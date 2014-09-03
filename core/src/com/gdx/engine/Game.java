@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 //GDX main test 
 //Cory's test comment
+//test
 
 public class Game extends ApplicationAdapter {
 	SpriteBatch batch;
