@@ -9,7 +9,6 @@ public class Assets {
 	public static AssetManager manager = new AssetManager();
 	
 	public static void loadAssets() {
-		manager.load("borncg.g3db", Model.class);
-		manager.load("walkableTile.png", Texture.class);
+		
 	}
 }

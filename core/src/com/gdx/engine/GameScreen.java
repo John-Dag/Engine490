@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class GameScreen implements Screen {
 	public Game game;
+	public Level level;
 	public PerspectiveCamera camera;
 	public CameraInputController cameraController;
 	public ModelBatch modelBatch;
@@ -31,13 +32,14 @@ public class GameScreen implements Screen {
 	
 	public GameScreen(Game game) {
 		this.game = game;
+		this.level = new Level();
 		modelBatch = new ModelBatch();
 		modelBuilder = new ModelBuilder();
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.position.set(3f, 3f, 3f);
+		camera.position.set(7f, 7f, 7f);
 		camera.lookAt(0, 0, 0);
 		camera.near = 1f;
 		camera.far = 300f;

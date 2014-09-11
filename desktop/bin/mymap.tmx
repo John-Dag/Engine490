@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="16" height="16" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="HeightMap" tilewidth="32" tileheight="32">
+  <image source="TileMap.png" width="128" height="128"/>
+  <tile id="1">
+   <properties>
+    <property name="height" value="1"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="16" height="16">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYKQCZiIDY9OLbiY+O7DJETKPCYvZuNxDyI/43EpMuBAbdoTsJ1Y/Lr9hCzti1FLbflr7n5A4vnSErm8g4g9fuJKLARtpAZE=
+  </data>
+ </layer>
+</map>
