@@ -3,6 +3,7 @@ package com.gdx.engine;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -33,10 +34,12 @@ public class GameScreen implements Screen {
 	public Array<ModelInstance> instances = new Array<ModelInstance>();
 	public boolean loading;
 	public BitmapFont bitmapFont;
+	public World world;
 	
 	public GameScreen(Game game) {
 		this.game = game;
 		this.level = new Level();
+		this.world = new World();
 		modelBatch = new ModelBatch();
 		modelBuilder = new ModelBuilder();
 		//Environment settings
@@ -45,15 +48,14 @@ public class GameScreen implements Screen {
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 		//Camera settings
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.position.set(7f, 7f, 7f);
-		camera.lookAt(0, 0, 0);
+		camera.position.set(world.player.position.x, world.player.position.y, 2f);
+		camera.lookAt(0, 0, 5);
 		camera.near = 0.5f;
 		camera.far = 100f;
 		camera.update();
 	
 		spriteBatch = new SpriteBatch();
 		bitmapFont = new BitmapFont();
-		cameraController = new CameraInputController(camera);
 		Gdx.input.setInputProcessor(cameraController);
 
 		loading = true;
@@ -72,7 +74,8 @@ public class GameScreen implements Screen {
 			System.out.println("Assets successfully loaded.");
 			doneLoading();
 		}
-		cameraController.update();
+		camera.position.set(world.player.position);
+		camera.update();
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
@@ -84,6 +87,19 @@ public class GameScreen implements Screen {
 		spriteBatch.begin();
 		renderFps();
 		spriteBatch.end();
+		world.update();
+		updateInput();
+	}
+	
+	public void updateInput() {
+		if (Gdx.input.isKeyPressed(Keys.D))
+			world.player.position.x -= 0.05f;
+		if (Gdx.input.isKeyPressed(Keys.A))
+			world.player.position.x += 0.05f;
+		if (Gdx.input.isKeyPressed(Keys.W))
+			world.player.position.z += 0.05f;
+		if (Gdx.input.isKeyPressed(Keys.S))
+			world.player.position.z -= 0.05f;
 	}
 	
 	public void renderFps() {
