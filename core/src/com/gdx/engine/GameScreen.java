@@ -41,8 +41,8 @@ public class GameScreen implements Screen {
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.position.set(7f, 7f, 7f);
 		camera.lookAt(0, 0, 0);
-		camera.near = 1f;
-		camera.far = 300f;
+		camera.near = 0.5f;
+		camera.far = 100f;
 		camera.update();
 	
 		cameraController = new CameraInputController(camera);
@@ -68,9 +68,10 @@ public class GameScreen implements Screen {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
-		modelBatch.begin(camera);
-		modelBatch.render(instances, environment);
-		modelBatch.end();
+		//modelBatch.begin(camera);
+		//modelBatch.render(instances, environment);
+		//modelBatch.end();
+		level.render(camera, environment);
 	}
 
 	@Override
