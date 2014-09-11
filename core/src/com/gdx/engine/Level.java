@@ -17,7 +17,6 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Array;
 
 public class Level {
-	
 	private TiledMap tiledMap;
 	private ModelBatch modelBatch;
 	private ModelBuilder modelBuilder;
@@ -44,7 +43,7 @@ public class Level {
 				if(layer.getCell(i,j) != null && layer.getCell(i,j).getTile().getProperties().containsKey("height")){
 					//System.out.print("one  , ");
 				}
-				else{
+				else {
 					//System.out.print("solid, ");
 					box = modelBuilder.createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(Color.GREEN)), Usage.Position | Usage.Normal);
 					ModelInstance boxInstance = new ModelInstance(box);
@@ -57,7 +56,6 @@ public class Level {
 				boxInstance.transform.setToTranslation(i, -1, j);
 				instances.add(boxInstance);
 			}
-			System.out.println("");
 		}
 	}
 }

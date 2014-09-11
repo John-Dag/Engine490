@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -24,20 +26,24 @@ public class GameScreen implements Screen {
 	public PerspectiveCamera camera;
 	public CameraInputController cameraController;
 	public ModelBatch modelBatch;
+	public SpriteBatch spriteBatch;
 	public ModelBuilder modelBuilder;
 	public Model box;
 	public Environment environment;
 	public Array<ModelInstance> instances = new Array<ModelInstance>();
 	public boolean loading;
+	public BitmapFont bitmapFont;
 	
 	public GameScreen(Game game) {
 		this.game = game;
 		this.level = new Level();
 		modelBatch = new ModelBatch();
 		modelBuilder = new ModelBuilder();
+		//Environment settings
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+		//Camera settings
 		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.position.set(7f, 7f, 7f);
 		camera.lookAt(0, 0, 0);
@@ -45,6 +51,8 @@ public class GameScreen implements Screen {
 		camera.far = 100f;
 		camera.update();
 	
+		spriteBatch = new SpriteBatch();
+		bitmapFont = new BitmapFont();
 		cameraController = new CameraInputController(camera);
 		Gdx.input.setInputProcessor(cameraController);
 
@@ -61,7 +69,7 @@ public class GameScreen implements Screen {
 	@Override
 	public void render(float delta) {
 		if (loading && Assets.manager.update()) {
-			System.out.println("Assets are loaded.");
+			System.out.println("Assets successfully loaded.");
 			doneLoading();
 		}
 		cameraController.update();
@@ -71,7 +79,22 @@ public class GameScreen implements Screen {
 		//modelBatch.begin(camera);
 		//modelBatch.render(instances, environment);
 		//modelBatch.end();
+		
 		level.render(camera, environment);
+		spriteBatch.begin();
+		renderFps();
+		spriteBatch.end();
+	}
+	
+	public void renderFps() {
+		int fps = Gdx.graphics.getFramesPerSecond();
+		bitmapFont.draw(spriteBatch, "FPS: " + fps, 10f, 20f);
+	}
+
+	@Override
+	public void dispose() {
+		modelBatch.dispose();
+		Assets.manager.dispose();
 	}
 
 	@Override
@@ -102,11 +125,5 @@ public class GameScreen implements Screen {
 	public void resume() {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public void dispose() {
-		modelBatch.dispose();
-		Assets.manager.dispose();
 	}
 }
