@@ -7,6 +7,9 @@ import com.gdx.engine.Engine;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.title = "Engine 490";
+		config.width = 960;
+		config.height = 540;
 		new LwjglApplication(new Engine(), config);
 	}
 }

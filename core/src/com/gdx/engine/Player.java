@@ -3,8 +3,12 @@ package com.gdx.engine;
 import com.badlogic.gdx.math.Vector3;
 
 public class Player extends Entity {
-	public Player(float x, float y, float z, boolean active) {
-		this.position = new Vector3(0, 0, 0);
+	public final float ROTATION_SPEED = 0.2f;
+	public final float MOVEMENT_SPEED = 2.0f;
+	
+	public Player(Vector3 position, boolean active) {
+		this.position = position;
 		this.active = true;
+		this.id = 1;
 	}
 }
