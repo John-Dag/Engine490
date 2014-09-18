@@ -18,4 +18,8 @@ public class Entity {
 		this.active = active;
 		this.id = id;
 	}
+	
+	public void update() {
+		
+	}
 }

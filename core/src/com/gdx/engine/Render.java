@@ -22,12 +22,8 @@ public class Render {
 	private World world;
 	private ModelBatch modelBatch;
 	private Environment environment;
-	private PerspectiveCamera camera;
-	private Vector2 center;
-	private Vector3 temp;
 	private Model playerModel;
 	private ModelBuilder modelBuilder;
-	private boolean mouseLocked;
 	private Array<ModelInstance> playerInstances = new Array<ModelInstance>();
 	
 	public Render(World world) {
@@ -39,25 +35,15 @@ public class Render {
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 		
 		//Camera settings
-		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.position.set(world.getPlayer().position.x, world.getPlayer().position.y, 2f);
-		camera.lookAt(0, 0, 5);
-		camera.near = 0.1f;
-		camera.far = 100f;
 		
 		modelBatch = new ModelBatch();
-	
-		temp = new Vector3();
-		center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-		
 		modelBuilder = new ModelBuilder();
 		playerModel = modelBuilder.createBox(1f, 1f, 1f, new Material(ColorAttribute.createDiffuse(Color.LIGHT_GRAY)), Usage.Position | Usage.Normal);
 
-		mouseLocked = false;
-		setPlayers();
+		setPlayerMesh();
 	}
 	
-	public void setPlayers() {
+	public void setPlayerMesh() {
 		int length = world.getPlayers().size;
 		
 		for (int i = 0; i < length; i++) {
@@ -68,7 +54,7 @@ public class Render {
 		}
 	}
 	
-	public void updatePlayers() {
+	public void updatePlayerMesh() {
 		int length = world.getPlayers().size;
 		
 		for (int i = 0; i < length; i++) {
@@ -78,64 +64,15 @@ public class Render {
 	}
 	
 	public void RenderWorld(float delta) {
-		camera.position.set(world.getPlayer().position);
-		camera.update();
+		world.getPlayer().camera.position.set(world.getPlayer().position);
+		world.getPlayer().camera.update();
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(1,  1,  1,  1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		modelBatch.begin(camera);
+		modelBatch.begin(world.getPlayer().camera);
 		modelBatch.render(world.getLevel().getInstances(), environment);
 		modelBatch.render(playerInstances, environment);
 		modelBatch.end();
-		updateInput(delta);
-		updatePlayers();
-	}
-	
-	public void updateInput(float delta) {
-		//Lock the cursor with rmb
-		if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
-			Gdx.input.setCursorCatched(true);
-			mouseLocked = true;
-		}
-		//ESC cancels cursor lock
-		else if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
-			Gdx.input.setCursorCatched(false);
-			mouseLocked = false;
-		}
-		
-		if (mouseLocked) {
-			Vector2 deltaPos = new Vector2(Gdx.input.getX() - center.x, Gdx.input.getY() - center.y);
-			
-			boolean rotX = deltaPos.x != 0;
-			boolean rotY = deltaPos.y != 0;
-			
-			//Testing purposes
-			//System.out.println("Pointer Position: " + (int)deltaPos.x);
-			
-			if (rotX || rotY) {
-				Gdx.input.setCursorPosition((int)center.x, (int)center.y);
-				camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * world.getPlayer().ROTATION_SPEED);
-				temp.set(camera.direction).crs(camera.up).nor();
-				camera.direction.rotate(temp, -Gdx.input.getDeltaY() * world.getPlayer().ROTATION_SPEED);
-			}
-		}
-		
-		//Keyboard input
-		if (Gdx.input.isKeyPressed(Keys.D)) {
-			temp.set(camera.direction).crs(camera.up).nor().scl(delta * world.getPlayer().MOVEMENT_SPEED);
-			world.getPlayer().position.add(temp.x, 0, temp.z);
-		}
-		if (Gdx.input.isKeyPressed(Keys.A)) {
-			temp.set(camera.direction).crs(camera.up).nor().scl(-delta * world.getPlayer().MOVEMENT_SPEED);
-			world.getPlayer().position.add(temp.x, 0, temp.z);
-		}
-		if (Gdx.input.isKeyPressed(Keys.W)) {
-			temp.set(camera.direction).nor().scl(delta * world.getPlayer().MOVEMENT_SPEED);
-			world.getPlayer().position.add(temp.x, 0, temp.z);
-		}
-		if (Gdx.input.isKeyPressed(Keys.S)) {
-			temp.set(camera.direction).nor().scl(-delta * world.getPlayer().MOVEMENT_SPEED);
-			world.getPlayer().position.add(temp.x, 0, temp.z);
-		}
+		updatePlayerMesh();
 	}
 }

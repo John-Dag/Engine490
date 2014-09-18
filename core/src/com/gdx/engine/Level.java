@@ -37,12 +37,14 @@ public class Level {
 		}
 		
 		for (int k = 0; k < tiledMap.getLayers().getCount(); k++) {
-			TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+			TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(k);
 			for(int i = 0; i < layer.getWidth(); i++){
 				for(int j = 0; j < layer.getHeight(); j++){
 					if(layer.getCell(i,j) != null && layer.getCell(i,j).getTile().getProperties().containsKey("height")){
+						
 					}
 					else {
+						//System.out.println(layer.getCell(i, j).getTile().getProperties().get("height1", Integer.class));
 						ModelInstance boxInstance = new ModelInstance(wallBox);
 						boxInstance.transform.setToTranslation(i, 0, j);
 						instances.add(boxInstance);
