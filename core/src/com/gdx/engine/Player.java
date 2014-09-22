@@ -4,34 +4,36 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 
 public class Player extends Entity {
 	public final float ROTATION_SPEED = 0.2f;
 	public final float MOVEMENT_SPEED = 2.0f;
-	PerspectiveCamera camera;
-	boolean mouseLocked;
-	Vector2 center;
-	Vector3 temp;
+	public PerspectiveCamera camera;
+	public boolean mouseLocked, mouseLeft;
+	public Vector2 center;
+	public Vector3 temp;
+	public Ray ray;
 	
-	public Player(Vector3 position, boolean active) {
-		this.position = position;
-		this.active = true;
-		this.id = 1;
+	public Player(Vector3 position, boolean active, ModelInstance model) {
+		super(position, true, 1, model);
 		this.camera = new PerspectiveCamera();
 		this.center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		this.mouseLocked = false;
 		this.temp = new Vector3();
 		this.camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		this.camera.position.set(this.position.x, this.position.y, 2f);
+		this.camera.position.set(this.position.x, this.position.y, this.position.z);
 		this.camera.lookAt(0, 0, 5);
-		this.camera.near = 0.1f;
+		this.camera.near = 0.01f;
 		this.camera.far = 100f;
 	}
 	
-	public void update() {
-		
+	public void update(float delta) {
+		this.camera.update();
+		this.model.transform.translate(this.camera.position.x, this.camera.position.y, this.position.z);
 	}
 	
 	public void input(float delta) {
@@ -44,6 +46,14 @@ public class Player extends Entity {
 		else if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
 			Gdx.input.setCursorCatched(false);
 			mouseLocked = false;
+		}
+		
+		else if (Gdx.input.isButtonPressed(Buttons.LEFT) && mouseLocked) {
+			mouseLeft = true;
+		}
+		
+		else {
+			mouseLeft = false;
 		}
 		
 		if (mouseLocked) {
@@ -66,19 +76,19 @@ public class Player extends Entity {
 		//Keyboard input
 		if (Gdx.input.isKeyPressed(Keys.D)) {
 			temp.set(camera.direction).crs(camera.up).nor().scl(delta * MOVEMENT_SPEED);
-			this.position.add(temp.x, 0, temp.z);
+			this.camera.position.add(temp.x, 0, temp.z);
 		}
 		if (Gdx.input.isKeyPressed(Keys.A)) {
 			temp.set(camera.direction).crs(camera.up).nor().scl(-delta * MOVEMENT_SPEED);
-			this.position.add(temp.x, 0, temp.z);
+			this.camera.position.add(temp.x, 0, temp.z);
 		}
 		if (Gdx.input.isKeyPressed(Keys.W)) {
 			temp.set(camera.direction).nor().scl(delta * MOVEMENT_SPEED);
-			this.position.add(temp.x, 0, temp.z);
+			this.camera.position.add(temp.x, 0, temp.z);
 		}
 		if (Gdx.input.isKeyPressed(Keys.S)) {
 			temp.set(camera.direction).nor().scl(-delta * MOVEMENT_SPEED);
-			this.position.add(temp.x, 0, temp.z);
+			this.camera.position.add(temp.x, 0, temp.z);
 		}
 	}
 }

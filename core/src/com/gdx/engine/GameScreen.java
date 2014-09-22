@@ -14,7 +14,6 @@ public class GameScreen implements Screen {
 	private SpriteBatch spriteBatch;
 	private BitmapFont bitmapFont;
 	private Vector2 center;
-	private boolean loading;
 	
 	public GameScreen(Game game) {
 		this.game = game;
@@ -27,12 +26,7 @@ public class GameScreen implements Screen {
 	}
 
 	@Override
-	public void render(float delta) {
-		if (loading && Assets.manager.update()) {
-			System.out.println("Assets loaded.");
-			loading = false;
-		}
-		
+	public void render(float delta) {	
 		//Call the main renderer
 		renderer.RenderWorld(delta);
 		
@@ -53,11 +47,12 @@ public class GameScreen implements Screen {
 	@Override
 	public void dispose() {
 		Assets.manager.dispose();
+		game.dispose();
+		renderer.getDecalbatch().dispose();
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		//viewport.update(width, height);
 	}
 
 	@Override

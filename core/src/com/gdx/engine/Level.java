@@ -7,33 +7,30 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 public class Level {
 	private TiledMap tiledMap;
-	private ModelBuilder modelBuilder;
-	private Model wallBox, floorBox, skySphere;
-	private Array<ModelInstance> instances = new Array<ModelInstance>();
+	private Model skySphere;
+	private ModelInstance sphereInstance;
+	private boolean isSkyboxActive;
+	private Array<Entity> instances = new Array<Entity>();
 	
 	public Level(TiledMap tiledMap, float x, float y, float z, boolean isSkyboxActive, Material floorMat, Material wallMat) {
-		modelBuilder = new ModelBuilder();
 		this.tiledMap = tiledMap;
+		this.isSkyboxActive = isSkyboxActive;
 		generateLevel(x, y, z, isSkyboxActive, floorMat, wallMat);
 	}
 	
 	private void generateLevel(float x, float y, float z, boolean isSkyboxActive, Material floorMat, Material wallMat){
-		floorBox = modelBuilder.createBox(x, y, z, floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
-		wallBox = modelBuilder.createBox(x, y, z, wallMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
-		
 		if (isSkyboxActive) {
-			skySphere = modelBuilder.createSphere(50f, 50f, 50f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.TEAL)), Usage.Position | Usage.Normal);
+			skySphere = Assets.modelBuilder.createSphere(50f, 50f, 50f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.TEAL)), Usage.Position | Usage.Normal);
 			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));
-			ModelInstance sphereInstance = new ModelInstance(skySphere);
+			sphereInstance = new ModelInstance(skySphere);
 			sphereInstance.transform.setToTranslation(0, 0, 0);
-			instances.add(sphereInstance);
 		}
 		
 		for (int k = 0; k < tiledMap.getLayers().getCount(); k++) {
@@ -44,21 +41,32 @@ public class Level {
 						
 					}
 					else {
-						//System.out.println(layer.getCell(i, j).getTile().getProperties().get("height1", Integer.class));
-						ModelInstance boxInstance = new ModelInstance(wallBox);
-						boxInstance.transform.setToTranslation(i, 0, j);
-						instances.add(boxInstance);
+						Entity entity;
+						entity = new Entity(new Vector3(i, 0, j), true, 2, BuildModel.buildBoxTextureModel(x, y, z, Assets.wallMat));
+						entity.model.transform.setToTranslation(i, 0, j);
+						entity.model.calculateBoundingBox(entity.boundingBox).mul(entity.model.transform);
+						instances.add(entity);
 					}
 					
-					ModelInstance boxInstance = new ModelInstance(floorBox);
-					boxInstance.transform.setToTranslation(i, -1, j);
-					instances.add(boxInstance);
+					Entity entity;
+					entity = new Entity(new Vector3(i, -1, j), true, 3, BuildModel.buildBoxTextureModel(x, y, z, Assets.floorMat));
+					entity.model.transform.setToTranslation(i, -1, j);
+					entity.model.calculateBoundingBox(entity.boundingBox).mul(entity.model.transform);
+					instances.add(entity);
 				}
 			}
 		}
 	}
 	
-	public Array<ModelInstance> getInstances() {
+	public Array<Entity> getInstances() {
 		return instances;
+	}
+	
+	public ModelInstance getSkySphere() {
+		return sphereInstance;
+	}
+	
+	public boolean getSkyboxActive() {
+		return isSkyboxActive;
 	}
 }
