@@ -15,11 +15,7 @@ public class Render {
 	private World world;
 	private ModelBatch modelBatch;
 	private Environment environment;
-<<<<<<< HEAD
-	private Array<ModelInstance> instances = new Array<ModelInstance>();
-=======
 	private Array<ModelInstance> instances;
->>>>>>> origin/test2
 	private boolean loading;
 	private DecalBatch decalBatch;
 	
@@ -31,24 +27,16 @@ public class Render {
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 		
-<<<<<<< HEAD
-=======
 		instances = new Array<ModelInstance>(world.getLevelMesh());
 		
->>>>>>> origin/test2
 		modelBatch = new ModelBatch();
 		loading = true;
 		decalBatch = new DecalBatch(new CameraGroupStrategy(world.getPlayer().camera));
 	}
 	
 	private void doneLoading() {
-<<<<<<< HEAD
-		if (world.getLevel().getSkyboxActive())
-			instances.add(world.getLevel().getSkySphere());
-=======
 //		if (world.getLevel().getSkyboxActive())
 //			instances.add(world.getLevel().getSkySphere());
->>>>>>> origin/test2
 		loading = false;
 	}
 	
@@ -62,34 +50,6 @@ public class Render {
 		}
 	}
 	
-<<<<<<< HEAD
-	public void updateEntityMesh() {
-		int length = world.getLevel().getInstances().size;
-		
-		for (int i = 0; i < length; i++) {
-			Entity entity = world.getLevel().getInstances().get(i);
-			
-			if (!entity.active) {
-				world.getLevel().getInstances().removeIndex(i);
-				instances.removeIndex(i);
-				length -= 1;
-				break;
-			}
-			
-			entity.model.transform.setToTranslation(entity.position.x, entity.position.y, entity.position.z);
-			
-			if (entity.id == 1) {
-				entity.model.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z);
-				entity.model.calculateBoundingBox(entity.boundingBox).mul(entity.model.transform.scale(0.5f, 0.5f, 0.5f));
-			}
-			
-			if (!entity.isRendered) {
-				instances.add(entity.model);
-				entity.isRendered = true;
-			}
-		}
-	}
-=======
 //	public void updateEntityMesh() {
 //		int length = world.getLevel().getInstances().size;
 //		
@@ -116,7 +76,6 @@ public class Render {
 //			}
 //		}
 //	}
->>>>>>> origin/test2
 	
 	public void RenderWorld(float delta) {
 		if (loading && Assets.manager.update()) {
@@ -125,11 +84,7 @@ public class Render {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(1,  1,  1,  1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-<<<<<<< HEAD
-		updateEntityMesh();
-=======
 		//updateEntityMesh();
->>>>>>> origin/test2
 		modelBatch.begin(world.getPlayer().camera);
 		modelBatch.render(instances, environment);
 		modelBatch.end();

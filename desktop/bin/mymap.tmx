@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="32" height="32" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="HeightMap" tilewidth="32" tileheight="32">
+  <image source="TileMap.png" width="128" height="128"/>
+  <tile id="0">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="solid" value=""/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="height" value="1"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="height" value="3"/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="14">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="15">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJzlltEOgyAMRYHtZXNO//9rh8lICOltC1Qw8eEkisCx0oLeOecvQKhkjzwiW8PYBOUu3wm9o6XfF21Sn7PiR/ej4q/JC8n/BUjrv/6R+nH+9IxiE+bVfKcdzNfr565H+GfHr60TTf69AdK8vf6j/RN5ApZsjHb9a+qvxz8rfrRXJKh+wdCPclWDhX/tAK3ZC9CS/7VY1/9d/FItcP8G3sDPjaPG5nmNznEuX5H/aMv3bN/g14D8Zf0uhD8UfVrypNeP6nqUP88NS78vYqPW/0y/dq+39ktnAVdjFv7RXMU/kx/nUQ9q
+  </data>
+ </layer>
+</map>
