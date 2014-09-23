@@ -1,11 +1,14 @@
 package com.gdx.engine;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
@@ -27,16 +30,27 @@ public class MeshLevel {
 	private TiledMap tiledMap;
 	private ModelBuilder modelBuilder = new ModelBuilder();
 	private Array<ModelInstance> instances = new Array<ModelInstance>();
-	private Model model;
+	private Model model, skySphere;
 	private ModelInstance instance;
 	private int triCount = 0;
+	private MeshPartBuilder meshPartBuilder;
+	private boolean isSkySphereActive;
 	
-	public MeshLevel() {
+	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
-		tiledMap = new TmxMapLoader().load("mymap.tmx");
+		this.tiledMap = tiledMap;
+		this.isSkySphereActive = isSkySphereActive;
 	}
 	
 	public Array<ModelInstance> generateLevel() {
+		if (isSkySphereActive) {
+			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.TEAL)), Usage.Position | Usage.Normal);
+			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));
+			instance = new ModelInstance(skySphere);
+			instance.transform.setToTranslation(0, 0, 0);
+			instances.add(instance);
+		}
+		
 		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
 		// on each cell
 		// TODO: There's a problem here with i's and j's because somehow they got mixed up and directions are all whack. Fix it Cory.
@@ -50,7 +64,6 @@ public class MeshLevel {
 						String direction = getRampDirection(tile);
 						int height = getHeight(tile);
 						modelBuilder.begin();
-						MeshPartBuilder meshPartBuilder;
 						Node node = modelBuilder.node();
 						node.translation.set(j,height,i);
 						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
@@ -58,15 +71,19 @@ public class MeshLevel {
 								Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
 								new Material(TextureAttribute.createDiffuse(new Texture("stonefloor.png"))));
 
-						if (direction.equals("up")){
+						if (direction.equals("up"))	{
 							meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
-						}else if (direction.equals("down")){
+						}	
+						else if (direction.equals("down")) {
 							meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
-						}else if(direction.equals("left")){
+						}	
+						else if(direction.equals("left")) {
 							meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,-ROOT_PT5);
-						}else if (direction.equals("right")){
+						}	
+						else if (direction.equals("right"))	{
 							meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,ROOT_PT5);
-						}else{
+						}	
+						else	{
 							System.err.println("generateLevel(): Direction not recognized");
 						}
 						model = modelBuilder.end();
@@ -74,7 +91,7 @@ public class MeshLevel {
 						instances.add(instance);
 						
 						// check for triangles
-						if(direction.equals("up") | direction.equals("down")){
+						if(direction.equals("up") | direction.equals("down")) {
 							// make any north-facing triangles (look south)
 							makeTriangles(i,j,NORTH);
 
@@ -82,7 +99,7 @@ public class MeshLevel {
 							makeTriangles(i,j,SOUTH);
 						}
 
-						if(direction.equals("left") | direction.equals("right")){
+						if(direction.equals("left") | direction.equals("right")) {
 							// make any east-facing triangles
 							makeTriangles(i,j,EAST);
 
@@ -91,10 +108,9 @@ public class MeshLevel {
 						}
 					}
 					// else not a ramp
-					else{
+					else {
 						int height = getHeight(tile);
 						modelBuilder.begin();
-						MeshPartBuilder meshPartBuilder;
 						Node node = modelBuilder.node();
 						node.translation.set(j,height,i);
 						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
@@ -122,6 +138,7 @@ public class MeshLevel {
 				makeWalls(i,j,WEST);
 			}
 		}
+		
 		return instances;
 	}
 	
@@ -131,31 +148,34 @@ public class MeshLevel {
 		String rampDirection = getRampDirection(tile);
 		int looki = 0;
 		int lookj = 0;
+		
 		switch(direction) {
-		case NORTH:	// look south to check for north-facing wall
-			looki = i+1;
-			lookj = j;
-			break;
-		case SOUTH:	// look north to check for south-facing wall
-			looki = i-1;
-			lookj = j;
-			break;
-		case EAST:	// look west to check for east-facing wall
-			looki = i;
-			lookj = j-1;
-			break;
-		case WEST:	// look east to check for west-facing wall
-			looki = i;
-			lookj = j+1;
-			break;
-		default:
-			System.err.println("makeWalls: Direction not recognized");
+			case NORTH:	// look south to check for north-facing wall
+				looki = i+1;
+				lookj = j;
+				break;
+			case SOUTH:	// look north to check for south-facing wall
+				looki = i-1;
+				lookj = j;
+				break;
+			case EAST:	// look west to check for east-facing wall
+				looki = i;
+				lookj = j-1;
+				break;
+			case WEST:	// look east to check for west-facing wall
+				looki = i;
+				lookj = j+1;
+				break;
+			default:
+				System.err.println("makeWalls: Direction not recognized");
 		}
+		
 		float adjacentHeight = (float)getHeight(layer.getCell(looki, lookj).getTile());
 		float tileHeight = (float)getHeight(tile);
 		if(tileHeight > adjacentHeight){
 			
-		}else if(tileHeight <= adjacentHeight){
+		}
+		else if(tileHeight <= adjacentHeight){
 			
 		}
 		
@@ -167,24 +187,24 @@ public class MeshLevel {
 		int looki = 0;
 		int lookj = 0;
 		switch(direction) {
-		case NORTH:	// look south to check for north-facing wall
-			looki = i+1;
-			lookj = j;
-			break;
-		case SOUTH:	// look north to check for south-facing wall
-			looki = i-1;
-			lookj = j;
-			break;
-		case EAST:	// look west to check for east-facing wall
-			looki = i;
-			lookj = j-1;
-			break;
-		case WEST:	// look east to check for west-facing wall
-			looki = i;
-			lookj = j+1;
-			break;
-		default:
-			System.err.println("makeWalls: Direction not recognized");
+			case NORTH:	// look south to check for north-facing wall
+				looki = i+1;
+				lookj = j;
+				break;
+			case SOUTH:	// look north to check for south-facing wall
+				looki = i-1;
+				lookj = j;
+				break;
+			case EAST:	// look west to check for east-facing wall
+				looki = i;
+				lookj = j-1;
+				break;
+			case WEST:	// look east to check for west-facing wall
+				looki = i;
+				lookj = j+1;
+				break;
+			default:
+				System.err.println("makeWalls: Direction not recognized");
 		}
 		// case where current tile and adjacent tile are not ramps
 		if(layer.getCell(looki, lookj)!=null &&
@@ -243,6 +263,7 @@ public class MeshLevel {
 		Vector3 p4 = new Vector3();
 		Vector3 normalVector = new Vector3();
 		String dirString;
+		
 		switch(direction){
 		case NORTH:
 			dirString = "North";
@@ -290,7 +311,6 @@ public class MeshLevel {
 		}
 		
 		modelBuilder.begin();
-		MeshPartBuilder meshPartBuilder;
 		meshPartBuilder = modelBuilder.part(dirString + "_wall" + celli + "_" + cellj, 
 				GL20.GL_TRIANGLES, 
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
@@ -304,7 +324,6 @@ public class MeshLevel {
 	
 	private void genTriangle(Vector3 p1, Vector3 p2, Vector3 p3){
 		modelBuilder.begin();
-		MeshPartBuilder meshPartBuilder;
 		meshPartBuilder = modelBuilder.part("triangle" + triCount++, 
 				GL20.GL_TRIANGLES, 
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
@@ -323,6 +342,7 @@ public class MeshLevel {
 		Vector3 p4 = new Vector3();
 		Vector3 normalVector = new Vector3();
 		String dirString;
+		
 		switch(direction){
 		case NORTH:
 			dirString = "North";
@@ -370,7 +390,6 @@ public class MeshLevel {
 		}
 		
 		modelBuilder.begin();
-		MeshPartBuilder meshPartBuilder;
 		meshPartBuilder = modelBuilder.part(dirString + "_wall" + celli + "_" + cellj, 
 				GL20.GL_TRIANGLES, 
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 

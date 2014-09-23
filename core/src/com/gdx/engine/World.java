@@ -20,10 +20,10 @@ public class World {
 	private Vector3 out = new Vector3();
 	
 	public World() {
-		player = new Player(new Vector3(2f, 2f, 2f), true, BuildModel.buildBoxColorModel(1f, 1f, 1f, Color.BLUE));
+		player = new Player(new Vector3(2f, 1.5f, 2f), true, BuildModel.buildBoxColorModel(1f, 1f, 1f, Color.BLUE));
 		//level = new Level(Assets.level, 1f, 1f, 1f, true, Assets.floorMat, Assets.wallMat);
 		//level.getInstances().add(player);
-		meshLevel = new MeshLevel();
+		meshLevel = new MeshLevel(Assets.level, true);
 	}
 	
 	public Array<ModelInstance> getLevelMesh() {
