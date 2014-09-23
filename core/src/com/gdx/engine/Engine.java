@@ -7,6 +7,7 @@ public class Engine extends Game {
 	public void create () {
 		Assets.loadAssets();
 		setScreen(new GameScreen(this));
+		//setScreen(new TestScreen(this));
 	}
 
 	@Override
