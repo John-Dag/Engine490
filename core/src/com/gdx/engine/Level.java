@@ -25,7 +25,7 @@ public class Level {
 		generateLevel(x, y, z, isSkyboxActive, floorMat, wallMat);
 	}
 	
-	private void generateLevel(float x, float y, float z, boolean isSkyboxActive, Material floorMat, Material wallMat){
+	private void generateLevel(float x, float y, float z, boolean isSkyboxActive, Material floorMat, Material wallMat) {
 		if (isSkyboxActive) {
 			skySphere = Assets.modelBuilder.createSphere(50f, 50f, 50f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.TEAL)), Usage.Position | Usage.Normal);
 			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));

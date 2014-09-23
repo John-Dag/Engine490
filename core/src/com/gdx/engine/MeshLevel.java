@@ -28,8 +28,8 @@ public class MeshLevel {
 	private static final int WEST = 3;
 	
 	private TiledMap tiledMap;
-	private ModelBuilder modelBuilder = new ModelBuilder();
-	private Array<ModelInstance> instances = new Array<ModelInstance>();
+	private ModelBuilder modelBuilder;
+	private Array<ModelInstance> instances;
 	private Model model, skySphere;
 	private ModelInstance instance;
 	private int triCount = 0;
@@ -37,6 +37,8 @@ public class MeshLevel {
 	private boolean isSkySphereActive;
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
+		modelBuilder = new ModelBuilder();
+		instances  = new Array<ModelInstance>();
 		modelBuilder = new ModelBuilder();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
@@ -409,5 +411,9 @@ public class MeshLevel {
 	private String getRampDirection(TiledMapTile tile) {
 		String direction = tile.getProperties().get("ramp").toString();
 		return direction;
+	}
+	
+	public Array<ModelInstance> getInstances() {
+		return instances;
 	}
 }

@@ -15,7 +15,7 @@ public class Render {
 	private World world;
 	private ModelBatch modelBatch;
 	private Environment environment;
-	private Array<ModelInstance> instances = new Array<ModelInstance>();
+	private Array<ModelInstance> instances;
 	private boolean loading;
 	private DecalBatch decalBatch;
 	
@@ -27,7 +27,7 @@ public class Render {
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 		
-		instances = world.getLevelMesh();
+		instances = new Array<ModelInstance>(world.getLevelMesh());
 		
 		modelBatch = new ModelBatch();
 		loading = true;
