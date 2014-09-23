@@ -15,11 +15,13 @@ public class Assets {
 	public static Texture crosshair;
 	public static Texture floor;
 	public static Texture wall;
+	public static Texture stoneFloor;
 	public static TiledMap level;
 	public static TiledMap level2;
 	public static ModelBuilder modelBuilder;
 	public static Material floorMat;
 	public static Material wallMat;
+	public static Material stoneFloorMat;
 	public static Decal test;
 	public static TextureRegion test1;
 	public static Texture hole;
@@ -31,9 +33,11 @@ public class Assets {
 		level = new TmxMapLoader().load("mymap.tmx");
 		floor = new Texture("floor.png");
 		wall = new Texture("wall.png");
+		stoneFloor = new Texture("stoneFloor.png");
 		level2 = new TmxMapLoader().load("mymap2.tmx");
 		modelBuilder = new ModelBuilder();
-		floorMat = new Material(TextureAttribute.createDiffuse(Assets.floor));
-		wallMat = new Material(TextureAttribute.createDiffuse(Assets.wall));
+		floorMat = new Material(TextureAttribute.createDiffuse(floor));
+		wallMat = new Material(TextureAttribute.createDiffuse(wall));
+		stoneFloorMat = new Material(TextureAttribute.createDiffuse(stoneFloor));
 	}
 }

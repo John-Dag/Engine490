@@ -69,7 +69,7 @@ public class MeshLevel {
 						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
 								GL20.GL_TRIANGLES, 
 								Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-								new Material(TextureAttribute.createDiffuse(new Texture("stonefloor.png"))));
+								Assets.stoneFloorMat);
 
 						if (direction.equals("up"))	{
 							meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
@@ -83,7 +83,7 @@ public class MeshLevel {
 						else if (direction.equals("right"))	{
 							meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,ROOT_PT5);
 						}	
-						else	{
+						else {
 							System.err.println("generateLevel(): Direction not recognized");
 						}
 						model = modelBuilder.end();
@@ -116,7 +116,7 @@ public class MeshLevel {
 						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
 								GL20.GL_TRIANGLES, 
 								Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-								new Material(TextureAttribute.createDiffuse(new Texture("floor.png"))));
+								Assets.floorMat);
 
 						meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
 						model = modelBuilder.end();
@@ -314,7 +314,7 @@ public class MeshLevel {
 		meshPartBuilder = modelBuilder.part(dirString + "_wall" + celli + "_" + cellj, 
 				GL20.GL_TRIANGLES, 
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-				new Material(TextureAttribute.createDiffuse(new Texture("wall.png"))));
+				Assets.wallMat);
 
 		meshPartBuilder.rect(p1, p2, p3, p4, normalVector);
 		model = modelBuilder.end();
@@ -327,7 +327,7 @@ public class MeshLevel {
 		meshPartBuilder = modelBuilder.part("triangle" + triCount++, 
 				GL20.GL_TRIANGLES, 
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-				new Material(TextureAttribute.createDiffuse(new Texture("wall.png"))));
+				Assets.wallMat);
 
 		meshPartBuilder.triangle(p1, p2, p3);
 		model = modelBuilder.end();
@@ -393,7 +393,7 @@ public class MeshLevel {
 		meshPartBuilder = modelBuilder.part(dirString + "_wall" + celli + "_" + cellj, 
 				GL20.GL_TRIANGLES, 
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-				new Material(TextureAttribute.createDiffuse(new Texture("wall.png"))));
+				Assets.wallMat);
 
 		meshPartBuilder.rect(p1, p2, p3, p4, normalVector);
 		model = modelBuilder.end();
