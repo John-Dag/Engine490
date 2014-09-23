@@ -11,7 +11,11 @@ import com.badlogic.gdx.math.collision.Ray;
 
 public class Player extends Entity {
 	public final float ROTATION_SPEED = 0.2f;
+<<<<<<< HEAD
 	public final float MOVEMENT_SPEED = 2.0f;
+=======
+	public final float MOVEMENT_SPEED = 5.0f;
+>>>>>>> origin/test2
 	public PerspectiveCamera camera;
 	public boolean mouseLocked, mouseLeft;
 	public Vector2 center;
@@ -26,8 +30,13 @@ public class Player extends Entity {
 		this.temp = new Vector3();
 		this.camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		this.camera.position.set(this.position.x, this.position.y, this.position.z);
+<<<<<<< HEAD
 		this.camera.lookAt(0, 0, 5);
 		this.camera.near = 0.01f;
+=======
+		this.camera.lookAt(0, 1.5f, 5);
+		this.camera.near = 0.1f;
+>>>>>>> origin/test2
 		this.camera.far = 100f;
 	}
 	
