@@ -3,79 +3,56 @@ package com.gdx.engine;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.Shader;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 
 public class GameScreen implements Screen {
-	public Game game;
-	public Level level;
-	public PerspectiveCamera camera;
-	public MyCamInputController cameraController;
-	public Shader shader;
-	public RenderContext renderContext;
-	public Model model;
-	public ModelBatch modelBatch;
-	public ModelBuilder modelBuilder;
-	public Model box;
-	public Environment environment;
-	public Renderable renderable;
-	public Array<ModelInstance> instances = new Array<ModelInstance>();
-	Array<Renderable> renderables;
-	public boolean loading;
+	private Game game;
+	private World world;
+	private Render renderer;
+	private SpriteBatch spriteBatch;
+	private BitmapFont bitmapFont;
+	private Vector2 center;
 	
 	public GameScreen(Game game) {
 		this.game = game;
-		
-		modelBatch = new ModelBatch();
-		modelBuilder = new ModelBuilder();
-		
-		environment = new Environment();
-		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
-		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
-		
-		this.level = new Level(environment);
-		
-		camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.position.set(7f, 7f, 7f);
-		camera.lookAt(0, 0, 0);
-		camera.near = 0.5f;
-		camera.far = 100f;
-		camera.update();
+		this.world = new World();
+		this.renderer = new Render(world);
 	
-		cameraController = new MyCamInputController(camera);
-		Gdx.input.setInputProcessor(cameraController);
-		
-		//here we get the model instances from level
-		instances = level.generateLevel();
+		center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		spriteBatch = new SpriteBatch();
+		bitmapFont = new BitmapFont();
 	}
 
 	@Override
-	public void render(float delta) {
-
-		cameraController.update();
-		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+	public void render(float delta) {	
+		//Call the main renderer
+		renderer.RenderWorld(delta);
 		
-		modelBatch.begin(camera);
-		modelBatch.render(instances, environment);
-		modelBatch.end();
+		//UI components are rendered here
+		spriteBatch.begin();
+		spriteBatch.draw(Assets.crosshair, center.x - 8, center.y - 8);
+		renderFps();
+		spriteBatch.end();
+		
+		world.update(delta);
+	}
+	
+	public void renderFps() {
+		int fps = Gdx.graphics.getFramesPerSecond();
+		bitmapFont.draw(spriteBatch, "FPS: " + fps, 10f, 20f);
+	}
+
+	@Override
+	public void dispose() {
+		Assets.manager.dispose();
+		game.dispose();
+		renderer.getDecalbatch().dispose();
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -101,12 +78,4 @@ public class GameScreen implements Screen {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void dispose() {
-		modelBatch.dispose();
-		Assets.manager.dispose();
-	}
-	
-	
 }
