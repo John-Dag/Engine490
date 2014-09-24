@@ -13,7 +13,7 @@ public class GameScreen implements Screen {
 	private Render renderer;
 	private SpriteBatch spriteBatch;
 	private BitmapFont bitmapFont;
-	private Vector2 center;
+	public static Vector2 center;
 	
 	public GameScreen(Game game) {
 		this.game = game;
@@ -23,6 +23,7 @@ public class GameScreen implements Screen {
 		center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		spriteBatch = new SpriteBatch();
 		bitmapFont = new BitmapFont();
+		bitmapFont.setScale(0.9f);
 	}
 
 	@Override
@@ -41,7 +42,8 @@ public class GameScreen implements Screen {
 	
 	public void renderFps() {
 		int fps = Gdx.graphics.getFramesPerSecond();
-		bitmapFont.draw(spriteBatch, "FPS: " + fps, 10f, 20f);
+		bitmapFont.draw(spriteBatch, "FPS: " + fps, 10f, 530f);
+		bitmapFont.draw(spriteBatch, "Rendered Models: " + Render.renderCount, 10f, 510f); 
 	}
 
 	@Override
@@ -53,6 +55,7 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void resize(int width, int height) {
+		center.set(width / 2, height / 2);
 	}
 
 	@Override

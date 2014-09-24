@@ -1,5 +1,6 @@
 package com.gdx.engine;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -9,6 +10,8 @@ import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 
 public class Render {
@@ -18,6 +21,10 @@ public class Render {
 	private Array<ModelInstance> instances;
 	private boolean loading;
 	private DecalBatch decalBatch;
+	ModelInstance instance;
+	public static int renderCount;
+	Vector3 position = new Vector3();
+	Array<BoundingBox> boxes = new Array<BoundingBox>();
 	
 	public Render(World world) {
 		this.world = world;
@@ -32,6 +39,17 @@ public class Render {
 		modelBatch = new ModelBatch();
 		loading = true;
 		decalBatch = new DecalBatch(new CameraGroupStrategy(world.getPlayer().camera));
+		setBoxes();
+	}
+	
+	public void setBoxes() {
+		int size = instances.size;
+		
+		for (int i = 0; i < size; i++) {
+			BoundingBox box = new BoundingBox();
+			instances.get(i).calculateBoundingBox(box);
+			boxes.add(box);
+		}
 	}
 	
 	private void doneLoading() {
@@ -84,13 +102,27 @@ public class Render {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(1,  1,  1,  1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
 		//updateEntityMesh();
 		modelBatch.begin(world.getPlayer().camera);
-		modelBatch.render(instances, environment);
+		renderCount = 0;
+		for (int i = 0; i < instances.size; i++) {
+			ModelInstance instance = instances.get(i);
+			if (isVisible(world.getPlayer().camera, instance, boxes.get(i))) {
+				modelBatch.render(instance, environment);
+				renderCount++;
+			}
+		}
 		modelBatch.end();
 		updateDecals();
 		
 		decalBatch.flush();
+	}
+	
+	private boolean isVisible(final Camera cam, final ModelInstance instance, BoundingBox box) {
+		instance.transform.getTranslation(position);
+		position.add(box.getCenter());
+		return cam.frustum.boundsInFrustum(position, box.getDimensions());
 	}
 	
 	public DecalBatch getDecalbatch() {

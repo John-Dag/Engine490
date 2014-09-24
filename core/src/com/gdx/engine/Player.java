@@ -14,14 +14,12 @@ public class Player extends Entity {
 	public final float MOVEMENT_SPEED = 5.0f;
 	public PerspectiveCamera camera;
 	public boolean mouseLocked, mouseLeft;
-	public Vector2 center;
 	public Vector3 temp;
 	public Ray ray;
 	
 	public Player(Vector3 position, boolean active, ModelInstance model) {
 		super(position, true, 1, model);
 		this.camera = new PerspectiveCamera();
-		this.center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		this.mouseLocked = false;
 		this.temp = new Vector3();
 		this.camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -57,7 +55,7 @@ public class Player extends Entity {
 		}
 		
 		if (mouseLocked) {
-			Vector2 deltaPos = new Vector2(Gdx.input.getX() - center.x, Gdx.input.getY() - center.y);
+			Vector2 deltaPos = new Vector2(Gdx.input.getX() - GameScreen.center.x, GameScreen.center.y);
 			
 			boolean rotX = deltaPos.x != 0;
 			boolean rotY = deltaPos.y != 0;
@@ -66,7 +64,7 @@ public class Player extends Entity {
 			//System.out.println("Pointer Position: " + (int)deltaPos.x);
 			
 			if (rotX || rotY) {
-				Gdx.input.setCursorPosition((int)center.x, (int)center.y);
+				Gdx.input.setCursorPosition((int)GameScreen.center.x - 8, (int)GameScreen.center.y - 8);
 				camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
 				temp.set(camera.direction).crs(camera.up).nor();
 				camera.direction.rotate(temp, -Gdx.input.getDeltaY() * ROTATION_SPEED);
