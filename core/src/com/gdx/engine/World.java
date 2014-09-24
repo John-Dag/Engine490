@@ -16,6 +16,7 @@ public class World {
 	private MeshLevel meshLevel;
 	private Ray ray;
 	private Array<Decal> decalInstances = new Array<Decal>();
+	private Array<BoundingBox> boxes = new Array<BoundingBox>();
 	private float timer;
 	private Vector3 position = new Vector3();
 	private Vector3 out = new Vector3();
@@ -25,6 +26,20 @@ public class World {
 		//level = new Level(Assets.level, 1f, 1f, 1f, true, Assets.floorMat, Assets.wallMat);
 		//level.getInstances().add(player);
 		meshLevel = new MeshLevel(Assets.level, true);
+	}
+	
+	public void createBoundingBoxes() {
+		int size = meshLevel.getInstances().size;
+		
+		for (int i = 0; i < size; i++) {
+			BoundingBox box = new BoundingBox();
+			meshLevel.getInstances().get(i).calculateBoundingBox(box);
+			boxes.add(box);
+		}
+	}
+	
+	public Array<BoundingBox> getBoundingBoxes() {
+		return boxes;
 	}
 	
 	public Array<ModelInstance> getLevelMesh() {
@@ -55,20 +70,18 @@ public class World {
 				ModelInstance model = meshLevel.getInstances().get(i);
 				
 				model.transform.getTranslation(position);
-				BoundingBox box = new BoundingBox();
-				model.calculateBoundingBox(box);
-				position.add(box.getCenter());
+				position.add(boxes.get(i).getCenter());
 				float dist2 = ray.origin.dst2(position);
 				
 				if (distance >= 0f && dist2 > distance)
 					continue;
 		
-				if (Intersector.intersectRayBoundsFast(ray, box)) {
+				if (Intersector.intersectRayBoundsFast(ray, boxes.get(i))) {
 					result = i;
 					distance = dist2;
 					
 					if (result > -1) {
-						Intersector.intersectRayBounds(ray, box, out);
+						Intersector.intersectRayBounds(ray, boxes.get(i), out);
 						Decal test = Decal.newDecal(Assets.test1, true);
 						test.setPosition(out);
 						test.lookAt(player.camera.position, player.camera.position.cpy().nor());

@@ -24,7 +24,6 @@ public class Render {
 	ModelInstance instance;
 	public static int renderCount;
 	Vector3 position = new Vector3();
-	Array<BoundingBox> boxes = new Array<BoundingBox>();
 	
 	public Render(World world) {
 		this.world = world;
@@ -39,17 +38,7 @@ public class Render {
 		modelBatch = new ModelBatch();
 		loading = true;
 		decalBatch = new DecalBatch(new CameraGroupStrategy(world.getPlayer().camera));
-		setBoxes();
-	}
-	
-	public void setBoxes() {
-		int size = instances.size;
-		
-		for (int i = 0; i < size; i++) {
-			BoundingBox box = new BoundingBox();
-			instances.get(i).calculateBoundingBox(box);
-			boxes.add(box);
-		}
+		world.createBoundingBoxes();
 	}
 	
 	private void doneLoading() {
@@ -102,13 +91,15 @@ public class Render {
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(1,  1,  1,  1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		//Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+		//Gdx.gl.glCullFace(GL20.GL_BACK);
 
 		//updateEntityMesh();
 		modelBatch.begin(world.getPlayer().camera);
 		renderCount = 0;
 		for (int i = 0; i < instances.size; i++) {
 			ModelInstance instance = instances.get(i);
-			if (isVisible(world.getPlayer().camera, instance, boxes.get(i))) {
+			if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
 				modelBatch.render(instance, environment);
 				renderCount++;
 			}

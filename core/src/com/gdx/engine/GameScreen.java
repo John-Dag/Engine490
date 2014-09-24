@@ -6,6 +6,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
+import com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle;
 
 public class GameScreen implements Screen {
 	private Game game;
@@ -33,7 +36,7 @@ public class GameScreen implements Screen {
 		
 		//UI components are rendered here
 		spriteBatch.begin();
-		spriteBatch.draw(Assets.crosshair, center.x - 8, center.y - 8);
+		spriteBatch.draw(Assets.crosshair, center.x - 16, center.y);
 		renderFps();
 		spriteBatch.end();
 		
