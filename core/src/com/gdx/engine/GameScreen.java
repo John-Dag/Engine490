@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -38,6 +39,9 @@ public class GameScreen implements Screen {
 		spriteBatch.begin();
 		spriteBatch.draw(Assets.crosshair, center.x - 16, center.y);
 		renderFps();
+		renderPos();
+		renderTilePos();
+		renderFloatPos();
 		spriteBatch.end();
 		
 		world.update(delta);
@@ -47,6 +51,30 @@ public class GameScreen implements Screen {
 		int fps = Gdx.graphics.getFramesPerSecond();
 		bitmapFont.draw(spriteBatch, "FPS: " + fps, 10f, 530f);
 		bitmapFont.draw(spriteBatch, "Rendered Models: " + Render.renderCount, 10f, 510f); 
+	}
+	
+	// TODO: need to make sure that player position always matches camera position, then apply movement to player position, not just camera -Cory
+	public void renderPos() {
+		int posX = (int)world.getPlayer().camera.position.x;
+		int posY = (int)world.getPlayer().camera.position.y;
+		int posZ = (int)world.getPlayer().camera.position.z;
+		bitmapFont.draw(spriteBatch,  "Position: " + posX + ", " + posY + ", " + posZ, 10f, 490f);
+	}
+	
+	public void renderFloatPos() {
+		float posX = world.getPlayer().camera.position.x;
+		float posY = world.getPlayer().camera.position.y;
+		float posZ = world.getPlayer().camera.position.z;
+		bitmapFont.draw(spriteBatch, "X:" + posX + ", Y:" + posY + ", Z:" + posZ, 10f, 450f);
+	}
+	
+	public void renderTilePos(){
+//		int tileX = (int)world.getPlayer().camera.position.z;
+//		int tileY = world.getMeshLevel().getLevelHeight() - 1 - (int)world.getPlayer().camera.position.x;
+//		bitmapFont.draw(spriteBatch, "Tile (" + tileX + ", " + tileY +")", 10f, 470f);
+		
+		GridPoint2 tileIndex = world.getPlayer().getPlayerTileCoords();
+		bitmapFont.draw(spriteBatch, "Tile (" + tileIndex.x + ", " + tileIndex.y +")", 10f, 470f);
 	}
 
 	@Override

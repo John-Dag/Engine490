@@ -32,6 +32,8 @@ public class MeshLevel {
 	private int triCount = 0;
 	private MeshPartBuilder meshPartBuilder;
 	private boolean isSkySphereActive;
+	private int heightDimension = 0;
+	private int widthDimension = 0;
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
@@ -400,14 +402,31 @@ public class MeshLevel {
 		instances.add(instance);
 	}
 	
-	private int getHeight(TiledMapTile tile) {
-		String height = tile.getProperties().get("height").toString();
+	public int getHeight(TiledMapTile tile) {
+		String height = "0";
+		if (tile.getProperties().containsKey("height")){
+			height = tile.getProperties().get("height").toString();
+		}
 		return Integer.parseInt(height);
 	}
 	
 	private String getRampDirection(TiledMapTile tile) {
 		String direction = tile.getProperties().get("ramp").toString();
 		return direction;
+	}
+	
+	public int getLevelHeight() {
+		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+		return layer.getHeight();
+	}
+	
+	public int getLevelWidth() {
+		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+		return layer.getWidth();
+	}
+	
+	public TiledMap getTiledMap() {
+		return tiledMap;
 	}
 	
 	public Array<ModelInstance> getInstances() {
