@@ -41,7 +41,6 @@ public class GameScreen implements Screen {
 		renderFps();
 		renderPos();
 		renderTilePos();
-		renderFloatPos();
 		spriteBatch.end();
 		
 		world.update(delta);
@@ -59,13 +58,6 @@ public class GameScreen implements Screen {
 		int posY = (int)world.getPlayer().camera.position.y;
 		int posZ = (int)world.getPlayer().camera.position.z;
 		bitmapFont.draw(spriteBatch,  "Position: " + posX + ", " + posY + ", " + posZ, 10f, 490f);
-	}
-	
-	public void renderFloatPos() {
-		float posX = world.getPlayer().camera.position.x;
-		float posY = world.getPlayer().camera.position.y;
-		float posZ = world.getPlayer().camera.position.z;
-		bitmapFont.draw(spriteBatch, "X:" + posX + ", Y:" + posY + ", Z:" + posZ, 10f, 450f);
 	}
 	
 	public void renderTilePos(){

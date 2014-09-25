@@ -125,12 +125,12 @@ public class Player extends Entity {
 			if(movTileCoords.y != getPlayerTileCoords().y){
 				// zero the x component of the movement vector
 				returnVec.x = 0;
-				System.out.println("Zero X");
+				//System.out.println("Zero X");
 			}
 			if(movTileCoords.x != getPlayerTileCoords().x){
 				// zero the z component of the movement vector
 				returnVec.y = 0;
-				System.out.println("Zero Y");
+				//System.out.println("Zero Y");
 			}
 		}
 		return returnVec;

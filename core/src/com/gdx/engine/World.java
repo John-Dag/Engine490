@@ -86,16 +86,15 @@ public class World {
 					
 					if (result > -1) {
 						Intersector.intersectRayBounds(ray, boxes.get(i), out);
-						Decal test = Decal.newDecal(Assets.test1, true);
-						test.setPosition(out);
-						test.lookAt(player.camera.position, player.camera.position.cpy().nor());
-						test.setScale(0.001f);
-						decalInstances.add(test);
-						//System.out.println("Fired");
-						//System.out.println(result);
 					}
 				}
 			}
+			
+			Decal test = Decal.newDecal(Assets.test1, true);
+			test.setPosition(out);
+			test.lookAt(player.camera.position, player.camera.position.cpy().nor());
+			test.setScale(0.001f);
+			decalInstances.add(test);
 		}
 	}
 	
