@@ -173,13 +173,14 @@ public class MeshLevel {
 					direction = 3;
 					
 				Object object = new Object(objPosition, Assets.torch, scale, direction, 1, false);
+				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
 				objectInstances.add(object);
 			}
 			
 			else if (rectObj.getName().contains("Light")) {
 				int height = getObjectHeight(rectObj);
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				
+				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
 				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(255, 0, 0, 1), 50f, 2, false);
 				objectInstances.add(object);
 			}
