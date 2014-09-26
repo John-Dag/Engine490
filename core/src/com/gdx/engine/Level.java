@@ -12,6 +12,8 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+//Cube level
+
 public class Level {
 	private TiledMap tiledMap;
 	private Model skySphere;

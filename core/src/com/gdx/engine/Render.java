@@ -78,7 +78,7 @@ public class Render {
 		
 		loadParam = new ParticleEffectLoader.ParticleEffectLoadParameter(particleSystem.getBatches());
 		loader = new ParticleEffectLoader(new InternalFileHandleResolver());
-		
+
 	    manager.setLoader(ParticleEffect.class, loader);
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
@@ -224,5 +224,9 @@ public class Render {
 	
 	public DecalBatch getDecalbatch() {
 		return decalBatch;
+	}
+	
+	public ModelBatch getModelbatch() {
+		return modelBatch;
 	}
 }

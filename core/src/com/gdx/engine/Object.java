@@ -10,31 +10,31 @@ import com.badlogic.gdx.math.Vector3;
 //For testing purposes
 
 public class Object {
-	Decal decal;
-	int id;
-	boolean active;
-	Vector3 position = new Vector3();
-	Color color;
-	float intensity;
-	PointLight light;
+	public Decal decal;
+	public int id;
+	public boolean active;
+	public Vector3 position;
+	public Color color;
+	public float intensity;
+	public PointLight light;
 	
 	public Object(Vector3 position, Color color, float intensity, int id, boolean active) {
-		this.position.set(position);
+		this.position = position;
 		this.color = color;
 		this.intensity = intensity;
 		this.id = id;
 		this.active = false;
-		decal = null;
 		this.light = new PointLight().set(color, position, intensity);
+		this.active = false;
 	}
 	
 	public Object(Vector3 position, TextureRegion region, float scale, int direction, int id, boolean active) {
-		decal = Decal.newDecal(region, true);
-		decal.setScale(scale);
+		this.decal = Decal.newDecal(region, true);
+		this.decal.setScale(scale);
 		this.id = id;
 		rotate(direction);
-		decal.setPosition(position);
-		active = false;
+		this.decal.setPosition(position);
+		this.active = false;
 	}
 	
 	private void rotate(int direction) {
