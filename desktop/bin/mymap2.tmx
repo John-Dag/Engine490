@@ -128,7 +128,7 @@
   </object>
   <object name="Light" x="799" y="429">
    <properties>
-    <property name="color" value="red"/>
+    <property name="color" value="2"/>
     <property name="height" value="3"/>
    </properties>
   </object>
@@ -142,6 +142,12 @@
    <properties>
     <property name="E" value=""/>
     <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Light" x="240" y="782">
+   <properties>
+    <property name="color" value="0"/>
+    <property name="height" value="3"/>
    </properties>
   </object>
  </objectgroup>

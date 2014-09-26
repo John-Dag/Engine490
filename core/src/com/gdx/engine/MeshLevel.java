@@ -154,6 +154,7 @@ public class MeshLevel {
 	private void setObjectInstances() {
 		Vector3 objPosition = new Vector3();
 		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
+		Color color;
 		int direction = 0;
 		
 		for (int i = 0; i < objects.getCount(); i++) {
@@ -181,7 +182,8 @@ public class MeshLevel {
 				int height = getObjectHeight(rectObj);
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
 				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
-				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(255, 0, 0, 1), 50f, 2, false);
+				color = getLightColor(rectObj);
+				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 2, false);
 				objectInstances.add(object);
 			}
 		}
@@ -462,6 +464,37 @@ public class MeshLevel {
 		}
 		
 		return Integer.parseInt(height);
+	}
+	
+	private Color getLightColor(RectangleMapObject object) {
+		Color color = new Color();
+		int temp;
+		
+		if (object.getProperties().containsKey("color")) {
+			String type = object.getProperties().get("color").toString();
+			temp = Integer.parseInt(type);
+			
+			switch(temp) {
+				case(0):
+					color.set(255, 0, 0, 1);
+					break;
+				case(1):
+					color.set(240, 255, 186, 1);
+					break;
+				case(2):
+					color.set(0, 255, 68, 1);
+					break;
+				default:
+					color.set(0, 0, 0, 1);
+					break;
+			}
+		}
+		else {
+			System.err.println("Tile color not set. Default color used");
+			color.set(0, 0, 0, 1);
+		}
+		
+		return color;
 	}
 	
 	private String getRampDirection(TiledMapTile tile) {
