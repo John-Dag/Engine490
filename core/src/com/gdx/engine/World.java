@@ -1,9 +1,12 @@
 package com.gdx.engine;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -12,6 +15,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class World {
 	private Player player;
+	//private Enemy enemy;
 	//private Level level;
 	private MeshLevel meshLevel;
 	private Ray ray;
@@ -20,12 +24,15 @@ public class World {
 	private float timer;
 	private Vector3 position = new Vector3();
 	private Vector3 out = new Vector3();
+	//private Vector3 test = new Vector3(2f, 1.5f, 2f);
+    //private TiledMapTileLayer layer = (TiledMapTileLayer)Assets.level2.getLayers().get(0);
 	
 	public World() {
 		player = new Player(this, new Vector3(2f, 1.5f, 2f), true, BuildModel.buildBoxColorModel(1f, 1f, 1f, Color.BLUE));
 		//level = new Level(Assets.level, 1f, 1f, 1f, true, Assets.floorMat, Assets.wallMat);
 		//level.getInstances().add(player);
-		meshLevel = new MeshLevel(Assets.level, true);
+		meshLevel = new MeshLevel(Assets.level2, true);
+		//meshLevel.getInstances().add(player.model);
 	}
 	
 	public void createBoundingBoxes() {
@@ -38,16 +45,13 @@ public class World {
 		}
 	}
 	
-	public Array<BoundingBox> getBoundingBoxes() {
-		return boxes;
-	}
-	
-	public Array<ModelInstance> getLevelMesh() {
-		return meshLevel.generateLevel();
-	}
-	
-	public MeshLevel getMeshLevel() {
-		return meshLevel;
+	public void setObjectDecals() {
+		int size = meshLevel.getObjectInstances().size;
+		
+		for (int i = 0; i < size; i++) {
+			Decal decal = meshLevel.getObjectInstances().get(i).decal;
+			decalInstances.add(decal);
+		}
 	}
 	
 	public void update(float delta) {
@@ -108,5 +112,17 @@ public class World {
 	
 	public Array<Decal> getDecals() {
 		return decalInstances;
+	}
+	
+	public Array<BoundingBox> getBoundingBoxes() {
+		return boxes;
+	}
+	
+	public Array<ModelInstance> getLevelMesh() {
+		return meshLevel.generateLevel();
+	}
+	
+	public MeshLevel getMeshLevel() {
+		return meshLevel;
 	}
 }

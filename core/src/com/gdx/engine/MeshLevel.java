@@ -11,9 +11,13 @@ import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
@@ -27,6 +31,7 @@ public class MeshLevel {
 	private TiledMap tiledMap;
 	private ModelBuilder modelBuilder;
 	private Array<ModelInstance> instances;
+	private Array<Object> objectInstances;
 	private Model model, skySphere;
 	private ModelInstance instance;
 	private int triCount = 0;
@@ -38,6 +43,7 @@ public class MeshLevel {
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
 		instances  = new Array<ModelInstance>();
+		objectInstances = new Array<Object>();
 		modelBuilder = new ModelBuilder();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
@@ -45,7 +51,7 @@ public class MeshLevel {
 	
 	public Array<ModelInstance> generateLevel() {
 		if (isSkySphereActive) {
-			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.TEAL)), Usage.Position | Usage.Normal);
+			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.BLACK)), Usage.Position | Usage.Normal);
 			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));
 			instance = new ModelInstance(skySphere);
 			instance.transform.setToTranslation(0, 0, 0);
@@ -139,8 +145,45 @@ public class MeshLevel {
 				makeWalls(i,j,WEST);
 			}
 		}
+		setObjectInstances();
 		
 		return instances;
+	}
+	
+	//Objects are read from the "objects" layer in the tile map
+	private void setObjectInstances() {
+		Vector3 objPosition = new Vector3();
+		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
+		int direction = 0;
+		
+		for (int i = 0; i < objects.getCount(); i++) {
+			RectangleMapObject rectObj = (RectangleMapObject) objects.get(i);
+			
+			if (rectObj.getName().contains("Torch")) {
+				float scale = 0.003f;
+				int height = getObjectHeight(rectObj);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				if (rectObj.getProperties().containsKey("N"))
+					direction = 0;
+				else if (rectObj.getProperties().containsKey("S"))
+					direction = 1;
+				else if (rectObj.getProperties().containsKey("E")) 
+					direction = 2;
+				else if (rectObj.getProperties().containsKey("W"))
+					direction = 3;
+					
+				Object object = new Object(objPosition, Assets.torch, scale, direction, 1, false);
+				objectInstances.add(object);
+			}
+			
+			else if (rectObj.getName().contains("Light")) {
+				int height = getObjectHeight(rectObj);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				
+				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(255, 0, 0, 1), 50f, 2, false);
+				objectInstances.add(object);
+			}
+		}
 	}
 	
 	private void makeTriangles(int i, int j, int direction){
@@ -410,6 +453,16 @@ public class MeshLevel {
 		return Integer.parseInt(height);
 	}
 	
+	public int getObjectHeight(RectangleMapObject object) {
+		String height = "0";
+		
+		if (object.getProperties().containsKey("height")) {
+			height = object.getProperties().get("height").toString();
+		}
+		
+		return Integer.parseInt(height);
+	}
+	
 	private String getRampDirection(TiledMapTile tile) {
 		String direction = tile.getProperties().get("ramp").toString();
 		return direction;
@@ -431,5 +484,9 @@ public class MeshLevel {
 	
 	public Array<ModelInstance> getInstances() {
 		return instances;
+	}
+	
+	public Array<Object> getObjectInstances() {
+		return objectInstances;
 	}
 }

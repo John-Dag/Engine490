@@ -31,8 +31,8 @@ public class Player extends Entity {
 		this.temp = new Vector3();
 		this.camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		this.camera.position.set(this.position.x, this.position.y, this.position.z);
-		this.camera.lookAt(0, 1.5f, 5);
-		this.camera.near = 0.1f;
+		this.camera.lookAt(5, 1.5f, 5);
+		this.camera.near = 0.001f;
 		this.camera.far = 100f;
 	}
 	
