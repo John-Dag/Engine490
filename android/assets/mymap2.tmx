@@ -81,48 +81,56 @@
   <object name="Torch" x="37" y="785">
    <properties>
     <property name="W" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
   <object name="Torch" x="215" y="987">
    <properties>
     <property name="S" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
   <object name="Torch" x="987" y="788">
    <properties>
     <property name="E" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
   <object name="Torch" x="619" y="37">
    <properties>
     <property name="N" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
   <object name="Torch" x="331" y="987">
    <properties>
     <property name="S" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
   <object name="Torch" x="467" y="987">
    <properties>
     <property name="S" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
   <object name="Torch" x="443" y="691">
    <properties>
     <property name="E" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="4"/>
    </properties>
   </object>
   <object name="Torch" x="600" y="988">
    <properties>
     <property name="S" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
@@ -135,12 +143,14 @@
   <object name="Torch" x="987" y="676">
    <properties>
     <property name="E" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
   <object name="Torch" x="985" y="411">
    <properties>
     <property name="E" value=""/>
+    <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
@@ -148,6 +158,25 @@
    <properties>
     <property name="color" value="0"/>
     <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Torch" x="613" y="691">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="4"/>
+   </properties>
+  </object>
+  <object name="Light" x="528" y="721">
+   <properties>
+    <property name="color" value="3"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Emitter" x="804" y="850">
+   <properties>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
    </properties>
   </object>
  </objectgroup>

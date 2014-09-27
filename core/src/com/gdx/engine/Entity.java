@@ -24,4 +24,12 @@ public class Entity {
 		this.id = id;
 		this.isRendered = false;
 	}
+	
+	public Entity(Vector3 position, boolean active, int id, BoundingBox boundingBox) {
+		this.position = position;
+		this.active = active;
+		this.isRendered = false;
+		this.id = id;
+		this.boundingBox = boundingBox;
+	}
 }

@@ -34,7 +34,7 @@ public class Assets {
 		level2 = new TmxMapLoader().load("mymap2.tmx");
 		floor = new Texture("floor.png");
 		wall = new Texture("wall.png");
-		stoneFloor = new Texture("stoneFloor.png");
+		stoneFloor = new Texture("stonefloor.png");
 		modelBuilder = new ModelBuilder();
 		floorMat = new Material(TextureAttribute.createDiffuse(floor));
 		wallMat = new Material(TextureAttribute.createDiffuse(wall));

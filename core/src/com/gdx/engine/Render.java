@@ -75,7 +75,7 @@ public class Render extends DefaultShaderProvider {
 		//Environment settings
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
-		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+		//environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 		//environment.add(new PointLight().set(new ColorAttribute(ColorAttribute.Diffuse).color.set(255, 0, 0, 1), 1f, 2f, 1f, 100f));
 		
 		//Particles
@@ -122,7 +122,7 @@ public class Render extends DefaultShaderProvider {
 			if (!object.active) {
 				if (object.id == 1) {
 					objectCoords.set(object.decal.getPosition().x, object.decal.getPosition().y + 0.1f, object.decal.getPosition().z);
-					environment.add(new PointLight().set(new ColorAttribute(ColorAttribute.AmbientLight).color.set(240, 255, 186, 1), objectCoords, 5f));
+					environment.add(new PointLight().set(new ColorAttribute(ColorAttribute.AmbientLight).color.set(object.color), objectCoords, 5f));
 					ParticleEffect effect = new ParticleEffect();
 					spawnParticleEffect(effect, objectCoords);
 					object.active = true;
@@ -130,6 +130,13 @@ public class Render extends DefaultShaderProvider {
 				
 				else if (object.id == 2) {
 					environment.add(object.light);
+					object.active = true;
+				}
+				
+				else if (object.id == 3) {
+					ParticleEffect effect = new ParticleEffect();
+					pfxPool.newObject();
+					spawnParticleEffect(effect, objectCoords);
 					object.active = true;
 				}
 			}

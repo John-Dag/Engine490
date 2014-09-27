@@ -27,6 +27,10 @@ public class MeshLevel {
 	private static final int SOUTH = 1;
 	private static final int EAST = 2;
 	private static final int WEST = 3;
+	private final int RED = 0;
+	private final int WHITE = 1;
+	private final int GREEN = 2;
+	private final int BLUE = 3;
 	
 	private TiledMap tiledMap;
 	private ModelBuilder modelBuilder;
@@ -172,8 +176,9 @@ public class MeshLevel {
 					direction = 2;
 				else if (rectObj.getProperties().containsKey("W"))
 					direction = 3;
-					
-				Object object = new Object(objPosition, Assets.torch, scale, direction, 1, false);
+				
+				color = getLightColor(rectObj);
+				Object object = new Object(objPosition, Assets.torch, color, scale, direction, 1, false);
 				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
 				objectInstances.add(object);
 			}
@@ -184,6 +189,14 @@ public class MeshLevel {
 				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
 				color = getLightColor(rectObj);
 				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 2, false);
+				objectInstances.add(object);
+			}
+			
+			else if (rectObj.getName().contains("Emitter")) {
+				int height = getObjectHeight(rectObj);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				color = getLightColor(rectObj);
+				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 3, false);
 				objectInstances.add(object);
 			}
 		}
@@ -475,14 +488,17 @@ public class MeshLevel {
 			temp = Integer.parseInt(type);
 			
 			switch(temp) {
-				case(0):
+				case(RED):
 					color.set(255, 0, 0, 1);
 					break;
-				case(1):
+				case(WHITE):
 					color.set(240, 255, 186, 1);
 					break;
-				case(2):
+				case(GREEN):
 					color.set(0, 255, 68, 1);
+					break;
+				case(BLUE):
+					color.set(0, 0, 255, 1);
 					break;
 				default:
 					color.set(0, 0, 0, 1);

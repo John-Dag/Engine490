@@ -28,10 +28,11 @@ public class Object {
 		this.active = false;
 	}
 	
-	public Object(Vector3 position, TextureRegion region, float scale, int direction, int id, boolean active) {
+	public Object(Vector3 position, TextureRegion region, Color color, float scale, int direction, int id, boolean active) {
 		this.decal = Decal.newDecal(region, true);
 		this.decal.setScale(scale);
 		this.id = id;
+		this.color = color;
 		rotate(direction);
 		this.decal.setPosition(position);
 		this.active = false;
