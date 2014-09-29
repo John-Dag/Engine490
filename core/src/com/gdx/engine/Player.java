@@ -134,6 +134,7 @@ public class Player extends Entity {
 				//System.out.println("Zero Y");
 			}
 		}
+		
 		return returnVec;
 	}
 	
