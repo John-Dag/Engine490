@@ -5,8 +5,6 @@ import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.maps.tiled.TiledMapTile;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -53,18 +51,18 @@ public class Player extends Entity {
 	
 	public void update(float delta) {
 		float heightValue = HEIGHT_OFFSET + world.getMeshLevel().rampHeight(this.camera.position.x, this.camera.position.z);
-		if(isJumping){
+		if (isJumping) {
 			float jumpAmt = jumpVelocity * delta;
-			if(this.camera.position.y + jumpAmt > heightValue){
+			if (this.camera.position.y + jumpAmt > heightValue) {
 				this.camera.position.y += jumpAmt;
 				jumpVelocity -= GRAVITY;
 			}
-			else{
+			else {
 				this.camera.position.y = heightValue;
 				isJumping = false;
 				jumpVelocity = 0f;
 			}
-		}else{
+		} else {
 			// update height from ramps
 			this.camera.position.y = heightValue;
 		}
@@ -116,9 +114,6 @@ public class Player extends Entity {
 			
 			boolean rotX = deltaPos.x != 0;
 			boolean rotY = deltaPos.y != 0;
-			
-			//Testing purposes
-			//System.out.println("Pointer Position: " + (int)deltaPos.x);
 			
 			if (rotX || rotY) {
 				Gdx.input.setCursorPosition((int)GameScreen.center.x - 8, (int)GameScreen.center.y - 8);

@@ -24,16 +24,17 @@ public class Entity {
 	public btRigidBody rigidBody;
 	public boolean isRendered;
 	public int id;
-	public  BoundingBox boundingBox=new BoundingBox();
+	public BoundingBox boundingBox= new BoundingBox();
 	
 	public Entity(Vector3 position, Vector3 rotation, Vector3 scale, boolean active, 
-			      int index, boolean collision) {
+		      int index, boolean collision, ModelInstance model) {
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
 		this.active = active;
 		this.index = index;
 		this.collision = collision;
+		this.model = model;
 		
 		velocity=new Vector3(0,0,0);
 		acceleration=new Vector3(0,0,0);

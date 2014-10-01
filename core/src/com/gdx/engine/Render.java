@@ -1,5 +1,4 @@
 package com.gdx.engine;
-import java.awt.Color;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
@@ -9,21 +8,15 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
-import com.badlogic.gdx.graphics.g3d.particles.batches.PointSpriteParticleBatch;
-import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -50,15 +43,15 @@ public class Render extends DefaultShaderProvider {
 	    }
 	}
 	
+	public static int renderCount;
 	private World world;
 	private ModelBatch modelBatch;
 	private Environment environment;
 	private Array<ModelInstance> instances;
 	private boolean loading;
 	private DecalBatch decalBatch;
-	public static int renderCount;
-	Vector3 position = new Vector3();
-	public static AssetManager manager = new AssetManager();
+	private Vector3 position;
+	public static AssetManager manager;
 	private ParticleSystem particleSystem;
 	private BillboardParticleBatch pointSpriteBatch;
 	private ParticleEffectLoader.ParticleEffectLoadParameter loadParam;
@@ -68,6 +61,7 @@ public class Render extends DefaultShaderProvider {
 	
 	public Render(World world) {
 		this.world = world;
+		position = new Vector3();
 	
 		//Changes the max number point lights in the default shader
 		this.config.numPointLights = 20;
@@ -87,6 +81,7 @@ public class Render extends DefaultShaderProvider {
 		loadParam = new ParticleEffectLoader.ParticleEffectLoadParameter(particleSystem.getBatches());
 		loader = new ParticleEffectLoader(new InternalFileHandleResolver());
 
+		manager = new AssetManager();
 	    manager.setLoader(ParticleEffect.class, loader);
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();

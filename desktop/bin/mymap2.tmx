@@ -179,5 +179,11 @@
     <property name="height" value="2"/>
    </properties>
   </object>
+  <object name="Enemy" x="174" y="960">
+   <properties>
+    <property name="color" value="1"/>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

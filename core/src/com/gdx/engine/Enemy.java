@@ -1,22 +1,23 @@
 package com.gdx.engine;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector3;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by Austin on 9/21/2014.
  */
+
 public class Enemy extends Entity {
     private TiledMap tiledMap;
     private  ArrayList<String> showXY = new ArrayList<String>();
 
-    public Enemy (Vector3 position, boolean active) {
-
+    public Enemy (Vector3 position, Vector3 rotation, Vector3 scale, boolean active, 
+		      int index, boolean collision, ModelInstance model) {
+    	super(position, rotation, scale, active, index, collision, model);
     }
 
     public ArrayList<Integer> shortestPath(int startLoc, int endLoc, TiledMapTileLayer layer) {

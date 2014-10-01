@@ -1,12 +1,9 @@
 package com.gdx.engine;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -24,15 +21,36 @@ public class World {
 	private float timer;
 	private Vector3 position = new Vector3();
 	private Vector3 out = new Vector3();
-	//private Vector3 test = new Vector3(2f, 1.5f, 2f);
     //private TiledMapTileLayer layer = (TiledMapTileLayer)Assets.level2.getLayers().get(0);
 	
 	public World() {
 		player = new Player(this, new Vector3(2f, 1.5f, 2f), true, BuildModel.buildBoxColorModel(1f, 1f, 1f, Color.BLUE));
-		//level = new Level(Assets.level, 1f, 1f, 1f, true, Assets.floorMat, Assets.wallMat);
-		//level.getInstances().add(player);
 		meshLevel = new MeshLevel(Assets.level2, true);
 		//meshLevel.getInstances().add(player.model);
+	}
+	
+	public void update(float delta) {
+		rayPick();
+		player.input(delta);
+		player.update(delta);
+		updateEntities(delta);
+		timer += delta;
+	}
+	
+	private void updateEntities(float delta) {
+		int size = meshLevel.getEntityInstances().size;
+		
+		for (int i = 0; i < size; i++) {
+			Entity entity = meshLevel.getEntityInstances().get(i);
+			
+			if (entity.active) {
+				entity.UpdateInstanceTransform();
+			}
+			
+			else {
+				meshLevel.getEntityInstances().removeIndex(i);
+			}
+		}
 	}
 	
 	public void createBoundingBoxes() {
@@ -52,13 +70,6 @@ public class World {
 			Decal decal = meshLevel.getObjectInstances().get(i).decal;
 			decalInstances.add(decal);
 		}
-	}
-	
-	public void update(float delta) {
-		rayPick();
-		player.input(delta);
-		player.update(delta);
-		timer += delta;
 	}
 	
 	//Temporary
@@ -89,6 +100,7 @@ public class World {
 					distance = dist2;
 					
 					if (result > -1) {
+						System.out.println("hit");
 						Intersector.intersectRayBounds(ray, boxes.get(i), out);
 					}
 				}

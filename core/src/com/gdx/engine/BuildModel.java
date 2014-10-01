@@ -19,7 +19,7 @@ public class BuildModel {
 	public static ModelInstance buildBoxTextureModel(float x, float y, float z, Material material) {
 		Model model = Assets.modelBuilder.createBox(x, y, z, material, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
 		ModelInstance instance = new ModelInstance(model);
-		instance.transform.setToTranslation(x, y, z);
+		//instance.transform.setToTranslation(x, y, z);
 		return instance;
 	}
 }

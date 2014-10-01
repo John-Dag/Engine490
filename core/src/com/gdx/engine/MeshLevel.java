@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -42,6 +41,7 @@ public class MeshLevel {
 	private ModelBuilder modelBuilder;
 	private Array<ModelInstance> instances;
 	private Array<Object> objectInstances;
+	private Array<Entity> entityInstances;
 	private Model model, skySphere;
 	private ModelInstance instance;
 	private int triCount = 0;
@@ -55,6 +55,7 @@ public class MeshLevel {
 		modelBuilder = new ModelBuilder();
 		instances  = new Array<ModelInstance>();
 		objectInstances = new Array<Object>();
+		entityInstances = new Array<Entity>();
 		modelBuilder = new ModelBuilder();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
@@ -205,6 +206,18 @@ public class MeshLevel {
 				color = getLightColor(rectObj);
 				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 3, false);
 				objectInstances.add(object);
+			}
+			
+			else if (rectObj.getName().contains("Enemy")) {
+				int height = getObjectHeight(rectObj);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				color = getLightColor(rectObj);
+				ModelInstance test = BuildModel.buildBoxTextureModel(1f, 1f, 1f, Assets.wallMat);
+				Vector3 rotation = new Vector3(0f, 0f, 0f);
+				Vector3 scale = new Vector3(1f, 1f, 1f);
+				Enemy enemy = new Enemy(objPosition, rotation, scale, true, 4, false, test);
+				entityInstances.add(enemy);
+				instances.add(enemy.model);
 			}
 		}
 	}
@@ -547,6 +560,10 @@ public class MeshLevel {
 		return objectInstances;
 	}
 	
+	public Array<Entity> getEntityInstances() {
+		return entityInstances;
+	}
+	
 	public Vector3 checkCollision(Vector3 oldPos, Vector3 newPos, float objectWidth, float objectLength){
 		Vector2 collisionVector = new Vector2(1,1);
 		Vector3 movementVector = new Vector3(newPos.x - oldPos.x, newPos.y - oldPos.y, newPos.z - oldPos.z);
@@ -561,18 +578,18 @@ public class MeshLevel {
 			GridPoint2 tileCoords = getTileCoords(oldPos);
 			
 			// iterate through all tiles near the player
-			for(int i = tileCoords.x - 1; i <= tileCoords.x + 1; i++){
+			for(int i = tileCoords.x - 1; i <= tileCoords.x + 1; i++) {
 				if(i < 0 || i >= tiledMapLayer0.getWidth()) {continue;}
-				for(int j = tileCoords.y - 1; j <= tileCoords.y + 1; j++){
+				for(int j = tileCoords.y - 1; j <= tileCoords.y + 1; j++) {
 					
 					// this keeps it from checking tiles that are out of bounds (don't exist)
-					if(j<0 || j >= tiledMapLayer0.getHeight()) {continue;}
+					if (j<0 || j >= tiledMapLayer0.getHeight()) { continue; }
 					
 					// TODO: Fix known bug: Player can access a ramp from the side, but should not be able to.
 					
 					// if oldPos tile is a ramp, it can lead us up one space
-					if(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")){
-						if(getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile()) + 1){
+					if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
+						if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile()) + 1) {
 							//check collision
 							Vector2 tilePos = new Vector2(i * blockSize.x, j * blockSize.y);
 							Vector2 rectCollideVec = rectCollide(oldPos2, newPos2, objectSize, tilePos, blockSize);
@@ -580,7 +597,7 @@ public class MeshLevel {
 							collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y);
 						}
 					}
-					else if(getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())){
+					else if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())) {
 						//check collision
 						Vector2 tilePos = new Vector2(i * blockSize.x, j * blockSize.y);
 						Vector2 rectCollideVec = rectCollide(oldPos2, newPos2, objectSize, tilePos, blockSize);
@@ -618,12 +635,12 @@ public class MeshLevel {
 	
 	// despite the method name, this is also used when not on a ramp
 	// given x,z world coordinates, this method returns the height value of the map at that point (including on ramps)
-	public float rampHeight(float x, float z){
+	public float rampHeight(float x, float z) {
 		float height = 0;
 		GridPoint2 tileCoords = getTileCoords(x, z);
 		TiledMapTile tile = tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile();
 		height = (float)getHeight(tile);
-		if(tile.getProperties().containsKey("ramp")){
+		if(tile.getProperties().containsKey("ramp")) {
 			int temp = 0;
 			String direction = getRampDirection(tile);
 			if (direction.equals("up"))	{ // -x direction
@@ -649,13 +666,13 @@ public class MeshLevel {
 		return height;
 	}	
 	
-	private GridPoint2 getTileCoords(Vector3 position){
+	private GridPoint2 getTileCoords(Vector3 position) {
 		int tileX = (int)position.z;
 		int tileY = (int)position.x;
 		return new GridPoint2(tileX, tileY);
 	}
 	
-	private GridPoint2 getTileCoords(float x, float z){
+	private GridPoint2 getTileCoords(float x, float z) {
 		int tileX = (int)z;
 		int tileY = (int)x;
 		return new GridPoint2(tileX, tileY);
