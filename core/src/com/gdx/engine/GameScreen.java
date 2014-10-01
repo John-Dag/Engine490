@@ -61,10 +61,6 @@ public class GameScreen implements Screen {
 	}
 	
 	public void renderTilePos(){
-//		int tileX = (int)world.getPlayer().camera.position.z;
-//		int tileY = world.getMeshLevel().getLevelHeight() - 1 - (int)world.getPlayer().camera.position.x;
-//		bitmapFont.draw(spriteBatch, "Tile (" + tileX + ", " + tileY +")", 10f, 470f);
-		
 		GridPoint2 tileIndex = world.getPlayer().getPlayerTileCoords();
 		bitmapFont.draw(spriteBatch, "Tile (" + tileIndex.x + ", " + tileIndex.y +")", 10f, 470f);
 	}

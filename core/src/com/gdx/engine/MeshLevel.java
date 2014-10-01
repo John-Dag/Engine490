@@ -89,16 +89,16 @@ public class MeshLevel {
 								Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
 								Assets.stoneFloorMat);
 
-						if (direction.equals("up"))	{
+						if (direction.equals("up"))	{ // -x direction
 							meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
 						}	
-						else if (direction.equals("down")) {
+						else if (direction.equals("down")) { // +x direction
 							meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
 						}	
-						else if(direction.equals("left")) {
+						else if(direction.equals("left")) { // -z direction
 							meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,-ROOT_PT5);
 						}	
-						else if (direction.equals("right"))	{
+						else if (direction.equals("right"))	{ // +z direction
 							meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,ROOT_PT5);
 						}	
 						else {
@@ -564,9 +564,23 @@ public class MeshLevel {
 			for(int i = tileCoords.x - 1; i <= tileCoords.x + 1; i++){
 				if(i < 0 || i >= tiledMapLayer0.getWidth()) {continue;}
 				for(int j = tileCoords.y - 1; j <= tileCoords.y + 1; j++){
+					
+					// this keeps it from checking tiles that are out of bounds (don't exist)
 					if(j<0 || j >= tiledMapLayer0.getHeight()) {continue;}
-					// the iterated tile is higher than the oldPos tile
-					if(getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())){
+					
+					// TODO: Fix known bug: Player can access a ramp from the side, but should not be able to.
+					
+					// if oldPos tile is a ramp, it can lead us up one space
+					if(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")){
+						if(getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile()) + 1){
+							//check collision
+							Vector2 tilePos = new Vector2(i * blockSize.x, j * blockSize.y);
+							Vector2 rectCollideVec = rectCollide(oldPos2, newPos2, objectSize, tilePos, blockSize);
+
+							collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y);
+						}
+					}
+					else if(getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())){
 						//check collision
 						Vector2 tilePos = new Vector2(i * blockSize.x, j * blockSize.y);
 						Vector2 rectCollideVec = rectCollide(oldPos2, newPos2, objectSize, tilePos, blockSize);
@@ -575,10 +589,9 @@ public class MeshLevel {
 					}
 				}
 			}
-			
 		}
 		
-		return new Vector3(collisionVector.x, 0, collisionVector.y);
+		return new Vector3(collisionVector.x, 1, collisionVector.y);
 	}
 	
 	private Vector2 rectCollide(Vector2 oldPos, Vector2 newPos, Vector2 size1, Vector2 pos2, Vector2 size2) {
@@ -603,9 +616,48 @@ public class MeshLevel {
 		return result;
 	}
 	
+	// despite the method name, this is also used when not on a ramp
+	// given x,z world coordinates, this method returns the height value of the map at that point (including on ramps)
+	public float rampHeight(float x, float z){
+		float height = 0;
+		GridPoint2 tileCoords = getTileCoords(x, z);
+		TiledMapTile tile = tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile();
+		height = (float)getHeight(tile);
+		if(tile.getProperties().containsKey("ramp")){
+			int temp = 0;
+			String direction = getRampDirection(tile);
+			if (direction.equals("up"))	{ // -x direction
+				temp = (int)x;
+				height += x - temp;
+			}	
+			else if (direction.equals("down")) { // +x direction
+				temp = (int)x;
+				height += 1 - (x - temp);
+			}	
+			else if(direction.equals("left")) { // -z direction
+				temp = (int)z;
+				height += 1 - (z - temp);
+			}	
+			else if (direction.equals("right"))	{ // +z direction
+				temp = (int)z;
+				height += z - temp;
+			}	
+			else {
+				System.err.println("MeshLevel.rampHeight() - Direction not recognized");
+			}
+		}
+		return height;
+	}	
+	
 	private GridPoint2 getTileCoords(Vector3 position){
 		int tileX = (int)position.z;
 		int tileY = (int)position.x;
+		return new GridPoint2(tileX, tileY);
+	}
+	
+	private GridPoint2 getTileCoords(float x, float z){
+		int tileX = (int)z;
+		int tileY = (int)x;
 		return new GridPoint2(tileX, tileY);
 	}
 }

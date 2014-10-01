@@ -13,10 +13,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 
 public class Player extends Entity {
-	public final float ROTATION_SPEED = 0.2f;
-	public final float MOVEMENT_SPEED = 5.0f;
-	public final float PLAYER_SIZE = 0.2f;
-	public final float TILE_HALF_WIDTH = 0.5f;
+	private static final float ROTATION_SPEED = 0.2f;
+	private static final float MOVEMENT_SPEED = 5.0f;
+	private static final float PLAYER_SIZE = 0.2f;
+	private static final float TILE_HALF_WIDTH = 0.5f;
+	private static final float HEIGHT_OFFSET = 0.5f;
+	private static final float JUMP_SPEED = 10f;
+	private static final float GRAVITY = 0.5f;
 	public PerspectiveCamera camera;
 	public boolean mouseLocked, mouseLeft;
 	public Vector3 temp;
@@ -26,6 +29,8 @@ public class Player extends Entity {
 	private Vector3 movementVector;
 	private Vector3 newPos;
 	private Vector3 oldPos;
+	private boolean isJumping;
+	private float jumpVelocity;
 	
 	public Player(World world, Vector3 position, boolean active, ModelInstance model) {
 		super(position, true, 1, model);
@@ -43,10 +48,28 @@ public class Player extends Entity {
 		this.movementVector = new Vector3(0,0,0);
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
+		this.isJumping = false;
 	}
 	
 	public void update(float delta) {
-		float movAmt = (float)(MOVEMENT_SPEED * delta);
+		float heightValue = HEIGHT_OFFSET + world.getMeshLevel().rampHeight(this.camera.position.x, this.camera.position.z);
+		if(isJumping){
+			float jumpAmt = jumpVelocity * delta;
+			if(this.camera.position.y + jumpAmt > heightValue){
+				this.camera.position.y += jumpAmt;
+				jumpVelocity -= GRAVITY;
+			}
+			else{
+				this.camera.position.y = heightValue;
+				isJumping = false;
+				jumpVelocity = 0f;
+			}
+		}else{
+			// update height from ramps
+			this.camera.position.y = heightValue;
+		}
+		
+		float movAmt = MOVEMENT_SPEED * delta;
 		movementVector.y = 0;
 		
 		movementVector.nor();
@@ -67,7 +90,7 @@ public class Player extends Entity {
 	}
 	
 	public void input(float delta) {
-		//Lock the cursor with rmb
+		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
 			Gdx.input.setCursorCatched(true);
 			mouseLocked = true;
@@ -119,6 +142,12 @@ public class Player extends Entity {
 		if (Gdx.input.isKeyPressed(Keys.A)) {
 			temp.set(camera.up).crs(camera.direction);
 			movementVector.add(temp);
+		}
+		if (Gdx.input.isKeyPressed(Keys.SPACE)){
+			if(!isJumping){
+				isJumping = true;
+				jumpVelocity = JUMP_SPEED;
+			}
 		}
 	}
 	
