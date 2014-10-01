@@ -17,6 +17,7 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -27,6 +28,11 @@ public class MeshLevel {
 	private static final int SOUTH = 1;
 	private static final int EAST = 2;
 	private static final int WEST = 3;
+	
+	private static final float SPOT_WIDTH = 1;
+	private static final float SPOT_LENGTH = 1;
+	private static final float SPOT_HEIGHT = 1;
+	
 	private final int RED = 0;
 	private final int WHITE = 1;
 	private final int GREEN = 2;
@@ -43,6 +49,7 @@ public class MeshLevel {
 	private boolean isSkySphereActive;
 	private int heightDimension = 0;
 	private int widthDimension = 0;
+	private TiledMapTileLayer tiledMapLayer0;
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
@@ -51,6 +58,7 @@ public class MeshLevel {
 		modelBuilder = new ModelBuilder();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
+		tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
 	}
 	
 	public Array<ModelInstance> generateLevel() {
@@ -64,7 +72,6 @@ public class MeshLevel {
 		
 		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
 		// on each cell
-		// TODO: There's a problem here with i's and j's because somehow they got mixed up and directions are all whack. Fix it Cory.
 		for(int i = 0; i < layer.getHeight(); i++){
 			for(int j = 0; j < layer.getWidth(); j++){
 				TiledMapTile tile = layer.getCell(i,j).getTile();
@@ -538,5 +545,67 @@ public class MeshLevel {
 	
 	public Array<Object> getObjectInstances() {
 		return objectInstances;
+	}
+	
+	public Vector3 checkCollision(Vector3 oldPos, Vector3 newPos, float objectWidth, float objectLength){
+		Vector2 collisionVector = new Vector2(1,1);
+		Vector3 movementVector = new Vector3(newPos.x - oldPos.x, newPos.y - oldPos.y, newPos.z - oldPos.z);
+		
+		if(movementVector.len() > 0){
+			Vector2 blockSize = new Vector2(SPOT_WIDTH, SPOT_LENGTH);
+			Vector2 objectSize = new Vector2(objectWidth, objectLength);
+			
+			Vector2 oldPos2 = new Vector2(oldPos.z, oldPos.x);
+			Vector2 newPos2 = new Vector2(newPos.z, newPos.x);
+			
+			GridPoint2 tileCoords = getTileCoords(oldPos);
+			
+			// iterate through all tiles near the player
+			for(int i = tileCoords.x - 1; i <= tileCoords.x + 1; i++){
+				if(i < 0 || i >= tiledMapLayer0.getWidth()) {continue;}
+				for(int j = tileCoords.y - 1; j <= tileCoords.y + 1; j++){
+					if(j<0 || j >= tiledMapLayer0.getHeight()) {continue;}
+					// the iterated tile is higher than the oldPos tile
+					if(getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())){
+						//check collision
+						Vector2 tilePos = new Vector2(i * blockSize.x, j * blockSize.y);
+						Vector2 rectCollideVec = rectCollide(oldPos2, newPos2, objectSize, tilePos, blockSize);
+
+						collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y);
+					}
+				}
+			}
+			
+		}
+		
+		return new Vector3(collisionVector.x, 0, collisionVector.y);
+	}
+	
+	private Vector2 rectCollide(Vector2 oldPos, Vector2 newPos, Vector2 size1, Vector2 pos2, Vector2 size2) {
+		Vector2 result = new Vector2(0,0);
+		
+		if(     newPos.x + size1.x < pos2.x ||
+                newPos.x - size1.x > pos2.x + size2.x * size2.x ||
+                oldPos.y + size1.y < pos2.y ||
+                oldPos.y - size1.y > pos2.y + size2.y * size2.y) {
+
+            result.y = 1;
+        }
+
+        if(     oldPos.x + size1.x < pos2.x ||
+                oldPos.x - size1.x > pos2.x + size2.x * size2.x ||
+                newPos.y + size1.y < pos2.y ||
+                newPos.y - size1.y > pos2.y + size2.y * size2.y) {
+
+            result.x = 1;
+        }
+		
+		return result;
+	}
+	
+	private GridPoint2 getTileCoords(Vector3 position){
+		int tileX = (int)position.z;
+		int tileY = (int)position.x;
+		return new GridPoint2(tileX, tileY);
 	}
 }
