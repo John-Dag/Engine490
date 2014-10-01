@@ -157,14 +157,18 @@ public class MeshLevel {
 				makeWalls(i,j,WEST);
 			}
 		}
-		setObjectInstances();
+		
+		if (tiledMap.getLayers().get("objects") != null)
+			setObjectInstances();
+		else
+			System.err.println("TileMap - No object layer in current map");
 		
 		return instances;
 	}
 	
 	//Objects are read from the "objects" layer in the tile map
 	private void setObjectInstances() {
-		Vector3 objPosition = new Vector3();
+		Vector3 objPosition;
 		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
 		Color color;
 		int direction = 0;
@@ -175,6 +179,7 @@ public class MeshLevel {
 			if (rectObj.getName().contains("Torch")) {
 				float scale = 0.003f;
 				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
 				if (rectObj.getProperties().containsKey("N"))
 					direction = 0;
@@ -193,6 +198,7 @@ public class MeshLevel {
 			
 			else if (rectObj.getName().contains("Light")) {
 				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
 				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
 				color = getLightColor(rectObj);
@@ -202,6 +208,7 @@ public class MeshLevel {
 			
 			else if (rectObj.getName().contains("Emitter")) {
 				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
 				color = getLightColor(rectObj);
 				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 3, false);
@@ -210,14 +217,15 @@ public class MeshLevel {
 			
 			else if (rectObj.getName().contains("Enemy")) {
 				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				color = getLightColor(rectObj);
 				ModelInstance test = BuildModel.buildBoxTextureModel(1f, 1f, 1f, Assets.wallMat);
+				test.transform.setToTranslation(objPosition);
 				Vector3 rotation = new Vector3(0f, 0f, 0f);
-				Vector3 scale = new Vector3(1f, 1f, 1f);
+				Vector3 scale = new Vector3(2f, 2f, 2f);
 				Enemy enemy = new Enemy(objPosition, rotation, scale, true, 4, false, test);
 				entityInstances.add(enemy);
-				instances.add(enemy.model);
 			}
 		}
 	}

@@ -216,15 +216,24 @@ public class Render extends DefaultShaderProvider {
 		for (int i = 0; i < instances.size; i++) {
 			ModelInstance instance = instances.get(i);
 			if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
-				modelBatch.render(instance, environment);
+				renderModels(instance);
 				renderCount++;
 			}
+		}
+		
+		for (int j = 0; j < world.getMeshLevel().getEntityInstances().size; j++) {
+			ModelInstance instance = world.getMeshLevel().getEntityInstances().get(j).model;
+			renderModels(instance);
 		}
 		modelBatch.end();
 		updateDecals();
 		
 		//Render decals
 		decalBatch.flush();
+	}
+	
+	private void renderModels(ModelInstance instance) {
+		modelBatch.render(instance, environment);
 	}
 	
 	private boolean isVisible(final Camera cam, final ModelInstance instance, BoundingBox box) {

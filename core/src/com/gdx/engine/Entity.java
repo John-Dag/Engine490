@@ -109,11 +109,10 @@ public class Entity {
 		if(model==null)
 			return;
 		model.transform.idt();
-		model.transform.setToScaling(scale);
-		
+		//model.transform.setToScaling(scale);
 		model.transform.translate(position);
+		
 		model.transform.rotate(Vector3.X, rotation.x);
-
 		model.transform.rotate(Vector3.Y, rotation.y);
 		model.transform.rotate(Vector3.Z, rotation.z);
 		

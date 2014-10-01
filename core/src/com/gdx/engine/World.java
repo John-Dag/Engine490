@@ -25,7 +25,7 @@ public class World {
 	
 	public World() {
 		player = new Player(this, new Vector3(2f, 1.5f, 2f), true, BuildModel.buildBoxColorModel(1f, 1f, 1f, Color.BLUE));
-		meshLevel = new MeshLevel(Assets.level2, true);
+		meshLevel = new MeshLevel(Assets.level2, false);
 		//meshLevel.getInstances().add(player.model);
 	}
 	
@@ -44,7 +44,7 @@ public class World {
 			Entity entity = meshLevel.getEntityInstances().get(i);
 			
 			if (entity.active) {
-				entity.UpdateInstanceTransform();
+				//entity.UpdateInstanceTransform();
 			}
 			
 			else {
@@ -55,11 +55,17 @@ public class World {
 	
 	public void createBoundingBoxes() {
 		int size = meshLevel.getInstances().size;
+		int length = meshLevel.getEntityInstances().size;
 		
 		for (int i = 0; i < size; i++) {
 			BoundingBox box = new BoundingBox();
 			meshLevel.getInstances().get(i).calculateBoundingBox(box);
 			boxes.add(box);
+		}
+		
+		for (int j = 0; j < length; j++) {
+			Entity entity = meshLevel.getEntityInstances().get(j);
+			entity.model.calculateBoundingBox(entity.boundingBox).mul(entity.model.transform);
 		}
 	}
 	
@@ -72,13 +78,21 @@ public class World {
 		}
 	}
 	
+	public void rayPicking() {
+		ray = null;
+		if (player.mouseLeft == true && timer >= 0.1f) {
+			ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+			
+		}
+	}
+	
 	//Temporary
 	public void rayPick() {
 		ray = null;
 		int size = meshLevel.getInstances().size;
 		int result = -1;
 		float distance = -1;
-		
+
 		if (player.mouseLeft == true && timer >= 0.1f) {
 			ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
 			timer = 0;
