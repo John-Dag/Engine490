@@ -96,11 +96,11 @@ public class MeshLevel {
 						else if (direction.equals("down")) { // +x direction
 							meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
 						}	
-						else if(direction.equals("left")) { // -z direction
-							meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,-ROOT_PT5);
+						else if(direction.equals("left")) { // +z direction
+							meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
 						}	
-						else if (direction.equals("right"))	{ // +z direction
-							meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,ROOT_PT5);
+						else if (direction.equals("right"))	{ // -z direction
+							meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
 						}	
 						else {
 							System.err.println("generateLevel(): Direction not recognized");
@@ -382,7 +382,7 @@ public class MeshLevel {
 			p2.set(cellj+1f, bottom, celli+1f);
 			p3.set(cellj+1f, top, celli+1f);
 			p4.set(cellj+1f, top, celli);
-			normalVector.set(1f,0f,0f);
+			normalVector.set(-1f,0f,0f);
 			
 			break;
 		default:
@@ -461,7 +461,7 @@ public class MeshLevel {
 			p2.set(celli+1f, bottom, cellj+1f);
 			p3.set(celli+1f, top, cellj+1f);
 			p4.set(celli+1f, top, cellj);
-			normalVector.set(1f,0f,0f);
+			normalVector.set(-1f,0f,0f);
 			
 			break;
 		default:
