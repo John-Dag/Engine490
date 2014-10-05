@@ -21,6 +21,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+// Important note to the team: (this can be confusing)
+// World coordinates have x, y, z, with +x pointing East, and +z pointing South
+// Tiled coordinates have x, y with +x pointing South and +y pointing East
+// Many methods convert between these two coordinate systems, so its important to know which variables are in which coordinate system.
+
 public class MeshLevel {
 	private static final float ROOT_PT5 = 0.70710678f;
 	private static final int NORTH = 0;
@@ -30,12 +35,12 @@ public class MeshLevel {
 	
 	private static final float SPOT_WIDTH = 1;
 	private static final float SPOT_LENGTH = 1;
-	private static final float SPOT_HEIGHT = 1;
 	
 	private final int RED = 0;
 	private final int WHITE = 1;
 	private final int GREEN = 2;
 	private final int BLUE = 3;
+	private final int PURPLE = 4;
 	
 	private TiledMap tiledMap;
 	private ModelBuilder modelBuilder;
@@ -47,8 +52,6 @@ public class MeshLevel {
 	private int triCount = 0;
 	private MeshPartBuilder meshPartBuilder;
 	private boolean isSkySphereActive;
-	private int heightDimension = 0;
-	private int widthDimension = 0;
 	private TiledMapTileLayer tiledMapLayer0;
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
@@ -63,18 +66,20 @@ public class MeshLevel {
 	}
 	
 	public Array<ModelInstance> generateLevel() {
+		
+		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+		
 		if (isSkySphereActive) {
 			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.BLACK)), Usage.Position | Usage.Normal);
 			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));
 			instance = new ModelInstance(skySphere);
-			instance.transform.setToTranslation(0, 0, 0);
+			instance.transform.setToTranslation(layer.getHeight()/2, 0, layer.getWidth()/2);
 			instances.add(instance);
 		}
 		
-		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
 		// on each cell
-		for(int i = 0; i < layer.getHeight(); i++){
-			for(int j = 0; j < layer.getWidth(); j++){
+		for(int i = 0; i < layer.getWidth(); i++){
+			for(int j = 0; j < layer.getHeight(); j++){
 				TiledMapTile tile = layer.getCell(i,j).getTile();
 				// make the flat surfaces
 				if(layer.getCell(i,j) != null && tile.getProperties().containsKey("height")){
@@ -181,17 +186,18 @@ public class MeshLevel {
 				int height = getObjectHeight(rectObj);
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				if (rectObj.getProperties().containsKey("N"))
+				if (rectObj.getProperties().containsKey("W"))
 					direction = 0;
-				else if (rectObj.getProperties().containsKey("S"))
+				else if (rectObj.getProperties().containsKey("E"))
 					direction = 1;
-				else if (rectObj.getProperties().containsKey("E")) 
+				else if (rectObj.getProperties().containsKey("N")) 
 					direction = 2;
-				else if (rectObj.getProperties().containsKey("W"))
+				else if (rectObj.getProperties().containsKey("S"))
 					direction = 3;
 				
 				color = getLightColor(rectObj);
 				Object object = new Object(objPosition, Assets.torch, color, scale, direction, 1, false);
+				object.rotate(direction);
 				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
 				objectInstances.add(object);
 			}
@@ -226,6 +232,16 @@ public class MeshLevel {
 				Vector3 scale = new Vector3(2f, 2f, 2f);
 				Enemy enemy = new Enemy(objPosition, rotation, scale, true, 4, false, test);
 				entityInstances.add(enemy);
+			}
+			
+			else if (rectObj.getName().contains("Weapon")) {
+				int height = getObjectHeight(rectObj);
+				float scale = 0.005f;
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				color = getLightColor(rectObj);
+				Object object = new Object(objPosition, Assets.weapon1Region, color, scale, direction, 5, false);
+				objectInstances.add(object);
 			}
 		}
 	}
@@ -489,12 +505,30 @@ public class MeshLevel {
 		instances.add(instance);
 	}
 	
+	public int getHeight(Vector3 position){
+		TiledMapTile tile = getTileAt(getTileCoords(position));
+		if(tile != null){
+			return getHeight(tile);
+		}else{
+			return -1;
+		}
+	}
+	
 	public int getHeight(TiledMapTile tile) {
 		String height = "0";
 		if (tile.getProperties().containsKey("height")){
 			height = tile.getProperties().get("height").toString();
 		}
 		return Integer.parseInt(height);
+	}
+	
+	public TiledMapTile getTileAt(GridPoint2 position){
+		if(position.x >= 0 && position.x < tiledMapLayer0.getWidth() && position.y >= 0 && position.y < tiledMapLayer0.getHeight()){
+			return tiledMapLayer0.getCell(position.x, position.y).getTile();
+		}
+		else{
+			return null;
+		}
 	}
 	
 	public int getObjectHeight(RectangleMapObject object) {
@@ -527,6 +561,9 @@ public class MeshLevel {
 					break;
 				case(BLUE):
 					color.set(0, 0, 255, 1);
+					break;
+				case(PURPLE):
+					color.set(255,0,255, 1);
 					break;
 				default:
 					color.set(0, 0, 0, 1);
@@ -572,25 +609,71 @@ public class MeshLevel {
 		return entityInstances;
 	}
 	
-	public Vector3 checkCollision(Vector3 oldPos, Vector3 newPos, float objectWidth, float objectLength){
-		Vector2 collisionVector = new Vector2(1,1);
+	// true ultimate 3d collision maths
+	public Vector3 checkCollision(Vector3 oldPos, Vector3 newPos, float playerWidth, float playerHeight, float playerLength){
+		Vector3 collisionVector = new Vector3(1,1,1);
 		Vector3 movementVector = new Vector3(newPos.x - oldPos.x, newPos.y - oldPos.y, newPos.z - oldPos.z);
-		
+		//System.out.println("X: " + movementVector.x + " Y: " + movementVector.y + " Z: " + movementVector.z);
 		if(movementVector.len() > 0){
-			Vector2 blockSize = new Vector2(SPOT_WIDTH, SPOT_LENGTH);
-			Vector2 objectSize = new Vector2(objectWidth, objectLength);
+			Vector3 blockSize = new Vector3(SPOT_WIDTH, 0, SPOT_LENGTH);
+			Vector3 playerSize = new Vector3(playerWidth, playerHeight, playerLength);
 			
-			Vector2 oldPos2 = new Vector2(oldPos.z, oldPos.x);
-			Vector2 newPos2 = new Vector2(newPos.z, newPos.x);
-			
+			// returns tiled coords (as opposed to world coords)
 			GridPoint2 tileCoords = getTileCoords(oldPos);
 			
-			// iterate through all tiles near the player
-			for(int i = tileCoords.x - 1; i <= tileCoords.x + 1; i++) {
-				if(i < 0 || i >= tiledMapLayer0.getWidth()) {continue;}
-				for(int j = tileCoords.y - 1; j <= tileCoords.y + 1; j++) {
+			int startX, endX, startY, endY;
+			
+//			if(movementVector.x > 0){
+//				startY = tileCoords.y;
+//				endY = tileCoords.y + 1;
+//			}else if(movementVector.x < 0){
+//				startY = tileCoords.y - 1;
+//				endY = tileCoords.y;
+//			}else{
+//				startY = tileCoords.y;
+//				endY = tileCoords.y;
+//			}
+//			if(movementVector.z > 0){
+//				startX = tileCoords.x;
+//				endX = tileCoords.x + 1;
+//			}else if(movementVector.z < 0){
+//				startX = tileCoords.x - 1;
+//				endX = tileCoords.x;
+//			}else{
+//				startX = tileCoords.x;
+//				endX = tileCoords.x;
+//			}
+			
+			if (movementVector.x > 0) {
+				startY = tileCoords.y;
+				endY = tileCoords.y + 3;
+			} else if (movementVector.x < 0) {
+				startY = tileCoords.y - 3;
+				endY = tileCoords.y;
+			} else {
+				startY = tileCoords.y;
+				endY = tileCoords.y;
+			}
+			if (movementVector.z > 0) {
+				startX = tileCoords.x;
+				endX = tileCoords.x + 3;
+			} else if(movementVector.z < 0) {
+				startX = tileCoords.x - 3;
+				endX = tileCoords.x;
+			} else {
+				startX = tileCoords.x;
+				endX = tileCoords.x;
+			}
+			
+			// iterate through certain tiles in front of the player, depending on direction
+			for (int i = startX; i <= endX; i++) {
+				
+				// don't check tiles outside the map which don't exist
+				if (i < 0 || i >= tiledMapLayer0.getWidth()) { continue; }
+				
+				for (int j = startY; j <= endY; j++) {
 					
-					// this keeps it from checking tiles that are out of bounds (don't exist)
+					// don't check tiles outside the map which don't exist
 					if (j<0 || j >= tiledMapLayer0.getHeight()) { continue; }
 					
 					// TODO: Fix known bug: Player can access a ramp from the side, but should not be able to.
@@ -599,90 +682,123 @@ public class MeshLevel {
 					if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
 						if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile()) + 1) {
 							//check collision
-							Vector2 tilePos = new Vector2(i * blockSize.x, j * blockSize.y);
-							Vector2 rectCollideVec = rectCollide(oldPos2, newPos2, objectSize, tilePos, blockSize);
+							//Note: Switched i,j        here                             and                                 here (translating tiled coords to world coords)
+							Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(tiledMapLayer0.getCell(i, j).getTile()), i * blockSize.z);
+							blockSize.y = getHeight(tiledMapLayer0.getCell(i, j).getTile());
+							Vector3 rectCollideVec = rectCollide(oldPos, newPos, playerSize, tilePos, blockSize);
 
-							collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y);
+							collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y, collisionVector.z * rectCollideVec.z);
 						}
 					}
 					else if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())) {
 						//check collision
-						Vector2 tilePos = new Vector2(i * blockSize.x, j * blockSize.y);
-						Vector2 rectCollideVec = rectCollide(oldPos2, newPos2, objectSize, tilePos, blockSize);
+						//Note: Switched i,j        here                             and                                 here (translating tiled coords to world coords)
+						Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(tiledMapLayer0.getCell(i, j).getTile()), i * blockSize.z);
+						blockSize.y = getHeight(tiledMapLayer0.getCell(i, j).getTile());
+						Vector3 rectCollideVec = rectCollide(oldPos, newPos, playerSize, tilePos, blockSize);
 
-						collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y);
+						collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y, collisionVector.z * rectCollideVec.z);
 					}
 				}
 			}
 		}
 		
-		return new Vector3(collisionVector.x, 1, collisionVector.y);
+		if(newPos.x - World.PLAYER_SIZE < 0 || newPos.x + World.PLAYER_SIZE > tiledMapLayer0.getHeight()) {
+			collisionVector.x = 0;
+		}
+		if(newPos.z - World.PLAYER_SIZE < 0 || newPos.z + World.PLAYER_SIZE > tiledMapLayer0.getWidth()) {
+			collisionVector.z = 0;
+		}
+		
+		return new Vector3(collisionVector.x, collisionVector.y, collisionVector.z);
 	}
 	
-	private Vector2 rectCollide(Vector2 oldPos, Vector2 newPos, Vector2 size1, Vector2 pos2, Vector2 size2) {
-		Vector2 result = new Vector2(0,0);
-		
-		if(     newPos.x + size1.x < pos2.x ||
-                newPos.x - size1.x > pos2.x + size2.x * size2.x ||
-                oldPos.y + size1.y < pos2.y ||
-                oldPos.y - size1.y > pos2.y + size2.y * size2.y) {
-
-            result.y = 1;
+	public Vector3 rectCollide(Vector3 oldPos, Vector3 newPos, Vector3 size1, Vector3 pos2, Vector3 size2) {
+		Vector3 result = new Vector3(0,0,0);
+	
+		if (     newPos.x + size1.x < pos2.x ||
+                 newPos.x - size1.x > pos2.x + size2.x * size2.x ||
+                 oldPos.y - size1.y > pos2.y ||
+                 oldPos.z + size1.z < pos2.z ||
+                 oldPos.z - size1.z > pos2.z + size2.z * size2.z) {
+			result.x = 1;
         }
+		
+		if (     oldPos.x + size1.x < pos2.x ||
+				 oldPos.x - size1.x > pos2.x + size2.x * size2.x ||
+                 newPos.y - size1.y > pos2.y ||
+                 oldPos.z + size1.z < pos2.z ||
+                 oldPos.z - size1.z > pos2.z + size2.z * size2.z) {
+			result.y = 1;
+        } 
 
-        if(     oldPos.x + size1.x < pos2.x ||
-                oldPos.x - size1.x > pos2.x + size2.x * size2.x ||
-                newPos.y + size1.y < pos2.y ||
-                newPos.y - size1.y > pos2.y + size2.y * size2.y) {
+        if (     oldPos.x + size1.x < pos2.x ||
+                 oldPos.x - size1.x > pos2.x + size2.x * size2.x ||
+                 oldPos.y - size1.y > pos2.y ||
+                 newPos.z + size1.z < pos2.z ||
+                 newPos.z - size1.z > pos2.z + size2.z * size2.z) {
 
-            result.x = 1;
+            result.z = 1;
         }
 		
 		return result;
 	}
 	
-	// despite the method name, this is also used when not on a ramp
 	// given x,z world coordinates, this method returns the height value of the map at that point (including on ramps)
-	public float rampHeight(float x, float z) {
+	public float mapHeight(float x, float z) {
 		float height = 0;
 		GridPoint2 tileCoords = getTileCoords(x, z);
 		TiledMapTile tile = tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile();
 		height = (float)getHeight(tile);
+		
 		if(tile.getProperties().containsKey("ramp")) {
+			
+			//height = (float)getHeight(tile);
 			int temp = 0;
 			String direction = getRampDirection(tile);
+			
 			if (direction.equals("up"))	{ // -x direction
 				temp = (int)x;
 				height += x - temp;
-			}	
+			}
 			else if (direction.equals("down")) { // +x direction
 				temp = (int)x;
 				height += 1 - (x - temp);
-			}	
+			}
 			else if(direction.equals("left")) { // -z direction
 				temp = (int)z;
 				height += 1 - (z - temp);
-			}	
+			}
 			else if (direction.equals("right"))	{ // +z direction
 				temp = (int)z;
 				height += z - temp;
-			}	
+			}
 			else {
 				System.err.println("MeshLevel.rampHeight() - Direction not recognized");
 			}
 		}
+		
 		return height;
-	}	
+	}
+	
+	public Vector2 getTileCenter(float x, float z){
+		Vector2 returnVec = new Vector2(0,0);
+		GridPoint2 tileCoords = getTileCoords(x, z);
+		returnVec.set(tileCoords.y + 0.5f, tileCoords.x + 0.5f);
+		
+		return returnVec;
+	}
 	
 	private GridPoint2 getTileCoords(Vector3 position) {
-		int tileX = (int)position.z;
-		int tileY = (int)position.x;
-		return new GridPoint2(tileX, tileY);
+		return getTileCoords(position.x, position.z);
 	}
 	
 	private GridPoint2 getTileCoords(float x, float z) {
 		int tileX = (int)z;
 		int tileY = (int)x;
+//		if(tileX < 0 || tileY < 0 || tileX > tiledMapLayer0.getHeight() || tileY > tiledMapLayer0.getWidth()) {
+//			return new GridPoint2(-1, -1);	// special invalid point
+//		}
 		return new GridPoint2(tileX, tileY);
 	}
 }

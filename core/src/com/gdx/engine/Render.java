@@ -6,6 +6,7 @@ import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
@@ -17,33 +18,20 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
+import com.badlogic.gdx.graphics.g3d.particles.batches.ParticleBatch;
+import com.badlogic.gdx.graphics.g3d.particles.batches.PointSpriteParticleBatch;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Pool;
 
-public class Render extends DefaultShaderProvider {
-	private static class PFXPool extends Pool<ParticleEffect> {
-	    private ParticleEffect sourceEffect;
-
-	    public PFXPool(ParticleEffect sourceEffect) {
-	        this.sourceEffect = sourceEffect;
-	    }
-
-	    @Override
-	    public void free(ParticleEffect pfx) {
-	        pfx.reset();
-	        super.free(pfx);
-	    }
-
-	    @Override
-	    protected ParticleEffect newObject() {
-	        return sourceEffect.copy();
-	    }
-	}
-	
+public class Render implements Disposable {
 	public static int renderCount;
+	public static AssetManager manager;
 	private World world;
 	private ModelBatch modelBatch;
 	private Environment environment;
@@ -51,20 +39,30 @@ public class Render extends DefaultShaderProvider {
 	private boolean loading;
 	private DecalBatch decalBatch;
 	private Vector3 position;
-	public static AssetManager manager;
 	private ParticleSystem particleSystem;
 	private BillboardParticleBatch pointSpriteBatch;
 	private ParticleEffectLoader.ParticleEffectLoadParameter loadParam;
 	private ParticleEffectLoader loader;
 	private ParticleEffect originalEffect;
+	private ParticleEffect weaponEffect;
 	private PFXPool pfxPool;
+	private PFXPool pfxPoolWeapon;
+	private DefaultShaderProvider shaderProvider;
+	private Matrix4 target;
+	private Vector3 movementVector = new Vector3();
+	private Vector3 oldPos = new Vector3();
+	private Vector3 newPos = new Vector3();
+	private Vector3 collisionVector;
+	private ModelInstance gunInstance;
+	private Model gun = new Model();
 	
 	public Render(World world) {
 		this.world = world;
 		position = new Vector3();
 	
 		//Changes the max number point lights in the default shader
-		this.config.numPointLights = 20;
+		shaderProvider = new DefaultShaderProvider();
+		shaderProvider.config.numPointLights = 20;
 		
 		//Environment settings
 		environment = new Environment();
@@ -82,28 +80,41 @@ public class Render extends DefaultShaderProvider {
 		loader = new ParticleEffectLoader(new InternalFileHandleResolver());
 
 		manager = new AssetManager();
+	    manager.load("GUNFBX.g3db", Model.class);
 	    manager.setLoader(ParticleEffect.class, loader);
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
+	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
 		
 		originalEffect = manager.get("torcheffect.pfx");
+		weaponEffect = manager.get("rocketeffect.pfx");
 		pfxPool = new PFXPool(originalEffect);
+		pfxPoolWeapon = new PFXPool(weaponEffect);
 		//End particles
 
 		instances = new Array<ModelInstance>(world.getLevelMesh());
 		
-		modelBatch = new ModelBatch(this);
+		modelBatch = new ModelBatch(shaderProvider);
 		loading = true;
 		decalBatch = new DecalBatch(new CameraGroupStrategy(world.getPlayer().camera));
+		target = new Matrix4();
 		
 		world.createBoundingBoxes();
 		world.setObjectDecals();
 		renderObjects();
 	}
 	
+	//g3db files loaded here
 	private void doneLoading() {
 //		if (world.getLevel().getSkyboxActive())
 //			instances.add(world.getLevel().getSkySphere());
+		
+		//Temporary model for testing
+		gun = manager.get("GUNFBX.g3db", Model.class);
+		gunInstance = new ModelInstance(gun);
+		gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z);
+		gunInstance.transform.scale(0.001f, 0.001f, 0.001f);
+		
 		loading = false;
 	}
 	
@@ -134,10 +145,73 @@ public class Render extends DefaultShaderProvider {
 					spawnParticleEffect(effect, objectCoords);
 					object.active = true;
 				}
+				
+				else if (object.id == 5) {
+					objectCoords.set(object.decal.getPosition().x, object.decal.getPosition().y + 0.1f, object.decal.getPosition().z);
+					environment.add(new PointLight().set(new ColorAttribute(ColorAttribute.AmbientLight).color.set(object.color), objectCoords, 2f));
+					object.active = true;
+				}
 			}
 		}
 	}
 	
+	//Renders projectiles as particle effects. Particle effects are recycled in pfxPoolWeapon. 
+	//Uses checkCollision in MeshLevel for collisions.
+	//FIX: Fast camera rotation while firing projectiles causes null pointer exception
+	//FIX: Collision not working with projectiles and ramps
+	private void renderProjectiles() {
+		int length = world.getProjectiles().size;
+
+		for (int i = 0; i < length; i++) {
+			Projectile projectile = world.getProjectiles().get(i);
+			if (!projectile.active) {
+				projectile.active = true;
+				projectile.effect = pfxPoolWeapon.obtain();
+				projectile.effect.init();
+				projectile.effect.start();
+				particleSystem.add(projectile.effect);
+				System.out.println("Pool pfx: " + length);
+			}
+
+			projectile.UpdatePosition(0.1f);
+			if (projectile.effect != null) {
+				target.idt();
+				target.translate(projectile.position);
+				projectile.effect.setTransform(target);
+			}
+			
+			movementVector.set(0, 0, 0);
+			movementVector.set(world.getPlayer().camera.direction);
+			movementVector.nor();
+			float moveAmt = 0.1f * Gdx.graphics.getDeltaTime();
+			oldPos.set(projectile.position);
+			newPos.set(oldPos.x + movementVector.x * moveAmt, oldPos.y + movementVector.y * moveAmt, oldPos.z + movementVector.z * moveAmt);
+			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, 0.5f, 0.5f, 0.5f);
+
+			movementVector.set(movementVector.x * collisionVector.x,
+						       movementVector.y * collisionVector.y,
+					           movementVector.z * collisionVector.z);
+			
+			//System.out.println("X: " + movementVector.x + " Y: " + movementVector.y + " Z: " + movementVector.z);
+			if (collisionVector.x == 0 || collisionVector.y == 0 || collisionVector.z == 0) {
+				particleSystem.remove(projectile.effect);
+				pfxPoolWeapon.free(projectile.effect);
+				world.getProjectiles().removeIndex(i);
+				length -= 1;
+			}
+			
+			/*
+			if (projectile.position.epsilonEquals(world.getOut(), 1f)) {
+				particleSystem.remove(projectile.effect);
+				pfxPoolWeapon.free(projectile.effect);
+				world.getProjectiles().removeIndex(i);
+				length -= 1;
+			}
+			*/
+		}
+	}
+	
+	//Spawn a stationary particle effect
 	private void spawnParticleEffect(ParticleEffect effect, Vector3 position) {
 		if (pfxPool.getFree() != -1) {
 			effect = pfxPool.obtain();
@@ -156,8 +230,11 @@ public class Render extends DefaultShaderProvider {
 			//System.out.println(i);
 			//Vector3 test = new Vector3(0, 10, 10);
 			//decal.lookAt(world.getPlayer().camera.position, );
-			if (decal != null)
+			if (decal != null) {
+				if (decal.value == 5)
+					decal.lookAt(world.getPlayer().camera.position, world.getPlayer().camera.up);
 				decalBatch.add(decal);
+			}
 		}
 	}
 	
@@ -189,7 +266,6 @@ public class Render extends DefaultShaderProvider {
 //	}
 	
 	public void renderParticles() {
-		//Vector3 test = new Vector3(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z + 3f);
 		particleSystem.update();
 		particleSystem.begin();
 		particleSystem.draw();
@@ -205,9 +281,10 @@ public class Render extends DefaultShaderProvider {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
-
+		//System.out.println(pfxPoolWeapon.peak);
 		//updateEntityMesh();
 		modelBatch.begin(world.getPlayer().camera);
+		renderProjectiles();
 		renderParticles();
 		modelBatch.render(particleSystem);
 		
@@ -221,10 +298,20 @@ public class Render extends DefaultShaderProvider {
 			}
 		}
 		
+		//Render entities
 		for (int j = 0; j < world.getMeshLevel().getEntityInstances().size; j++) {
 			ModelInstance instance = world.getMeshLevel().getEntityInstances().get(j).model;
 			renderModels(instance);
 		}
+		
+		/*
+		gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z);
+		gunInstance.transform.rotate(world.getPlayer().camera.up, -Gdx.input.getDeltaX() * 0.2f);
+		gunInstance.transform.rotate(world.getPlayer().getTemp(), -Gdx.input.getDeltaY() * 0.2f);
+		gunInstance.transform.scale(0.01f, 0.01f, 0.01f);
+		renderModels(gunInstance);
+		*/
+		
 		modelBatch.end();
 		updateDecals();
 		
@@ -248,5 +335,37 @@ public class Render extends DefaultShaderProvider {
 	
 	public ModelBatch getModelbatch() {
 		return modelBatch;
+	}
+
+	@Override
+	public void dispose() {
+		world.getProjectiles().clear();
+		world.getBoundingBoxes().clear();
+		world.getMeshLevel().getInstances().clear();
+		world.getMeshLevel().getEntityInstances().clear();
+		world.getMeshLevel().getObjectInstances().clear();
+		world.getDecals().clear();
+		manager.dispose();
+		modelBatch.dispose();
+	}
+	
+	//Pool for particle effects
+	private static class PFXPool extends Pool<ParticleEffect> {
+	    private ParticleEffect sourceEffect;
+
+	    public PFXPool(ParticleEffect sourceEffect) {
+	        this.sourceEffect = sourceEffect;
+	    }
+
+	    @Override
+	    public void free(ParticleEffect pfx) {
+	        pfx.reset();
+	        super.free(pfx);
+	    }
+
+	    @Override
+	    protected ParticleEffect newObject() {
+	        return sourceEffect.copy();
+	    }
 	}
 }

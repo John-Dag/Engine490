@@ -26,8 +26,33 @@ public class Entity {
 	public int id;
 	public BoundingBox boundingBox= new BoundingBox();
 	
+	//Default constructor
+	public Entity(){
+		position=new Vector3(0,0,0);
+		rotation=new Vector3(0,0,0);
+		scale=new Vector3(1,1,1);
+		velocity=new Vector3(0,0,0);
+		acceleration=new Vector3(0,0,0);
+		angAccel=new Vector3(0,0,0);
+		angVelocity=new Vector3(0,0,0);
+	}
+	
+	public Entity(Vector3 position, Vector3 rotation, Vector3 scale, Vector3 angVelocity, Vector3 velocity, Vector3 angAccel,
+				  Vector3 acceleration, boolean active, int index, boolean collision) {
+		this.position = position;
+		this.rotation = rotation;
+		this.scale = scale;
+		this.angVelocity = angVelocity;
+		this.velocity = velocity;
+		this.angAccel = angAccel;
+		this.acceleration = acceleration;
+		this.active = active;
+		this.index = index;
+		this.collision = collision;
+	}
+	
 	public Entity(Vector3 position, Vector3 rotation, Vector3 scale, boolean active, 
-		      int index, boolean collision, ModelInstance model) {
+		          int index, boolean collision, ModelInstance model) {
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
@@ -57,18 +82,7 @@ public class Entity {
 		this.id = id;
 		this.boundingBox = boundingBox;
 	}
-	
-	//Default constructor
-	public Entity(){
-		position=new Vector3(0,0,0);
-		rotation=new Vector3(0,0,0);
-		scale=new Vector3(1,1,1);
-		velocity=new Vector3(0,0,0);
-		acceleration=new Vector3(0,0,0);
-		angAccel=new Vector3(0,0,0);
-		angVelocity=new Vector3(0,0,0);
-	}
-	
+
 	public BoundingBox getBoundingBox(){
 		//TODO 
 		return null;

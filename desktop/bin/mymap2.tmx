@@ -197,5 +197,11 @@
     <property name="height" value="1"/>
    </properties>
   </object>
+  <object name="Weapon" x="63" y="883">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

@@ -12,12 +12,15 @@ import com.badlogic.gdx.utils.Array;
 
 public class World {
 	private Player player;
+	public static final float PLAYER_SIZE = 0.2f;
+	
 	//private Enemy enemy;
 	//private Level level;
 	private MeshLevel meshLevel;
 	private Ray ray;
 	private Array<Decal> decalInstances;
 	private Array<BoundingBox> boxes;
+	private Array<Projectile> projectiles;
 	private float timer;
 	private Vector3 position;
 	private Vector3 out;
@@ -29,6 +32,7 @@ public class World {
 		//meshLevel.getInstances().add(player.model);
 		decalInstances = new Array<Decal>();
 		boxes = new Array<BoundingBox>();
+		projectiles = new Array<Projectile>();
 		position = new Vector3();
 		out = new Vector3();
 	}
@@ -57,6 +61,7 @@ public class World {
 		}
 	}
 	
+	//Bounding boxes used for frustum culling and entities
 	public void createBoundingBoxes() {
 		int size = meshLevel.getInstances().size;
 		int length = meshLevel.getEntityInstances().size;
@@ -82,13 +87,15 @@ public class World {
 		}
 	}
 	
+	//Temporary
 	public void rayPick() {
-		if (player.mouseLeft == true && timer >= 0.1f) {
+		if (player.mouseLeft == true && player.getWeapon() != null && 
+			timer >= player.getWeapon().firingDelay) {
 			ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
 			timer = 0;
 			rayPickLevel();
 			rayPickEntities();
-			setDecals();
+			fireWeapon();
 		}
 	}
 	
@@ -148,6 +155,23 @@ public class World {
 		}
 	}
 	
+	//Temporary
+	public void fireWeapon() {
+		if (player.getWeapon().isParticleWeapon) {
+			Vector3 rotation = new Vector3(0, 0, 0);
+			Vector3 scale = new Vector3(0, 0, 0);
+			
+			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
+			Projectile projectile = new Projectile(player.camera.position.cpy(), rotation, scale, player.camera.direction.cpy(), 
+												   player.camera.direction.cpy(), player.camera.direction.cpy(), player.camera.direction.cpy(), false, 5, false);
+			projectiles.add(projectile);
+		}
+		
+		else {
+			setDecals();
+		}
+	}
+	
 	public void setDecals() {
 		Decal decal = Decal.newDecal(Assets.test1, true);
 		decal.setPosition(out);
@@ -178,5 +202,17 @@ public class World {
 	
 	public MeshLevel getMeshLevel() {
 		return meshLevel;
+	}
+	
+	public Ray getRay() {
+		return ray;
+	}
+	
+	public Vector3 getOut() {
+		return out;
+	}
+	
+	public Array<Projectile> getProjectiles() {
+		return projectiles;
 	}
 }

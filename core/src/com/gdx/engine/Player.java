@@ -13,11 +13,10 @@ import com.badlogic.gdx.math.collision.Ray;
 public class Player extends Entity {
 	private static final float ROTATION_SPEED = 0.2f;
 	private static final float MOVEMENT_SPEED = 5.0f;
-	private static final float PLAYER_SIZE = 0.2f;
-	private static final float TILE_HALF_WIDTH = 0.5f;
+	private static final float PLAYER_HEIGHT = 0.5f;
 	private static final float HEIGHT_OFFSET = 0.5f;
 	private static final float JUMP_SPEED = 10f;
-	private static final float GRAVITY = 0.5f;
+	private static final float GRAVITY = 30f;
 	public PerspectiveCamera camera;
 	public boolean mouseLocked, mouseLeft;
 	public Vector3 temp;
@@ -29,6 +28,7 @@ public class Player extends Entity {
 	private Vector3 oldPos;
 	private boolean isJumping;
 	private float jumpVelocity;
+	private Weapon weapon;
 	
 	public Player(World world, Vector3 position, boolean active, ModelInstance model) {
 		super(position, true, 1, model);
@@ -40,49 +40,58 @@ public class Player extends Entity {
 		this.camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		this.camera.position.set(this.position.x, this.position.y, this.position.z);
 		this.camera.lookAt(5, 1.5f, 5);
-		this.camera.near = 0.001f;
-		this.camera.far = 100f;
+		this.camera.near = 0.1f;
+		this.camera.far = 200f;
 		this.model = model;
 		this.movementVector = new Vector3(0,0,0);
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
 		this.isJumping = false;
+		this.weapon = new Weapon(Assets.weapon1Region, 0.5f, 5, true, true);
 	}
 	
 	public void update(float delta) {
-		float heightValue = HEIGHT_OFFSET + world.getMeshLevel().rampHeight(this.camera.position.x, this.camera.position.z);
+		// gets the height of the map at the players x,z location
+		float heightValue = HEIGHT_OFFSET + world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z);
+		
+		// Jumping code
 		if (isJumping) {
 			float jumpAmt = jumpVelocity * delta;
 			if (this.camera.position.y + jumpAmt > heightValue) {
 				this.camera.position.y += jumpAmt;
-				jumpVelocity -= GRAVITY;
+				jumpVelocity -= GRAVITY * delta;
 			}
 			else {
 				this.camera.position.y = heightValue;
 				isJumping = false;
 				jumpVelocity = 0f;
 			}
+
 		} else {
 			// update height from ramps
 			this.camera.position.y = heightValue;
 		}
 		
 		float movAmt = MOVEMENT_SPEED * delta;
-		movementVector.y = 0;
-		
+		movementVector.y = 0;	// jumping is done separately from the movementVector
 		movementVector.nor();
 		
 		oldPos.set(this.camera.position);
 		newPos.set(oldPos.x + movementVector.x * movAmt, oldPos.y + movementVector.y * movAmt, oldPos.z + movementVector.z * movAmt);
 		
-		collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, PLAYER_SIZE, PLAYER_SIZE);
-		
+		// This makes it so that the player falls with gravity when running off ledges
+		if(world.getMeshLevel().getHeight(newPos) < world.getMeshLevel().getHeight(oldPos) && 
+				world.getMeshLevel().getHeight(newPos) != -1){
+			isJumping = true;
+		}
+
+		// calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the movementVector.
+		collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, world.PLAYER_SIZE, PLAYER_HEIGHT, world.PLAYER_SIZE);
 		movementVector.set(movementVector.x * collisionVector.x,
 							movementVector.y * collisionVector.y,
 							movementVector.z * collisionVector.z);
-		
+
 		this.camera.position.mulAdd(movementVector, movAmt);
-		
 		this.camera.update();
 		this.model.transform.translate(this.camera.position.x, this.camera.position.y, this.position.z);
 	}
@@ -101,14 +110,13 @@ public class Player extends Entity {
 		
 		else if (Gdx.input.isButtonPressed(Buttons.LEFT) && mouseLocked) {
 			mouseLeft = true;
-		}
-		
-		else {
+		}else{
 			mouseLeft = false;
 		}
 		
 		movementVector.set(0,0,0);
 		
+		// camera rotation based on mouse looking
 		if (mouseLocked) {
 			Vector2 deltaPos = new Vector2(Gdx.input.getX() - GameScreen.center.x, GameScreen.center.y);
 			
@@ -138,11 +146,25 @@ public class Player extends Entity {
 			temp.set(camera.up).crs(camera.direction);
 			movementVector.add(temp);
 		}
+		if (Gdx.input.isKeyPressed(Keys.NUM_1)) {
+			weapon.isParticleWeapon = false;
+		}
+		if (Gdx.input.isKeyPressed(Keys.NUM_2)) {
+			weapon.isParticleWeapon = true;
+		}
 		if (Gdx.input.isKeyPressed(Keys.SPACE)){
 			if(!isJumping){
 				isJumping = true;
 				jumpVelocity = JUMP_SPEED;
 			}
+		}
+		// This is temporary, but useful for testing. Press 'O' if you ever get stuck.
+		if (Gdx.input.isKeyPressed(Keys.O)){
+			Vector2 tileCenter = world.getMeshLevel().getTileCenter(camera.position.x, camera.position.z);
+			Vector2 camPosition = new Vector2(camera.position.x, camera.position.z);
+			Vector2 movVect = new Vector2(0,0);
+			movVect = tileCenter.sub(camPosition);
+			camera.position.add(movVect.x * delta, 0, movVect.y * delta);
 		}
 	}
 	
@@ -157,5 +179,9 @@ public class Player extends Entity {
 		int tileX = (int)z;
 		int tileY = (int)x;
 		return new GridPoint2(tileX, tileY);
+	}
+	
+	public Weapon getWeapon() {
+		return weapon;
 	}
 }

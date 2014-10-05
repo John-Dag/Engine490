@@ -23,6 +23,8 @@ public class Assets {
 	public static Texture hole;
 	public static Texture torchTexture;
 	public static TextureRegion torch;
+	public static Texture weapon1;
+	public static TextureRegion weapon1Region;
 	
 	public static void loadAssets() {
 		torchTexture = new Texture("torch2.png");
@@ -39,5 +41,7 @@ public class Assets {
 		floorMat = new Material(TextureAttribute.createDiffuse(floor));
 		wallMat = new Material(TextureAttribute.createDiffuse(wall));
 		stoneFloorMat = new Material(TextureAttribute.createDiffuse(stoneFloor));
+		weapon1 = new Texture("weapon1.png");
+		weapon1Region = new TextureRegion(weapon1);
 	}
 }

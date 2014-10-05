@@ -17,6 +17,12 @@ public class Object {
 	public float intensity;
 	public PointLight light;
 	
+	public Object(Vector3 position, int id, boolean active) {
+		this.position = position;
+		this.id = id;
+		this.active = active;
+	}
+	
 	public Object(Vector3 position, Color color, float intensity, int id, boolean active) {
 		this.position = position;
 		this.color = color;
@@ -32,25 +38,26 @@ public class Object {
 		this.decal.setScale(scale);
 		this.id = id;
 		this.color = color;
-		rotate(direction);
 		this.decal.setPosition(position);
 		this.active = false;
+		this.decal.value = id;
 	}
 	
-	private void rotate(int direction) {
+	public void rotate(int direction) {
 		switch (direction) {
 			case(0):
-				decal.rotateZ(60f);
-			case(1):
-				decal.rotateZ(-30f);
+				decal.rotateX(30f);
+				decal.rotateY(-90f);
 				break;
-			case(2):
+			case(1):
 				decal.rotateX(-30f);
 				decal.rotateY(90f);
 				break;
+			case(2):
+				decal.rotateZ(30f);
+				break;
 			case(3):
-				decal.rotateX(30f);
-				decal.rotateY(90f);
+				decal.rotateZ(-30f);
 				break;
 		}
 	}
