@@ -27,6 +27,7 @@ import com.badlogic.gdx.utils.Array;
 // Many methods convert between these two coordinate systems, so its important to know which variables are in which coordinate system.
 
 public class MeshLevel {
+	public static Color skyColor = Color.TEAL;
 	private static final float ROOT_PT5 = 0.70710678f;
 	private static final int NORTH = 0;
 	private static final int SOUTH = 1;
@@ -70,7 +71,7 @@ public class MeshLevel {
 		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
 		
 		if (isSkySphereActive) {
-			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.BLACK)), Usage.Position | Usage.Normal);
+			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(skyColor)), Usage.Position | Usage.Normal);
 			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));
 			instance = new ModelInstance(skySphere);
 			instance.transform.setToTranslation(layer.getHeight()/2, 0, layer.getWidth()/2);
@@ -241,6 +242,15 @@ public class MeshLevel {
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				color = getLightColor(rectObj);
 				Object object = new Object(objPosition, Assets.weapon1Region, color, scale, direction, 5, false);
+				objectInstances.add(object);
+			}
+			
+			else if (rectObj.getName().contains("Mist")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				color = getLightColor(rectObj);
+				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 6, false);
 				objectInstances.add(object);
 			}
 		}

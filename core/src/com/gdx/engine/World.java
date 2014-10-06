@@ -28,7 +28,7 @@ public class World {
 	
 	public World() {
 		player = new Player(this, new Vector3(2f, 1.5f, 2f), true, BuildModel.buildBoxColorModel(1f, 1f, 1f, Color.BLUE));
-		meshLevel = new MeshLevel(Assets.level2, true);
+		meshLevel = new MeshLevel(Assets.castle, true);
 		//meshLevel.getInstances().add(player.model);
 		decalInstances = new Array<Decal>();
 		boxes = new Array<BoundingBox>();

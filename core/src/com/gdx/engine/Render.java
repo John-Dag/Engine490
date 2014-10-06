@@ -47,6 +47,7 @@ public class Render implements Disposable {
 	private ParticleEffect weaponEffect;
 	private PFXPool pfxPool;
 	private PFXPool pfxPoolWeapon;
+	private ParticleEffect mistEffect;
 	private DefaultShaderProvider shaderProvider;
 	private Matrix4 target;
 	private Vector3 movementVector = new Vector3();
@@ -62,7 +63,7 @@ public class Render implements Disposable {
 	
 		//Changes the max number point lights in the default shader
 		shaderProvider = new DefaultShaderProvider();
-		shaderProvider.config.numPointLights = 20;
+		shaderProvider.config.numPointLights = 30;
 		
 		//Environment settings
 		environment = new Environment();
@@ -84,10 +85,12 @@ public class Render implements Disposable {
 	    manager.setLoader(ParticleEffect.class, loader);
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
+	    manager.load("dropletsGreen.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
 		
 		originalEffect = manager.get("torcheffect.pfx");
 		weaponEffect = manager.get("rocketeffect.pfx");
+		mistEffect = manager.get("dropletsGreen.pfx");
 		pfxPool = new PFXPool(originalEffect);
 		pfxPoolWeapon = new PFXPool(weaponEffect);
 		//End particles
@@ -129,8 +132,7 @@ public class Render implements Disposable {
 				if (object.id == 1) {
 					objectCoords.set(object.decal.getPosition().x, object.decal.getPosition().y + 0.1f, object.decal.getPosition().z);
 					environment.add(new PointLight().set(new ColorAttribute(ColorAttribute.AmbientLight).color.set(object.color), objectCoords, 5f));
-					ParticleEffect effect = new ParticleEffect();
-					spawnParticleEffect(effect, objectCoords);
+					spawnParticleEffect(pfxPool.obtain(), objectCoords);
 					object.active = true;
 				}
 				
@@ -149,6 +151,11 @@ public class Render implements Disposable {
 				else if (object.id == 5) {
 					objectCoords.set(object.decal.getPosition().x, object.decal.getPosition().y + 0.1f, object.decal.getPosition().z);
 					environment.add(new PointLight().set(new ColorAttribute(ColorAttribute.AmbientLight).color.set(object.color), objectCoords, 2f));
+					object.active = true;
+				}
+				
+				else if (object.id == 6) {
+					spawnParticleEffect(mistEffect.copy(), object.position);
 					object.active = true;
 				}
 			}
@@ -214,7 +221,6 @@ public class Render implements Disposable {
 	//Spawn a stationary particle effect
 	private void spawnParticleEffect(ParticleEffect effect, Vector3 position) {
 		if (pfxPool.getFree() != -1) {
-			effect = pfxPool.obtain();
 			effect.init();
 			effect.start();
 			effect.translate(position);
@@ -277,7 +283,7 @@ public class Render implements Disposable {
 			doneLoading();
 		}
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		Gdx.gl.glClearColor(1,  1,  1,  1);
+		Gdx.gl.glClearColor(MeshLevel.skyColor.r, MeshLevel.skyColor.g, MeshLevel.skyColor.b, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace(GL20.GL_BACK);

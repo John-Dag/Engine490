@@ -41,7 +41,7 @@ public class Player extends Entity {
 		this.camera.position.set(this.position.x, this.position.y, this.position.z);
 		this.camera.lookAt(5, 1.5f, 5);
 		this.camera.near = 0.1f;
-		this.camera.far = 200f;
+		this.camera.far = 40f;
 		this.model = model;
 		this.movementVector = new Vector3(0,0,0);
 		this.newPos = new Vector3(0,0,0);

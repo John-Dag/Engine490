@@ -15,6 +15,7 @@ public class Assets {
 	public static Texture stoneFloor;
 	public static TiledMap level;
 	public static TiledMap level2;
+	public static TiledMap castle;
 	public static ModelBuilder modelBuilder;
 	public static Material floorMat;
 	public static Material wallMat;
@@ -34,6 +35,7 @@ public class Assets {
 		test1 = new TextureRegion(hole);
 		level = new TmxMapLoader().load("mymap.tmx");
 		level2 = new TmxMapLoader().load("mymap2.tmx");
+		castle = new TmxMapLoader().load("castle.tmx");
 		floor = new Texture("floor.png");
 		wall = new Texture("wall.png");
 		stoneFloor = new Texture("stonefloor.png");
