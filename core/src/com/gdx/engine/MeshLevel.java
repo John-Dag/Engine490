@@ -27,7 +27,7 @@ import com.badlogic.gdx.utils.Array;
 // Many methods convert between these two coordinate systems, so its important to know which variables are in which coordinate system.
 
 public class MeshLevel {
-	public static Color skyColor = Color.TEAL;
+	public static Color skyColor = Color.BLACK;
 	private static final float ROOT_PT5 = 0.70710678f;
 	private static final int NORTH = 0;
 	private static final int SOUTH = 1;
@@ -633,47 +633,47 @@ public class MeshLevel {
 			
 			int startX, endX, startY, endY;
 			
-//			if(movementVector.x > 0){
-//				startY = tileCoords.y;
-//				endY = tileCoords.y + 1;
-//			}else if(movementVector.x < 0){
-//				startY = tileCoords.y - 1;
-//				endY = tileCoords.y;
-//			}else{
-//				startY = tileCoords.y;
-//				endY = tileCoords.y;
-//			}
-//			if(movementVector.z > 0){
-//				startX = tileCoords.x;
-//				endX = tileCoords.x + 1;
-//			}else if(movementVector.z < 0){
-//				startX = tileCoords.x - 1;
-//				endX = tileCoords.x;
-//			}else{
-//				startX = tileCoords.x;
-//				endX = tileCoords.x;
-//			}
+			if(movementVector.x > 0){
+				startY = tileCoords.y;
+				endY = tileCoords.y + 1;
+			}else if(movementVector.x < 0){
+				startY = tileCoords.y - 1;
+				endY = tileCoords.y;
+			}else{
+				startY = tileCoords.y;
+				endY = tileCoords.y;
+			}
+			if(movementVector.z > 0){
+				startX = tileCoords.x;
+				endX = tileCoords.x + 1;
+			}else if(movementVector.z < 0){
+				startX = tileCoords.x - 1;
+				endX = tileCoords.x;
+			}else{
+				startX = tileCoords.x;
+				endX = tileCoords.x;
+			}
 			
-			if (movementVector.x > 0) {
-				startY = tileCoords.y;
-				endY = tileCoords.y + 3;
-			} else if (movementVector.x < 0) {
-				startY = tileCoords.y - 3;
-				endY = tileCoords.y;
-			} else {
-				startY = tileCoords.y;
-				endY = tileCoords.y;
-			}
-			if (movementVector.z > 0) {
-				startX = tileCoords.x;
-				endX = tileCoords.x + 3;
-			} else if(movementVector.z < 0) {
-				startX = tileCoords.x - 3;
-				endX = tileCoords.x;
-			} else {
-				startX = tileCoords.x;
-				endX = tileCoords.x;
-			}
+//			if (movementVector.x > 0) {
+//				startY = tileCoords.y;
+//				endY = tileCoords.y + 3;
+//			} else if (movementVector.x < 0) {
+//				startY = tileCoords.y - 3;
+//				endY = tileCoords.y;
+//			} else {
+//				startY = tileCoords.y;
+//				endY = tileCoords.y;
+//			}
+//			if (movementVector.z > 0) {
+//				startX = tileCoords.x;
+//				endX = tileCoords.x + 3;
+//			} else if(movementVector.z < 0) {
+//				startX = tileCoords.x - 3;
+//				endX = tileCoords.x;
+//			} else {
+//				startX = tileCoords.x;
+//				endX = tileCoords.x;
+//			}
 			
 			// iterate through certain tiles in front of the player, depending on direction
 			for (int i = startX; i <= endX; i++) {
@@ -687,7 +687,8 @@ public class MeshLevel {
 					if (j<0 || j >= tiledMapLayer0.getHeight()) { continue; }
 					
 					// TODO: Fix known bug: Player can access a ramp from the side, but should not be able to.
-					
+					if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y) == null)
+						return collisionVector.set(0, 0, 0);
 					// if oldPos tile is a ramp, it can lead us up one space
 					if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
 						if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile()) + 1) {

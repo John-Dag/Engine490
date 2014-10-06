@@ -45,8 +45,10 @@ public class Render implements Disposable {
 	private ParticleEffectLoader loader;
 	private ParticleEffect originalEffect;
 	private ParticleEffect weaponEffect;
+	private ParticleEffect sparkEffect;
 	private PFXPool pfxPool;
 	private PFXPool pfxPoolWeapon;
+	private PFXPool pfxPoolSparks;
 	private ParticleEffect mistEffect;
 	private DefaultShaderProvider shaderProvider;
 	private Matrix4 target;
@@ -86,13 +88,16 @@ public class Render implements Disposable {
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("dropletsGreen.pfx", ParticleEffect.class, loadParam);
+	    manager.load("sparks.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
 		
 		originalEffect = manager.get("torcheffect.pfx");
 		weaponEffect = manager.get("rocketeffect.pfx");
 		mistEffect = manager.get("dropletsGreen.pfx");
+		sparkEffect = manager.get("sparks.pfx");
 		pfxPool = new PFXPool(originalEffect);
 		pfxPoolWeapon = new PFXPool(weaponEffect);
+		pfxPoolSparks = new PFXPool(sparkEffect);
 		//End particles
 
 		instances = new Array<ModelInstance>(world.getLevelMesh());
@@ -237,8 +242,10 @@ public class Render implements Disposable {
 			//Vector3 test = new Vector3(0, 10, 10);
 			//decal.lookAt(world.getPlayer().camera.position, );
 			if (decal != null) {
-				if (decal.value == 5)
+				if (decal.value == 5) {
 					decal.lookAt(world.getPlayer().camera.position, world.getPlayer().camera.up);
+				}
+				
 				decalBatch.add(decal);
 			}
 		}

@@ -177,6 +177,7 @@ public class World {
 		decal.setPosition(out);
 		decal.lookAt(player.camera.position, player.camera.position.cpy().nor());
 		decal.setScale(0.001f);
+		decal.value = 6;
 		decalInstances.add(decal);
 	}
 	

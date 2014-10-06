@@ -47,7 +47,7 @@ public class Player extends Entity {
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
 		this.isJumping = false;
-		this.weapon = new Weapon(Assets.weapon1Region, 0.5f, 5, true, true);
+		this.weapon = new Weapon(Assets.weapon1Region, 0.1f, 5, true, true);
 	}
 	
 	public void update(float delta) {
@@ -110,7 +110,7 @@ public class Player extends Entity {
 		
 		else if (Gdx.input.isButtonPressed(Buttons.LEFT) && mouseLocked) {
 			mouseLeft = true;
-		}else{
+		} else {
 			mouseLeft = false;
 		}
 		
