@@ -203,5 +203,17 @@
     <property name="height" value="1"/>
    </properties>
   </object>
+  <object name="Mist" x="798" y="436">
+   <properties>
+    <property name="color" value="1"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Weapon" x="806" y="436">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
