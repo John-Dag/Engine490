@@ -12,12 +12,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle;
 
 public class GameScreen implements Screen {
+	public static Vector2 center;
 	private Game game;
 	private World world;
 	private Render renderer;
 	private SpriteBatch spriteBatch;
 	private BitmapFont bitmapFont;
-	public static Vector2 center;
 	
 	public GameScreen(Game game) {
 		this.game = game;

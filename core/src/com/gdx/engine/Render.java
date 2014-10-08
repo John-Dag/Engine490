@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.g3d.particles.batches.ParticleBatch;
 import com.badlogic.gdx.graphics.g3d.particles.batches.PointSpriteParticleBatch;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -70,6 +71,7 @@ public class Render implements Disposable {
 		//Environment settings
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
+		environment.set(new ColorAttribute(ColorAttribute.Fog, MeshLevel.skyColor.r, MeshLevel.skyColor.g, MeshLevel.skyColor.b, 1f));
 		//environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 		//environment.add(new PointLight().set(new ColorAttribute(ColorAttribute.Diffuse).color.set(255, 0, 0, 1), 1f, 2f, 1f, 100f));
 		
@@ -88,13 +90,13 @@ public class Render implements Disposable {
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("dropletsGreen.pfx", ParticleEffect.class, loadParam);
-	    manager.load("sparks.pfx", ParticleEffect.class, loadParam);
+	    //manager.load("sparks.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
 		
 		originalEffect = manager.get("torcheffect.pfx");
 		weaponEffect = manager.get("rocketeffect.pfx");
 		mistEffect = manager.get("dropletsGreen.pfx");
-		sparkEffect = manager.get("sparks.pfx");
+		//sparkEffect = manager.get("sparks.pfx");
 		pfxPool = new PFXPool(originalEffect);
 		pfxPoolWeapon = new PFXPool(weaponEffect);
 		pfxPoolSparks = new PFXPool(sparkEffect);
@@ -118,7 +120,7 @@ public class Render implements Disposable {
 //			instances.add(world.getLevel().getSkySphere());
 		
 		//Temporary model for testing
-		gun = manager.get("GUNFBX.g3db", Model.class);
+		gun = manager.get(world.getPlayer().getWeapon().weaponModelName, Model.class);
 		gunInstance = new ModelInstance(gun);
 		gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z);
 		gunInstance.transform.scale(0.001f, 0.001f, 0.001f);
@@ -169,8 +171,6 @@ public class Render implements Disposable {
 	
 	//Renders projectiles as particle effects. Particle effects are recycled in pfxPoolWeapon. 
 	//Uses checkCollision in MeshLevel for collisions.
-	//FIX: Fast camera rotation while firing projectiles causes null pointer exception
-	//FIX: Collision not working with projectiles and ramps
 	private void renderProjectiles() {
 		int length = world.getProjectiles().size;
 
@@ -185,7 +185,7 @@ public class Render implements Disposable {
 				System.out.println("Pool pfx: " + length);
 			}
 
-			projectile.UpdatePosition(0.1f);
+			projectile.UpdatePosition(world.getPlayer().getWeapon().firingDelay);
 			if (projectile.effect != null) {
 				target.idt();
 				target.translate(projectile.position);
@@ -195,7 +195,7 @@ public class Render implements Disposable {
 			movementVector.set(0, 0, 0);
 			movementVector.set(world.getPlayer().camera.direction);
 			movementVector.nor();
-			float moveAmt = 0.1f * Gdx.graphics.getDeltaTime();
+			float moveAmt = world.getPlayer().getWeapon().firingDelay * Gdx.graphics.getDeltaTime();
 			oldPos.set(projectile.position);
 			newPos.set(oldPos.x + movementVector.x * moveAmt, oldPos.y + movementVector.y * moveAmt, oldPos.z + movementVector.z * moveAmt);
 			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, 0.5f, 0.5f, 0.5f);
@@ -317,14 +317,12 @@ public class Render implements Disposable {
 			renderModels(instance);
 		}
 		
-		/*
-		gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z);
-		gunInstance.transform.rotate(world.getPlayer().camera.up, -Gdx.input.getDeltaX() * 0.2f);
-		gunInstance.transform.rotate(world.getPlayer().getTemp(), -Gdx.input.getDeltaY() * 0.2f);
+		gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y - 0.1f, world.getPlayer().camera.position.z);
+		Vector3 start = new Vector3(-1, 0, 0);
+		Vector3 camDir = new Vector3(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
+		gunInstance.transform.rotate(start, camDir.nor());
 		gunInstance.transform.scale(0.01f, 0.01f, 0.01f);
 		renderModels(gunInstance);
-		*/
-		
 		modelBatch.end();
 		updateDecals();
 		

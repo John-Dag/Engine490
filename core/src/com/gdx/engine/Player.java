@@ -8,11 +8,11 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.Ray;
 
 public class Player extends Entity {
 	private static final float ROTATION_SPEED = 0.2f;
 	private static final float MOVEMENT_SPEED = 5.0f;
+	private static final float PLAYER_SIZE = 0.2f;
 	private static final float PLAYER_HEIGHT = 0.5f;
 	private static final float HEIGHT_OFFSET = 0.5f;
 	private static final float JUMP_SPEED = 10f;
@@ -20,7 +20,6 @@ public class Player extends Entity {
 	public PerspectiveCamera camera;
 	public boolean mouseLocked, mouseLeft;
 	public Vector3 temp;
-	public Ray ray;
 	private World world;
 	private Vector3 collisionVector;
 	private Vector3 movementVector;
@@ -38,38 +37,41 @@ public class Player extends Entity {
 		this.mouseLocked = false;
 		this.temp = new Vector3();
 		this.camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		this.camera.position.set(this.position.x, this.position.y, this.position.z);
-		this.camera.lookAt(5, 1.5f, 5);
-		this.camera.near = 0.1f;
+		this.camera.position.set(position.x, position.y, position.z);
+		this.camera.lookAt(position.x + 1, position.y, position.z + 1);
+		this.camera.near = 0.01f;
 		this.camera.far = 30f;
 		this.model = model;
 		this.movementVector = new Vector3(0,0,0);
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
 		this.isJumping = false;
-		this.weapon = new Weapon(Assets.weapon1Region, 0.1f, 5, true, true);
+		this.collision = true;
+		this.weapon = new Weapon("GUNFBX.g3db", Assets.weapon1Region, 0.1f, 5, true, true);
 	}
 	
 	public void update(float delta) {
+		
 		// gets the height of the map at the players x,z location
 		float heightValue = HEIGHT_OFFSET + world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z);
 		
-		// Jumping code
-		if (isJumping) {
-			float jumpAmt = jumpVelocity * delta;
-			if (this.camera.position.y + jumpAmt > heightValue) {
-				this.camera.position.y += jumpAmt;
-				jumpVelocity -= GRAVITY * delta;
-			}
-			else {
+		if(collision){
+			// Jumping code
+			if (isJumping) {
+				float jumpAmt = jumpVelocity * delta;
+				if (this.camera.position.y + jumpAmt > heightValue) {
+					this.camera.position.y += jumpAmt;
+					jumpVelocity -= GRAVITY * delta;
+				}
+				else {
+					this.camera.position.y = heightValue;
+					isJumping = false;
+					jumpVelocity = 0f;
+				}
+			} else {
+				// update height from ramps
 				this.camera.position.y = heightValue;
-				isJumping = false;
-				jumpVelocity = 0f;
 			}
-
-		} else {
-			// update height from ramps
-			this.camera.position.y = heightValue;
 		}
 		
 		float movAmt = MOVEMENT_SPEED * delta;
@@ -80,18 +82,22 @@ public class Player extends Entity {
 		newPos.set(oldPos.x + movementVector.x * movAmt, oldPos.y + movementVector.y * movAmt, oldPos.z + movementVector.z * movAmt);
 		
 		// This makes it so that the player falls with gravity when running off ledges
-		if(world.getMeshLevel().getHeight(newPos) < world.getMeshLevel().getHeight(oldPos) && 
+		//if(world.getMeshLevel().getHeight(newPos) < world.getMeshLevel().getHeight(oldPos) &&
+		if(world.getMeshLevel().mapHeight(newPos.x, newPos.z) < world.getMeshLevel().mapHeight(oldPos.x, oldPos.z) &&
 				world.getMeshLevel().getHeight(newPos) != -1){
 			isJumping = true;
 		}
 
 		// calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the movementVector.
-		collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, world.PLAYER_SIZE, PLAYER_HEIGHT, world.PLAYER_SIZE);
-		movementVector.set(movementVector.x * collisionVector.x,
-							movementVector.y * collisionVector.y,
-							movementVector.z * collisionVector.z);
+		if(collision){
+			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, PLAYER_SIZE, PLAYER_HEIGHT, PLAYER_SIZE);
+			movementVector.set(movementVector.x * collisionVector.x,
+					movementVector.y * collisionVector.y,
+					movementVector.z * collisionVector.z);
+		}
 
 		this.camera.position.mulAdd(movementVector, movAmt);
+		
 		this.camera.update();
 		this.model.transform.translate(this.camera.position.x, this.camera.position.y, this.position.z);
 	}
@@ -166,6 +172,14 @@ public class Player extends Entity {
 			movVect = tileCenter.sub(camPosition);
 			camera.position.add(movVect.x * delta, 0, movVect.y * delta);
 		}
+	}
+	
+	public void decreaseViewDistance(){
+		
+	}
+	
+	public void increaseViewDistance(){
+		
 	}
 	
 	// input world coordinates to get tile coords

@@ -1,5 +1,6 @@
 package com.gdx.engine;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -9,16 +10,19 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 
 public class Assets {
+	AssetManager manager = new AssetManager();
 	public static Texture crosshair;
 	public static Texture floor;
 	public static Texture wall;
 	public static Texture stoneFloor;
+	public static Texture darkWood;
 	public static TiledMap level;
 	public static TiledMap level2;
 	public static TiledMap castle;
 	public static ModelBuilder modelBuilder;
 	public static Material floorMat;
 	public static Material wallMat;
+	public static Material triangleWallMat;
 	public static Material stoneFloorMat;
 	public static TextureRegion test1;
 	public static Texture hole;
@@ -36,12 +40,14 @@ public class Assets {
 		level = new TmxMapLoader().load("mymap.tmx");
 		level2 = new TmxMapLoader().load("mymap2.tmx");
 		castle = new TmxMapLoader().load("castle.tmx");
+		darkWood = new Texture("darkWoodTex.png");
 		floor = new Texture("floor.png");
 		wall = new Texture("wall.png");
 		stoneFloor = new Texture("stonefloor.png");
 		modelBuilder = new ModelBuilder();
 		floorMat = new Material(TextureAttribute.createDiffuse(floor));
 		wallMat = new Material(TextureAttribute.createDiffuse(wall));
+		triangleWallMat = new Material(TextureAttribute.createDiffuse(wall));
 		stoneFloorMat = new Material(TextureAttribute.createDiffuse(stoneFloor));
 		weapon1 = new Texture("weapon1.png");
 		weapon1Region = new TextureRegion(weapon1);
