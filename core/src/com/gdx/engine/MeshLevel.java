@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
@@ -21,6 +23,10 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.StaticEntities.Light;
+import com.gdx.StaticEntities.Mist;
+import com.gdx.StaticEntities.StaticWeapon;
+import com.gdx.StaticEntities.Torch;
 
 // Important note to the team: (this can be confusing)
 // World coordinates have x, y, z, with +x pointing East, and +z pointing South
@@ -30,18 +36,21 @@ import com.badlogic.gdx.utils.Array;
 public class MeshLevel {
 	public static Color skyColor = Color.BLACK;
 	private static final float ROOT_PT5 = 0.70710678f;
-	private static final int NORTH = 0;
-	private static final int SOUTH = 1;
-	private static final int EAST = 2;
-	private static final int WEST = 3;
-	private static final int LEFT = 0;
-	private static final int RIGHT = 1;
-	private static final int UP = 2;
-	private static final int DOWN = 3;
+	private static final int NORTH = 1;
+	private static final int SOUTH = 2;
+	private static final int EAST = 3;
+	private static final int WEST = 4;
+	// the direction of the ramp gradient (left = north, etc)
+	private static final int LEFT = 1;
+	private static final int RIGHT = 2;
+	private static final int UP = 3;
+	private static final int DOWN = 4;
 	
+	// the length and width of one tile
 	private static final float SPOT_WIDTH = 1;
 	private static final float SPOT_LENGTH = 1;
 	
+	// colors of point lights
 	private final int RED = 0;
 	private final int WHITE = 1;
 	private final int GREEN = 2;
@@ -59,6 +68,17 @@ public class MeshLevel {
 	private MeshPartBuilder meshPartBuilder;
 	private boolean isSkySphereActive;
 	private TiledMapTileLayer tiledMapLayer0;
+	private int heightOffset;
+	
+	// These vectors and vertex info objects are used in the generation of the level mesh
+	private Vector3 p1 = new Vector3();
+	private Vector3 p2 = new Vector3();
+	private Vector3 p3 = new Vector3();
+	private Vector3 p4 = new Vector3();
+	private VertexInfo v1 = new VertexInfo();
+	private VertexInfo v2 = new VertexInfo();
+	private VertexInfo v3 = new VertexInfo();
+	private Vector3 normal = new Vector3();
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
@@ -68,8 +88,9 @@ public class MeshLevel {
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
 		tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+		this.heightOffset = 5;
 	}
-	
+	// TODO: generateLevel
 	public Array<ModelInstance> generateLevel() {
 		
 		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
@@ -87,7 +108,9 @@ public class MeshLevel {
 		// on each cell
 		for(int i = 0; i < layer.getWidth(); i++){
 			for(int j = 0; j < layer.getHeight(); j++){
+				System.out.println("("+i+","+j+")");
 				TiledMapTile tile = layer.getCell(i,j).getTile();
+				
 				// make the floor tiles
 				if(layer.getCell(i,j) != null && tile.getProperties().containsKey("height")){
 					// if ramp
@@ -96,10 +119,10 @@ public class MeshLevel {
 						int height = getHeight(tile);
 						modelBuilder.begin();
 						Node node = modelBuilder.node();
-						node.translation.set(j,height,i);
+						node.translation.set(j,height+heightOffset,i);
 						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
 								GL20.GL_TRIANGLES, 
-								Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
+								Usage.Position | Usage.Normal | Usage.TextureCoordinates,
 								Assets.stoneFloorMat);
 
 						if (direction.equals("up"))	{ // -x direction
@@ -127,9 +150,9 @@ public class MeshLevel {
 						int height = getHeight(tile);
 						modelBuilder.begin();
 						Node node = modelBuilder.node();
-						node.translation.set(j,height,i);
+						node.translation.set(j,height+heightOffset,i);
 						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
-								GL20.GL_TRIANGLES, 
+								GL20.GL_TRIANGLES,
 								Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
 								Assets.stoneFloorMat);
 
@@ -162,52 +185,460 @@ public class MeshLevel {
 		if (tiledMap.getLayers().get("objects") != null)
 			setObjectInstances();
 		else
-			System.err.println("generateLevel(): No object layer exists in current map");
+			System.err.println("TileMap - No object layer in current map");
 		
 		return instances;
+	}
+	
+	
+	// TODO: makeWalls
+	// calling this will make the walls at tile (i,j) that are facing the given direction
+	private void makeWalls(int i, int j, int direction) {
+		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+		TiledMapTile tile = layer.getCell(i,j).getTile();
+		int looki = 0;
+		int lookj = 0;
+		// direction: which direction the wall is facing
+		switch(direction) {
+			case NORTH:	// look south to check for north-facing wall
+				looki = i+1;
+				lookj = j;
+				break;
+			case SOUTH:	// look north to check for south-facing wall
+				looki = i-1;
+				lookj = j;
+				break;
+			case EAST:	// look west to check for east-facing wall
+				looki = i;
+				lookj = j-1;
+				break;
+			case WEST:	// look east to check for west-facing wall
+				looki = i;
+				lookj = j+1;
+				break;
+			default:
+				System.err.println("makeWalls: Direction not recognized");
+		}
+		
+		TiledMapTile adj;
+		if( layer.getCell(looki, lookj) != null){
+			adj = layer.getCell(looki, lookj).getTile();
+		} else {
+			adj = null;
+		}
+		
+		// case where current tile and adjacent tile are not ramps
+		if(adj!=null &&
+				adj.getProperties().containsKey("height") &&
+				!adj.getProperties().containsKey("ramp")&&
+				!tile.getProperties().containsKey("ramp") &&
+				getHeight(adj) > getHeight(tile)){
+			for(float b1 = getHeight(tile); b1 < getHeight(adj); b1++){
+				genWall(i, j, b1, direction);
+			}
+		}
+		// case where current tile is a ramp, but the adjacent tile is not
+		if(adj!=null &&
+				adj.getProperties().containsKey("height") &&
+				tile.getProperties().containsKey("ramp") &&
+				!adj.getProperties().containsKey("ramp")&&
+				getHeight(adj) > getHeight(tile)){
+			for(float b1 = getHeight(tile)+1; b1 < getHeight(adj); b1++){
+				genWall(i, j, b1, direction);
+			}
+			// generate the walls at the bottom of ramp slopes (if any)
+			if(getIntRampDirection(tile) == direction){
+				genWall(i, j, getHeight(tile), direction);
+			}
+			
+			
+			// generates the triangle segments and puts them in the right spot
+			makeTriangleSegments(getIntRampDirection(tile), getHeight(tile),
+					getIntRampDirection(adj), getHeight(adj), direction, j, i);
+			
+		}
+		// case where the current tile is not a ramp, but the adjacent tile is
+		if(adj!=null &&
+				adj.getProperties().containsKey("height") &&
+				adj.getProperties().containsKey("ramp")&&
+				!tile.getProperties().containsKey("ramp")
+				&& getHeight(adj) >= getHeight(tile)){
+			for(int b1 = getHeight(tile); b1 < getHeight(adj); b1++){
+				genWall(i, j, b1, direction);
+			}
+			
+			// generates the triangle segments and puts them in the right spot
+			makeTriangleSegments(getIntRampDirection(tile), getHeight(tile),
+					getIntRampDirection(adj), getHeight(adj), direction, j, i);
+			
+		}
+		// case where both the current tile and the adjacent tile are ramps
+		if(adj!=null &&
+				adj.getProperties().containsKey("height") &&
+				adj.getProperties().containsKey("ramp")&&
+				tile.getProperties().containsKey("ramp") &&
+				getHeight(adj) > getHeight(tile)){
+			for(float b1 = getHeight(tile)+1; b1 < getHeight(adj); b1++){
+				genWall(i, j, b1, direction);
+			}
+			
+			// generates the triangle segments and puts them in the right spot
+			makeTriangleSegments(getIntRampDirection(tile), getHeight(tile),
+					getIntRampDirection(adj), getHeight(adj), direction, j, i);
+			
+		}
+	}
+	
+	private void makeTriangleSegments(int currRampDir, int currHeight, int adjRampDir, int adjHeight, 
+			int wallFaceDir, int j, int i){
+		
+		// case where the adjacent tile is a ramp
+		if(adjRampDir != 0){
+			switch(wallFaceDir){
+			case(NORTH):
+				if(adjRampDir == LEFT){
+					// need to make a rectangle
+					genWall(i, j, adjHeight, wallFaceDir);
+				}
+				if(adjRampDir == UP){
+					// need to make a triangle
+					p1.set(0,0,1);
+					p2.set(1,1,1);
+					p3.set(1,0,1);
+					normal.set(0,0,-1);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, adjHeight, i);
+				}
+				if(adjRampDir == DOWN){
+					// need to make a triangle
+					p1.set(0,1,1);
+					p2.set(1,0,1);
+					p3.set(0,0,1);
+					normal.set(0,0,-1);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 1.0f);
+					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, adjHeight, i);
+				}
+				break;
+			case(SOUTH):
+				if(adjRampDir == RIGHT){
+					// need to make a rectangle
+					genWall(i, j, adjHeight, wallFaceDir);
+				}
+				if(adjRampDir == UP){
+					// need to make a triangle
+					p1.set(1,1,0);
+					p2.set(0,0,0);
+					p3.set(1,0,0);
+					normal.set(0,0,1);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 1.0f);
+					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, adjHeight, i);
+				}
+				if(adjRampDir == DOWN){
+					// need to make a triangle
+					p1.set(1,0,0);
+					p2.set(0,1,0);
+					p3.set(0,0,0);
+					normal.set(0,0,1);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, adjHeight, i);
+				}
+				break;
+			case(EAST):
+				if(adjRampDir == UP){
+					// need to make a rectangle
+					genWall(i, j, adjHeight, wallFaceDir);
+				}
+				if(adjRampDir == LEFT){
+					// need to make a triangle
+					p1.set(0,1,0);
+					p2.set(0,0,1);
+					p3.set(0,0,0);
+					normal.set(1,0,0);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 1.0f);
+					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, adjHeight, i);
+				}
+				if(adjRampDir == RIGHT){
+					// need to make a triangle
+					p1.set(0,0,0);
+					p2.set(0,1,1);
+					p3.set(0,0,1);
+					normal.set(1,0,0);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, adjHeight, i);
+				}
+				break;
+			case(WEST):
+				if(adjRampDir == DOWN){
+					// need to make a rectangle
+					genWall(i, j, adjHeight, wallFaceDir);
+				}
+				if(adjRampDir == LEFT){
+					// need to make a triangle
+					p1.set(1,0,1);
+					p2.set(1,1,0);
+					p3.set(1,0,0);
+					normal.set(-1,0,0);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, adjHeight, i);
+				}
+				if(adjRampDir == RIGHT){
+					// need to make a triangle
+					p1.set(1,1,1);
+					p2.set(1,0,0);
+					p3.set(1,0,1);
+					normal.set(-1,0,0);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 1.0f);
+					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, adjHeight, i);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		// case where the current tile is a ramp
+		if(currRampDir != 0){
+			switch(currRampDir){
+			case(UP):
+				//
+				if(wallFaceDir == NORTH){
+					p1.set(0,0,1);
+					p2.set(0,1,1);
+					p3.set(1,1,1);
+					normal.set(0,0,-1);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
+					v2.setPos(p2).setNor(normal).setUV(1.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
+					genTriangle(v1, v2, v3, j, currHeight, i);
+				}
+				if(wallFaceDir == SOUTH){
+					p1.set(1,1,0);
+					p2.set(0,1,0);
+					p3.set(0,0,0);
+					normal.set(0,0,1);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, currHeight, i);
+				}
+			break;
+			case(DOWN):
+				//
+				if(wallFaceDir == NORTH){
+					p1.set(0,1,1);
+					p2.set(1,1,1);
+					p3.set(1,0,1);
+					normal.set(0,0,-1);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, currHeight, i);
+				}
+				if(wallFaceDir == SOUTH){
+					p1.set(1,0,0);
+					p2.set(1,1,0);
+					p3.set(0,1,0);
+					normal.set(0,0,1);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
+					v2.setPos(p2).setNor(normal).setUV(1.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
+					genTriangle(v1, v2, v3, j, currHeight, i);
+				}
+			break;
+			case(LEFT):
+				//
+				if(wallFaceDir == WEST){
+					p1.set(1,0,1);
+					p2.set(1,1,1);
+					p3.set(1,1,0);
+					normal.set(-1,0,0);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
+					v2.setPos(p2).setNor(normal).setUV(1.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
+					genTriangle(v1, v2, v3, j, currHeight, i);
+				}
+				if(wallFaceDir == EAST){
+					p1.set(0,1,0);
+					p2.set(0,1,1);
+					p3.set(0,0,1);
+					normal.set(1,0,0);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, currHeight, i);
+				}
+			break;
+			case(RIGHT):
+				//
+				if(wallFaceDir == WEST){
+					p1.set(1,1,1);
+					p2.set(1,1,0);
+					p3.set(1,0,0);
+					normal.set(-1,0,0);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
+					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
+					genTriangle(v1, v2, v3, j, currHeight, i);
+				}
+				if(wallFaceDir == EAST){
+					p1.set(0,0,0);
+					p2.set(0,1,0);
+					p3.set(0,1,1);
+					normal.set(1,0,0);
+					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
+					v2.setPos(p2).setNor(normal).setUV(1.0f, 0.0f);
+					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
+					genTriangle(v1, v2, v3, j, currHeight, i);
+				}
+			break;
+			default:
+				System.err.println("makeWalls(): Ramp direction not recognized");
+				break;
+			}
+		}
+	}
+	
+	// TODO: genTriangle
+	// Generates a triangle given the VertexInfo (these include normals, and UV texture coordinates)
+	private void genTriangle(VertexInfo v1, VertexInfo v2, VertexInfo v3, int offset1, int offset2, int offset3){
+		modelBuilder.begin();
+		Node node = modelBuilder.node();
+		node.translation.set(offset1, offset2+heightOffset, offset3);
+		meshPartBuilder = modelBuilder.part("triangle" + triCount++, 
+				GL20.GL_TRIANGLES, 
+
+				Usage.Position
+				| Usage.Normal
+				| Usage.TextureCoordinates
+				, Assets.wallMat
+				);
+
+		meshPartBuilder.triangle(v1, v2, v3);
+		model = modelBuilder.end();
+		instance = new ModelInstance(model);
+		instances.add(instance);
+	}
+	// TODO: genWall
+	// Generates a wall segment
+	// TODO: is top even used in this?
+	private void genWall(float cellj, float celli, float bottom, int direction){
+		String dirString;
+		
+		switch(direction){
+		case NORTH:
+			dirString = "North";
+			
+			p1.set(1, 0, 1);
+			p2.set(0, 0, 1);
+			p3.set(0, 1, 1);
+			p4.set(1, 1, 1);
+			normal.set(0f,0f,-1f);
+			
+			break;
+		case SOUTH:
+			dirString = "South";
+			
+			p1.set(0, 0, 0);
+			p2.set(1, 0, 0);
+			p3.set(1, 1, 0);
+			p4.set(0, 1, 0);
+			normal.set(0f,0f,1f);
+			
+			break;
+		case EAST:
+			dirString = "East";
+		
+			p1.set(0, 0, 1);
+			p2.set(0, 0, 0);
+			p3.set(0, 1, 0);
+			p4.set(0, 1, 1);
+			normal.set(1f,0f,0f);
+			
+			break;
+		case WEST:
+			dirString = "West";
+		
+			p1.set(1, 0, 0);
+			p2.set(1, 0, 1);
+			p3.set(1, 1, 1);
+			p4.set(1, 1, 0);
+			normal.set(-1f,0f,0f);
+			
+			break;
+		default:
+			dirString = "Error";
+			System.err.println("Error: direction not recognized");
+		}
+		
+		modelBuilder.begin();
+		Node node = modelBuilder.node();
+		node.translation.set(celli,bottom+heightOffset,cellj);
+		meshPartBuilder = modelBuilder.part(dirString + "_wall" + celli + "_" + cellj, 
+				GL20.GL_TRIANGLES, 
+				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
+				Assets.wallMat);
+
+		meshPartBuilder.rect(p1, p2, p3, p4, normal);
+		model = modelBuilder.end();
+		instance = new ModelInstance(model);
+		instances.add(instance);
 	}
 	
 	//Objects are read from the "objects" layer in the tile map
 	private void setObjectInstances() {
 		Vector3 objPosition;
 		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
-		Color color;
-		int direction = 0;
 		
 		for (int i = 0; i < objects.getCount(); i++) {
 			RectangleMapObject rectObj = (RectangleMapObject) objects.get(i);
-			
+			//decal, color, intensity, pointLight, id, isActive, isRenderable
 			if (rectObj.getName().contains("Torch")) {
-				float scale = 0.003f;
-				int height = getObjectHeight(rectObj);
 				objPosition = new Vector3();
+				int height = getObjectHeight(rectObj);
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				if (rectObj.getProperties().containsKey("W"))
-					direction = 0;
-				else if (rectObj.getProperties().containsKey("E"))
-					direction = 1;
-				else if (rectObj.getProperties().containsKey("N")) 
-					direction = 2;
-				else if (rectObj.getProperties().containsKey("S"))
-					direction = 3;
+				Torch torch = new Torch(objPosition, 'W', 1, true, true);
 				
-				color = getLightColor(rectObj);
-				Object object = new Object(objPosition, Assets.torch, color, scale, direction, 1, false);
-				object.rotate(direction);
-				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
-				objectInstances.add(object);
+				if (rectObj.getProperties().containsKey("N"))
+					torch.setDirection('N');
+				else if (rectObj.getProperties().containsKey("S"))
+					torch.setDirection('S');
+				else if (rectObj.getProperties().containsKey("E")) 
+					torch.setDirection('E');
+				else if (rectObj.getProperties().containsKey("W"))
+					torch.setDirection('W');
+				
+				torch.setDecal(Decal.newDecal(Assets.torch, true));
+				torch.setColor(getLightColor(rectObj));
+				torch.getDecal().setScale(0.003f);
+				torch.setRotations(torch.getDirection());
+				Entity.entityInstances.add(torch);
 			}
-			
+
 			else if (rectObj.getName().contains("Light")) {
 				int height = getObjectHeight(rectObj);
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				//System.out.println("X: " + rectObj.getRectangle().getY() / 32 + " Y: " + rectObj.getRectangle().getX() / 32);
-				color = getLightColor(rectObj);
-				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 2, false);
-				objectInstances.add(object);
+				PointLight pointLight = new PointLight();
+				pointLight.set(getLightColor(rectObj), objPosition, 20f);
+				Light light = new Light(objPosition, 2, true, true, pointLight);
+				Entity.entityInstances.add(light);
 			}
-			
+			/*
 			else if (rectObj.getName().contains("Emitter")) {
 				int height = getObjectHeight(rectObj);
 				objPosition = new Vector3();
@@ -229,471 +660,36 @@ public class MeshLevel {
 				Enemy enemy = new Enemy(objPosition, rotation, scale, true, 4, false, test);
 				entityInstances.add(enemy);
 			}
+			*/
 			
 			else if (rectObj.getName().contains("Weapon")) {
 				int height = getObjectHeight(rectObj);
-				float scale = 0.005f;
+				//float scale = 0.005f;
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				color = getLightColor(rectObj);
-				Object object = new Object(objPosition, Assets.weapon1Region, color, scale, direction, 5, false);
-				objectInstances.add(object);
+				StaticWeapon weapon = new StaticWeapon(objPosition, 5, true, true, true);
+				weapon.setDecal(Decal.newDecal(Assets.weapon1Region, true));
+				weapon.getDecal().setScale(0.005f);
+				PointLight pointLight = new PointLight();
+				pointLight.set(getLightColor(rectObj), objPosition, 1f);
+				weapon.setPointLight(pointLight);
+				Entity.entityInstances.add(weapon);
 			}
-			
+
 			else if (rectObj.getName().contains("Mist")) {
 				int height = getObjectHeight(rectObj);
 				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				color = getLightColor(rectObj);
-				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 6, false);
-				objectInstances.add(object);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				PointLight pointLight = new PointLight();
+				pointLight.set(getLightColor(rectObj), objPosition, 20f);
+				Mist mist = new Mist(objPosition, 2, true, true, pointLight);
+				Entity.entityInstances.add(mist);
 			}
-			
+
 			else {
 				System.err.println("setObjectInstances(): Object does not exist " + rectObj.getName());
 			}
 		}
-	}
-	
-	private void makeWalls(int i, int j, int direction) {
-		// used to generate triangles
-		Vector3 p1 = new Vector3();
-		Vector3 p2 = new Vector3();
-		Vector3 p3 = new Vector3();
-		
-		VertexInfo v1 = new VertexInfo();
-		VertexInfo v2 = new VertexInfo();
-		VertexInfo v3 = new VertexInfo();
-		
-		Vector3 normal = new Vector3();
-		
-		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
-		TiledMapTile tile = layer.getCell(i,j).getTile();
-		int looki = 0;
-		int lookj = 0;
-		switch(direction) {
-			case NORTH:	// look south to check for north-facing wall
-				looki = i+1;
-				lookj = j;
-				break;
-			case SOUTH:	// look north to check for south-facing wall
-				looki = i-1;
-				lookj = j;
-				break;
-			case EAST:	// look west to check for east-facing wall
-				looki = i;
-				lookj = j-1;
-				break;
-			case WEST:	// look east to check for west-facing wall
-				looki = i;
-				lookj = j+1;
-				break;
-			default:
-				System.err.println("makeWalls: Direction not recognized");
-		}
-		// case where current tile and adjacent tile are not ramps
-		if(layer.getCell(looki, lookj)!=null &&
-				layer.getCell(looki, lookj).getTile().getProperties().containsKey("height") &&
-				!layer.getCell(looki, lookj).getTile().getProperties().containsKey("ramp")&&
-				!tile.getProperties().containsKey("ramp") &&
-				getHeight(layer.getCell(looki, lookj).getTile()) > getHeight(tile)){
-			float top = (float)getHeight(layer.getCell(looki, lookj).getTile());
-			float bottom = (float)getHeight(tile);
-			for(float b1 = bottom; b1 < top; b1++){
-				genWall(i,j,b1+1, b1, direction);
-			}
-		}
-		// case where current tile is a ramp, but the adjacent tile is not
-		if(layer.getCell(looki, lookj)!=null &&
-				layer.getCell(looki, lookj).getTile().getProperties().containsKey("height") &&
-				!layer.getCell(looki, lookj).getTile().getProperties().containsKey("ramp")&&
-				tile.getProperties().containsKey("ramp") &&
-				getHeight(layer.getCell(looki, lookj).getTile()) > getHeight(tile)){
-			float top = (float)getHeight(layer.getCell(looki, lookj).getTile());
-			float bottom = (float)getHeight(tile);
-			for(float b1 = bottom+1; b1 < top; b1++){
-				genWall(i,j,b1+1, b1, direction);
-			}
-			// generate the walls at the bottom of ramp slopes (if any)
-			if(getIntRampDirection(tile) == UP && direction == EAST ||
-					getIntRampDirection(tile) == DOWN && direction == WEST ||
-					getIntRampDirection(tile) == LEFT && direction == NORTH ||
-					getIntRampDirection(tile) == RIGHT && direction == SOUTH){
-				switch(direction){
-				case(NORTH):
-					genWall(i+1,j,bottom, bottom+1, SOUTH);
-					break;
-				case(SOUTH):
-					genWall(i-1,j,bottom, bottom+1, NORTH);
-					break;
-				case(EAST):
-					genWall(i,j-1,bottom, bottom+1, WEST);
-					break;
-				case(WEST):
-					genWall(i,j+1,bottom, bottom+1, EAST);
-					break;
-				default:
-					break;
-				}
-			}
-			
-			// generate needed triangles
-			switch(getIntRampDirection(tile)){
-			case(UP):
-				//
-				if(direction == NORTH){
-					p1.set(j,bottom,i+1);
-					p2.set(j,bottom+1,i+1);
-					p3.set(j+1,bottom+1,i+1);
-					normal.set(0,0,-1);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
-					v2.setPos(p2).setNor(normal).setUV(1.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
-					genTriangle(v1, v2, v3);
-				}
-				if(direction == SOUTH){
-					p1.set(j+1,bottom+1,i);
-					p2.set(j,bottom+1,i);
-					p3.set(j,bottom,i);
-					normal.set(0,0,1);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-			break;
-			case(DOWN):
-				//
-				if(direction == NORTH){
-					p1.set(j,bottom+1,i+1);
-					p2.set(j+1,bottom+1,i+1);
-					p3.set(j+1,bottom,i+1);
-					normal.set(0,0,-1);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				if(direction == SOUTH){
-					p1.set(j+1,bottom,i);
-					p2.set(j+1,bottom+1,i);
-					p3.set(j,bottom+1,i);
-					normal.set(0,0,1);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
-					v2.setPos(p2).setNor(normal).setUV(1.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
-					genTriangle(v1, v2, v3);
-				}
-			break;
-			case(LEFT):
-				//
-				if(direction == WEST){
-					p1.set(j+1,bottom,i+1);
-					p2.set(j+1,bottom+1,i+1);
-					p3.set(j+1,bottom+1,i);
-					normal.set(-1,0,0);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
-					v2.setPos(p2).setNor(normal).setUV(1.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
-					genTriangle(v1, v2, v3);
-				}
-				if(direction == EAST){
-					p1.set(j,bottom+1,i);
-					p2.set(j,bottom+1,i+1);
-					p3.set(j,bottom,i+1);
-					normal.set(1,0,0);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-			break;
-			case(RIGHT):
-				//
-				if(direction == WEST){
-					p1.set(j+1,bottom+1,i+1);
-					p2.set(j+1,bottom+1,i);
-					p3.set(j+1,bottom,i);
-					normal.set(-1,0,0);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				if(direction == EAST){
-					p1.set(j,bottom,i);
-					p2.set(j,bottom+1,i);
-					p3.set(j,bottom+1,i+1);
-					normal.set(1,0,0);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
-					v2.setPos(p2).setNor(normal).setUV(1.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
-					genTriangle(v1, v2, v3);
-				}
-			break;
-			default:
-				System.err.println("makeWalls(): Ramp direction not recognized");
-				break;
-			}
-		}
-		// case where the current tile is not a ramp, but the adjacent tile is
-		if(layer.getCell(looki, lookj)!=null &&
-				layer.getCell(looki, lookj).getTile().getProperties().containsKey("height") &&
-				layer.getCell(looki, lookj).getTile().getProperties().containsKey("ramp")&&
-				!tile.getProperties().containsKey("ramp")
-				&& getHeight(layer.getCell(looki, lookj).getTile()) >= getHeight(tile)
-				){
-			float top = (float)getHeight(layer.getCell(looki, lookj).getTile());
-			float bottom = (float)getHeight(tile);
-			for(float b1 = bottom; b1 < top; b1++){
-				genWall(i,j,b1+1, b1, direction);
-			}
-			
-			switch(direction){
-			case(NORTH):
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == LEFT){
-					// need to make a rect
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					for(float b1 = bottom; b1 < top; b1++){
-						genWall(i,j,top,bottom, direction);
-					}
-				}
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == UP){
-					// need to make a triangle
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					p1.set(j,bottom,i+1);
-					p2.set(j+1,bottom+1,i+1);
-					p3.set(j+1, bottom, i+1);
-					normal.set(0,0,-1);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == DOWN){
-					// need to make a triangle
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					p1.set(j,bottom+1,i+1);
-					p2.set(j+1,bottom,i+1);
-					p3.set(j,bottom,i+1);
-					normal.set(0,0,-1);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 1.0f);
-					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				break;
-			case(SOUTH):
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == RIGHT){
-					// need to make a rect
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					for(float b1 = bottom; b1 < top; b1++){
-						genWall(i,j,top,bottom, direction);
-					}
-				}
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == UP){
-					// need to make a triangle
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					p1.set(j+1,bottom+1,i);
-					p2.set(j,bottom,i);
-					p3.set(j+1,bottom,i);
-					normal.set(0,0,1);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 1.0f);
-					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == DOWN){
-					// need to make a triangle
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					p1.set(j+1,bottom,i);
-					p2.set(j,bottom+1,i);
-					p3.set(j,bottom,i);
-					normal.set(0,0,1);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				break;
-			case(EAST):
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == UP){
-					// need to make a rect
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					for(float b1 = bottom; b1 < top; b1++){
-						genWall(i,j,top,bottom, direction);
-					}
-				}
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == LEFT){
-					// need to make a triangle
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					p1.set(j,bottom+1,i);
-					p2.set(j,bottom,i+1);
-					p3.set(j,bottom,i);
-					normal.set(1,0,0);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 1.0f);
-					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == RIGHT){
-					// need to make a triangle
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					p1.set(j,bottom,i);
-					p2.set(j,bottom+1,i+1);
-					p3.set(j,bottom,i+1);
-					normal.set(1,0,0);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				break;
-			case(WEST):
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == DOWN){
-					// need to make a rect
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					for(float b1 = bottom; b1 < top; b1++){
-						genWall(i,j,top,bottom, direction);
-					}
-				}
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == LEFT){
-					// need to make a triangle
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					p1.set(j+1,bottom,i+1);
-					p2.set(j+1,bottom+1,i);
-					p3.set(j+1,bottom,i);
-					normal.set(-1,0,0);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 1.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 0.0f);
-					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				if(getIntRampDirection(layer.getCell(looki, lookj).getTile()) == RIGHT){
-					// need to make a triangle
-					bottom = (float)getHeight(layer.getCell(looki, lookj).getTile());
-					top = bottom + 1;
-					p1.set(j+1,bottom+1,i+1);
-					p2.set(j+1,bottom,i);
-					p3.set(j+1,bottom,i+1);
-					normal.set(-1,0,0);
-					v1.setPos(p1).setNor(normal).setUV(1.0f, 0.0f);
-					v2.setPos(p2).setNor(normal).setUV(0.0f, 1.0f);
-					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
-					genTriangle(v1, v2, v3);
-				}
-				break;
-			default:
-				break;
-			}
-		}
-		// case where both the current tile and the adjacent tile are ramps
-		if(layer.getCell(looki, lookj)!=null &&
-				layer.getCell(looki, lookj).getTile().getProperties().containsKey("height") &&
-				layer.getCell(looki, lookj).getTile().getProperties().containsKey("ramp")&&
-				tile.getProperties().containsKey("ramp") &&
-				getHeight(layer.getCell(looki, lookj).getTile()) > getHeight(tile)){
-			float top = (float)getHeight(layer.getCell(looki, lookj).getTile());
-			float bottom = (float)getHeight(tile);
-			for(float b1 = bottom+1; b1 < top; b1++){
-				genWall(i,j,b1+1, b1, direction);
-			}
-		}
-	}
-	
-	// Generates a triangle given the VertexInfo (these include normals, and UV texture coordinates)
-	private void genTriangle(VertexInfo v1, VertexInfo v2, VertexInfo v3){
-		modelBuilder.begin();
-		meshPartBuilder = modelBuilder.part("triangle" + triCount++, 
-				GL20.GL_TRIANGLES, 
-
-				Usage.Position
-				| Usage.Normal
-				| Usage.TextureCoordinates
-				, Assets.wallMat
-				);
-
-		meshPartBuilder.triangle(v1, v2, v3);
-		model = modelBuilder.end();
-		instance = new ModelInstance(model);
-		instances.add(instance);
-	}
-	// Generates a wall segment
-	private void genWall(float cellj, float celli, float top, float bottom, int direction){
-		Vector3 p1 = new Vector3();
-		Vector3 p2 = new Vector3();
-		Vector3 p3 = new Vector3();
-		Vector3 p4 = new Vector3();
-		Vector3 normalVector = new Vector3();
-		String dirString;
-		
-		switch(direction){
-		case NORTH:
-			dirString = "North";
-			
-			p1.set(celli+1f, bottom, cellj+1f);
-			p2.set(celli, bottom, cellj+1f);
-			p3.set(celli, top, cellj+1f);
-			p4.set(celli+1f, top, cellj+1f);
-			normalVector.set(0f,0f,-1f);
-			
-			break;
-		case SOUTH:
-			dirString = "South";
-			
-			p1.set(celli, bottom, cellj);
-			p2.set(celli+1f, bottom, cellj);
-			p3.set(celli+1f, top, cellj);
-			p4.set(celli, top, cellj);
-			normalVector.set(0f,0f,1f);
-			
-			break;
-		case EAST:
-			dirString = "East";
-		
-			p1.set(celli, bottom, cellj+1f);
-			p2.set(celli, bottom, cellj);
-			p3.set(celli, top, cellj);
-			p4.set(celli, top, cellj+1f);
-			normalVector.set(1f,0f,0f);
-			
-			break;
-		case WEST:
-			dirString = "West";
-		
-			p1.set(celli+1f, bottom, cellj);
-			p2.set(celli+1f, bottom, cellj+1f);
-			p3.set(celli+1f, top, cellj+1f);
-			p4.set(celli+1f, top, cellj);
-			normalVector.set(-1f,0f,0f);
-			
-			break;
-		default:
-			dirString = "Error";
-			System.err.println("Error: direction not recognized");
-		}
-		
-		modelBuilder.begin();
-		meshPartBuilder = modelBuilder.part(dirString + "_wall" + celli + "_" + cellj, 
-				GL20.GL_TRIANGLES, 
-				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-				Assets.wallMat);
-
-		meshPartBuilder.rect(p1, p2, p3, p4, normalVector);
-		model = modelBuilder.end();
-		instance = new ModelInstance(model);
-		instances.add(instance);
 	}
 	
 	// returns the tile height at the given position
@@ -733,7 +729,7 @@ public class MeshLevel {
 			height = object.getProperties().get("height").toString();
 		}
 		
-		return Integer.parseInt(height);
+		return Integer.parseInt(height) + heightOffset;
 	}
 	
 	// returns the color of a light map object
@@ -767,17 +763,21 @@ public class MeshLevel {
 			}
 		}
 		else {
-			System.err.println("getLightColor(): Tile color not set. Default color used.");
+			System.err.println("Tile color not set. Default color used");
 			color.set(0, 0, 0, 1);
 		}
 		
 		return color;
 	}
 	
-	// returns the direction of the upward slope. Up = East, Down = West, Left = North, Right = South
+	// returns the direction of the upward slope. Up = East, Down = West, Left = North, Right = South, NAR = not a ramp
 	private String getRampDirection(TiledMapTile tile) {
-		String direction = tile.getProperties().get("ramp").toString();
-		return direction;
+		if(tile.getProperties().containsKey("ramp")){
+			String direction = tile.getProperties().get("ramp").toString();
+			return direction;
+		} else {
+			return "NAR";
+		}
 	}
 	
 	// returns the direction of the upward slope
@@ -797,8 +797,8 @@ public class MeshLevel {
 			intDir = RIGHT;
 		}
 		else{
-			intDir = -1;
-			System.err.println("getIntRampDirection(): Ramp direction not recognized");
+			// not a ramp
+			intDir = 0;
 		}
 		return intDir;
 	}
@@ -884,24 +884,25 @@ public class MeshLevel {
 					// TODO: Fix known bug: Player can access a ramp from the side, but should not be able to.
 					
 					// if oldPos tile is a ramp, it can lead us up one space
-					
-					if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y)!= null && tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
-						if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile()) + 1) {
+					if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y)!= null) {
+						if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
+							if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile()) + 1) {
+								//check collision
+								//Note: Switched i,j        here                             and                                 here (translating tiled coords to world coords)
+								Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(tiledMapLayer0.getCell(i, j).getTile()) + heightOffset, i * blockSize.z);
+								Vector3 rectCollideVec = rectCollide(oldPos, newPos, objectSize, tilePos, blockSize);
+	
+								collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y, collisionVector.z * rectCollideVec.z);
+							}
+						}
+						else if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())) {
 							//check collision
 							//Note: Switched i,j        here                             and                                 here (translating tiled coords to world coords)
-							Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(tiledMapLayer0.getCell(i, j).getTile()), i * blockSize.z);
+							Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(tiledMapLayer0.getCell(i, j).getTile()) + heightOffset, i * blockSize.z);
 							Vector3 rectCollideVec = rectCollide(oldPos, newPos, objectSize, tilePos, blockSize);
-
+	
 							collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y, collisionVector.z * rectCollideVec.z);
 						}
-					}
-					else if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())) {
-						//check collision
-						//Note: Switched i,j        here                             and                                 here (translating tiled coords to world coords)
-						Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(tiledMapLayer0.getCell(i, j).getTile()), i * blockSize.z);
-						Vector3 rectCollideVec = rectCollide(oldPos, newPos, objectSize, tilePos, blockSize);
-
-						collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y, collisionVector.z * rectCollideVec.z);
 					}
 				}
 			}
@@ -1006,5 +1007,9 @@ public class MeshLevel {
 		int tileX = (int)z;
 		int tileY = (int)x;
 		return new GridPoint2(tileX, tileY);
+	}
+	
+	public int getHeightOffset(){
+		return heightOffset;
 	}
 }

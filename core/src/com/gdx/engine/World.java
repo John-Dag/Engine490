@@ -1,7 +1,6 @@
 package com.gdx.engine;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.Intersector;
@@ -9,11 +8,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.DynamicEntities.Player;
+import com.gdx.DynamicEntities.Projectile;
+import com.gdx.DynamicEntities.Weapon;
 
 public class World {
-	private Player player;
 	public static final float PLAYER_SIZE = 0.2f;
-	
+	private Player player;
 	//private Enemy enemy;
 	//private Level level;
 	private MeshLevel meshLevel;
@@ -24,11 +25,18 @@ public class World {
 	private float timer;
 	private Vector3 position;
 	private Vector3 out;
+	public static ParticleManager particleManager;
     //private TiledMapTileLayer layer = (TiledMapTileLayer)Assets.level2.getLayers().get(0);
 	
 	public World() {
-		player = new Player(this, new Vector3(2f, 1.5f, 2f), true, BuildModel.buildBoxColorModel(1f, 1f, 1f, Color.BLUE));
+		Weapon weapon = new Weapon(0.1f, true, "GUNFBX.g3db", 0, null, 1, true, true, new Vector3(-1, 0, 0), 
+								   new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+		player = new Player(this, 100, weapon, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+						    new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
+						    Assets.floorMat, 1)));
+		particleManager = new ParticleManager(this);
 		meshLevel = new MeshLevel(Assets.level2, true);
+		Entity.entityInstances.add(player);
 		//meshLevel.getInstances().add(player.model);
 		decalInstances = new Array<Decal>();
 		boxes = new Array<BoundingBox>();
@@ -39,24 +47,24 @@ public class World {
 	
 	public void update(float delta) {
 		rayPick();
-		player.input(delta);
-		player.update(delta);
 		updateEntities(delta);
 		timer += delta;
 	}
 	
 	private void updateEntities(float delta) {
-		int size = meshLevel.getEntityInstances().size;
+		int size = Entity.entityInstances.size;
 		
 		for (int i = 0; i < size; i++) {
-			Entity entity = meshLevel.getEntityInstances().get(i);
+			Entity entity = Entity.entityInstances.get(i);
 			
-			if (entity.active) {
-				entity.UpdateInstanceTransform();
+			if (entity.isActive()) {
+				entity.update(delta);
 			}
 			
 			else {
-				meshLevel.getEntityInstances().removeIndex(i);
+				System.out.println("Removed: " + size);
+				entity.removeEntity(i);
+				size -= 1;
 			}
 		}
 	}
@@ -64,7 +72,7 @@ public class World {
 	//Bounding boxes used for frustum culling and entities
 	public void createBoundingBoxes() {
 		int size = meshLevel.getInstances().size;
-		int length = meshLevel.getEntityInstances().size;
+		//int length = meshLevel.getEntityInstances().size;
 		
 		for (int i = 0; i < size; i++) {
 			BoundingBox box = new BoundingBox();
@@ -72,25 +80,18 @@ public class World {
 			boxes.add(box);
 		}
 		
+		/*
 		for (int j = 0; j < length; j++) {
 			Entity entity = meshLevel.getEntityInstances().get(j);
 			entity.model.calculateBoundingBox(entity.boundingBox).mul(entity.model.transform);
 		}
-	}
-	
-	public void setObjectDecals() {
-		int size = meshLevel.getObjectInstances().size;
-		
-		for (int i = 0; i < size; i++) {
-			Decal decal = meshLevel.getObjectInstances().get(i).decal;
-			decalInstances.add(decal);
-		}
+		*/
 	}
 	
 	//Temporary
 	public void rayPick() {
-		if (player.mouseLeft == true && player.getWeapon() != null && 
-			timer >= player.getWeapon().firingDelay) {
+		if (player.isMouseLeft() && player.getCurrentWeapon() != null && 
+			timer >= player.getCurrentWeapon().getFiringDelay()) {
 			ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
 			timer = 0;
 			rayPickLevel();
@@ -128,6 +129,7 @@ public class World {
 	}
 	
 	public void rayPickEntities() {
+		/*
 		int size = meshLevel.getEntityInstances().size;
 		int result = -1;
 		float distance = -1;
@@ -136,7 +138,7 @@ public class World {
 			for (int i = 0; i < size; i++) {
 				Entity entity = meshLevel.getEntityInstances().get(i);
 				
-				entity.model.transform.getTranslation(position);
+				entity.get.transform.getTranslation(position);
 				position.add(entity.boundingBox.getCenter());
 				float dist2 = ray.origin.dst2(position);
 				
@@ -153,22 +155,20 @@ public class World {
 				}
 			}
 		}
+		*/
 	}
 	
 	//Temporary
 	public void fireWeapon() {
-		if (player.getWeapon().isParticleWeapon) {
+		if (player.getCurrentWeapon().isParticleWeapon()) {
 			Vector3 rotation = new Vector3(0, 0, 0);
 			Vector3 scale = new Vector3(0, 0, 0);
 			
 			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
-			Projectile projectile = new Projectile(player.camera.position.cpy(), rotation, scale, player.camera.direction.cpy(), 
-												   player.camera.direction.cpy(), player.camera.direction.cpy(), player.camera.direction.cpy(), false, 5, false);
-			projectiles.add(projectile);
-		}
-		
-		else {
-			setDecals();
+			Projectile projectile = new Projectile(0, player.getCurrentWeapon(), 6, true, true, player.camera.position.cpy(), 
+												   rotation, scale, player.camera.direction.cpy(), player.camera.direction.cpy(), 
+												   10, 0.1f, particleManager.mistPool.obtain(), this);
+			Entity.entityInstances.add(projectile);
 		}
 	}
 	
@@ -184,10 +184,6 @@ public class World {
 	public Player getPlayer() {
 		return player;
 	}
-	
-//	public Level getLevel() {
-//		return level;
-//	}
 	
 	public Array<Decal> getDecals() {
 		return decalInstances;
