@@ -165,7 +165,7 @@ public class World {
 			Vector3 scale = new Vector3(0, 0, 0);
 			
 			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
-			Projectile projectile = new Projectile(0, player.getCurrentWeapon(), 6, true, true, player.camera.position.cpy(), 
+			Projectile projectile = new Projectile(player.getCurrentWeapon(), 6, true, true, player.camera.position.cpy(), 
 												   rotation, scale, player.camera.direction.cpy(), player.camera.direction.cpy(), 
 												   10, 0.1f, particleManager.mistPool.obtain(), this);
 			Entity.entityInstances.add(projectile);

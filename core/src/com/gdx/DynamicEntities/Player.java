@@ -23,17 +23,15 @@ public class Player extends Dynamic {
 	private static final float GRAVITY = 30f;
 	private static final int MIN_HEALTH = 0;
 	private static final int MAX_HEALTH = 100;
+	private int health;
 	public PerspectiveCamera camera;
 	private boolean mouseLocked, mouseLeft, inCollision, isCrouching;
 	public Vector3 temp;
 	private World world;
-	private Vector3 collisionVector;
-	private Vector3 movementVector;
-	private Vector3 newPos;
-	private Vector3 oldPos;
+	private Vector3 collisionVector, movementVector, newPos, oldPos;
 	private boolean isJumping;
-	private float jumpVelocity;
 	private Vector3 v;
+	private float jumpVelocity;
 	private float currentHeightOffset;
 	private float currentMovementSpeed;
 	
@@ -44,7 +42,7 @@ public class Player extends Dynamic {
 	public Player(World world, int health, Weapon weapon, int id, boolean isActive, boolean isRenderable,
 			      Vector3 position, Vector3 rotation, Vector3 scale,
 			      Vector3 velocity, Vector3 acceleration, ModelInstance model) {
-		super(health, weapon, id, isActive, isRenderable, position, rotation, scale, velocity,
+		super(weapon, id, isActive, isRenderable, position, rotation, scale, velocity,
 			  acceleration, model);
 		this.world = world;
 		this.camera = new PerspectiveCamera();
@@ -62,6 +60,7 @@ public class Player extends Dynamic {
 		this.isJumping = false;
 		this.inCollision = true;
 		this.isCrouching = false;
+		this.health = MAX_HEALTH;
 		this.currentHeightOffset = PLAYER_HEIGHT_OFFSET;
 		this.currentMovementSpeed = MOVEMENT_SPEED;
 	}
@@ -247,6 +246,14 @@ public class Player extends Dynamic {
 		int tileX = (int)z;
 		int tileY = (int)x;
 		return new GridPoint2(tileX, tileY);
+	}
+	
+	public int getHealth() {
+		return health;
+	}
+
+	public void setHealth(int health) {
+		this.health = health;
 	}
 	
 	public boolean isMouseLocked() {

@@ -6,16 +6,14 @@ import com.badlogic.gdx.math.Vector3;
 import com.gdx.engine.Entity;
 
 public class Dynamic extends Entity {
-	private int health;
 	private Weapon currentWeapon;
 	private Vector3 position, rotation, scale, velocity, acceleration;
 	private ModelInstance model;
 	private ParticleEffect particleEffect;
-	private boolean isFired, inCollision, isRendered;
+	private boolean inCollision, isRendered;
 	
 	public Dynamic() {
 		super(0, false, false);
-		health = 0;
 		currentWeapon = null;
 		position = new Vector3(0, 0, 0);
 		rotation = new Vector3(0, 0, 0);
@@ -24,10 +22,9 @@ public class Dynamic extends Entity {
 		model = null;
 	}
 	
-	public Dynamic(int health, Weapon currentWeapon, int id, boolean isActive, boolean isRenderable, Vector3 position,
+	public Dynamic(Weapon currentWeapon, int id, boolean isActive, boolean isRenderable, Vector3 position,
 			 	   Vector3 rotation, Vector3 scale, Vector3 velocity, Vector3 acceleration, ParticleEffect effect) {
 		super(id, isActive, isRenderable);
-		this.health = health;
 		this.currentWeapon = currentWeapon;
 		this.position = position;
 		this.rotation = rotation;
@@ -37,10 +34,9 @@ public class Dynamic extends Entity {
 		this.particleEffect = effect;
 	}
 	
-	public Dynamic(int health, Weapon currentWeapon, int id, boolean isActive, boolean isRenderable, Vector3 position,
+	public Dynamic(Weapon currentWeapon, int id, boolean isActive, boolean isRenderable, Vector3 position,
 		       	   Vector3 rotation, Vector3 scale, Vector3 velocity, Vector3 acceleration) {
 		super(id, isActive, isRenderable);
-		this.health = health;
 		this.currentWeapon = currentWeapon;
 		this.position = position;
 		this.rotation = rotation;
@@ -49,10 +45,9 @@ public class Dynamic extends Entity {
 		this.acceleration = acceleration;
 	}
 
-	public Dynamic(int health, Weapon currentWeapon, int id, boolean isActive, boolean isRenderable, Vector3 position,
+	public Dynamic(Weapon currentWeapon, int id, boolean isActive, boolean isRenderable, Vector3 position,
 			       Vector3 rotation, Vector3 scale, Vector3 velocity, Vector3 acceleration, ModelInstance model) {
 		super(id, isActive, isRenderable);
-		this.health = health;
 		this.currentWeapon = currentWeapon;
 		this.position = position;
 		this.rotation = rotation;
@@ -86,14 +81,6 @@ public class Dynamic extends Entity {
 	public void setInCollision(boolean inCollision) {
 		this.inCollision = inCollision;
 	}
-
-	public boolean isFired() {
-		return isFired;
-	}
-
-	public void setFired(boolean isFired) {
-		this.isFired = isFired;
-	}
 	
 	public ParticleEffect getParticleEffect() {
 		return particleEffect;
@@ -103,16 +90,8 @@ public class Dynamic extends Entity {
 		this.particleEffect = particleEffect;
 	}
 
-	public int getHealth() {
-		return health;
-	}
-
 	public Weapon getCurrentWeapon() {
 		return currentWeapon;
-	}
-
-	public void setHealth(int health) {
-		this.health = health;
 	}
 
 	public void setCurrentWeapon(Weapon currentWeapon) {

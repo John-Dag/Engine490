@@ -16,7 +16,8 @@ public class Static extends Entity {
 	private PointLight pointLight;
 	private boolean isDecalFacing;
 	private ParticleEffect effect;
-	
+	private ModelInstance model;
+
 	public Static() {
 		super();
 		decal = new Decal();
@@ -33,17 +34,25 @@ public class Static extends Entity {
 		this.effect = new ParticleEffect();
 	}
 	
+	@Override
+	public void update(float delta) {
+		
+	}
+	
+	public ModelInstance getModel() {
+		return model;
+	}
+
+	public void setModel(ModelInstance model) {
+		this.model = model;
+	}
+	
 	public ParticleEffect getEffect() {
 		return effect;
 	}
 
 	public void setEffect(ParticleEffect effect) {
 		this.effect = effect;
-	}
-	
-	@Override
-	public void update(float delta) {
-		
 	}
 
 	public Decal getDecal() {

@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -27,7 +26,6 @@ public class Render implements Disposable {
 	private Array<ModelInstance> instances;
 	private DecalBatch decalBatch;
 	private DefaultShaderProvider shaderProvider;
-	private Matrix4 target;
 	private Vector3 position;
 	private Vector3 startXZ = new Vector3(-1, 0, 0);
 	private Vector3 startY = new Vector3();
@@ -55,7 +53,6 @@ public class Render implements Disposable {
 		modelBatch = new ModelBatch(shaderProvider);
 		loading = true;
 		decalBatch = new DecalBatch(new CameraGroupStrategy(world.getPlayer().camera));
-		target = new Matrix4();
 		instances = new Array<ModelInstance>(world.getLevelMesh());
 		world.createBoundingBoxes();
 		renderStaticEntities();
@@ -67,12 +64,11 @@ public class Render implements Disposable {
 		for (int j = 0; j < Entity.entityInstances.size; j++) {
 			Entity entity = Entity.entityInstances.get(j);
 			if (entity instanceof Static) {
-				if (entity.isRenderable() && entity instanceof Static) {
-					stat = (Static)entity;
+				stat = (Static)entity;
+				if (stat.isRenderable()) {
 					if (stat.getPointLight() != null)
 						environment.add(stat.getPointLight());
 					if (stat.getEffect() != null) {
-						System.out.println("Torch Loaded");
 						stat.getEffect().init();
 						stat.getEffect().start();
 						stat.getEffect().translate(stat.getPosition());
@@ -90,18 +86,13 @@ public class Render implements Disposable {
 			Entity entity = Entity.entityInstances.get(i);
 			if (entity instanceof Dynamic) {
 				dyn = (Dynamic)entity;
-				if (dyn.isRenderable() && !dyn.isFired() && dyn.getParticleEffect() != null) {
-					System.out.println("rocket");
-					dyn.setFired(true);
-					dyn.getParticleEffect().init();
-					dyn.getParticleEffect().start();
-					World.particleManager.system.add(dyn.getParticleEffect());
-				}
-				
-				else if (dyn.isFired()) {
-					target.idt();
-					target.translate(dyn.getPosition());
-					dyn.getParticleEffect().setTransform(target);
+				if (dyn.isRenderable()) {
+					if (dyn.getParticleEffect() != null && !dyn.isRendered()) {
+						dyn.setRendered(true);
+						dyn.getParticleEffect().init();
+						dyn.getParticleEffect().start();
+						World.particleManager.system.add(dyn.getParticleEffect());
+					}
 				}
 			}
 		}
