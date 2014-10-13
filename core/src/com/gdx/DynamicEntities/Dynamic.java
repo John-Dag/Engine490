@@ -11,8 +11,7 @@ public class Dynamic extends Entity {
 	private Vector3 position, rotation, scale, velocity, acceleration;
 	private ModelInstance model;
 	private ParticleEffect particleEffect;
-	private boolean isFired;
-	private boolean inCollision;
+	private boolean isFired, inCollision, isRendered;
 	
 	public Dynamic() {
 		super(0, false, false);
@@ -61,14 +60,23 @@ public class Dynamic extends Entity {
 		this.velocity = velocity;
 		this.acceleration = acceleration;
 		this.model = model;
+		this.isRendered = false;
 	}
-	
+
 	public void UpdatePosition(float time)
 	{
 		Vector3 timeV = new Vector3(time,time,time);
 
 		position.add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
 		//rotation.add(new Vector3(angVelocity.add(new Vector3(angAccel).scl(timeV))).scl(timeV));
+	}
+	
+	public boolean isRendered() {
+		return isRendered;
+	}
+
+	public void setRendered(boolean isRendered) {
+		this.isRendered = isRendered;
 	}
 
 	public boolean isInCollision() {

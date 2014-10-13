@@ -48,7 +48,7 @@ public class Assets {
 		test1 = new TextureRegion(hole);
 		level = new TmxMapLoader().load("mymap.tmx");
 		level2 = new TmxMapLoader().load("mymap2.tmx");
-		castle = new TmxMapLoader().load("castle.tmx");
+		castle = new TmxMapLoader().load("castle2.tmx");
 		darkWood = new Texture("darkWoodTex.png");
 		floor = new Texture("floor.png");
 		wall = new Texture("wall.png");

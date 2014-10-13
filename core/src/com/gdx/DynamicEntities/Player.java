@@ -55,7 +55,7 @@ public class Player extends Dynamic {
 		this.camera.position.set(position.x, position.y, position.z);
 		this.camera.lookAt(position.x + 1, position.y, position.z + 1);
 		this.camera.near = 0.01f;
-		this.camera.far = 30f;
+		this.camera.far = 15f;
 		this.movementVector = new Vector3(0,0,0);
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
@@ -69,27 +69,43 @@ public class Player extends Dynamic {
 	@Override
 	public void update(float delta) {
 		input(delta);
-		// gets the height of the map at the players x,z location
-		float heightValue = world.getMeshLevel().getHeightOffset() 
-				+ currentHeightOffset 
-				+ world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z);
+		
+		float heightValueLvl1 = currentHeightOffset // has to do with crouching, name change may be in order
+				+ world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z, 1);
+		float heightValueLvl2 = 6
+				+ currentHeightOffset // has to do with crouching, name change may be in order
+				+ world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z, 2);
 		
 		if(inCollision){
-			// Jumping code
-			if (isJumping) {
+			if(isJumping) {
 				float jumpAmt = jumpVelocity * delta;
-				if (this.camera.position.y + jumpAmt > heightValue) {
-					this.camera.position.y += jumpAmt;
-					jumpVelocity -= GRAVITY * delta;
+				if(this.camera.position.y + jumpAmt > 6){
+					if (this.camera.position.y + jumpAmt > heightValueLvl2){
+						this.camera.position.y += jumpAmt;
+						jumpVelocity -= GRAVITY * delta;
+					}
+					else{
+						isJumping = false;
+						jumpVelocity = 0f;
+					}
 				}
-				else {
-					this.camera.position.y = heightValue;
-					isJumping = false;
-					jumpVelocity = 0f;
+				if(this.camera.position.y + jumpAmt <= 6){
+					if (this.camera.position.y + jumpAmt > heightValueLvl1){
+						this.camera.position.y += jumpAmt;
+						jumpVelocity -= GRAVITY * delta;
+					}
+					else{
+						isJumping = false;
+						jumpVelocity = 0f;
+					}
 				}
 			} else {
-				// update height from ramps
-				this.camera.position.y = heightValue;
+				if(this.camera.position.y >= 6) {
+					this.camera.position.y = heightValueLvl2;
+				}
+				if(this.camera.position.y < 6 + currentHeightOffset) {
+					this.camera.position.y = heightValueLvl1;
+				}
 			}
 		}
 		
@@ -101,9 +117,21 @@ public class Player extends Dynamic {
 		newPos.set(oldPos.x + movementVector.x * movAmt, oldPos.y + movementVector.y * movAmt, oldPos.z + movementVector.z * movAmt);
 		
 		// This makes it so that the player falls with gravity when running off ledges
-		//if(world.getMeshLevel().getHeight(newPos) < world.getMeshLevel().getHeight(oldPos) &&
-		if(world.getMeshLevel().mapHeight(newPos.x, newPos.z) < world.getMeshLevel().mapHeight(oldPos.x, oldPos.z) &&
-				world.getMeshLevel().getHeight(newPos) != -1){
+		
+		int oldPosLevel, newPosLevel;
+		if(oldPos.y >= 6 + currentHeightOffset){
+			oldPosLevel = 2;
+		}else {
+			oldPosLevel = 1;
+		}
+		if(newPos.y >= 6 + currentHeightOffset){
+			newPosLevel = 2;
+		}else{
+			newPosLevel = 1;
+		}
+
+		if (world.getMeshLevel().mapHeight(newPos.x, newPos.z, newPosLevel) < 
+		    world.getMeshLevel().mapHeight(oldPos.x, oldPos.z, oldPosLevel)){
 			isJumping = true;
 		}
 
@@ -116,6 +144,8 @@ public class Player extends Dynamic {
 		}
 
 		this.camera.position.mulAdd(movementVector, movAmt);
+		
+		//world.getMeshLevel().updateHeightOffset(this.camera.position.y - currentHeightOffset);
 		
 		this.camera.update();
 		this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
@@ -135,7 +165,7 @@ public class Player extends Dynamic {
 		
 		else if (Gdx.input.isButtonPressed(Buttons.LEFT) && mouseLocked) {
 			mouseLeft = true;
-		} else {
+		}else{
 			mouseLeft = false;
 		}
 		
@@ -143,21 +173,26 @@ public class Player extends Dynamic {
 		
 		// camera rotation based on mouse looking
 		if (mouseLocked) {
-			camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
-			
-			temp.set(camera.direction).crs(camera.up).nor();
-			v = camera.direction;
-			float pitch = (float)((Math.atan2(Math.sqrt(v.x * v.x + v.z * v.z), v.y) * MathUtils.radiansToDegrees));
-			float pr = -Gdx.input.getDeltaY() * 0.1f;
-			
-			if (pitch - pr > 165) {
-				pr = -(165 - pitch);
-			}
-			else if (pitch - pr < 15) {
-				pr = pitch - 15;
-			}
-			
-			camera.direction.rotate(temp, pr);
+				// rotate xz plane
+				camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
+				
+				// calculates up and down rotation vector
+				temp.set(camera.direction).crs(camera.up).nor();
+				
+				Vector3 v = camera.direction;
+				float pitch = (float) ((Math.atan2( Math.sqrt(v.x*v.x + v.z*v.z),v.y) * MathUtils.radiansToDegrees));
+				
+				float pr = -Gdx.input.getDeltaY() * 0.1f; // pitch rotation
+				
+				if(pitch-pr > 165) {
+					pr = -(165 - pitch);
+				}
+				else if(pitch-pr < 15) {
+					pr = pitch - 15;
+				}
+
+				// rotates up and down
+				camera.direction.rotate(temp, pr);
 		}
 		
 		//Keyboard input
@@ -199,14 +234,6 @@ public class Player extends Dynamic {
 			movVect = tileCenter.sub(camPosition);
 			camera.position.add(movVect.x * delta, 0, movVect.y * delta);
 		}
-	}
-	
-	public void decreaseViewDistance(){
-		
-	}
-	
-	public void increaseViewDistance(){
-		
 	}
 	
 	// input world coordinates to get tile coords

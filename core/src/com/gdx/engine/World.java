@@ -35,7 +35,7 @@ public class World {
 						    new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
 						    Assets.floorMat, 1)));
 		particleManager = new ParticleManager(this);
-		meshLevel = new MeshLevel(Assets.level2, true);
+		meshLevel = new MeshLevel(Assets.castle, true);
 		Entity.entityInstances.add(player);
 		//meshLevel.getInstances().add(player.model);
 		decalInstances = new Array<Decal>();

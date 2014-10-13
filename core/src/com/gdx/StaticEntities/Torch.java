@@ -20,18 +20,18 @@ public class Torch extends Static {
 	public void setRotations(char rotation) {
 		switch (direction) {
 			case('W'):
-				this.getDecal().rotateX(30f);
-				this.getDecal().rotateY(-90f);
+				this.getDecal().rotateZ(60f);
 				break;
 			case('E'):
+				this.getDecal().rotateZ(-30f);
+				break;
+			case('N'):
 				this.getDecal().rotateX(-30f);
 				this.getDecal().rotateY(90f);
 				break;
-			case('N'):
-				this.getDecal().rotateZ(30f);
-				break;
 			case('S'):
-				this.getDecal().rotateZ(-30f);
+				this.getDecal().rotateX(30f);
+				this.getDecal().rotateY(90f);
 				break;
 		}
 	}

@@ -23,6 +23,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.DynamicEntities.Enemy;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.StaticWeapon;
@@ -67,8 +68,12 @@ public class MeshLevel {
 	private int triCount = 0;
 	private MeshPartBuilder meshPartBuilder;
 	private boolean isSkySphereActive;
-	private TiledMapTileLayer tiledMapLayer0;
-	private int heightOffset;
+	//private TiledMapTileLayer tiledMapLayer0;
+	private TiledMapTileLayer currentLayer;
+	private TiledMapTileLayer layer1;
+	private TiledMapTileLayer layer2;
+	private float heightOffset;
+	private float levelHeight;
 	
 	// These vectors and vertex info objects are used in the generation of the level mesh
 	private Vector3 p1 = new Vector3();
@@ -80,6 +85,8 @@ public class MeshLevel {
 	private VertexInfo v3 = new VertexInfo();
 	private Vector3 normal = new Vector3();
 	
+	private int numLevel = 1;
+	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
 		instances  = new Array<ModelInstance>();
@@ -87,114 +94,298 @@ public class MeshLevel {
 		entityInstances = new Array<Entity>();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
-		tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
-		this.heightOffset = 5;
+		//tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+		this.currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+		this.layer1 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+		this.layer2 = (TiledMapTileLayer) tiledMap.getLayers().get(2);
+		this.heightOffset = 0f;
+		this.levelHeight = 0f;
 	}
+	
+	// TODO: updateHeightOffset
+	public void updateHeightOffset(float yPosPlayer){
+		if(yPosPlayer > 5f && numLevel == 1){
+			currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(2);
+			System.out.print("Current Layer = " + currentLayer.getName() + ". ");
+			System.out.println("Level 2");
+			numLevel = 2;
+		}
+		if(yPosPlayer <= 5f && numLevel == 2){
+			currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+			System.out.print("Current Layer = " + currentLayer.getName() + ". ");
+			System.out.println("Level 1");
+			numLevel = 1;
+		}
+	}
+	
 	// TODO: generateLevel
 	public Array<ModelInstance> generateLevel() {
-		
-		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
 		
 		if (isSkySphereActive) {
 			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.BLACK)), Usage.Position | Usage.Normal);
 			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));
 			instance = new ModelInstance(skySphere);
-			instance.transform.setToTranslation(layer.getHeight()/2, 0, layer.getWidth()/2);
+			instance.transform.setToTranslation(currentLayer.getHeight()/2, 0, currentLayer.getWidth()/2);
 			instances.add(instance);
 		}
 		
-		//modelBuilder.begin();
+//		for(int k = 0; k < tiledMap.getLayers().getCount(); k++){
+//			if(tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")){
+//				//TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
+//				currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
+//				if(currentLayer.getName().equals("Tile Layer 1")){
+//					heightOffset = 0;
+//				}else if(currentLayer.getName().equals("Tile Layer 2")){
+//					heightOffset = 6;
+//				}
+				//modelBuilder.begin();
+
+		TiledMapTile tile1 = null;
+		TiledMapTile tile2 = null;
+		TiledMapTile currentTile = null;
+		
 		
 		// on each cell
-		for(int i = 0; i < layer.getWidth(); i++){
-			for(int j = 0; j < layer.getHeight(); j++){
-				System.out.println("("+i+","+j+")");
-				TiledMapTile tile = layer.getCell(i,j).getTile();
+		for(int i = 0; i < currentLayer.getWidth(); i++){
+			for(int j = 0; j < currentLayer.getHeight(); j++){
 				
-				// make the floor tiles
-				if(layer.getCell(i,j) != null && tile.getProperties().containsKey("height")){
-					// if ramp
-					if(layer.getCell(i,j) != null && layer.getCell(i,j).getTile().getProperties().containsKey("ramp")){
-						String direction = getRampDirection(tile);
-						int height = getHeight(tile);
-						modelBuilder.begin();
-						Node node = modelBuilder.node();
-						node.translation.set(j,height+heightOffset,i);
-						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
-								GL20.GL_TRIANGLES, 
-								Usage.Position | Usage.Normal | Usage.TextureCoordinates,
-								Assets.stoneFloorMat);
-
-						if (direction.equals("up"))	{ // -x direction
-							meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
-						}	
-						else if (direction.equals("down")) { // +x direction
-							meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
-						}	
-						else if(direction.equals("left")) { // +z direction
-							meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
-						}	
-						else if (direction.equals("right"))	{ // -z direction
-							meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
-						}	
-						else {
-							System.err.println("generateLevel(): Direction not recognized");
-						}
-						model = modelBuilder.end();
-						instance = new ModelInstance(model);
-						instances.add(instance);
-						
-					}
-					// else not a ramp
-					else {
-						int height = getHeight(tile);
-						modelBuilder.begin();
-						Node node = modelBuilder.node();
-						node.translation.set(j,height+heightOffset,i);
-						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
-								GL20.GL_TRIANGLES,
-								Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-								Assets.stoneFloorMat);
-
-						meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
-						model = modelBuilder.end();
-						instance = new ModelInstance(model);
-						instances.add(instance);
-					}
+				if(layer1.getCell(i,j) != null){
+					tile1 = layer1.getCell(i,j).getTile();
 				}
-//				Node node = modelBuilder.node();
-//				node.translation.set(0,0,0);
+				if(layer2.getCell(i,j) != null){
+					tile2 = layer2.getCell(i,j).getTile();
+				}
 				
-				// make any north-facing walls (look south)
-				makeWalls(i,j,NORTH);
+				// make lvl2 ceilings
+				if(tile2 != null && tile2.getProperties().containsKey("height")
+						&& tile1 != null && getHeight(tile1) != 5){
+					modelBuilder.begin();
+					Node node = modelBuilder.node();
+					node.translation.set(j,5,i);
+					meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
+							GL20.GL_TRIANGLES,
+							Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
+							Assets.wallMat);
+
+					//meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,-1,0);
+					meshPartBuilder.rect(0,0,0, 1,0,0, 1,0,1, 0,0,1, 0,-1,0);
+					model = modelBuilder.end();
+					instance = new ModelInstance(model);
+					instances.add(instance);
+				}
 				
-				// make any south-facing walls (look north)
-				makeWalls(i,j,SOUTH);
+				for(int layerNum = 0; layerNum < 2; layerNum++){
+					if(layerNum == 0){
+						currentLayer = layer1;
+						currentTile = tile1;
+						levelHeight = 0f;
+						heightOffset = 0f;
+					}else if(layerNum ==1){
+						currentLayer = layer2;
+						currentTile = tile2;
+						levelHeight = 6f;
+						heightOffset = 6f;
+					}
+
+					// make the floor tiles
+					if(currentLayer.getCell(i,j) != null && currentTile.getProperties().containsKey("height")){
+						// if ramp
+						if(currentLayer.getCell(i,j) != null && currentLayer.getCell(i,j).getTile().getProperties().containsKey("ramp")){
+							String direction = getRampDirection(currentTile);
+							int height = getHeight(currentTile);
+							modelBuilder.begin();
+							Node node = modelBuilder.node();
+							node.translation.set(j,height+levelHeight,i);
+							meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
+									GL20.GL_TRIANGLES, 
+									Usage.Position | Usage.Normal | Usage.TextureCoordinates,
+									Assets.stoneFloorMat);
+
+							if (direction.equals("up"))	{ // -x direction
+								meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
+							}	
+							else if (direction.equals("down")) { // +x direction
+								meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
+							}	
+							else if(direction.equals("left")) { // +z direction
+								meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
+							}	
+							else if (direction.equals("right"))	{ // -z direction
+								meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
+							}	
+							else {
+								System.err.println("generateLevel(): Direction not recognized");
+							}
+							model = modelBuilder.end();
+							instance = new ModelInstance(model);
+							instances.add(instance);
+
+						}
+						// else not a ramp
+						else {
+							int height = getHeight(currentTile);
+							modelBuilder.begin();
+							Node node = modelBuilder.node();
+							node.translation.set(j,height+levelHeight,i);
+							meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
+									GL20.GL_TRIANGLES,
+									Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
+									Assets.stoneFloorMat);
+
+							meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
+							model = modelBuilder.end();
+							instance = new ModelInstance(model);
+							instances.add(instance);
+						}
+					}
+				//				Node node = modelBuilder.node();
+				//				node.translation.set(0,0,0);
+				}
 				
-				// make any east-facing walls
-				makeWalls(i,j,EAST);
-				
-				// make any west-facing walls
-				makeWalls(i,j,WEST);
+				for(int layerNum = 0; layerNum < 2; layerNum++){
+					if(layerNum == 0){
+						currentLayer = layer1;
+						currentTile = tile1;
+						levelHeight = 0f;
+						heightOffset = 0f;
+					}else if(layerNum ==1){
+						currentLayer = layer2;
+						currentTile = tile2;
+						levelHeight = 6f;
+						heightOffset = 6f;
+					}
+
+					// make any north-facing walls (look south)
+					makeWalls(i,j,NORTH);
+
+					// make any south-facing walls (look north)
+					makeWalls(i,j,SOUTH);
+
+					// make any east-facing walls
+					makeWalls(i,j,EAST);
+
+					// make any west-facing walls
+					makeWalls(i,j,WEST);
+				}
 			}
 		}
-//		model = modelBuilder.end();
-//		instance = new ModelInstance(model);
-//		instances.add(instance);
+		//		model = modelBuilder.end();
+		//		instance = new ModelInstance(model);
+		//		instances.add(instance);
+
 		
-		if (tiledMap.getLayers().get("objects") != null)
+//		for(int k = 0; k < tiledMap.getLayers().getCount(); k++){
+//			if(tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")){
+//				//TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
+//				currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
+//				if(currentLayer.getName().equals("Tile Layer 1")){
+//					heightOffset = 0;
+//				}else if(currentLayer.getName().equals("Tile Layer 2")){
+//					heightOffset = 6;
+//				}
+//				//modelBuilder.begin();
+//
+//				// on each cell
+//				for(int i = 0; i < currentLayer.getWidth(); i++){
+//					for(int j = 0; j < currentLayer.getHeight(); j++){
+//						TiledMapTile tile = null;
+//						if(currentLayer.getCell(i,j) != null){
+//							tile = currentLayer.getCell(i,j).getTile();
+//						}
+//						
+//						
+//
+//						// make the floor tiles
+//						if(currentLayer.getCell(i,j) != null && tile.getProperties().containsKey("height")){
+//							// if ramp
+//							if(currentLayer.getCell(i,j) != null && currentLayer.getCell(i,j).getTile().getProperties().containsKey("ramp")){
+//								String direction = getRampDirection(tile);
+//								int height = getHeight(tile);
+//								modelBuilder.begin();
+//								Node node = modelBuilder.node();
+//								node.translation.set(j,height+heightOffset,i);
+//								meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
+//										GL20.GL_TRIANGLES, 
+//										Usage.Position | Usage.Normal | Usage.TextureCoordinates,
+//										Assets.stoneFloorMat);
+//
+//								if (direction.equals("up"))	{ // -x direction
+//									meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
+//								}	
+//								else if (direction.equals("down")) { // +x direction
+//									meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
+//								}	
+//								else if(direction.equals("left")) { // +z direction
+//									meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
+//								}	
+//								else if (direction.equals("right"))	{ // -z direction
+//									meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
+//								}	
+//								else {
+//									System.err.println("generateLevel(): Direction not recognized");
+//								}
+//								model = modelBuilder.end();
+//								instance = new ModelInstance(model);
+//								instances.add(instance);
+//
+//							}
+//							// else not a ramp
+//							else {
+//								int height = getHeight(tile);
+//								modelBuilder.begin();
+//								Node node = modelBuilder.node();
+//								node.translation.set(j,height+heightOffset,i);
+//								meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
+//										GL20.GL_TRIANGLES,
+//										Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
+//										Assets.stoneFloorMat);
+//
+//								meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
+//								model = modelBuilder.end();
+//								instance = new ModelInstance(model);
+//								instances.add(instance);
+//							}
+//						}
+//						//				Node node = modelBuilder.node();
+//						//				node.translation.set(0,0,0);
+//
+//						// make any north-facing walls (look south)
+//						makeWalls(i,j,NORTH);
+//
+//						// make any south-facing walls (look north)
+//						makeWalls(i,j,SOUTH);
+//
+//						// make any east-facing walls
+//						makeWalls(i,j,EAST);
+//
+//						// make any west-facing walls
+//						makeWalls(i,j,WEST);
+//					}
+//				}
+//				//		model = modelBuilder.end();
+//				//		instance = new ModelInstance(model);
+//				//		instances.add(instance);
+//			}
+//		}
+		
+		heightOffset = 0;
+		
+		if (tiledMap.getLayers().get("objects") != null){
 			setObjectInstances();
-		else
+		}
+		else{
 			System.err.println("TileMap - No object layer in current map");
+		}
 		
+		currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 1");
 		return instances;
 	}
-	
 	
 	// TODO: makeWalls
 	// calling this will make the walls at tile (i,j) that are facing the given direction
 	private void makeWalls(int i, int j, int direction) {
-		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+		//TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+		TiledMapTileLayer layer = currentLayer;
 		TiledMapTile tile = layer.getCell(i,j).getTile();
 		int looki = 0;
 		int lookj = 0;
@@ -535,7 +726,6 @@ public class MeshLevel {
 	}
 	// TODO: genWall
 	// Generates a wall segment
-	// TODO: is top even used in this?
 	private void genWall(float cellj, float celli, float bottom, int direction){
 		String dirString;
 		
@@ -600,98 +790,103 @@ public class MeshLevel {
 	}
 	
 	//Objects are read from the "objects" layer in the tile map
-	private void setObjectInstances() {
-		Vector3 objPosition;
-		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
-		
-		for (int i = 0; i < objects.getCount(); i++) {
-			RectangleMapObject rectObj = (RectangleMapObject) objects.get(i);
-			//decal, color, intensity, pointLight, id, isActive, isRenderable
-			if (rectObj.getName().contains("Torch")) {
-				objPosition = new Vector3();
-				int height = getObjectHeight(rectObj);
-				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				Torch torch = new Torch(objPosition, 'W', 1, true, true);
-				
-				if (rectObj.getProperties().containsKey("N"))
-					torch.setDirection('N');
-				else if (rectObj.getProperties().containsKey("S"))
-					torch.setDirection('S');
-				else if (rectObj.getProperties().containsKey("E")) 
-					torch.setDirection('E');
-				else if (rectObj.getProperties().containsKey("W"))
-					torch.setDirection('W');
-				
-				torch.setDecal(Decal.newDecal(Assets.torch, true));
-				torch.setColor(getLightColor(rectObj));
-				torch.getDecal().setScale(0.003f);
-				torch.setRotations(torch.getDirection());
-				Entity.entityInstances.add(torch);
-			}
-
-			else if (rectObj.getName().contains("Light")) {
-				int height = getObjectHeight(rectObj);
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				PointLight pointLight = new PointLight();
-				pointLight.set(getLightColor(rectObj), objPosition, 20f);
-				Light light = new Light(objPosition, 2, true, true, pointLight);
-				Entity.entityInstances.add(light);
-			}
-			/*
-			else if (rectObj.getName().contains("Emitter")) {
-				int height = getObjectHeight(rectObj);
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				color = getLightColor(rectObj);
-				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 3, false);
-				objectInstances.add(object);
-			}
+		private void setObjectInstances() {
+			Vector3 objPosition;
+			MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
 			
-			else if (rectObj.getName().contains("Enemy")) {
-				int height = getObjectHeight(rectObj);
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				color = getLightColor(rectObj);
-				ModelInstance test = BuildModel.buildBoxTextureModel(1f, 1f, 1f, Assets.wallMat);
-				test.transform.setToTranslation(objPosition);
-				Vector3 rotation = new Vector3(0f, 0f, 0f);
-				Vector3 scale = new Vector3(2f, 2f, 2f);
-				Enemy enemy = new Enemy(objPosition, rotation, scale, true, 4, false, test);
-				entityInstances.add(enemy);
-			}
-			*/
-			
-			else if (rectObj.getName().contains("Weapon")) {
-				int height = getObjectHeight(rectObj);
-				//float scale = 0.005f;
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				StaticWeapon weapon = new StaticWeapon(objPosition, 5, true, true, true);
-				weapon.setDecal(Decal.newDecal(Assets.weapon1Region, true));
-				weapon.getDecal().setScale(0.005f);
-				PointLight pointLight = new PointLight();
-				pointLight.set(getLightColor(rectObj), objPosition, 1f);
-				weapon.setPointLight(pointLight);
-				Entity.entityInstances.add(weapon);
-			}
+			for (int i = 0; i < objects.getCount(); i++) {
+				RectangleMapObject rectObj = (RectangleMapObject) objects.get(i);
+				//decal, color, intensity, pointLight, id, isActive, isRenderable
+				if (rectObj.getName().contains("Torch")) {
+					objPosition = new Vector3();
+					int height = getObjectHeight(rectObj);
+					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+					Torch torch = new Torch(objPosition, 'W', 1, true, true);
+					
+					if (rectObj.getProperties().containsKey("N"))
+						torch.setDirection('N');
+					else if (rectObj.getProperties().containsKey("S"))
+						torch.setDirection('S');
+					else if (rectObj.getProperties().containsKey("E")) 
+						torch.setDirection('E');
+					else if (rectObj.getProperties().containsKey("W"))
+						torch.setDirection('W');
+					
+					torch.setDecal(Decal.newDecal(Assets.torch, true));
+					torch.setColor(getLightColor(rectObj));
+					torch.getDecal().setScale(0.003f);
+					torch.setRotations(torch.getDirection());
+					Entity.entityInstances.add(torch);
+				}
 
-			else if (rectObj.getName().contains("Mist")) {
-				int height = getObjectHeight(rectObj);
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				PointLight pointLight = new PointLight();
-				pointLight.set(getLightColor(rectObj), objPosition, 20f);
-				Mist mist = new Mist(objPosition, 2, true, true, pointLight);
-				Entity.entityInstances.add(mist);
-			}
+				else if (rectObj.getName().contains("Light")) {
+					int height = getObjectHeight(rectObj);
+					objPosition = new Vector3();
+					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+					PointLight pointLight = new PointLight();
+					pointLight.set(getLightColor(rectObj), objPosition, 20f);
+					Light light = new Light(objPosition, 2, true, true, pointLight);
+					Entity.entityInstances.add(light);
+				}
+				
+				/*
+				else if (rectObj.getName().contains("Emitter")) {
+					int height = getObjectHeight(rectObj);
+					objPosition = new Vector3();
+					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+					color = getLightColor(rectObj);
+					Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 3, false);
+					objectInstances.add(object);
+				}
+				*/
+				
+				else if (rectObj.getName().contains("Enemy")) {
+					int height = getObjectHeight(rectObj);
+					objPosition = new Vector3();
+					objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+					ModelInstance test = BuildModel.buildBoxTextureModel(1f, 1f, 1f, Assets.wallMat);
+					test.transform.setToTranslation(objPosition);
+					Vector3 rotation = new Vector3(0f, 0f, 0f);
+					Vector3 scale = new Vector3(2f, 2f, 2f);
+//					int health, Weapon currentWeapon, int id, boolean isActive,
+//					boolean isRenderable, Vector3 position, Vector3 rotation,
+//					Vector3 scale, Vector3 velocity, Vector3 acceleration,
+//					ModelInstance model
+					Enemy enemy = new Enemy(100, null, 7, true, true, objPosition, rotation, scale, new Vector3(0, 0, 0),
+											new Vector3(0, 0, 0), test);
+					Entity.entityInstances.add(enemy);
+				}
+				
+				else if (rectObj.getName().contains("Weapon")) {
+					int height = getObjectHeight(rectObj);
+					//float scale = 0.005f;
+					objPosition = new Vector3();
+					objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+					StaticWeapon weapon = new StaticWeapon(objPosition, 5, true, true, true);
+					weapon.setDecal(Decal.newDecal(Assets.weapon1Region, true));
+					weapon.getDecal().setScale(0.005f);
+					PointLight pointLight = new PointLight();
+					pointLight.set(getLightColor(rectObj), objPosition, 1f);
+					weapon.setPointLight(pointLight);
+					Entity.entityInstances.add(weapon);
+				}
 
-			else {
-				System.err.println("setObjectInstances(): Object does not exist " + rectObj.getName());
+				else if (rectObj.getName().contains("Mist")) {
+					int height = getObjectHeight(rectObj);
+					objPosition = new Vector3();
+					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+					PointLight pointLight = new PointLight();
+					pointLight.set(getLightColor(rectObj), objPosition, 20f);
+					Mist mist = new Mist(objPosition, 2, true, true, pointLight);
+					Entity.entityInstances.add(mist);
+				}
+
+				else {
+					System.err.println("setObjectInstances(): Object does not exist " + rectObj.getName());
+				}
 			}
 		}
-	}
-	
+
 	// returns the tile height at the given position
 	public int getHeight(Vector3 position){
 		TiledMapTile tile = getTileAt(getTileCoords(position));
@@ -704,7 +899,7 @@ public class MeshLevel {
 	
 	// returns the height of the given tile
 	public int getHeight(TiledMapTile tile) {
-		String height = "0";
+		String height = "-1";
 		if (tile.getProperties().containsKey("height")){
 			height = tile.getProperties().get("height").toString();
 		}
@@ -713,8 +908,8 @@ public class MeshLevel {
 	
 	// returns the tile object at the given position
 	public TiledMapTile getTileAt(GridPoint2 position){
-		if(position.x >= 0 && position.x < tiledMapLayer0.getWidth() && position.y >= 0 && position.y < tiledMapLayer0.getHeight()){
-			return tiledMapLayer0.getCell(position.x, position.y).getTile();
+		if(position.x >= 0 && position.x < currentLayer.getWidth() && position.y >= 0 && position.y < currentLayer.getHeight()){
+			return currentLayer.getCell(position.x, position.y).getTile();
 		}
 		else{
 			return null;
@@ -729,7 +924,7 @@ public class MeshLevel {
 			height = object.getProperties().get("height").toString();
 		}
 		
-		return Integer.parseInt(height) + heightOffset;
+		return Integer.parseInt(height) + (int)heightOffset;
 	}
 	
 	// returns the color of a light map object
@@ -803,17 +998,17 @@ public class MeshLevel {
 		return intDir;
 	}
 	
-	// returns the y or j dimension (in tiles) of the map
-	public int getLevelHeight() {
-		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
-		return layer.getHeight();
-	}
-	
-	// returns the x or i dimension (in tiles) of the map
-	public int getLevelWidth() {
-		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
-		return layer.getWidth();
-	}
+//	// returns the y or j dimension (in tiles) of the map
+//	public int getLevelHeight() {
+//		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+//		return layer.getHeight();
+//	}
+//	
+//	// returns the x or i dimension (in tiles) of the map
+//	public int getLevelWidth() {
+//		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+//		return layer.getWidth();
+//	}
 	
 	public TiledMap getTiledMap() {
 		return tiledMap;
@@ -831,6 +1026,7 @@ public class MeshLevel {
 		return entityInstances;
 	}
 	
+	// TODO: Check Collision
 	// true ultimate 3d collision maths
 	// This returns a Vector3. A '0' in that vector represents collision on the corresponding axis,
 	// and a '1' represents no collision on the corresponding axis
@@ -838,6 +1034,36 @@ public class MeshLevel {
 	public Vector3 checkCollision(Vector3 oldPos, Vector3 newPos, float objectWidth, float objectHeight, float objectLength){
 		Vector3 collisionVector = new Vector3(1,1,1);
 		Vector3 movementVector = new Vector3(newPos.x - oldPos.x, newPos.y - oldPos.y, newPos.z - oldPos.z);
+		
+		TiledMapTileLayer oldPosLayer, newPosLayer;
+		int oldHeightOffset, newHeightOffset;
+		if(oldPos.y > 6.5f){ 
+			oldPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(2);
+			oldHeightOffset = 6;
+		}
+		else {
+			oldPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+			oldHeightOffset = 0;
+		}
+		if(newPos.y > 6.5f) {
+			newPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(2);
+			newHeightOffset = 6;
+		}
+		else { 
+			newPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+			newHeightOffset = 0;
+		}
+		
+		
+		
+//		if(newPos.y <= 6f) {
+//			currentLayer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
+//			heightOffset = 0;
+//		}
+//		if(newPos.y > 6f) {
+//			currentLayer = (TiledMapTileLayer)tiledMap.getLayers().get(2);
+//			heightOffset = 6;
+//		}
 		
 		if(movementVector.len() > 0){
 			Vector3 blockSize = new Vector3(SPOT_WIDTH, 0, SPOT_LENGTH);
@@ -874,31 +1100,34 @@ public class MeshLevel {
 			for(int i = startX; i <= endX; i++) {
 				
 				// don't check tiles outside the map which don't exist
-				if(i < 0 || i >= tiledMapLayer0.getWidth()) {continue;}
+				if(i < 0 || i >= oldPosLayer.getWidth()) {continue;}
 				
 				for(int j = startY; j <= endY; j++) {
 					
 					// don't check tiles outside the map which don't exist
-					if (j<0 || j >= tiledMapLayer0.getHeight()) { continue; }
+					if (j<0 || j >= oldPosLayer.getHeight()) { continue; }
 					
 					// TODO: Fix known bug: Player can access a ramp from the side, but should not be able to.
 					
 					// if oldPos tile is a ramp, it can lead us up one space
-					if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y)!= null) {
-						if (tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
-							if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile()) + 1) {
+					if (oldPosLayer.getCell(tileCoords.x, tileCoords.y)!= null) {
+						if (oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
+	//						if(oldHeightOffset == 0 && getHeight(oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile()) == 5){
+	//							newPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(2);
+	//						}
+							if (getHeight(newPosLayer.getCell(i, j).getTile()) + newHeightOffset > getHeight(oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile()) + oldHeightOffset + 1) {
 								//check collision
 								//Note: Switched i,j        here                             and                                 here (translating tiled coords to world coords)
-								Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(tiledMapLayer0.getCell(i, j).getTile()) + heightOffset, i * blockSize.z);
+								Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(newPosLayer.getCell(i, j).getTile()) + newHeightOffset, i * blockSize.z);
 								Vector3 rectCollideVec = rectCollide(oldPos, newPos, objectSize, tilePos, blockSize);
 	
 								collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y, collisionVector.z * rectCollideVec.z);
 							}
 						}
-						else if (getHeight(tiledMapLayer0.getCell(i, j).getTile()) > getHeight(tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile())) {
+						else if (getHeight(newPosLayer.getCell(i, j).getTile()) + newHeightOffset > getHeight(oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile()) + oldHeightOffset) {
 							//check collision
 							//Note: Switched i,j        here                             and                                 here (translating tiled coords to world coords)
-							Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(tiledMapLayer0.getCell(i, j).getTile()) + heightOffset, i * blockSize.z);
+							Vector3 tilePos = new Vector3(j * blockSize.x, getHeight(newPosLayer.getCell(i, j).getTile()) + newHeightOffset, i * blockSize.z);
 							Vector3 rectCollideVec = rectCollide(oldPos, newPos, objectSize, tilePos, blockSize);
 	
 							collisionVector.set(collisionVector.x * rectCollideVec.x, collisionVector.y * rectCollideVec.y, collisionVector.z * rectCollideVec.z);
@@ -909,10 +1138,10 @@ public class MeshLevel {
 		}
 		
 		// This prevents the player from going out of bounds of the level
-		if(newPos.x - objectWidth < 0 || newPos.x + objectWidth > tiledMapLayer0.getHeight()) {
+		if(newPos.x - objectWidth < 0 || newPos.x + objectWidth > oldPosLayer.getHeight()) {
 			collisionVector.x = 0;
 		}
-		if(newPos.z - objectLength < 0 || newPos.z + objectLength > tiledMapLayer0.getWidth()) {
+		if(newPos.z - objectLength < 0 || newPos.z + objectLength > oldPosLayer.getWidth()) {
 			collisionVector.z = 0;
 		}
 		
@@ -929,7 +1158,7 @@ public class MeshLevel {
 	
 		if(     newPos.x + size1.x < pos2.x ||
 				newPos.x - size1.x > pos2.x + size2.x * size2.x ||
-                oldPos.y - size1.y > pos2.y ||
+				oldPos.y - size1.y > pos2.y ||
                 oldPos.z + size1.z < pos2.z ||
                 oldPos.z - size1.z > pos2.z + size2.z * size2.z) {
 			result.x = 1;
@@ -943,22 +1172,83 @@ public class MeshLevel {
         } 
         if(     oldPos.x + size1.x < pos2.x ||
         		oldPos.x - size1.x > pos2.x + size2.x * size2.x ||
-                oldPos.y - size1.y > pos2.y ||
+        		oldPos.y - size1.y > pos2.y ||
                 newPos.z + size1.z < pos2.z ||
                 newPos.z - size1.z > pos2.z + size2.z * size2.z) {
 
             result.z = 1;
         }
+        if(result.x == 0 || result.y == 0 || result.z == 0){
+        	System.out.println("Collision ("+result.x+", "+result.y+", "+result.z+")" + ", oldPos ("+oldPos.x+", "+oldPos.y+", "+oldPos.z+")"
+        			+", newPos ("+newPos.x+", "+newPos.y+", "+newPos.z+")"
+        			+", pos2 ("+pos2.x+", "+pos2.y+", "+pos2.z+")");
+        }
 		return result;
 	}
 	
+	// TODO: Map Height
 	// given x,z world coordinates, this method returns the height value of the map at that point (including on ramps)
 	public float mapHeight(float x, float z) {
 		
 		float height = 0;
 		GridPoint2 tileCoords = getTileCoords(x, z);
-		TiledMapTile tile = tiledMapLayer0.getCell(tileCoords.x, tileCoords.y).getTile();
+
+		TiledMapTile tile = currentLayer.getCell(tileCoords.x, tileCoords.y).getTile();
+		
+		// this is in case the player is on level 2 but there is no floor there, so level 1 is used
 		height = (float)getHeight(tile);
+		if(height == -1f){
+			currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+			heightOffset = 0;
+		}
+		
+		if(tile.getProperties().containsKey("ramp")) {
+			
+			//height = (float)getHeight(tile);
+			int temp = 0;
+			String direction = getRampDirection(tile);
+			
+			if (direction.equals("up"))	{ // -x direction
+				temp = (int)x;
+				height += x - temp;
+			}
+			else if (direction.equals("down")) { // +x direction
+				temp = (int)x;
+				height += 1 - (x - temp);
+			}
+			else if(direction.equals("left")) { // -z direction
+				temp = (int)z;
+				height += 1 - (z - temp);
+			}
+			else if (direction.equals("right"))	{ // +z direction
+				temp = (int)z;
+				height += z - temp;
+			}
+			else {
+				System.err.println("MeshLevel.rampHeight() - Direction not recognized");
+			}
+		}
+		return height;
+	}
+	
+public float mapHeight(float x, float z, int heightLevel) {
+		
+		float height = 0;
+		GridPoint2 tileCoords = getTileCoords(x, z);
+
+		TiledMapTile tile;
+		if(heightLevel == 1){
+			tile = layer1.getCell(tileCoords.x, tileCoords.y).getTile();
+		}else{
+			tile = layer2.getCell(tileCoords.x, tileCoords.y).getTile();
+		}
+		
+		// this is in case the player is on level 2 but there is no floor there, so level 1 is used
+		height = (float)getHeight(tile);
+		if(height == -1f){
+			currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+			heightOffset = 0;
+		}
 		
 		if(tile.getProperties().containsKey("ramp")) {
 			
@@ -1010,6 +1300,15 @@ public class MeshLevel {
 	}
 	
 	public int getHeightOffset(){
-		return heightOffset;
+		return (int)heightOffset;
+	}
+	
+	public int getHeightOffset(Vector3 position){
+		if(position.y > 6){ 
+			return 6;
+		}
+		else {
+			return 0;
+		}
 	}
 }
