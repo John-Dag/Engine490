@@ -26,6 +26,7 @@ import com.badlogic.gdx.utils.Array;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
+import com.gdx.StaticEntities.Spawn;
 import com.gdx.StaticEntities.StaticWeapon;
 import com.gdx.StaticEntities.Torch;
 
@@ -762,6 +763,14 @@ public class MeshLevel {
 					pointLight.set(getLightColor(rectObj), objPosition, 20f);
 					Mist mist = new Mist(objPosition, 2, true, true, pointLight);
 					Entity.entityInstances.add(mist);
+				}
+				
+				else if (rectObj.getName().contains("Spawn")) {
+					int height = getObjectHeight(rectObj);
+					objPosition = new Vector3();
+					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+					Spawn spawn = new Spawn(objPosition, 8, true, false, false);
+					Entity.entityInstances.add(spawn);
 				}
 
 				else {

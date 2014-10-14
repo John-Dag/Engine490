@@ -1,9 +1,11 @@
 package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
@@ -22,6 +24,14 @@ public class Enemy extends DynamicEntity {
 				 Vector3 scale, Vector3 velocity, Vector3 acceleration, ModelInstance model) {
 		super(id, isActive, isRenderable, position, rotation,
 			  scale, velocity, acceleration, model);
+		this.getModel().calculateBoundingBox(this.getBoundingBox());
+	}
+	
+	@Override
+	public void update(float delta) {
+		this.UpdatePosition(delta);
+		this.UpdateInstanceTransform();
+		this.getAnimation().update(delta);
 	}
 	
     private int getXPos(int tileNumber, TiledMapTileLayer layer) {

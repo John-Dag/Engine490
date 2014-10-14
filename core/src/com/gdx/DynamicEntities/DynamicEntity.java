@@ -2,15 +2,21 @@ package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.engine.Entity;
 
 public class DynamicEntity extends Entity {
 	private Weapon weapon;
-	private Vector3 position, rotation, scale, velocity, acceleration;
+	private Vector3 position, rotation, scale, velocity, acceleration, angVelocity, angAccel;
 	private ModelInstance model;
 	private ParticleEffect particleEffect;
-	private boolean inCollision, isRendered;
+	private boolean inCollision, isRendered, isAnimating;
+	private Quaternion rotationQuaternion;
+	private AnimationController animation;
+	private BoundingBox boundingBox;
 	
 	public DynamicEntity() {
 		super(0, false, false);
@@ -21,7 +27,7 @@ public class DynamicEntity extends Entity {
 		acceleration = new Vector3(0, 0, 0);
 		model = null;
 	}
-	
+
 	public DynamicEntity(int id, boolean isActive, boolean isRenderable, Vector3 position,
 			 	   	     Vector3 rotation, Vector3 scale, Vector3 velocity, Vector3 acceleration, ParticleEffect effect) {
 		super(id, isActive, isRenderable);
@@ -50,17 +56,113 @@ public class DynamicEntity extends Entity {
 		this.rotation = rotation;
 		this.scale = scale;
 		this.velocity = velocity;
-		this.acceleration = acceleration;
 		this.model = model;
 		this.isRendered = false;
+		this.isAnimating = false;
+		this.rotationQuaternion = new Quaternion();
+		this.boundingBox = new BoundingBox();
+		this.acceleration = acceleration;
+		this.angAccel = new Vector3(0, 0, 0);
+		this.angVelocity = new Vector3(0, 0, 0);
+	}
+	
+	public BoundingBox getTransformedBoundingBox(){
+		return new BoundingBox(this.boundingBox).mul(this.model.transform);
 	}
 
 	public void UpdatePosition(float time)
 	{
-		Vector3 timeV = new Vector3(time,time,time);
+		Vector3 timeV=new Vector3(time,time,time);
+		
 
 		position.add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
+
 		//rotation.add(new Vector3(angVelocity.add(new Vector3(angAccel).scl(timeV))).scl(timeV));
+	}
+	
+	//Updates the animation with given time
+	public void UpdateAnimation(float time)
+	{
+		if(this.isAnimating && this.animation != null)
+		{
+			this.animation.update(time);
+		}
+	}
+	
+	//Get new position without updating current position
+	public Vector3 getNewPosition(float time)
+	{
+		Vector3 timeV=new Vector3(time,time,time);
+		Vector3 newPosition=new Vector3(position).add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
+		return newPosition;
+	}
+	
+	//Get new rotation without updating current rotation
+	public Vector3 getNewRotation(float time)
+	{
+		Vector3 timeV=new Vector3(time,time,time);
+		Vector3 newRotation=new Vector3(rotation).add(new Vector3(angVelocity.add(new Vector3(angAccel).scl(timeV))).scl(timeV));
+		return newRotation;
+	}
+	
+	public void UpdateInstanceTransform(){
+		if(model==null)
+			return;
+		this.model.transform.idt();
+		
+		this.model.transform.translate(this.position);
+
+		this.model.transform.rotate(rotationQuaternion.setEulerAngles(this.rotation.x, this.rotation.y, this.rotation.z));
+		this.model.transform.scale(scale.x,scale.y,scale.z);
+		this.model.calculateTransforms();
+	}
+	
+	public Vector3 getAngVelocity() {
+		return angVelocity;
+	}
+
+	public Vector3 getAngAccel() {
+		return angAccel;
+	}
+
+	public void setAngVel(Vector3 angVel) {
+		this.angVelocity = angVel;
+	}
+
+	public void setAngAccel(Vector3 angAccel) {
+		this.angAccel = angAccel;
+	}
+	
+	public boolean isAnimating() {
+		return isAnimating;
+	}
+
+	public Quaternion getRotationQuaternion() {
+		return rotationQuaternion;
+	}
+
+	public AnimationController getAnimation() {
+		return animation;
+	}
+
+	public BoundingBox getBoundingBox() {
+		return boundingBox;
+	}
+
+	public void setAnimating(boolean isAnimating) {
+		this.isAnimating = isAnimating;
+	}
+
+	public void setRotationQuaternion(Quaternion rotationQuaternion) {
+		this.rotationQuaternion = rotationQuaternion;
+	}
+
+	public void setAnimation(AnimationController animation) {
+		this.animation = animation;
+	}
+
+	public void setBoundingBox(BoundingBox boundingBox) {
+		this.boundingBox = boundingBox;
 	}
 	
 	public boolean isRendered() {

@@ -86,12 +86,18 @@ public class Render implements Disposable {
 			Entity entity = Entity.entityInstances.get(i);
 			if (entity instanceof DynamicEntity) {
 				dyn = (DynamicEntity)entity;
-				if (dyn.isRenderable()) {
-					if (dyn.getParticleEffect() != null && !dyn.isRendered()) {
+				if (dyn.isRenderable() && !dyn.isRendered()) {
+					if (dyn.getParticleEffect() != null) {
 						dyn.setRendered(true);
 						dyn.getParticleEffect().init();
 						dyn.getParticleEffect().start();
 						World.particleManager.system.add(dyn.getParticleEffect());
+					}
+					
+					if (dyn.getModel() != null) {
+						dyn.setRendered(true);
+						dyn.UpdateInstanceTransform();
+						instances.add(dyn.getModel());
 					}
 				}
 			}
@@ -152,10 +158,10 @@ public class Render implements Disposable {
 		renderCount = 0;
 		for (int i = 0; i < instances.size; i++) {
 			ModelInstance instance = instances.get(i);
-			if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
+			//if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
 				renderModels(instance);
 				renderCount++;
-			}
+			//}
 		}
 
 		gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, 

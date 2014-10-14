@@ -215,5 +215,10 @@
     <property name="height" value="3"/>
    </properties>
   </object>
+  <object name="Spawn" x="863" y="864">
+   <properties>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
