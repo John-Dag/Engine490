@@ -129,244 +129,128 @@ public class MeshLevel {
 			instances.add(instance);
 		}
 		
-//		for(int k = 0; k < tiledMap.getLayers().getCount(); k++){
-//			if(tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")){
-//				//TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
-//				currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
-//				if(currentLayer.getName().equals("Tile Layer 1")){
-//					heightOffset = 0;
-//				}else if(currentLayer.getName().equals("Tile Layer 2")){
-//					heightOffset = 6;
-//				}
-				//modelBuilder.begin();
+		//modelBuilder.begin();
 
 		TiledMapTile tile1 = null;
 		TiledMapTile tile2 = null;
-		TiledMapTile currentTile = null;
+		//TiledMapTile currentTile = null;
 		
-		
-		// on each cell
-		for(int i = 0; i < currentLayer.getWidth(); i++){
-			for(int j = 0; j < currentLayer.getHeight(); j++){
-				
-				if(layer1.getCell(i,j) != null){
-					tile1 = layer1.getCell(i,j).getTile();
+		for(int k = 0; k < tiledMap.getLayers().getCount(); k++){
+			if(tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")){
+				//TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
+				currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
+				if(currentLayer.getName().equals("Tile Layer 1")){
+					heightOffset = 0;
+				}else if(currentLayer.getName().equals("Tile Layer 2")){
+					heightOffset = 6;
 				}
-				if(layer2.getCell(i,j) != null){
-					tile2 = layer2.getCell(i,j).getTile();
-				}
-				
-				// make lvl2 ceilings
-				if(tile2 != null && tile2.getProperties().containsKey("height")
-						&& tile1 != null && getHeight(tile1) != 5){
-					modelBuilder.begin();
-					Node node = modelBuilder.node();
-					node.translation.set(j,5,i);
-					meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
-							GL20.GL_TRIANGLES,
-							Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-							Assets.wallMat);
+				//modelBuilder.begin();
 
-					//meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,-1,0);
-					meshPartBuilder.rect(0,0,0, 1,0,0, 1,0,1, 0,0,1, 0,-1,0);
-					model = modelBuilder.end();
-					instance = new ModelInstance(model);
-					instances.add(instance);
-				}
-				
-				for(int layerNum = 0; layerNum < 2; layerNum++){
-					if(layerNum == 0){
-						currentLayer = layer1;
-						currentTile = tile1;
-						levelHeight = 0f;
-						heightOffset = 0f;
-					}else if(layerNum ==1){
-						currentLayer = layer2;
-						currentTile = tile2;
-						levelHeight = 6f;
-						heightOffset = 6f;
-					}
-
-					// make the floor tiles
-					if(currentLayer.getCell(i,j) != null && currentTile.getProperties().containsKey("height")){
-						// if ramp
-						if(currentLayer.getCell(i,j) != null && currentLayer.getCell(i,j).getTile().getProperties().containsKey("ramp")){
-							String direction = getRampDirection(currentTile);
-							int height = getHeight(currentTile);
-							modelBuilder.begin();
-							Node node = modelBuilder.node();
-							node.translation.set(j,height+levelHeight,i);
-							meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
-									GL20.GL_TRIANGLES, 
-									Usage.Position | Usage.Normal | Usage.TextureCoordinates,
-									Assets.stoneFloorMat);
-
-							if (direction.equals("up"))	{ // -x direction
-								meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
-							}	
-							else if (direction.equals("down")) { // +x direction
-								meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
-							}	
-							else if(direction.equals("left")) { // +z direction
-								meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
-							}	
-							else if (direction.equals("right"))	{ // -z direction
-								meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
-							}	
-							else {
-								System.err.println("generateLevel(): Direction not recognized");
-							}
-							model = modelBuilder.end();
-							instance = new ModelInstance(model);
-							instances.add(instance);
-
+				// on each cell
+				for(int i = 0; i < currentLayer.getWidth(); i++){
+					for(int j = 0; j < currentLayer.getHeight(); j++){
+						
+						if(layer1.getCell(i,j) != null){
+							tile1 = layer1.getCell(i,j).getTile();
 						}
-						// else not a ramp
-						else {
-							int height = getHeight(currentTile);
+						if(layer2.getCell(i,j) != null){
+							tile2 = layer2.getCell(i,j).getTile();
+						}
+						
+						TiledMapTile tile = null;
+						if(currentLayer.getCell(i,j) != null){
+							tile = currentLayer.getCell(i,j).getTile();
+						}
+						
+						// make lvl2 ceilings
+						if(tile2 != null && tile2.getProperties().containsKey("height")
+								&& tile1 != null && getHeight(tile1) != 5){
 							modelBuilder.begin();
 							Node node = modelBuilder.node();
-							node.translation.set(j,height+levelHeight,i);
+							node.translation.set(j,5,i);
 							meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
 									GL20.GL_TRIANGLES,
 									Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-									Assets.stoneFloorMat);
-
-							meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
+									Assets.wallMat);
+		
+							meshPartBuilder.rect(0,0,0, 1,0,0, 1,0,1, 0,0,1, 0,-1,0);
 							model = modelBuilder.end();
 							instance = new ModelInstance(model);
 							instances.add(instance);
 						}
+						
+						// make the floor tiles
+						if(currentLayer.getCell(i,j) != null && tile.getProperties().containsKey("height")){
+							// if ramp
+							if(currentLayer.getCell(i,j) != null && currentLayer.getCell(i,j).getTile().getProperties().containsKey("ramp")){
+								String direction = getRampDirection(tile);
+								int height = getHeight(tile);
+								modelBuilder.begin();
+								Node node = modelBuilder.node();
+								node.translation.set(j,height+heightOffset,i);
+								meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
+										GL20.GL_TRIANGLES, 
+										Usage.Position | Usage.Normal | Usage.TextureCoordinates,
+										Assets.stoneFloorMat);
+
+								if (direction.equals("up"))	{ // -x direction
+									meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
+								}	
+								else if (direction.equals("down")) { // +x direction
+									meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
+								}	
+								else if(direction.equals("left")) { // +z direction
+									meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
+								}	
+								else if (direction.equals("right"))	{ // -z direction
+									meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
+								}	
+								else {
+									System.err.println("generateLevel(): Direction not recognized");
+								}
+								model = modelBuilder.end();
+								instance = new ModelInstance(model);
+								instances.add(instance);
+
+							}
+							// else not a ramp
+							else {
+								int height = getHeight(tile);
+								modelBuilder.begin();
+								Node node = modelBuilder.node();
+								node.translation.set(j,height+heightOffset,i);
+								meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
+										GL20.GL_TRIANGLES,
+										Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
+										Assets.stoneFloorMat);
+
+								meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
+								model = modelBuilder.end();
+								instance = new ModelInstance(model);
+								instances.add(instance);
+							}
+						}
+						//				Node node = modelBuilder.node();
+						//				node.translation.set(0,0,0);
+
+						// make any north-facing walls (look south)
+						makeWalls(i,j,NORTH);
+
+						// make any south-facing walls (look north)
+						makeWalls(i,j,SOUTH);
+
+						// make any east-facing walls
+						makeWalls(i,j,EAST);
+
+						// make any west-facing walls
+						makeWalls(i,j,WEST);
 					}
-				//				Node node = modelBuilder.node();
-				//				node.translation.set(0,0,0);
 				}
-				
-				for(int layerNum = 0; layerNum < 2; layerNum++){
-					if(layerNum == 0){
-						currentLayer = layer1;
-						currentTile = tile1;
-						levelHeight = 0f;
-						heightOffset = 0f;
-					}else if(layerNum ==1){
-						currentLayer = layer2;
-						currentTile = tile2;
-						levelHeight = 6f;
-						heightOffset = 6f;
-					}
-
-					// make any north-facing walls (look south)
-					makeWalls(i,j,NORTH);
-
-					// make any south-facing walls (look north)
-					makeWalls(i,j,SOUTH);
-
-					// make any east-facing walls
-					makeWalls(i,j,EAST);
-
-					// make any west-facing walls
-					makeWalls(i,j,WEST);
-				}
+				//		model = modelBuilder.end();
+				//		instance = new ModelInstance(model);
+				//		instances.add(instance);
 			}
 		}
-		//		model = modelBuilder.end();
-		//		instance = new ModelInstance(model);
-		//		instances.add(instance);
-
-		
-//		for(int k = 0; k < tiledMap.getLayers().getCount(); k++){
-//			if(tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")){
-//				//TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
-//				currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
-//				if(currentLayer.getName().equals("Tile Layer 1")){
-//					heightOffset = 0;
-//				}else if(currentLayer.getName().equals("Tile Layer 2")){
-//					heightOffset = 6;
-//				}
-//				//modelBuilder.begin();
-//
-//				// on each cell
-//				for(int i = 0; i < currentLayer.getWidth(); i++){
-//					for(int j = 0; j < currentLayer.getHeight(); j++){
-//						TiledMapTile tile = null;
-//						if(currentLayer.getCell(i,j) != null){
-//							tile = currentLayer.getCell(i,j).getTile();
-//						}
-//						
-//						
-//
-//						// make the floor tiles
-//						if(currentLayer.getCell(i,j) != null && tile.getProperties().containsKey("height")){
-//							// if ramp
-//							if(currentLayer.getCell(i,j) != null && currentLayer.getCell(i,j).getTile().getProperties().containsKey("ramp")){
-//								String direction = getRampDirection(tile);
-//								int height = getHeight(tile);
-//								modelBuilder.begin();
-//								Node node = modelBuilder.node();
-//								node.translation.set(j,height+heightOffset,i);
-//								meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
-//										GL20.GL_TRIANGLES, 
-//										Usage.Position | Usage.Normal | Usage.TextureCoordinates,
-//										Assets.stoneFloorMat);
-//
-//								if (direction.equals("up"))	{ // -x direction
-//									meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
-//								}	
-//								else if (direction.equals("down")) { // +x direction
-//									meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
-//								}	
-//								else if(direction.equals("left")) { // +z direction
-//									meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
-//								}	
-//								else if (direction.equals("right"))	{ // -z direction
-//									meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
-//								}	
-//								else {
-//									System.err.println("generateLevel(): Direction not recognized");
-//								}
-//								model = modelBuilder.end();
-//								instance = new ModelInstance(model);
-//								instances.add(instance);
-//
-//							}
-//							// else not a ramp
-//							else {
-//								int height = getHeight(tile);
-//								modelBuilder.begin();
-//								Node node = modelBuilder.node();
-//								node.translation.set(j,height+heightOffset,i);
-//								meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
-//										GL20.GL_TRIANGLES,
-//										Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-//										Assets.stoneFloorMat);
-//
-//								meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
-//								model = modelBuilder.end();
-//								instance = new ModelInstance(model);
-//								instances.add(instance);
-//							}
-//						}
-//						//				Node node = modelBuilder.node();
-//						//				node.translation.set(0,0,0);
-//
-//						// make any north-facing walls (look south)
-//						makeWalls(i,j,NORTH);
-//
-//						// make any south-facing walls (look north)
-//						makeWalls(i,j,SOUTH);
-//
-//						// make any east-facing walls
-//						makeWalls(i,j,EAST);
-//
-//						// make any west-facing walls
-//						makeWalls(i,j,WEST);
-//					}
-//				}
-//				//		model = modelBuilder.end();
-//				//		instance = new ModelInstance(model);
-//				//		instances.add(instance);
-//			}
-//		}
 		
 		heightOffset = 0;
 		
@@ -384,7 +268,6 @@ public class MeshLevel {
 	// TODO: makeWalls
 	// calling this will make the walls at tile (i,j) that are facing the given direction
 	private void makeWalls(int i, int j, int direction) {
-		//TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
 		TiledMapTileLayer layer = currentLayer;
 		TiledMapTile tile = layer.getCell(i,j).getTile();
 		int looki = 0;
@@ -998,18 +881,6 @@ public class MeshLevel {
 		return intDir;
 	}
 	
-//	// returns the y or j dimension (in tiles) of the map
-//	public int getLevelHeight() {
-//		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
-//		return layer.getHeight();
-//	}
-//	
-//	// returns the x or i dimension (in tiles) of the map
-//	public int getLevelWidth() {
-//		TiledMapTileLayer layer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
-//		return layer.getWidth();
-//	}
-	
 	public TiledMap getTiledMap() {
 		return tiledMap;
 	}
@@ -1053,17 +924,6 @@ public class MeshLevel {
 			newPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
 			newHeightOffset = 0;
 		}
-		
-		
-		
-//		if(newPos.y <= 6f) {
-//			currentLayer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
-//			heightOffset = 0;
-//		}
-//		if(newPos.y > 6f) {
-//			currentLayer = (TiledMapTileLayer)tiledMap.getLayers().get(2);
-//			heightOffset = 6;
-//		}
 		
 		if(movementVector.len() > 0){
 			Vector3 blockSize = new Vector3(SPOT_WIDTH, 0, SPOT_LENGTH);
@@ -1112,9 +972,7 @@ public class MeshLevel {
 					// if oldPos tile is a ramp, it can lead us up one space
 					if (oldPosLayer.getCell(tileCoords.x, tileCoords.y)!= null) {
 						if (oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
-	//						if(oldHeightOffset == 0 && getHeight(oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile()) == 5){
-	//							newPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(2);
-	//						}
+
 							if (getHeight(newPosLayer.getCell(i, j).getTile()) + newHeightOffset > getHeight(oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile()) + oldHeightOffset + 1) {
 								//check collision
 								//Note: Switched i,j        here                             and                                 here (translating tiled coords to world coords)
@@ -1178,11 +1036,14 @@ public class MeshLevel {
 
             result.z = 1;
         }
-        if(result.x == 0 || result.y == 0 || result.z == 0){
-        	System.out.println("Collision ("+result.x+", "+result.y+", "+result.z+")" + ", oldPos ("+oldPos.x+", "+oldPos.y+", "+oldPos.z+")"
-        			+", newPos ("+newPos.x+", "+newPos.y+", "+newPos.z+")"
-        			+", pos2 ("+pos2.x+", "+pos2.y+", "+pos2.z+")");
-        }
+        
+        // This is useful if you want to do debugging on collision. Simply un-comment it in that case.
+//        if(result.x == 0 || result.y == 0 || result.z == 0){
+//        	System.out.println("Collision ("+result.x+", "+result.y+", "+result.z+")" + ", oldPos ("+oldPos.x+", "+oldPos.y+", "+oldPos.z+")"
+//        			+", newPos ("+newPos.x+", "+newPos.y+", "+newPos.z+")"
+//        			+", pos2 ("+pos2.x+", "+pos2.y+", "+pos2.z+")");
+//        }
+        
 		return result;
 	}
 	

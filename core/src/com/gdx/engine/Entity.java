@@ -24,6 +24,7 @@ public class Entity {
 		entityInstances.removeIndex(i);
 	}
 	
+	// Overridden by classes that extend DynamicEntity
 	public void update(float delta) {
 
 	}
