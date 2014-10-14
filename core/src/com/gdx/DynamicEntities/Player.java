@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.engine.World;
 
-public class Player extends Dynamic {
+public class Player extends DynamicEntity {
 	private static final float ROTATION_SPEED = 0.2f;
 	private static final float MOVEMENT_SPEED = 8.0f;
 	private static final float CROUCH_SPEED = 2.0f;
@@ -40,13 +40,14 @@ public class Player extends Dynamic {
 	}
 	
 	public Player(World world, int health, Weapon weapon, int id, boolean isActive, boolean isRenderable,
-			      Vector3 position, Vector3 rotation, Vector3 scale,
-			      Vector3 velocity, Vector3 acceleration, ModelInstance model) {
-		super(weapon, id, isActive, isRenderable, position, rotation, scale, velocity,
+			      Vector3 position, Vector3 rotation, Vector3 scale, Vector3 velocity, Vector3 acceleration, 
+			      ModelInstance model) {
+		super(id, isActive, isRenderable, position, rotation, scale, velocity,
 			  acceleration, model);
 		this.world = world;
+		this.setCurrentWeapon(weapon);
 		this.camera = new PerspectiveCamera();
-		this.collisionVector = new Vector3(1,1,1);
+		this.collisionVector = new Vector3(1, 1, 1);
 		this.mouseLocked = false;
 		this.temp = new Vector3();
 		this.camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

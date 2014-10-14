@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.engine.World;
 
-public class Projectile extends Dynamic {
+public class Projectile extends DynamicEntity {
 	private int damage;
 	private float accuracy;
 	private Vector3 movementVector, collisionVector, newPos, oldPos;
@@ -19,10 +19,10 @@ public class Projectile extends Dynamic {
 		accuracy = 0;
 	}
 	
-	public Projectile(Weapon currentWeapon, int id, boolean isActive, boolean isRenderable, Vector3 position,
+	public Projectile(int id, boolean isActive, boolean isRenderable, Vector3 position,
 					  Vector3 rotation, Vector3 scale, Vector3 velocity, Vector3 acceleration,
 					  int damage, float accuracy, ParticleEffect effect, World world) {
-		super(currentWeapon, id, isActive, isRenderable, position, rotation, scale, velocity, acceleration, effect);
+		super(id, isActive, isRenderable, position, rotation, scale, velocity, acceleration, effect);
 		this.damage = damage;
 		this.accuracy = accuracy;
 		this.world = world;
@@ -37,7 +37,7 @@ public class Projectile extends Dynamic {
 	
 	@Override
 	public void update(float time) {
-		this.UpdatePosition(this.getCurrentWeapon().getFiringDelay());
+		this.UpdatePosition(world.getPlayer().getCurrentWeapon().getFiringDelay());
 		
 		Vector3 timeV = new Vector3(time,time,time);
 		this.getPosition().add(new Vector3(this.getVelocity().add(new Vector3(this.getAcceleration()).scl(timeV))).scl(timeV));

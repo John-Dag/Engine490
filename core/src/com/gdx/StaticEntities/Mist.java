@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.engine.World;
 
-public class Mist extends Static {
+public class Mist extends StaticEntity {
 	public Mist() {
 		super();
 	}

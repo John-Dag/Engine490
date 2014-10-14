@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
 
-public class Enemy extends Dynamic {
+public class Enemy extends DynamicEntity {
 	private int health;
     private TiledMap tiledMap;
     private  ArrayList<String> showXY = new ArrayList<String>();
@@ -18,13 +18,10 @@ public class Enemy extends Dynamic {
 		super();
 	}
 
-	public Enemy(int health, Weapon currentWeapon, int id, boolean isActive,
-				 boolean isRenderable, Vector3 position, Vector3 rotation,
-				 Vector3 scale, Vector3 velocity, Vector3 acceleration,
-				 ModelInstance model) {
-		super(currentWeapon, id, isActive, isRenderable, position, rotation,
+	public Enemy(int id, boolean isActive, boolean isRenderable, Vector3 position, Vector3 rotation,
+				 Vector3 scale, Vector3 velocity, Vector3 acceleration, ModelInstance model) {
+		super(id, isActive, isRenderable, position, rotation,
 			  scale, velocity, acceleration, model);
-		this.health = health;
 	}
 	
     private int getXPos(int tileNumber, TiledMapTileLayer layer) {

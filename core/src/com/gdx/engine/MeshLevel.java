@@ -735,7 +735,7 @@ public class MeshLevel {
 //					boolean isRenderable, Vector3 position, Vector3 rotation,
 //					Vector3 scale, Vector3 velocity, Vector3 acceleration,
 //					ModelInstance model
-					Enemy enemy = new Enemy(100, null, 7, true, true, objPosition, rotation, scale, new Vector3(0, 0, 0),
+					Enemy enemy = new Enemy(7, true, true, objPosition, rotation, scale, new Vector3(0, 0, 0),
 											new Vector3(0, 0, 0), test);
 					Entity.entityInstances.add(enemy);
 				}

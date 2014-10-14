@@ -15,8 +15,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.gdx.DynamicEntities.Dynamic;
-import com.gdx.StaticEntities.Static;
+import com.gdx.DynamicEntities.DynamicEntity;
+import com.gdx.StaticEntities.StaticEntity;
 
 public class Render implements Disposable {
 	public static int renderCount;
@@ -55,16 +55,16 @@ public class Render implements Disposable {
 		decalBatch = new DecalBatch(new CameraGroupStrategy(world.getPlayer().camera));
 		instances = new Array<ModelInstance>(world.getLevelMesh());
 		world.createBoundingBoxes();
-		renderStaticEntities();
+		initStaticEntities();
 	}
 	
-	private void renderStaticEntities() {
-		Static stat;
+	private void initStaticEntities() {
+		StaticEntity stat;
 
 		for (int j = 0; j < Entity.entityInstances.size; j++) {
 			Entity entity = Entity.entityInstances.get(j);
-			if (entity instanceof Static) {
-				stat = (Static)entity;
+			if (entity instanceof StaticEntity) {
+				stat = (StaticEntity)entity;
 				if (stat.isRenderable()) {
 					if (stat.getPointLight() != null)
 						environment.add(stat.getPointLight());
@@ -79,13 +79,13 @@ public class Render implements Disposable {
 		}
 	}
 	
-	private void renderDynamicEntities(float delta) {
-		Dynamic dyn;
+	private void initDynamicEntities(float delta) {
+		DynamicEntity dyn;
 		
 		for (int i = 0; i < Entity.entityInstances.size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
-			if (entity instanceof Dynamic) {
-				dyn = (Dynamic)entity;
+			if (entity instanceof DynamicEntity) {
+				dyn = (DynamicEntity)entity;
 				if (dyn.isRenderable()) {
 					if (dyn.getParticleEffect() != null && !dyn.isRendered()) {
 						dyn.setRendered(true);
@@ -113,8 +113,8 @@ public class Render implements Disposable {
 		
 		for (int i = 0; i < size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
-			if (entity instanceof Static) {
-				Static stat = (Static)entity;
+			if (entity instanceof StaticEntity) {
+				StaticEntity stat = (StaticEntity)entity;
 				if (stat.isRenderable() && stat.getDecal() != null) {
 					decalBatch.add(stat.getDecal());
 					if (stat.isDecalFacing())
@@ -145,7 +145,7 @@ public class Render implements Disposable {
 		//updateEntityMesh();
 		modelBatch.begin(world.getPlayer().camera);
 		//renderProjectiles();
-		renderDynamicEntities(delta);
+		initDynamicEntities(delta);
 		renderParticles();
 		
 		//Viewport culling

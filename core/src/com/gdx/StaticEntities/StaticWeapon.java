@@ -2,7 +2,7 @@ package com.gdx.StaticEntities;
 
 import com.badlogic.gdx.math.Vector3;
 
-public class StaticWeapon extends Static {
+public class StaticWeapon extends StaticEntity {
 	private float firingDelay;
 	private boolean isParticleWeapon;
 	private String weaponModelName;

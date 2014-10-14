@@ -29,7 +29,7 @@ public class World {
     //private TiledMapTileLayer layer = (TiledMapTileLayer)Assets.level2.getLayers().get(0);
 	
 	public World() {
-		Weapon weapon = new Weapon(0.1f, true, "GUNFBX.g3db", 0, null, 1, true, true, new Vector3(-1, 0, 0), 
+		Weapon weapon = new Weapon(0.1f, true, "GUNFBX.g3db", 1, true, true, new Vector3(-1, 0, 0), 
 								   new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
 		player = new Player(this, 100, weapon, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 						    new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
@@ -165,7 +165,7 @@ public class World {
 			Vector3 scale = new Vector3(0, 0, 0);
 			
 			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
-			Projectile projectile = new Projectile(player.getCurrentWeapon(), 6, true, true, player.camera.position.cpy(), 
+			Projectile projectile = new Projectile(6, true, true, player.camera.position.cpy(), 
 												   rotation, scale, player.camera.direction.cpy(), player.camera.direction.cpy(), 
 												   10, 0.1f, particleManager.mistPool.obtain(), this);
 			Entity.entityInstances.add(projectile);

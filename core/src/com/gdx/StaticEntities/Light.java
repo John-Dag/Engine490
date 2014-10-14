@@ -3,7 +3,7 @@ package com.gdx.StaticEntities;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Vector3;
 
-public class Light extends Static {
+public class Light extends StaticEntity {
 	public Light() {
 		super();
 	}

@@ -2,7 +2,7 @@ package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.math.Vector3;
 
-public class Weapon extends Dynamic {
+public class Weapon extends DynamicEntity {
 	private float firingDelay;
 	private boolean isParticleWeapon;
 	private String weaponModelName;
@@ -14,11 +14,10 @@ public class Weapon extends Dynamic {
 		weaponModelName = "";
 	}
 
-	public Weapon(float firingDelay, boolean isParticleWeapon, String weaponModelName, 
-			      int health, Weapon currentWeapon, int id, boolean isActive,
-				  boolean isRenderable, Vector3 position, Vector3 rotation,
+	public Weapon(float firingDelay, boolean isParticleWeapon, String weaponModelName, int id, 
+				  boolean isActive, boolean isRenderable, Vector3 position, Vector3 rotation,
 				  Vector3 scale, Vector3 velocity, Vector3 acceleration) {
-		super(currentWeapon, id, isActive, isRenderable, position, rotation,
+		super(id, isActive, isRenderable, position, rotation,
 			  scale, velocity, acceleration);
 		this.firingDelay = firingDelay;
 		this.isParticleWeapon = isParticleWeapon;

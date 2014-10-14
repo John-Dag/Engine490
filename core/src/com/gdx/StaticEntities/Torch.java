@@ -3,7 +3,7 @@ package com.gdx.StaticEntities;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.engine.World;
 
-public class Torch extends Static {
+public class Torch extends StaticEntity {
 	char direction;
 	
 	public Torch() {
