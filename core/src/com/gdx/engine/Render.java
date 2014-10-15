@@ -65,7 +65,7 @@ public class Render implements Disposable {
 			Entity entity = Entity.entityInstances.get(j);
 			if (entity instanceof StaticEntity) {
 				stat = (StaticEntity)entity;
-				if (stat.isRenderable()) {
+				if (stat.isRenderable() && stat.isActive()) {
 					if (stat.getPointLight() != null)
 						environment.add(stat.getPointLight());
 					if (stat.getEffect() != null) {
@@ -86,7 +86,7 @@ public class Render implements Disposable {
 			Entity entity = Entity.entityInstances.get(i);
 			if (entity instanceof DynamicEntity) {
 				dyn = (DynamicEntity)entity;
-				if (dyn.isRenderable() && !dyn.isRendered()) {
+				if (dyn.isRenderable() && !dyn.isRendered() && dyn.isActive()) {
 					if (dyn.getParticleEffect() != null) {
 						dyn.setRendered(true);
 						dyn.getParticleEffect().init();
@@ -96,7 +96,8 @@ public class Render implements Disposable {
 					
 					if (dyn.getModel() != null) {
 						dyn.setRendered(true);
-						dyn.UpdateInstanceTransform();
+						System.out.println(dyn.getId());
+						world.getBoundingBoxes().add(dyn.getBoundingBox());
 						instances.add(dyn.getModel());
 					}
 				}
@@ -158,10 +159,10 @@ public class Render implements Disposable {
 		renderCount = 0;
 		for (int i = 0; i < instances.size; i++) {
 			ModelInstance instance = instances.get(i);
-			//if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
+			if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
 				renderModels(instance);
 				renderCount++;
-			//}
+			}
 		}
 
 		gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, 

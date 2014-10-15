@@ -61,16 +61,18 @@ public class DynamicEntity extends Entity {
 		this.isAnimating = false;
 		this.rotationQuaternion = new Quaternion();
 		this.boundingBox = new BoundingBox();
+		this.model.calculateBoundingBox(this.boundingBox);
+		this.isRendered = false;
 		this.acceleration = acceleration;
 		this.angAccel = new Vector3(0, 0, 0);
 		this.angVelocity = new Vector3(0, 0, 0);
 	}
-	
+
 	public BoundingBox getTransformedBoundingBox(){
 		return new BoundingBox(this.boundingBox).mul(this.model.transform);
 	}
 
-	public void UpdatePosition(float time)
+	public void updatePosition(float time)
 	{
 		Vector3 timeV=new Vector3(time,time,time);
 		
@@ -81,7 +83,7 @@ public class DynamicEntity extends Entity {
 	}
 	
 	//Updates the animation with given time
-	public void UpdateAnimation(float time)
+	public void updateAnimation(float time)
 	{
 		if(this.isAnimating && this.animation != null)
 		{
@@ -105,7 +107,7 @@ public class DynamicEntity extends Entity {
 		return newRotation;
 	}
 	
-	public void UpdateInstanceTransform(){
+	public void updateInstanceTransform(){
 		if(model==null)
 			return;
 		this.model.transform.idt();

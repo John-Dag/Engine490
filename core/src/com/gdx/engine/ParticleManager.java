@@ -35,15 +35,6 @@ public class ParticleManager {
 		torchPool = new PFXPool(torchEffect);
 		mistPool = new PFXPool(mistEffect);
 	}
-
-	public void spawnParticleEffect(ParticleEffect effect, Vector3 position) {
-		if (torchPool.getFree() != -1) {
-			effect.init();
-			effect.start();
-			effect.translate(position);
-			system.add(effect);
-		}
-	}
 	
 	public PFXPool getMistPool() {
 		return mistPool;

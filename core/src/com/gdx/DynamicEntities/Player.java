@@ -149,6 +149,9 @@ public class Player extends DynamicEntity {
 		
 		this.camera.update();
 		this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+		this.getPosition().set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+		this.updatePosition(delta);
+		this.updateInstanceTransform();
 	}
 	
 	public void input(float delta) {

@@ -7,14 +7,24 @@ import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.engine.Condition;
+import com.gdx.engine.State;
+import com.gdx.engine.StateMachine;
+import com.gdx.engine.World;
 
 import java.util.ArrayList;
 
 public class Enemy extends DynamicEntity {
-	private int health;
+	public static final int MAX_HEALTH = 100;
+	public static final int DAMAGE = 1;
+	private int health, damage;
     private TiledMap tiledMap;
     private  ArrayList<String> showXY = new ArrayList<String>();
     private int currentHeight = 1;
+	State idle=new State();
+	State moving=new State();
+	State dead=new State();
+	StateMachine stateMachine=new StateMachine();
 
 	public Enemy() {
 		super();
@@ -24,14 +34,74 @@ public class Enemy extends DynamicEntity {
 				 Vector3 scale, Vector3 velocity, Vector3 acceleration, ModelInstance model) {
 		super(id, isActive, isRenderable, position, rotation,
 			  scale, velocity, acceleration, model);
-		this.getModel().calculateBoundingBox(this.getBoundingBox());
+		this.health = MAX_HEALTH;
+		this.damage = DAMAGE;
+		this.StateMachineUsage(this);
 	}
-	
+
 	@Override
 	public void update(float delta) {
-		this.UpdatePosition(delta);
-		this.UpdateInstanceTransform();
+		this.updatePosition(delta);
+		this.updateInstanceTransform();
 		this.getAnimation().update(delta);
+		this.stateMachine.UpdateStates(this);
+	}
+	
+	private void StateMachineUsage(Enemy enemy){
+		Condition movingCondition=new Condition() {
+			@Override
+			public boolean IsSatisfied(Enemy enemy) {
+				if (enemy.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox()))
+					return true;
+				else
+					return false;
+			}
+		};
+		Condition idleCondition=new Condition() {
+			@Override
+			public boolean IsSatisfied(Enemy enemy) {
+				//if(enemy doesn't see player ()) return true ... else
+				return false;
+			}
+		};
+		
+		Condition deadCondition=new Condition() {
+			@Override
+			public boolean IsSatisfied(Enemy enemy) {
+				if (enemy.health <= 0) {
+					return true;
+				}
+				else
+					return false;
+			}
+		};
+
+		idle.LinkedStates.put(movingCondition, moving);
+		idle.LinkedStates.put(deadCondition, dead);
+		moving.LinkedStates.put(idleCondition, idle);
+		moving.LinkedStates.put(deadCondition, dead);
+		
+		stateMachine.States.add(idle);
+		stateMachine.States.add(moving);
+		stateMachine.States.add(dead);
+		
+		stateMachine.Current=idle; //Set initial state
+	}
+	
+	public StateMachine getStateMachine() {
+		return stateMachine;
+	}
+
+	public void setStateMachine(StateMachine stateMachine) {
+		this.stateMachine = stateMachine;
+	}
+
+	public int getHealth() {
+		return health;
+	}
+
+	public void setHealth(int health) {
+		this.health = health;
 	}
 	
     private int getXPos(int tileNumber, TiledMapTileLayer layer) {

@@ -736,9 +736,9 @@ public class MeshLevel {
 //					boolean isRenderable, Vector3 position, Vector3 rotation,
 //					Vector3 scale, Vector3 velocity, Vector3 acceleration,
 //					ModelInstance model
-					Enemy enemy = new Enemy(7, true, true, objPosition, rotation, scale, new Vector3(0, 0, 0),
-											new Vector3(0, 0, 0), test);
-					Entity.entityInstances.add(enemy);
+//					Enemy enemy = new Enemy(7, true, true, objPosition, rotation, scale, new Vector3(0, 0, 0),
+//											new Vector3(0, 0, 0), test);
+//					Entity.entityInstances.add(enemy);
 				}
 				
 				else if (rectObj.getName().contains("Weapon")) {
@@ -769,7 +769,7 @@ public class MeshLevel {
 					int height = getObjectHeight(rectObj);
 					objPosition = new Vector3();
 					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-					Spawn spawn = new Spawn(objPosition, 8, true, false, false);
+					Spawn spawn = new Spawn(objPosition, 8, true, false, false, getSpawnTime(rectObj));
 					Entity.entityInstances.add(spawn);
 				}
 
@@ -806,6 +806,16 @@ public class MeshLevel {
 		else{
 			return null;
 		}
+	}
+	
+	public float getSpawnTime(RectangleMapObject object) {
+		String time = "0";
+		
+		if (object.getProperties().containsKey("time")) {
+			time = object.getProperties().get("time").toString();
+		}
+		
+		return Float.parseFloat(time);
 	}
 	
 	// returns the height of the given map object
@@ -1101,8 +1111,7 @@ public class MeshLevel {
 		return height;
 	}
 	
-public float mapHeight(float x, float z, int heightLevel) {
-		
+	public float mapHeight(float x, float z, int heightLevel) {
 		float height = 0;
 		GridPoint2 tileCoords = getTileCoords(x, z);
 

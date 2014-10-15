@@ -37,10 +37,8 @@ public class Projectile extends DynamicEntity {
 	
 	@Override
 	public void update(float time) {
-		this.UpdatePosition(world.getPlayer().getCurrentWeapon().getFiringDelay());
+		this.updatePosition(world.getPlayer().getCurrentWeapon().getFiringDelay());
 		
-		Vector3 timeV = new Vector3(time,time,time);
-		this.getPosition().add(new Vector3(this.getVelocity().add(new Vector3(this.getAcceleration()).scl(timeV))).scl(timeV));
 		target.idt();
 		target.translate(this.getPosition());
 		this.getParticleEffect().setTransform(target);
@@ -58,8 +56,9 @@ public class Projectile extends DynamicEntity {
 				           movementVector.z * collisionVector.z);
 		
 		if (collisionVector.x == 0 || collisionVector.y == 0 || collisionVector.z == 0) {
-			World.particleManager.getProjectilePool().free(this.getParticleEffect());
 			World.particleManager.system.remove(this.getParticleEffect());
+			World.particleManager.getProjectilePool().free(this.getParticleEffect());
+			System.out.println(World.particleManager.projectilePool.peak);
 			this.setIsActive(false);
 		}
 	}

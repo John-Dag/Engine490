@@ -329,6 +329,19 @@
   <object name="Spawn" x="459" y="578">
    <properties>
     <property name="height" value="1"/>
+    <property name="time" value="20"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="671" y="957">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="10"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="378" y="962">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
    </properties>
   </object>
  </objectgroup>

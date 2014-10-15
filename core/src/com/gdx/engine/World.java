@@ -3,6 +3,7 @@ package com.gdx.engine;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
@@ -22,7 +23,7 @@ import com.gdx.DynamicEntities.Enemy;
 
 public class World {
 	public static final float PLAYER_SIZE = 0.2f;
-	private Player player;
+	public static Player player;
 	//private Enemy enemy;
 	//private Level level;
 	private MeshLevel meshLevel;
@@ -41,7 +42,7 @@ public class World {
 								   new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
 		player = new Player(this, 100, weapon, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 						    new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
-						    Assets.floorMat, 1)));
+						    Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
 		particleManager = new ParticleManager(this);
 		meshLevel = new MeshLevel(Assets.castle, true);
 		Entity.entityInstances.add(player);
@@ -71,7 +72,7 @@ public class World {
 			}
 			
 			else {
-				System.out.println("Removed: " + size);
+				//System.out.println("Removed: " + size);
 				entity.removeEntity(i);
 				size -= 1;
 			}
@@ -84,22 +85,25 @@ public class World {
 		for (int i = 0; i < size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
 			if (entity instanceof Enemy) {
-				Enemy enemy = (Enemy)entity;
+				final Enemy enemy = (Enemy)entity;
 				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
 				GridPoint2 playerPosition = new GridPoint2((int)player.camera.position.x, (int)player.camera.position.z);
 				TiledMapTileLayer layer = (TiledMapTileLayer)getMeshLevel().getTiledMap().getLayers().get(0);
 				int width = layer.getWidth();
 				ArrayList<Integer> path;
 				
-				try {
-					path = enemy.shortestPath(enemyPosition.x + width
-							* enemyPosition.y, playerPosition.x + width
-							* playerPosition.y, layer, 1);
-				} catch (Exception ex) {
-					path = new ArrayList<Integer>();
+				if (enemy.getStateMachine().Current == enemy.getStateMachine().States.get(0)) {
+					enemy.getAnimation().setAnimation("Idle", -1);
 				}
 
-				if (path.size() > 0) {
+				else if (enemy.getStateMachine().Current == enemy.getStateMachine().States.get(1)) {
+					try {
+						path = enemy.shortestPath(enemyPosition.x + width
+								* enemyPosition.y, playerPosition.x + width
+								* playerPosition.y, layer, 1);
+					} catch (Exception ex) {
+						path = new ArrayList<Integer>();
+					}
 					enemy.getAnimation().setAnimation("Walking", -1);
 					Vector3 vel = new Vector3();
 					int y = path.get(path.size() - 1) / width;
@@ -149,63 +153,49 @@ public class World {
 										enemy.getPosition().x,
 										enemy.getPosition().z);
 					}
-
-
-					System.out.println(path);
-
-					
-
-				} else {
-					enemy.getVelocity().set(0, 0, 0);
-					enemy.getAnimation().setAnimation("Dying", 1,new AnimationListener() {
-						
-						@Override
-						public void onLoop(AnimationDesc animation) {
-							// TODO Auto-generated method stub
-							
-						}
-						
-						@Override
-						public void onEnd(AnimationDesc animation) {
-							
-						}
-					});
+					//System.out.println(path);
 				}
 				
-
-				/*
-				if(Predator.GetTransformedBoundingBox().intersects(Victim.GetTransformedBoundingBox())){
-					System.out.println("intersects with target");
+				else {
+						enemy.getVelocity().set(0, 0, 0);
+						enemy.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
+							
+							@Override
+							public void onLoop(AnimationDesc animation) {
+								// TODO Auto-generated method stub
+								
+							}
+							
+							@Override
+							public void onEnd(AnimationDesc animation) {
+								enemy.setIsActive(false);
+							}
+						});
+					}
+				//System.out.println("Box: " + player.getTransformedBoundingBox());
+				if(enemy.getTransformedBoundingBox().intersects(player.getTransformedBoundingBox())){
+					//System.out.println("intersects with target");
 				}
 			}
-		
+		/*
 		if(ProjectileBoxEntity!=null&&Victim!=null&&ProjectileBoxEntity.GetTransformedBoundingBox().intersects(Victim.GetTransformedBoundingBox())){
 			System.out.println("intersects with target");
 			ProjectileBoxEntity.velocity.setZero();
 		}
 		*/
 
-			}
 		}
 	}
 	
-	//Bounding boxes used for frustum culling and entities
+	//Bounding boxes used for frustum culling
 	public void createBoundingBoxes() {
 		int size = meshLevel.getInstances().size;
-		//int length = meshLevel.getEntityInstances().size;
 		
 		for (int i = 0; i < size; i++) {
 			BoundingBox box = new BoundingBox();
 			meshLevel.getInstances().get(i).calculateBoundingBox(box);
 			boxes.add(box);
 		}
-		
-		/*
-		for (int j = 0; j < length; j++) {
-			Entity entity = meshLevel.getEntityInstances().get(j);
-			entity.model.calculateBoundingBox(entity.boundingBox).mul(entity.model.transform);
-		}
-		*/
 	}
 	
 	//Temporary
@@ -249,33 +239,35 @@ public class World {
 	}
 	
 	public void rayPickEntities() {
-		/*
-		int size = meshLevel.getEntityInstances().size;
+		int size = Entity.entityInstances.size;
 		int result = -1;
 		float distance = -1;
+		Enemy enemy;
 		
 		if (ray != null) {
 			for (int i = 0; i < size; i++) {
-				Entity entity = meshLevel.getEntityInstances().get(i);
-				
-				entity.get.transform.getTranslation(position);
-				position.add(entity.boundingBox.getCenter());
-				float dist2 = ray.origin.dst2(position);
-				
-				if (distance >= 0f && dist2 > distance)
-					continue;
-		
-				if (Intersector.intersectRayBoundsFast(ray, entity.boundingBox)) {
-					result = i;
-					distance = dist2;
+				Entity entity = Entity.entityInstances.get(i);
+				if (entity instanceof Enemy) {
+					enemy = (Enemy)entity;
+					enemy.getModel().transform.getTranslation(position);
+					position.add(enemy.getTransformedBoundingBox().getCenter());
+					float dist2 = ray.origin.dst2(position);
 					
-					if (result > -1) {
-						Intersector.intersectRayBounds(ray, entity.boundingBox, out);
+					if (distance >= 0f && dist2 > distance)
+						continue;
+			
+					if (Intersector.intersectRayBoundsFast(ray, enemy.getTransformedBoundingBox())) {
+						result = i;
+						distance = dist2;
+						
+						if (result > -1) {
+							Intersector.intersectRayBounds(ray, enemy.getTransformedBoundingBox(), out);
+							enemy.setHealth(-1);
+						}
 					}
 				}
 			}
 		}
-		*/
 	}
 	
 	//Temporary
