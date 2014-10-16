@@ -37,6 +37,15 @@ public class Projectile extends DynamicEntity {
 	
 	@Override
 	public void update(float time) {
+		if (!this.isRendered()) {
+			if (this.getParticleEffect() != null) {
+				this.setRendered(true);
+				this.getParticleEffect().init();
+				this.getParticleEffect().start();
+				World.particleManager.system.add(this.getParticleEffect());
+			}
+		}
+		
 		this.updatePosition(world.getPlayer().getCurrentWeapon().getFiringDelay());
 		
 		target.idt();

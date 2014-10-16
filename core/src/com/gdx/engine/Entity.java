@@ -1,5 +1,7 @@
 package com.gdx.engine;
 
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.utils.Array;
 
 public class Entity {
@@ -24,9 +26,17 @@ public class Entity {
 		entityInstances.removeIndex(i);
 	}
 	
+	public void initialize(World world) {
+		
+	}
+	
 	// Overridden by classes that extend DynamicEntity
 	public void update(float delta) {
 
+	}
+	
+	public void render(ModelBatch modelBatch, DecalBatch decalBatch) {
+		
 	}
 	
 	public int getId() {
@@ -51,6 +61,10 @@ public class Entity {
 	
 	public void setIsRenderable(boolean isRenderable) {
 		this.isRenderable = isRenderable;
+	}
+
+	public void render(float delta) {
+		
 	}
 }
 

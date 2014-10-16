@@ -28,9 +28,7 @@ public class World {
 	//private Level level;
 	private MeshLevel meshLevel;
 	private Ray ray;
-	private Array<Decal> decalInstances;
 	private Array<BoundingBox> boxes;
-	private Array<Projectile> projectiles;
 	private float timer;
 	private Vector3 position;
 	private Vector3 out;
@@ -47,9 +45,7 @@ public class World {
 		meshLevel = new MeshLevel(Assets.castle, true);
 		Entity.entityInstances.add(player);
 		//meshLevel.getInstances().add(player.model);
-		decalInstances = new Array<Decal>();
 		boxes = new Array<BoundingBox>();
-		projectiles = new Array<Projectile>();
 		position = new Vector3();
 		out = new Vector3();
 	}
@@ -59,6 +55,12 @@ public class World {
 		updateEntities(delta);
 		updateEnemies(delta);
 		timer += delta;
+	}
+	
+	public void initializeEntities() {
+		for (Entity entity : Entity.entityInstances) {
+			entity.initialize(this);
+		}
 	}
 	
 	private void updateEntities(float delta) {
@@ -157,25 +159,25 @@ public class World {
 				}
 				
 				else {
-						enemy.getVelocity().set(0, 0, 0);
-						enemy.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
+					enemy.getVelocity().set(0, 0, 0);
+					enemy.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
 							
 							@Override
-							public void onLoop(AnimationDesc animation) {
+						public void onLoop(AnimationDesc animation) {
 								// TODO Auto-generated method stub
 								
-							}
+						}
 							
-							@Override
-							public void onEnd(AnimationDesc animation) {
-								enemy.setIsActive(false);
-							}
-						});
-					}
-				//System.out.println("Box: " + player.getTransformedBoundingBox());
-				if(enemy.getTransformedBoundingBox().intersects(player.getTransformedBoundingBox())){
-					//System.out.println("intersects with target");
+						@Override
+						public void onEnd(AnimationDesc animation) {
+							enemy.setIsActive(false);
+						}
+					});
 				}
+				//System.out.println("Box: " + player.getTransformedBoundingBox());
+				//if(enemy.getTransformedBoundingBox().intersects(player.getTransformedBoundingBox())){
+					//System.out.println("intersects with target");
+				//}
 			}
 		/*
 		if(ProjectileBoxEntity!=null&&Victim!=null&&ProjectileBoxEntity.GetTransformedBoundingBox().intersects(Victim.GetTransformedBoundingBox())){
@@ -284,6 +286,7 @@ public class World {
 		}
 	}
 	
+	/*
 	public void setDecals() {
 		Decal decal = Decal.newDecal(Assets.test1, true);
 		decal.setPosition(out);
@@ -292,21 +295,14 @@ public class World {
 		decal.value = 6;
 		decalInstances.add(decal);
 	}
+	*/
 	
 	public Player getPlayer() {
 		return player;
 	}
 	
-	public Array<Decal> getDecals() {
-		return decalInstances;
-	}
-	
 	public Array<BoundingBox> getBoundingBoxes() {
 		return boxes;
-	}
-	
-	public Array<ModelInstance> getLevelMesh() {
-		return meshLevel.generateLevel();
 	}
 	
 	public MeshLevel getMeshLevel() {
@@ -319,9 +315,5 @@ public class World {
 	
 	public Vector3 getOut() {
 		return out;
-	}
-	
-	public Array<Projectile> getProjectiles() {
-		return projectiles;
 	}
 }

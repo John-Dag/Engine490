@@ -19,7 +19,7 @@ public class Enemy extends DynamicEntity {
 	public static final int DAMAGE = 1;
 	private int health, damage;
     private TiledMap tiledMap;
-    private  ArrayList<String> showXY = new ArrayList<String>();
+    private ArrayList<String> showXY = new ArrayList<String>();
     private int currentHeight = 1;
 	State idle=new State();
 	State moving=new State();
@@ -57,11 +57,12 @@ public class Enemy extends DynamicEntity {
 					return false;
 			}
 		};
+		
 		Condition idleCondition=new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-				//if(enemy doesn't see player ()) return true ... else
-				return false;
+
+					return false;
 			}
 		};
 		

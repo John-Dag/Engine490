@@ -20,6 +20,7 @@ public class GameScreen implements Screen {
 		this.game = game;
 		this.world = new World();
 		this.renderer = new Render(world);
+		this.world.initializeEntities();
 	
 		center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		spriteBatch = new SpriteBatch();
@@ -30,6 +31,7 @@ public class GameScreen implements Screen {
 	@Override
 	public void render(float delta) {	
 		//Call the main renderer
+		world.update(delta);
 		renderer.RenderWorld(delta);
 		
 		//UI components are rendered here
@@ -39,8 +41,6 @@ public class GameScreen implements Screen {
 		renderPos();
 		renderTilePos();
 		spriteBatch.end();
-		
-		world.update(delta);
 	}
 	
 	public void renderFps() {

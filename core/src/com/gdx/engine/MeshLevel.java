@@ -61,9 +61,7 @@ public class MeshLevel {
 	
 	private TiledMap tiledMap;
 	private ModelBuilder modelBuilder;
-	private Array<ModelInstance> instances;
-	private Array<Object> objectInstances;
-	private Array<Entity> entityInstances;
+	private Array<ModelInstance> modelInstances;
 	private Model model, skySphere;
 	private ModelInstance instance;
 	private int triCount = 0;
@@ -90,9 +88,7 @@ public class MeshLevel {
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
-		instances  = new Array<ModelInstance>();
-		objectInstances = new Array<Object>();
-		entityInstances = new Array<Entity>();
+		modelInstances  = new Array<ModelInstance>();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
 		//tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
@@ -101,6 +97,7 @@ public class MeshLevel {
 		this.layer2 = (TiledMapTileLayer) tiledMap.getLayers().get(2);
 		this.heightOffset = 0f;
 		this.levelHeight = 0f;
+		generateLevel();
 	}
 	
 	// TODO: updateHeightOffset
@@ -120,14 +117,14 @@ public class MeshLevel {
 	}
 	
 	// TODO: generateLevel
-	public Array<ModelInstance> generateLevel() {
+	public void generateLevel() {
 		
 		if (isSkySphereActive) {
 			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.BLACK)), Usage.Position | Usage.Normal);
 			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));
 			instance = new ModelInstance(skySphere);
 			instance.transform.setToTranslation(currentLayer.getHeight()/2, 0, currentLayer.getWidth()/2);
-			instances.add(instance);
+			modelInstances.add(instance);
 		}
 		
 		//modelBuilder.begin();
@@ -177,7 +174,7 @@ public class MeshLevel {
 							meshPartBuilder.rect(0,0,0, 1,0,0, 1,0,1, 0,0,1, 0,-1,0);
 							model = modelBuilder.end();
 							instance = new ModelInstance(model);
-							instances.add(instance);
+							modelInstances.add(instance);
 						}
 						
 						// make the floor tiles
@@ -211,7 +208,7 @@ public class MeshLevel {
 								}
 								model = modelBuilder.end();
 								instance = new ModelInstance(model);
-								instances.add(instance);
+								modelInstances.add(instance);
 
 							}
 							// else not a ramp
@@ -228,7 +225,7 @@ public class MeshLevel {
 								meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
 								model = modelBuilder.end();
 								instance = new ModelInstance(model);
-								instances.add(instance);
+								modelInstances.add(instance);
 							}
 						}
 						//				Node node = modelBuilder.node();
@@ -263,7 +260,6 @@ public class MeshLevel {
 		}
 		
 		currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 1");
-		return instances;
 	}
 	
 	// TODO: makeWalls
@@ -606,7 +602,7 @@ public class MeshLevel {
 		meshPartBuilder.triangle(v1, v2, v3);
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
-		instances.add(instance);
+		modelInstances.add(instance);
 	}
 	// TODO: genWall
 	// Generates a wall segment
@@ -670,7 +666,7 @@ public class MeshLevel {
 		meshPartBuilder.rect(p1, p2, p3, p4, normal);
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
-		instances.add(instance);
+		modelInstances.add(instance);
 	}
 	
 	//Objects are read from the "objects" layer in the tile map
@@ -905,15 +901,7 @@ public class MeshLevel {
 	}
 	
 	public Array<ModelInstance> getInstances() {
-		return instances;
-	}
-	
-	public Array<Object> getObjectInstances() {
-		return objectInstances;
-	}
-	
-	public Array<Entity> getEntityInstances() {
-		return entityInstances;
+		return modelInstances;
 	}
 	
 	// TODO: Check Collision
@@ -1189,5 +1177,13 @@ public class MeshLevel {
 		else {
 			return 0;
 		}
+	}
+	
+	public Array<ModelInstance> getModelInstances() {
+		return modelInstances;
+	}
+
+	public void setModelInstances(Array<ModelInstance> modelInstances) {
+		this.modelInstances = modelInstances;
 	}
 }

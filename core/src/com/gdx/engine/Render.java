@@ -20,10 +20,9 @@ import com.gdx.StaticEntities.StaticEntity;
 
 public class Render implements Disposable {
 	public static int renderCount;
+	public static Environment environment;
 	private World world;
 	private ModelBatch modelBatch;
-	private Environment environment;
-	private Array<ModelInstance> instances;
 	private DecalBatch decalBatch;
 	private DefaultShaderProvider shaderProvider;
 	private Vector3 position;
@@ -53,58 +52,9 @@ public class Render implements Disposable {
 		modelBatch = new ModelBatch(shaderProvider);
 		loading = true;
 		decalBatch = new DecalBatch(new CameraGroupStrategy(world.getPlayer().camera));
-		instances = new Array<ModelInstance>(world.getLevelMesh());
 		world.createBoundingBoxes();
-		initStaticEntities();
 	}
-	
-	private void initStaticEntities() {
-		StaticEntity stat;
 
-		for (int j = 0; j < Entity.entityInstances.size; j++) {
-			Entity entity = Entity.entityInstances.get(j);
-			if (entity instanceof StaticEntity) {
-				stat = (StaticEntity)entity;
-				if (stat.isRenderable() && stat.isActive()) {
-					if (stat.getPointLight() != null)
-						environment.add(stat.getPointLight());
-					if (stat.getEffect() != null) {
-						stat.getEffect().init();
-						stat.getEffect().start();
-						stat.getEffect().translate(stat.getPosition());
-						World.particleManager.system.add(stat.getEffect());
-					}
-				}
-			}
-		}
-	}
-	
-	private void initDynamicEntities(float delta) {
-		DynamicEntity dyn;
-		
-		for (int i = 0; i < Entity.entityInstances.size; i++) {
-			Entity entity = Entity.entityInstances.get(i);
-			if (entity instanceof DynamicEntity) {
-				dyn = (DynamicEntity)entity;
-				if (dyn.isRenderable() && !dyn.isRendered() && dyn.isActive()) {
-					if (dyn.getParticleEffect() != null) {
-						dyn.setRendered(true);
-						dyn.getParticleEffect().init();
-						dyn.getParticleEffect().start();
-						World.particleManager.system.add(dyn.getParticleEffect());
-					}
-					
-					if (dyn.getModel() != null) {
-						dyn.setRendered(true);
-						System.out.println(dyn.getId());
-						world.getBoundingBoxes().add(dyn.getBoundingBox());
-						instances.add(dyn.getModel());
-					}
-				}
-			}
-		}
-	}
-	
 	//g3db files loaded here
 	private void doneLoading() {
 		gun = Assets.manager.get(world.getPlayer().getCurrentWeapon().getWeaponModelName(), Model.class);
@@ -113,22 +63,6 @@ public class Render implements Disposable {
 		gunInstance.transform.scale(0.001f, 0.001f, 0.001f);
 		
 		loading = false;
-	}
-	
-	public void updateDecals() {
-		int size = Entity.entityInstances.size;
-		
-		for (int i = 0; i < size; i++) {
-			Entity entity = Entity.entityInstances.get(i);
-			if (entity instanceof StaticEntity) {
-				StaticEntity stat = (StaticEntity)entity;
-				if (stat.isRenderable() && stat.getDecal() != null) {
-					decalBatch.add(stat.getDecal());
-					if (stat.isDecalFacing())
-						stat.getDecal().lookAt(world.getPlayer().camera.position, world.getPlayer().camera.up);
-				}
-			}
-		}
 	}
 	
 	public void renderParticles() {
@@ -152,16 +86,22 @@ public class Render implements Disposable {
 		//updateEntityMesh();
 		modelBatch.begin(world.getPlayer().camera);
 		//renderProjectiles();
-		initDynamicEntities(delta);
+		//initDynamicEntities(delta);
 		renderParticles();
 		
 		//Viewport culling
 		renderCount = 0;
-		for (int i = 0; i < instances.size; i++) {
-			ModelInstance instance = instances.get(i);
+		for (int i = 0; i < world.getMeshLevel().getInstances().size; i++) {
+			ModelInstance instance = world.getMeshLevel().getInstances().get(i);
 			if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
 				renderModels(instance);
 				renderCount++;
+			}
+		}
+		
+		for (Entity entity : Entity.entityInstances) {
+			if (entity.isRenderable() && entity.isActive()) {
+				entity.render(modelBatch, decalBatch);
 			}
 		}
 
@@ -177,7 +117,7 @@ public class Render implements Disposable {
 		renderModels(gunInstance);
 	
 		modelBatch.end();
-		updateDecals();
+		//updateDecals();
 		
 		//Render decals
 		decalBatch.flush();
@@ -203,12 +143,8 @@ public class Render implements Disposable {
 
 	@Override
 	public void dispose() {
-		world.getProjectiles().clear();
 		world.getBoundingBoxes().clear();
 		world.getMeshLevel().getInstances().clear();
-		world.getMeshLevel().getEntityInstances().clear();
-		//world.getMeshLevel().getObjectInstances().clear();
-		world.getDecals().clear();
 		Assets.manager.dispose();
 		modelBatch.dispose();
 	}

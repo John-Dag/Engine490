@@ -1,12 +1,16 @@
 package com.gdx.StaticEntities;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
+import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.engine.Entity;
+import com.gdx.engine.Render;
+import com.gdx.engine.World;
 
 public class StaticEntity extends Entity {
 	private Vector3 position;
@@ -37,6 +41,27 @@ public class StaticEntity extends Entity {
 	@Override
 	public void update(float delta) {
 		
+	}
+	
+	@Override 
+	public void render(ModelBatch modelBatch, DecalBatch decalBatch) {
+		if (this.decal != null)
+			decalBatch.add(this.decal);
+	}
+	
+	@Override
+	public void initialize(World world) {
+		super.initialize(world);
+		if (this.isRenderable() && this.isActive()) {
+			if (this.getPointLight() != null)
+				Render.environment.add(this.getPointLight());
+			if (this.getEffect() != null) {
+				this.getEffect().init();
+				this.getEffect().start();
+				this.getEffect().translate(this.getPosition());
+				World.particleManager.system.add(this.getEffect());
+			}
+		}
 	}
 	
 	public ModelInstance getModel() {

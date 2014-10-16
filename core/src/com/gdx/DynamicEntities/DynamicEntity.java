@@ -1,12 +1,15 @@
 package com.gdx.DynamicEntities;
 
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.engine.Entity;
+import com.gdx.engine.World;
 
 public class DynamicEntity extends Entity {
 	private Weapon weapon;
@@ -71,6 +74,27 @@ public class DynamicEntity extends Entity {
 	public BoundingBox getTransformedBoundingBox(){
 		return new BoundingBox(this.boundingBox).mul(this.model.transform);
 	}
+	
+	@Override
+	public void update(float delta) {
+		
+	}
+	
+	@Override
+	public void render(ModelBatch modelBatch, DecalBatch decalBatch) {
+		if (this.model != null)
+			modelBatch.render(this.model);
+	}
+	
+	@Override
+	public void initialize(World world) {
+		super.initialize(world);
+		
+		if (this.getModel() != null) {
+			world.getBoundingBoxes().add(this.getBoundingBox());
+			world.getMeshLevel().getInstances().add(this.getModel());
+		}
+	}
 
 	public void updatePosition(float time)
 	{
@@ -78,7 +102,6 @@ public class DynamicEntity extends Entity {
 		
 
 		position.add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
-
 		//rotation.add(new Vector3(angVelocity.add(new Vector3(angAccel).scl(timeV))).scl(timeV));
 	}
 	
