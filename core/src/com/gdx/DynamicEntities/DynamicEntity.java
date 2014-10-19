@@ -20,6 +20,7 @@ public class DynamicEntity extends Entity {
 	private Quaternion rotationQuaternion;
 	private AnimationController animation;
 	private BoundingBox boundingBox;
+	private BoundingBox detectionBox;
 	
 	public DynamicEntity() {
 		super(0, false, false);
@@ -64,15 +65,30 @@ public class DynamicEntity extends Entity {
 		this.isAnimating = false;
 		this.rotationQuaternion = new Quaternion();
 		this.boundingBox = new BoundingBox();
+		this.detectionBox = new BoundingBox();
 		this.model.calculateBoundingBox(this.boundingBox);
+		this.detectionBox.set(this.boundingBox);
+		this.detectionBox.ext(15, 15, 15);
 		this.isRendered = false;
 		this.acceleration = acceleration;
 		this.angAccel = new Vector3(0, 0, 0);
 		this.angVelocity = new Vector3(0, 0, 0);
 	}
 
+	public BoundingBox getDetectionBox() {
+		return detectionBox;
+	}
+
+	public void setDetectionBox(BoundingBox detectionBox) {
+		this.detectionBox = detectionBox;
+	}
+
 	public BoundingBox getTransformedBoundingBox(){
 		return new BoundingBox(this.boundingBox).mul(this.model.transform);
+	}
+	
+	public BoundingBox getTransformedDetectionBoundingBox() {
+		return new BoundingBox(this.detectionBox).mul(this.model.transform);
 	}
 	
 	@Override

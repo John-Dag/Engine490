@@ -82,11 +82,7 @@ public class Render implements Disposable {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
-		//System.out.println(pfxPoolWeapon.peak);
-		//updateEntityMesh();
 		modelBatch.begin(world.getPlayer().camera);
-		//renderProjectiles();
-		//initDynamicEntities(delta);
 		renderParticles();
 		
 		//Viewport culling
@@ -117,7 +113,6 @@ public class Render implements Disposable {
 		renderModels(gunInstance);
 	
 		modelBatch.end();
-		//updateDecals();
 		
 		//Render decals
 		decalBatch.flush();

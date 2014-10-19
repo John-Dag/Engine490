@@ -180,7 +180,7 @@
  </tileset>
  <layer name="Tile Layer 1" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJzNl9sOgjAMhocML8B44elCxUQ8vP8juiU0LrUtHRvCxRfjoP270o5SGmPKmVnNxFL1C4JY3xoflD7cu3bY/jc2Bq0PrB/ahfeF9lokH5J+aHdztI4qMgasjWOQ9C1ht+ltAYv+U2uUvo3cP9Aw6972jNY6x8PxdLwc78j9UzHUzH72zLqUe0kfx8Dl0bN1HJS62vofygP2exy571z6cN0yzztVn+oFika4ZhP08VnA1QRXn7nyH+ZXeiad+fZelVn/Yn57ndtvS+jfE/OvAZ4PdeZMWX/AiVjLVX9jmar/PbuenPra81eKn6qJlPkjRV/Kg3b+uBq6/yj9zqS9f7map2YNsJ96/sD5A8A+5/wVM39y+mPnTxzD0Pyt6d+Y+RvbF4K2pzb8u0/jY6nfX//Wn5MP+AgOBw==
+   eJztV8sSwjAIZGzqoXU8+Dqo7aE+/v8T5VDGToRAHrUePOw4prAbAjS0AoBqYawWwl9f1l8j3Pibyq9xSPq+fcoeLByc/tSuR3SIOnIPkq2/zuk7xm8z+hKc959b4/R9bi1+Qhs4v7O3NiBuiDvigXhGxs/ZNUI8+8ycaPUfyvkWcTDqxta/Vkf07JgYdyl9eu6EfOfqc73AoU3kiIm/D+RSqs9S5z893xDfAO/eqwvrX+Cz1yWfrrC+FZSf0DtnjvojnCI5Ssc/V/1J2I2YQ197/1r2r/FY758c/RCndf64At9/nP8AefevVK/crEH+c88fMecXw5E7f2r1m7p/stfmb0v/pszfVjQQvvs0/PL3zzf1l8QL2nQOfw==
   </data>
  </layer>
  <objectgroup name="objects" width="32" height="32">
@@ -326,10 +326,16 @@
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Spawn" x="459" y="578">
+  <object name="Spawn" x="376" y="962">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="20"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Mist" x="512" y="555">
+   <properties>
+    <property name="color" value="3"/>
+    <property name="height" value="3"/>
    </properties>
   </object>
  </objectgroup>

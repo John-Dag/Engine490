@@ -30,7 +30,6 @@ public class Player extends DynamicEntity {
 	private World world;
 	private Vector3 collisionVector, movementVector, newPos, oldPos;
 	private boolean isJumping;
-	private Vector3 v;
 	private float jumpVelocity;
 	private float currentHeightOffset;
 	private float currentMovementSpeed;
@@ -158,24 +157,22 @@ public class Player extends DynamicEntity {
 		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
 			Gdx.input.setCursorCatched(true);
-			mouseLocked = true;
 		}
 		//ESC cancels cursor lock
-		else if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+		else if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) && Gdx.input.isCursorCatched()) {
 			Gdx.input.setCursorCatched(false);
-			mouseLocked = false;
 		}
 		
-		else if (Gdx.input.isButtonPressed(Buttons.LEFT) && mouseLocked) {
+		else if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
 			mouseLeft = true;
-		}else{
-			mouseLeft = false;
 		}
+		else
+			mouseLeft = false;
 		
 		movementVector.set(0,0,0);
 		
 		// camera rotation based on mouse looking
-		if (mouseLocked) {
+		if (Gdx.input.isCursorCatched()) {
 				// rotate xz plane
 				camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
 				

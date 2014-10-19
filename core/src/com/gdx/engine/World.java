@@ -94,11 +94,12 @@ public class World {
 				int width = layer.getWidth();
 				ArrayList<Integer> path;
 				
-				if (enemy.getStateMachine().Current == enemy.getStateMachine().States.get(0)) {
+				if (enemy.getStateMachine().Current == enemy.idle) {
+					enemy.getVelocity().set(0, 0, 0);
 					enemy.getAnimation().setAnimation("Idle", -1);
 				}
 
-				else if (enemy.getStateMachine().Current == enemy.getStateMachine().States.get(1)) {
+				else if (enemy.getStateMachine().Current == enemy.moving) {
 					try {
 						path = enemy.shortestPath(enemyPosition.x + width
 								* enemyPosition.y, playerPosition.x + width
@@ -159,7 +160,6 @@ public class World {
 				}
 				
 				else {
-					enemy.getVelocity().set(0, 0, 0);
 					enemy.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
 							
 							@Override
@@ -264,7 +264,6 @@ public class World {
 						
 						if (result > -1) {
 							Intersector.intersectRayBounds(ray, enemy.getTransformedBoundingBox(), out);
-							enemy.setHealth(-1);
 						}
 					}
 				}

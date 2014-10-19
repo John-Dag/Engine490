@@ -21,10 +21,11 @@ public class Enemy extends DynamicEntity {
     private TiledMap tiledMap;
     private ArrayList<String> showXY = new ArrayList<String>();
     private int currentHeight = 1;
-	State idle=new State();
-	State moving=new State();
-	State dead=new State();
-	StateMachine stateMachine=new StateMachine();
+	public State idle;
+	public State moving;
+	public State dead;
+	public State spawn;
+	StateMachine stateMachine;
 
 	public Enemy() {
 		super();
@@ -36,6 +37,11 @@ public class Enemy extends DynamicEntity {
 			  scale, velocity, acceleration, model);
 		this.health = MAX_HEALTH;
 		this.damage = DAMAGE;
+		idle = new State();
+		moving = new State();
+		dead = new State();
+		spawn = new State();
+		stateMachine=new StateMachine();
 		this.StateMachineUsage(this);
 	}
 
@@ -48,20 +54,22 @@ public class Enemy extends DynamicEntity {
 	}
 	
 	private void StateMachineUsage(Enemy enemy){
-		Condition movingCondition=new Condition() {
+		Condition idleCondition=new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-				if (enemy.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox()))
+				if (!enemy.getTransformedDetectionBoundingBox().intersects(World.player.getTransformedBoundingBox()))
 					return true;
 				else
 					return false;
 			}
 		};
 		
-		Condition idleCondition=new Condition() {
+		Condition movingCondition=new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-
+				if (enemy.getTransformedDetectionBoundingBox().intersects(World.player.getTransformedBoundingBox()))
+					return true;
+				else
 					return false;
 			}
 		};
@@ -76,6 +84,13 @@ public class Enemy extends DynamicEntity {
 					return false;
 			}
 		};
+		
+		Condition spawnCondition = new Condition() {
+			@Override
+			public boolean IsSatisfied(Enemy enemy) {
+				return false;
+			}
+		};
 
 		idle.LinkedStates.put(movingCondition, moving);
 		idle.LinkedStates.put(deadCondition, dead);
@@ -85,6 +100,7 @@ public class Enemy extends DynamicEntity {
 		stateMachine.States.add(idle);
 		stateMachine.States.add(moving);
 		stateMachine.States.add(dead);
+		stateMachine.States.add(spawn);
 		
 		stateMachine.Current=idle; //Set initial state
 	}
