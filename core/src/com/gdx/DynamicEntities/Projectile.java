@@ -42,7 +42,7 @@ public class Projectile extends DynamicEntity {
 				this.setRendered(true);
 				this.getParticleEffect().init();
 				this.getParticleEffect().start();
-				this.setBoundingBox(this.getBoundingBox());
+				this.setBoundingBox(this.getParticleEffect().getBoundingBox());
 				World.particleManager.system.add(this.getParticleEffect());
 			}
 		}

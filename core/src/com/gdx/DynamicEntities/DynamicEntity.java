@@ -97,9 +97,11 @@ public class DynamicEntity extends Entity {
 	}
 	
 	@Override
-	public void render(ModelBatch modelBatch, DecalBatch decalBatch) {
-		if (this.model != null)
+	public void render(ModelBatch modelBatch, DecalBatch decalBatch, ModelBatch shadowBatch) {
+		if (this.model != null) {
+			shadowBatch.render(this.model);
 			modelBatch.render(this.model);
+		}
 	}
 	
 	@Override

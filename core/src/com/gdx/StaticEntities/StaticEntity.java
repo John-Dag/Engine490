@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.engine.Entity;
 import com.gdx.engine.Render;
 import com.gdx.engine.World;
@@ -21,6 +22,7 @@ public class StaticEntity extends Entity {
 	private boolean isDecalFacing;
 	private ParticleEffect effect;
 	private ModelInstance model;
+	private BoundingBox boundingBox = new BoundingBox();
 
 	public StaticEntity() {
 		super();
@@ -40,13 +42,19 @@ public class StaticEntity extends Entity {
 	
 	@Override
 	public void update(float delta) {
-		
+
 	}
 	
 	@Override 
-	public void render(ModelBatch modelBatch, DecalBatch decalBatch) {
+	public void render(ModelBatch modelBatch, DecalBatch decalBatch, ModelBatch shadowBatch) {
 		if (this.decal != null)
 			decalBatch.add(this.decal);
+		if (this.model != null) {
+			this.model.transform.setToTranslation(this.position);
+			this.model.transform.scale(0.005f, 0.005f, 0.005f);
+			shadowBatch.render(this.model);
+			modelBatch.render(this.model);
+		}
 	}
 	
 	@Override
@@ -62,6 +70,18 @@ public class StaticEntity extends Entity {
 				World.particleManager.system.add(this.getEffect());
 			}
 		}
+	}
+	
+	public BoundingBox getTransformedBoundingBox(){
+		return new BoundingBox(this.boundingBox).mul(this.model.transform);
+	}
+
+	public BoundingBox getBoundingBox() {
+		return boundingBox;
+	}
+
+	public void setBoundingBox(BoundingBox boundingBox) {
+		this.boundingBox = boundingBox;
 	}
 	
 	public ModelInstance getModel() {

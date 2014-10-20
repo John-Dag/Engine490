@@ -37,7 +37,7 @@ public class Entity {
 	}
 	
 	// Overridden by classes that extend Entity
-	public void render(ModelBatch modelBatch, DecalBatch decalBatch) {
+	public void render(ModelBatch modelBatch, DecalBatch decalBatch, ModelBatch shadowBatch) {
 		
 	}
 	

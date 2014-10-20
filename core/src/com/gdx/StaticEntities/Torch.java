@@ -20,7 +20,7 @@ public class Torch extends StaticEntity {
 	public void setRotations(char rotation) {
 		switch (direction) {
 			case('W'):
-				this.getDecal().rotateZ(60f);
+				this.getDecal().rotateZ(30f);
 				break;
 			case('E'):
 				this.getDecal().rotateZ(-30f);

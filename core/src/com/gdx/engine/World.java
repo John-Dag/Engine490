@@ -24,6 +24,7 @@ import com.gdx.DynamicEntities.Enemy;
 public class World {
 	public static final float PLAYER_SIZE = 0.2f;
 	public static Player player;
+	public static Enemy currentEnemy;
 	//private Enemy enemy;
 	//private Level level;
 	private MeshLevel meshLevel;
@@ -36,9 +37,7 @@ public class World {
     //private TiledMapTileLayer layer = (TiledMapTileLayer)Assets.level2.getLayers().get(0);
 	
 	public World() {
-		Weapon weapon = new Weapon(0.1f, true, "GUNFBX.g3db", 1, true, true, new Vector3(-1, 0, 0), 
-								   new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
-		player = new Player(this, 100, weapon, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+		player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 						    new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
 						    Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
 		particleManager = new ParticleManager(this);
@@ -88,6 +87,7 @@ public class World {
 			Entity entity = Entity.entityInstances.get(i);
 			if (entity instanceof Enemy) {
 				final Enemy enemy = (Enemy)entity;
+				currentEnemy = enemy;
 				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
 				GridPoint2 playerPosition = new GridPoint2((int)player.camera.position.x, (int)player.camera.position.z);
 				TiledMapTileLayer layer = (TiledMapTileLayer)getMeshLevel().getTiledMap().getLayers().get(0);

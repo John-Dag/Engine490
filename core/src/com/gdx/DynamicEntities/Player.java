@@ -236,6 +236,16 @@ public class Player extends DynamicEntity {
 		}
 	}
 	
+	public void pickupWeapon(int id) {
+		switch (id) {
+			case 1:
+				Weapon weapon = new Weapon(0.1f, true, "GUNFBX.g3db", 1, true, true, new Vector3(-1, 0, 0), 
+						   				   new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+				this.setWeapon(weapon);
+				break;
+		}
+	}
+	
 	// input world coordinates to get tile coords
 	public GridPoint2 getPlayerTileCoords(){
 		return getTileCoords(camera.position.x, camera.position.z);

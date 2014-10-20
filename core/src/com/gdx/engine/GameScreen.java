@@ -36,7 +36,7 @@ public class GameScreen implements Screen {
 		
 		//UI components are rendered here
 		spriteBatch.begin();
-		spriteBatch.draw(Assets.crosshair, center.x - 16, center.y);
+		spriteBatch.draw(Assets.crosshair, center.x - 8, center.y - 8);
 		renderFps();
 		renderPos();
 		renderTilePos();

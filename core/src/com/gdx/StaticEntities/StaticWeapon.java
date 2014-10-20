@@ -1,6 +1,9 @@
 package com.gdx.StaticEntities;
 
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.engine.World;
 
 public class StaticWeapon extends StaticEntity {
 	private float firingDelay;
@@ -14,10 +17,20 @@ public class StaticWeapon extends StaticEntity {
 		weaponModelName = "";
 	}
 
-	public StaticWeapon(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing) {
+	public StaticWeapon(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, Model model) {
 		super(position, id, isActive, isRenderable, isDecalFacing);
+		this.setModel(new ModelInstance(model));
 	}
 	
+	@Override
+	public void update(float delta) {
+		if (this.getModel() != null && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
+			if (World.player.getCurrentWeapon() == null || World.player.getCurrentWeapon().getId() != this.getId())
+				this.setIsActive(false);
+				World.player.pickupWeapon(this.getId());
+		}
+	}
+
 	public float getFiringDelay() {
 		return firingDelay;
 	}

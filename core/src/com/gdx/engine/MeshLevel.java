@@ -22,6 +22,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.StaticEntities.Light;
@@ -696,6 +697,8 @@ public class MeshLevel {
 					torch.setColor(getLightColor(rectObj));
 					torch.getDecal().setScale(0.003f);
 					torch.setRotations(torch.getDirection());
+					PointLight light = new PointLight();
+					torch.setPointLight(light.set(getLightColor(rectObj), objPosition, 2f));
 					Entity.entityInstances.add(torch);
 				}
 
@@ -742,9 +745,13 @@ public class MeshLevel {
 					//float scale = 0.005f;
 					objPosition = new Vector3();
 					objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-					StaticWeapon weapon = new StaticWeapon(objPosition, 5, true, true, true);
-					weapon.setDecal(Decal.newDecal(Assets.weapon1Region, true));
-					weapon.getDecal().setScale(0.005f);
+					Assets.loadModels();
+					StaticWeapon weapon = new StaticWeapon(objPosition, 1, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class));
+					BoundingBox temp = new BoundingBox();
+					weapon.getModel().calculateBoundingBox(temp);
+					weapon.setBoundingBox(temp);
+					weapon.getModel().transform.setToTranslation(weapon.getPosition());
+					weapon.getModel().transform.scale(0.005f, 0.005f, 0.005f);
 					PointLight pointLight = new PointLight();
 					pointLight.set(getLightColor(rectObj), objPosition, 1f);
 					weapon.setPointLight(pointLight);
