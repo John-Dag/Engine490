@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -772,7 +773,14 @@ public class MeshLevel {
 					int height = getObjectHeight(rectObj);
 					objPosition = new Vector3();
 					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-					Spawn spawn = new Spawn(objPosition, 8, true, false, false, getSpawnTime(rectObj));
+					Assets.loadModels();
+					Enemy enemy = new Enemy(9, false, true, objPosition, new Vector3(0, 0, 0), 
+							new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+							new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
+					enemy.setAnimation(new AnimationController(enemy.getModel()));
+					enemy.getStateMachine().Current = enemy.spawn;
+					enemy.setInCollision(true);
+					Spawn spawn = new Spawn(objPosition, 8, true, false, false, getSpawnTime(rectObj), enemy);
 					Entity.entityInstances.add(spawn);
 				}
 
@@ -985,7 +993,7 @@ public class MeshLevel {
 					// TODO: Fix known bug: Player can access a ramp from the side, but should not be able to.
 					
 					// if oldPos tile is a ramp, it can lead us up one space
-					if (oldPosLayer.getCell(tileCoords.x, tileCoords.y)!= null) {
+					if (oldPosLayer.getCell(tileCoords.x, tileCoords.y) != null) {
 						if (oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
 
 							if (getHeight(newPosLayer.getCell(i, j).getTile()) + newHeightOffset > getHeight(oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile()) + oldHeightOffset + 1) {

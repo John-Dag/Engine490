@@ -53,8 +53,6 @@ public class Render implements Disposable {
                 		 .set(.5f, .5f, .5f, 20.0f, -35f, -35f)); 
 	    environment.shadowMap = shadowLight;
 	    shadowBatch = new ModelBatch(new DepthShaderProvider());
-		//environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
-		//environment.add(new PointLight().set(new ColorAttribute(ColorAttribute.Diffuse).color.set(255, 0, 0, 1), 1f, 2f, 1f, 100f));
 
 		Assets.loadModels();
 		modelBatch = new ModelBatch(shaderProvider);
@@ -65,8 +63,8 @@ public class Render implements Disposable {
 
 	//g3db files loaded here
 	private void doneLoading() {
-		if (world.getPlayer().getCurrentWeapon() != null) {
-			gun = Assets.manager.get(world.getPlayer().getCurrentWeapon().getWeaponModelName(), Model.class);
+		if (world.getPlayer().getWeapon() != null) {
+			gun = Assets.manager.get(world.getPlayer().getWeapon().getWeaponModelName(), Model.class);
 			gunInstance = new ModelInstance(gun);
 			gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z);
 			gunInstance.transform.scale(0.001f, 0.001f, 0.001f);
@@ -101,8 +99,8 @@ public class Render implements Disposable {
 		renderCount = 0;
 		for (int i = 0; i < world.getMeshLevel().getInstances().size; i++) {
 			ModelInstance instance = world.getMeshLevel().getInstances().get(i);
+			//shadowBatch.render(instance);
 			if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
-				//shadowBatch.render(instance);
 				renderModels(instance);
 				renderCount++;
 			}
@@ -114,7 +112,7 @@ public class Render implements Disposable {
 			}
 		}
 		
-		if (gunInstance != null) {
+		if (gunInstance != null && world.getPlayer().getWeapon() != null) {
 			gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, 
 												   world.getPlayer().camera.position.y - 0.1f, 
 												   world.getPlayer().camera.position.z);

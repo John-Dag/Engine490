@@ -326,7 +326,7 @@
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Spawn" x="376" y="962">
+  <object name="Spawn" x="921" y="509">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
@@ -348,6 +348,24 @@
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="516" y="726">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="804" y="951">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="91" y="326">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
    </properties>
   </object>
  </objectgroup>

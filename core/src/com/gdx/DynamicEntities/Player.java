@@ -4,11 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.engine.Assets;
+import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
 public class Player extends DynamicEntity {
@@ -44,7 +47,7 @@ public class Player extends DynamicEntity {
 		super(id, isActive, isRenderable, position, rotation, scale, velocity,
 			  acceleration, model);
 		this.world = world;
-		this.setCurrentWeapon(weapon);
+		this.setWeapon(weapon);
 		this.camera = new PerspectiveCamera();
 		this.collisionVector = new Vector3(1, 1, 1);
 		this.mouseLocked = false;
@@ -151,6 +154,10 @@ public class Player extends DynamicEntity {
 		this.getPosition().set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.updatePosition(delta);
 		this.updateInstanceTransform();
+		
+		if (this.health <= MIN_HEALTH) {
+			respawnPlayer(this);
+		}
 	}
 	
 	public void input(float delta) {
@@ -210,7 +217,7 @@ public class Player extends DynamicEntity {
 			temp.set(camera.up).crs(camera.direction);
 			movementVector.add(temp);
 		}
-		if (Gdx.input.isKeyPressed(Keys.SPACE)){
+		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
 			if(!isJumping){
 				isJumping = true;
 				jumpVelocity = JUMP_SPEED;
@@ -221,10 +228,13 @@ public class Player extends DynamicEntity {
 			currentHeightOffset = CROUCH_HEIGHT;
 			currentMovementSpeed = CROUCH_SPEED;
 		}
-		if (!Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)){
+		else {
 			isCrouching = false;
 			currentHeightOffset = PLAYER_HEIGHT_OFFSET;
 			currentMovementSpeed = MOVEMENT_SPEED;
+		}
+		if (Gdx.input.isKeyJustPressed(Keys.P)) {
+			Gdx.app.exit();
 		}
 		// This is temporary, but useful for testing. Press 'O' if you ever get stuck.
 		if (Gdx.input.isKeyPressed(Keys.O)){
@@ -244,6 +254,16 @@ public class Player extends DynamicEntity {
 				this.setWeapon(weapon);
 				break;
 		}
+	}
+	
+	public void takeDamage(int damage) {
+		this.health -= damage;
+	}
+	
+	public void respawnPlayer(Player player) {
+		player.camera.position.set(new Vector3(2f, 1.5f, 2f));
+		player.setWeapon(null);
+		player.setHealth(MAX_HEALTH);
 	}
 	
 	// input world coordinates to get tile coords

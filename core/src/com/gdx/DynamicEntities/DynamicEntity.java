@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -41,6 +42,7 @@ public class DynamicEntity extends Entity {
 		this.velocity = velocity;
 		this.acceleration = acceleration;
 		this.particleEffect = effect;
+		this.boundingBox = new BoundingBox();
 	}
 	
 	public DynamicEntity(int id, boolean isActive, boolean isRenderable, Vector3 position,
@@ -51,6 +53,7 @@ public class DynamicEntity extends Entity {
 		this.scale = scale;
 		this.velocity = velocity;
 		this.acceleration = acceleration;
+		this.boundingBox = new BoundingBox();
 	}
 
 	public DynamicEntity(int id, boolean isActive, boolean isRenderable, Vector3 position,
@@ -66,7 +69,7 @@ public class DynamicEntity extends Entity {
 		this.rotationQuaternion = new Quaternion();
 		this.boundingBox = new BoundingBox();
 		this.detectionBox = new BoundingBox();
-		this.model.calculateBoundingBox(this.boundingBox);
+		//this.model.calculateBoundingBox(this.boundingBox);
 		this.detectionBox.set(this.boundingBox);
 		this.detectionBox.ext(15, 15, 15);
 		this.isRendered = false;
@@ -83,8 +86,18 @@ public class DynamicEntity extends Entity {
 		this.detectionBox = detectionBox;
 	}
 
-	public BoundingBox getTransformedBoundingBox(){
+	public BoundingBox getTransformedBoundingBox() {
 		return new BoundingBox(this.boundingBox).mul(this.model.transform);
+	}
+	
+	public BoundingBox getTransformedEnemyBoundingBox() {
+		return this.boundingBox.set(new Vector3(this.getPosition().x - 1.5f, this.getPosition().y - 1f, this.getPosition().z - 1.5f),
+			    					new Vector3(this.getPosition().x + 1.5f, this.getPosition().y + 1f, this.getPosition().z + 1.5f));
+	}
+	
+	public BoundingBox getTransformedEnemyDetectionBoundingBox() {
+		return this.boundingBox.set(new Vector3(this.getPosition().x - 15f, this.getPosition().y - 15f, this.getPosition().z - 15f),
+			    					new Vector3(this.getPosition().x + 15f, this.getPosition().y + 15f, this.getPosition().z + 15f));
 	}
 	
 	public BoundingBox getTransformedDetectionBoundingBox() {
@@ -232,20 +245,12 @@ public class DynamicEntity extends Entity {
 		this.particleEffect = particleEffect;
 	}
 
-	public Weapon getCurrentWeapon() {
-		return weapon;
-	}
-
 	public Weapon getWeapon() {
 		return weapon;
 	}
 
 	public void setWeapon(Weapon weapon) {
 		this.weapon = weapon;
-	}
-
-	public void setCurrentWeapon(Weapon currentWeapon) {
-		this.weapon = currentWeapon;
 	}
 
 	public Vector3 getPosition() {

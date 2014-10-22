@@ -37,39 +37,41 @@ public class Projectile extends DynamicEntity {
 	
 	@Override
 	public void update(float time) {
-		if (!this.isRendered()) {
-			if (this.getParticleEffect() != null) {
-				this.setRendered(true);
-				this.getParticleEffect().init();
-				this.getParticleEffect().start();
-				this.setBoundingBox(this.getParticleEffect().getBoundingBox());
-				World.particleManager.system.add(this.getParticleEffect());
-			}
+		if (!this.isRendered() && this.getParticleEffect() != null) {
+			this.setRendered(true);
+			this.getParticleEffect().init();
+			this.getParticleEffect().start();
+			this.setBoundingBox(this.getParticleEffect().getBoundingBox());
+			World.particleManager.system.add(this.getParticleEffect());
 		}
 		
-		this.updatePosition(world.getPlayer().getCurrentWeapon().getFiringDelay());
-		
-		target.idt();
-		target.translate(this.getPosition());
-		this.getParticleEffect().setTransform(target);
-		
-		movementVector.set(0, 0, 0);
-		movementVector.set(world.getPlayer().camera.direction);
-		movementVector.nor();
-		float moveAmt = world.getPlayer().getCurrentWeapon().getFiringDelay() * Gdx.graphics.getDeltaTime();
-		oldPos.set(this.getPosition());
-		newPos.set(oldPos.x + movementVector.x * moveAmt, oldPos.y + movementVector.y * moveAmt, oldPos.z + movementVector.z * moveAmt);
-		collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, 0.5f, 0.5f, 0.5f);
-
-		movementVector.set(movementVector.x * collisionVector.x,
-					       movementVector.y * collisionVector.y,
-				           movementVector.z * collisionVector.z);
-		
-		if (collisionVector.x == 0 || collisionVector.y == 0 || collisionVector.z == 0) {
-			World.particleManager.system.remove(this.getParticleEffect());
-			World.particleManager.getProjectilePool().free(this.getParticleEffect());
-			System.out.println(World.particleManager.projectilePool.peak);
-			this.setIsActive(false);
+		if (World.player.getWeapon() != null) {
+			this.updatePosition(world.getPlayer().getWeapon().getFiringDelay());
+			
+			target.idt();
+			target.translate(this.getPosition());
+			this.getParticleEffect().setTransform(target);
+			
+			movementVector.set(0, 0, 0);
+			movementVector.set(world.getPlayer().camera.direction);
+			movementVector.nor();
+			float moveAmt = world.getPlayer().getWeapon().getFiringDelay() * Gdx.graphics.getDeltaTime();
+			oldPos.set(this.getPosition());
+			newPos.set(oldPos.x + movementVector.x * moveAmt, oldPos.y + movementVector.y * moveAmt, oldPos.z + movementVector.z * moveAmt);
+			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, 0.5f, 0.5f, 0.5f);
+	
+			movementVector.set(movementVector.x * collisionVector.x,
+						       movementVector.y * collisionVector.y,
+					           movementVector.z * collisionVector.z);
+			
+			this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.2f, this.getPosition().y  - 0.2f, this.getPosition().z  - 0.2f),
+									  new Vector3(this.getPosition().x + 0.2f, this.getPosition().y + 0.2f, this.getPosition().z + 0.2f));
+			
+			if (collisionVector.x == 0 || collisionVector.y == 0 || collisionVector.z == 0) {
+				World.particleManager.system.remove(this.getParticleEffect());
+				World.particleManager.getProjectilePool().free(this.getParticleEffect());
+				this.setIsActive(false);
+			}
 		}
 	}
 	
