@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -91,8 +90,8 @@ public class DynamicEntity extends Entity {
 	}
 	
 	public BoundingBox getTransformedEnemyBoundingBox() {
-		return this.boundingBox.set(new Vector3(this.getPosition().x - 1.5f, this.getPosition().y - 1f, this.getPosition().z - 1.5f),
-			    					new Vector3(this.getPosition().x + 1.5f, this.getPosition().y + 1f, this.getPosition().z + 1.5f));
+		return this.boundingBox.set(new Vector3(this.getPosition().x - 1.0f, this.getPosition().y - 1f, this.getPosition().z - 1.0f),
+			    					new Vector3(this.getPosition().x + 1.0f, this.getPosition().y + 1f, this.getPosition().z + 1.0f));
 	}
 	
 	public BoundingBox getTransformedEnemyDetectionBoundingBox() {
@@ -105,7 +104,7 @@ public class DynamicEntity extends Entity {
 	}
 	
 	@Override
-	public void update(float delta) {
+	public void update(float delta, World world) {
 		
 	}
 	

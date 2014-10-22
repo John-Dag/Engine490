@@ -2,8 +2,6 @@ package com.gdx.engine;
 
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 

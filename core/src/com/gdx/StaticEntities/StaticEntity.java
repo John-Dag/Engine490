@@ -41,7 +41,7 @@ public class StaticEntity extends Entity {
 	}
 	
 	@Override
-	public void update(float delta) {
+	public void update(float delta, World world) {
 
 	}
 	

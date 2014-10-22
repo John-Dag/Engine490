@@ -15,10 +15,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.gdx.DynamicEntities.DynamicEntity;
-import com.gdx.StaticEntities.StaticEntity;
 
 public class Render implements Disposable {
 	public static int renderCount;
@@ -49,7 +46,7 @@ public class Render implements Disposable {
 		environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, .7f, .7f, .7f, .2f));
 		environment.set(new ColorAttribute(ColorAttribute.Fog, MeshLevel.skyColor.r, MeshLevel.skyColor.g, MeshLevel.skyColor.b, 1f));
-	    environment.add((shadowLight = new DirectionalShadowLight(4096, 4096, 10f, 10f, .1f, 50f))                  
+	    environment.add((shadowLight = new DirectionalShadowLight(1024, 1024, 10f, 10f, .1f, 50f))                  
                 		 .set(.5f, .5f, .5f, 20.0f, -35f, -35f)); 
 	    environment.shadowMap = shadowLight;
 	    shadowBatch = new ModelBatch(new DepthShaderProvider());

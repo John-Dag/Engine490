@@ -4,14 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.gdx.engine.Assets;
-import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
 public class Player extends DynamicEntity {
@@ -69,7 +66,7 @@ public class Player extends DynamicEntity {
 	}
 	
 	@Override
-	public void update(float delta) {
+	public void update(float delta, World world) {
 		input(delta);
 		
 		float heightValueLvl1 = currentHeightOffset // has to do with crouching, name change may be in order

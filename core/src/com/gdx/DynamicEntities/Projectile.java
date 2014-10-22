@@ -10,7 +10,6 @@ public class Projectile extends DynamicEntity {
 	private int damage;
 	private float accuracy;
 	private Vector3 movementVector, collisionVector, newPos, oldPos;
-	private World world;
 	private Matrix4 target;
 	 
 	public Projectile() {
@@ -25,7 +24,6 @@ public class Projectile extends DynamicEntity {
 		super(id, isActive, isRenderable, position, rotation, scale, velocity, acceleration, effect);
 		this.damage = damage;
 		this.accuracy = accuracy;
-		this.world = world;
 		this.setParticleEffect(World.particleManager.getProjectilePool().obtain());
 		this.setRendered(false);
 		movementVector = new Vector3(0, 0, 0);
@@ -36,7 +34,7 @@ public class Projectile extends DynamicEntity {
 	}
 	
 	@Override
-	public void update(float time) {
+	public void update(float time, World world) {
 		if (!this.isRendered() && this.getParticleEffect() != null) {
 			this.setRendered(true);
 			this.getParticleEffect().init();
@@ -67,12 +65,18 @@ public class Projectile extends DynamicEntity {
 			this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.2f, this.getPosition().y  - 0.2f, this.getPosition().z  - 0.2f),
 									  new Vector3(this.getPosition().x + 0.2f, this.getPosition().y + 0.2f, this.getPosition().z + 0.2f));
 			
+			world.checkProjectileCollisions(this);
+			
 			if (collisionVector.x == 0 || collisionVector.y == 0 || collisionVector.z == 0) {
-				World.particleManager.system.remove(this.getParticleEffect());
-				World.particleManager.getProjectilePool().free(this.getParticleEffect());
-				this.setIsActive(false);
+				this.removeProjectile();
 			}
 		}
+	}
+	
+	public void removeProjectile() {
+		World.particleManager.system.remove(this.getParticleEffect());
+		World.particleManager.getProjectilePool().free(this.getParticleEffect());
+		this.setIsActive(false);
 	}
 	
 	public int getDamage() {

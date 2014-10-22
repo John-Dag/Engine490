@@ -1,9 +1,8 @@
 package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Intersector;
@@ -12,7 +11,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.gdx.engine.Assets;
 import com.gdx.engine.Condition;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.State;
@@ -25,8 +23,6 @@ public class Enemy extends DynamicEntity {
 	public static final int MAX_HEALTH = 100;
 	public static final int DAMAGE = 1;
 	private int health, damage;
-    private TiledMap tiledMap;
-    private ArrayList<String> showXY = new ArrayList<String>();
 	public State idle;
 	public State moving;
 	public State dead;
@@ -70,17 +66,128 @@ public class Enemy extends DynamicEntity {
 	}
 
 	@Override
-	public void update(float delta) {
+	public void update(float delta, World world) {
 		this.updatePosition(delta);
 		this.updateInstanceTransform();
 		this.getAnimation().update(delta);
 		this.stateMachine.UpdateStates(this);
+		
+		GridPoint2 thisPosition = new GridPoint2((int)this.getPosition().x, (int)this.getPosition().z);
+		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
+		TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);
+		int width = layer.getWidth();
+		ArrayList<Integer> path;
+		
+		if (this.getStateMachine().Current == this.idle) {
+			this.getAnimation().setAnimation("Idle", -1);
+            this.getVelocity().set(0,0,0);
+		}
+
+		else if (this.getStateMachine().Current == this.moving) {
+            try {
+                path = this.shortestPath(thisPosition.x + width
+                        * thisPosition.y, playerPosition.x + width
+                        * playerPosition.y, layer, world.getDistanceMap());
+            } catch (Exception ex) {
+                path = new ArrayList<Integer>();
+            }
+            if (path.size() == 0)
+                return;
+            this.getAnimation().setAnimation("Walking", -1);
+            Vector3 vel = new Vector3();
+            int y = path.get(0) / width;
+            int x = path.get(0) % width;
+            vel.x = x - thisPosition.x;
+            vel.z = y - thisPosition.y;
+
+            if (vel.x == 0 && vel.z == 0 && path.size() > 1) {
+                y = path.get(1) / width;
+                x = path.get(1 ) % width;
+                vel.x = x - thisPosition.x;
+                vel.z = y - thisPosition.y;
+            }
+            vel.y = 0;
+            vel.nor();
+            vel.scl(2f);
+            Vector2 angleVector = new Vector2(vel.z, vel.x);
+            this.getRotation().x = angleVector.angle();// +90 because
+            // model is
+            // originally 90
+            // degrees off
+            // when loaded
+            this.getVelocity().set(vel);
+            Vector3 collisionVector = world.getMeshLevel()
+                    .checkCollision(this.getPosition(),
+                            this.getNewPosition(delta), 1.6f, 1.6f,
+                            1.6f);
+            this.getVelocity().set(this.getVelocity().x
+                    * collisionVector.x, this.getVelocity().y
+                    * collisionVector.y, this.getVelocity().z
+                    * collisionVector.z);
+
+
+            float targetHeight = world.getMeshLevel().getHeightOffset()
+                    + world.getMeshLevel().mapHeight(
+                    this.getPosition().x, this.getPosition().z);
+            if (this.getPosition().y > targetHeight + 30 * delta) {
+                this.getPosition().y -= 30 * delta;
+
+            } else if (this.getPosition().y < targetHeight) {
+                this.getPosition().y = targetHeight;
+
+            } else {
+                this.getPosition().y = world.getMeshLevel()
+                        .getHeightOffset()
+                        + world.getMeshLevel().mapHeight(
+                        this.getPosition().x,
+                        this.getPosition().z);
+            }
+		}
+		
+		else if (this.getStateMachine().Current == this.spawn) {
+			this.getAnimation().setAnimation("Reincarnating", 1, new AnimationListener() {
+			
+			@Override
+			public void onLoop(AnimationDesc animation) {
+					// TODO Auto-generated method stub
+			}
+				
+			@Override
+			public void onEnd(AnimationDesc animation) {
+				setSpawned(true);
+				getStateMachine().Current = idle;
+			}
+		});
+		}
+		
+		else if (this.getStateMachine().Current == this.attack){
+			this.getAnimation().setAnimation("Attacking", -1);
+			world.getPlayer().takeDamage(this.getDamage());
+		}
+		
+		else {
+			this.getVelocity().set(0, 0, 0);
+			this.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
+					
+					@Override
+				public void onLoop(AnimationDesc animation) {
+						// TODO Auto-generated method stub
+						
+				}
+					
+				@Override
+				public void onEnd(AnimationDesc animation) {
+					setIsActive(false);
+				}
+			});
+		}
 	}
 	
 	private void StateMachineUsage(Enemy enemy){
 		Condition idleCondition=new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
+				/*
 				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
 				GridPoint2 playerPosition = new GridPoint2((int)World.player.camera.position.x, (int)World.player.camera.position.z);
 				TiledMapTileLayer layer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
@@ -96,39 +203,39 @@ public class Enemy extends DynamicEntity {
                 }
                 else
                 	return false;
-				/*
+*/
 				if (!enemy.getTransformedEnemyDetectionBoundingBox().intersects(World.player.getTransformedBoundingBox()))
 					return true;
 				else
 					return false;
-				*/
+
 			}
 		};
 		
 		Condition movingCondition=new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
-				GridPoint2 playerPosition = new GridPoint2((int)World.player.camera.position.x, (int)World.player.camera.position.z);
-				TiledMapTileLayer layer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
-				int width = layer.getWidth();
-                TiledMapTileLayer firstLayer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
-                TiledMapTile playerTile = firstLayer.getCell((int)playerPosition.x, (int)playerPosition.y).getTile();
-                int playerTileHeight = Integer.parseInt(playerTile.getProperties().get("height").toString());
-
-                if (enemy.seesPlayer(enemyPosition.x + width * enemyPosition.y, 
-                					 playerPosition.x + width * playerPosition.y, 
-                					 playerTileHeight, layer)) {
-                	return true;
-                }
-                else
-                	return false;
-                /*
+//				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
+//				GridPoint2 playerPosition = new GridPoint2((int)World.player.camera.position.x, (int)World.player.camera.position.z);
+//				TiledMapTileLayer layer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
+//				int width = layer.getWidth();
+//                TiledMapTileLayer firstLayer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
+//                TiledMapTile playerTile = firstLayer.getCell((int)playerPosition.x, (int)playerPosition.y).getTile();
+//                int playerTileHeight = Integer.parseInt(playerTile.getProperties().get("height").toString());
+//
+//                if (enemy.seesPlayer(enemyPosition.x + width * enemyPosition.y, 
+//                					 playerPosition.x + width * playerPosition.y, 
+//                					 playerTileHeight, layer)) {
+//                	return true;
+//                }
+//                else
+//                	return false;
+      
 				if (enemy.getTransformedEnemyDetectionBoundingBox().intersects(World.player.getTransformedBoundingBox()) && !enemy.isAttacking)
 					return true;
 				else
 					return false;
-				*/
+				
 			}
 		};
 		
@@ -186,6 +293,10 @@ public class Enemy extends DynamicEntity {
 		stateMachine.States.add(attack);
 		
 		stateMachine.Current=idle; //Set initial state
+	}
+	
+	public void takeDamage(int damage) {
+		this.health -= damage;
 	}
 
 	public int getDamage() {

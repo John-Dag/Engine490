@@ -32,7 +32,7 @@ public class Entity {
 	}
 	
 	// Overridden by classes that extend Entity
-	public void update(float delta) {
+	public void update(float delta, World world) {
 
 	}
 	

@@ -1,12 +1,7 @@
 package com.gdx.StaticEntities;
 
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.DynamicEntities.Enemy;
-import com.gdx.DynamicEntities.Weapon;
-import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
@@ -26,12 +21,13 @@ public class Spawn extends StaticEntity {
 	}
 	
 	@Override
-	public void update(float delta) {
+	public void update(float delta, World world) {
 		timer += delta;
 		if (timer >= spawnTime && !entity.isActive()) {
 			entity.setIsActive(true);
 			entityInstances.add(this.entity);
-			timer = -5;
+			World.enemyInstances.add((Enemy)entity);
+			timer = -1000;
 		}
 	}
 	
