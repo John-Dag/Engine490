@@ -180,196 +180,166 @@
  </tileset>
  <layer name="Tile Layer 1" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJzt1lEKACEIBFBxF+9/5H4XsSLKMdgJ5ieyF2SQiYgVR4tCnz59+vTp06f/d392Fr929x8X1T2D+Nr3k5O+nzOwr25vDfxoDdo/3X+rfq83EPef5fcGwl95/1n3j8wtfmUazpsKaA==
+   eJzllcEKwyAMhsUNL91tu7W37f2fcS2sIJI/iTFqYYcPWmv8tCaaQghpMtHAe+e2sxrjI/CX80Lz7Onn5tPTj95H+zW5IfmfAOn/Lz+kfpz//EaxCuNy/ykR43v6uecR/tnrr6lTKf9eAGncVv/R/tm5A7YsRrv/NfXX4p+1fnRWnFD9oqMf5aoGD//SANqzB8CS/7V41/+/+KVa0N7VVj8XR8XmeY3ucS5fkf9oy8/sZPBrQP6yfjfCH4s+ljxp9aO6HuXPc8PTn4q1Ufvf068967390l3A1ZiHfzRX8c/kC2K7GR0=
   </data>
  </layer>
- <objectgroup name="objects" width="32" height="32" visible="0">
-  <object name="Light" x="784" y="209">
+ <objectgroup name="objects" width="32" height="32">
+  <object name="Enemy" x="64" y="637">
+   <properties>
+    <property name="color" value="1"/>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="330" y="989">
+   <properties>
+    <property name="S" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="612" y="693">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="4"/>
+   </properties>
+  </object>
+  <object name="Weapon" x="805" y="438">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="3"/>
    </properties>
   </object>
-  <object name="Light" x="240" y="272">
+  <object name="Torch" x="599" y="990">
    <properties>
-    <property name="color" value="4"/>
-    <property name="height" value="3"/>
+    <property name="S" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Light" x="239" y="815">
+  <object name="Enemy" x="173" y="962">
+   <properties>
+    <property name="color" value="1"/>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="986" y="790">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="984" y="413">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Weapon" x="62" y="885">
    <properties>
     <property name="color" value="2"/>
-    <property name="height" value="3"/>
+    <property name="height" value="1"/>
    </properties>
   </object>
-  <object name="Light" x="784" y="815">
+  <object name="Torch" x="466" y="989">
    <properties>
-    <property name="color" value="4"/>
-    <property name="height" value="3"/>
+    <property name="S" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Light" x="511" y="512">
+  <object name="Light" x="527" y="723">
    <properties>
     <property name="color" value="3"/>
+    <property name="height" value="5"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="862" y="866">
+   <properties>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="36" y="787">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Light" x="798" y="431">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="5"/>
+   </properties>
+  </object>
+  <object name="Enemy" x="173" y="962">
+   <properties>
+    <property name="color" value="1"/>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="618" y="39">
+   <properties>
+    <property name="N" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Light" x="237" y="786">
+   <properties>
+    <property name="color" value="0"/>
+    <property name="height" value="5"/>
+   </properties>
+  </object>
+  <object name="Mist" x="797" y="438">
+   <properties>
+    <property name="color" value="1"/>
     <property name="height" value="3"/>
    </properties>
   </object>
-  <object name="Torch" x="399" y="805">
-   <properties>
-    <property name="W" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="625" y="805">
-   <properties>
-    <property name="W" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="623" y="262">
-   <properties>
-    <property name="W" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="399" y="262">
-   <properties>
-    <property name="W" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="624" y="216">
+  <object name="Torch" x="442" y="693">
    <properties>
     <property name="E" value=""/>
     <property name="color" value="1"/>
-    <property name="height" value="2"/>
+    <property name="height" value="4"/>
    </properties>
   </object>
-  <object name="Torch" x="399" y="219">
+  <object name="Emitter" x="803" y="852">
    <properties>
-    <property name="E" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="625" y="762">
-   <properties>
-    <property name="E" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="398" y="763">
-   <properties>
-    <property name="E" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="263" y="401">
+  <object name="Torch" x="214" y="989">
    <properties>
     <property name="S" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="263" y="623">
+  <object name="Torch" x="986" y="678">
    <properties>
-    <property name="S" value=""/>
+    <property name="E" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="805" y="401">
+  <object name="Light" x="160" y="332">
    <properties>
-    <property name="S" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
+    <property name="color" value="0"/>
+    <property name="height" value="5"/>
    </properties>
   </object>
-  <object name="Torch" x="805" y="624">
+  <object name="Light" x="78" y="78">
    <properties>
-    <property name="S" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="762" y="400">
-   <properties>
-    <property name="N" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="763" y="626">
-   <properties>
-    <property name="N" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="218" y="401">
-   <properties>
-    <property name="N" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Torch" x="216" y="622">
-   <properties>
-    <property name="N" value=""/>
-    <property name="color" value="1"/>
-    <property name="height" value="2"/>
-   </properties>
-  </object>
-  <object name="Spawn" x="921" y="509">
-   <properties>
-    <property name="height" value="1"/>
-    <property name="time" value="1"/>
-   </properties>
-  </object>
-  <object name="Mist" x="512" y="555">
-   <properties>
-    <property name="color" value="3"/>
-    <property name="height" value="3"/>
-   </properties>
-  </object>
-  <object name="Weapon" x="512" y="558">
-   <properties>
-    <property name="color" value="2"/>
-    <property name="height" value="1"/>
-   </properties>
-  </object>
-  <object name="Weapon" x="196" y="946">
-   <properties>
-    <property name="color" value="2"/>
-    <property name="height" value="1"/>
-   </properties>
-  </object>
-  <object name="Spawn" x="516" y="726">
-   <properties>
-    <property name="height" value="1"/>
-    <property name="time" value="1"/>
-   </properties>
-  </object>
-  <object name="Spawn" x="804" y="951">
-   <properties>
-    <property name="height" value="1"/>
-    <property name="time" value="1"/>
-   </properties>
-  </object>
-  <object name="Spawn" x="91" y="326">
-   <properties>
-    <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="color" value="0"/>
+    <property name="height" value="5"/>
    </properties>
   </object>
  </objectgroup>
- <layer name="Tile Layer 2" width="32" height="32" visible="0" opacity="0.98">
+ <layer name="Tile Layer 2" width="32" height="32" opacity="0.14">
   <data encoding="base64" compression="zlib">
    eJztw8EJAAAMA6H7Zf+Nu0dRcNVUVVXV1w9VIBwB
   </data>

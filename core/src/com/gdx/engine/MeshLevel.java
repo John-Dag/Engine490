@@ -950,28 +950,28 @@ public class MeshLevel {
 			
 			switch(temp) {
 				case(RED):
-					color.set(255, 0, 0, 1);
+					color.set(1f, 0f, 0f, 1f);
 					break;
 				case(WHITE):
-					color.set(240, 255, 186, 1);
+					color.set(240f/255f, 1f, 186f/255f, 1f);
 					break;
 				case(GREEN):
-					color.set(0, 255, 0, 1);
+					color.set(0f, 1f, 68f/255f, 1f);
 					break;
 				case(BLUE):
-					color.set(0, 0, 255, 1);
+					color.set(0f, 0f, 1f, 1f);
 					break;
 				case(PURPLE):
-					color.set(255,0,255, 1);
+					color.set(127f/255f, 0f, 1f, 1f);
 					break;
 				default:
-					color.set(0, 0, 0, 1);
+					color.set(0f, 0f, 0f, 1f);
 					break;
 			}
 		}
 		else {
 			System.err.println("Tile color not set. Default color used");
-			color.set(0, 0, 0, 1);
+			color.set(0f, 0f, 0f, 1f);
 		}
 		
 		return color;

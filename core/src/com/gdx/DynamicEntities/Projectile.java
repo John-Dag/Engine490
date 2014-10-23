@@ -42,7 +42,7 @@ public class Projectile extends DynamicEntity {
 			this.setBoundingBox(this.getParticleEffect().getBoundingBox());
 			World.particleManager.system.add(this.getParticleEffect());
 		}
-		
+		world.checkProjectileCollisions(this);
 		if (World.player.getWeapon() != null) {
 			this.updatePosition(world.getPlayer().getWeapon().getFiringDelay());
 			
@@ -56,6 +56,7 @@ public class Projectile extends DynamicEntity {
 			float moveAmt = world.getPlayer().getWeapon().getFiringDelay() * Gdx.graphics.getDeltaTime();
 			oldPos.set(this.getPosition());
 			newPos.set(oldPos.x + movementVector.x * moveAmt, oldPos.y + movementVector.y * moveAmt, oldPos.z + movementVector.z * moveAmt);
+
 			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, 0.5f, 0.5f, 0.5f);
 	
 			movementVector.set(movementVector.x * collisionVector.x,
@@ -64,9 +65,7 @@ public class Projectile extends DynamicEntity {
 			
 			this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.2f, this.getPosition().y  - 0.2f, this.getPosition().z  - 0.2f),
 									  new Vector3(this.getPosition().x + 0.2f, this.getPosition().y + 0.2f, this.getPosition().z + 0.2f));
-			
-			world.checkProjectileCollisions(this);
-			
+
 			if (collisionVector.x == 0 || collisionVector.y == 0 || collisionVector.z == 0) {
 				this.removeProjectile();
 			}

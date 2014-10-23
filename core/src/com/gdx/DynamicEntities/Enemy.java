@@ -57,14 +57,6 @@ public class Enemy extends DynamicEntity {
 		this.StateMachineUsage(this);
 	}
 
-	public boolean isAttacking() {
-		return isAttacking;
-	}
-
-	public void setAttacking(boolean isAttacking) {
-		this.isAttacking = isAttacking;
-	}
-
 	@Override
 	public void update(float delta, World world) {
 		this.updatePosition(delta);
@@ -165,8 +157,9 @@ public class Enemy extends DynamicEntity {
 			world.getPlayer().takeDamage(this.getDamage());
 		}
 		
-		else {
+		else if (this.getStateMachine().Current == this.dead) {
 			this.getVelocity().set(0, 0, 0);
+			World.enemyInstances.removeValue(this, true);
 			this.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
 					
 					@Override
@@ -263,7 +256,7 @@ public class Enemy extends DynamicEntity {
 		Condition attackCondition = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-				if (enemy.getTransformedEnemyBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
+				if (enemy.getTransformedEnemyBoundingBox().intersects(World.player.getTransformedBoundingBox()) && getStateMachine().Current != dead) {
 					return true;
 				}
 				else {
@@ -293,6 +286,14 @@ public class Enemy extends DynamicEntity {
 		stateMachine.States.add(attack);
 		
 		stateMachine.Current=idle; //Set initial state
+	}
+
+	public boolean isAttacking() {
+		return isAttacking;
+	}
+
+	public void setAttacking(boolean isAttacking) {
+		this.isAttacking = isAttacking;
 	}
 	
 	public void takeDamage(int damage) {

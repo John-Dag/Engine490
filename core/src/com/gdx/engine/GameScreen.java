@@ -40,6 +40,7 @@ public class GameScreen implements Screen {
 		renderFps();
 		renderPos();
 		renderTilePos();
+		renderUI();
 		spriteBatch.end();
 	}
 	
@@ -60,6 +61,10 @@ public class GameScreen implements Screen {
 	public void renderTilePos(){
 		GridPoint2 tileIndex = world.getPlayer().getPlayerTileCoords();
 		bitmapFont.draw(spriteBatch, "Tile (" + tileIndex.x + ", " + tileIndex.y +")", 10f, 470f);
+	}
+	
+	public void renderUI() {
+		bitmapFont.draw(spriteBatch, "Health: " + World.player.getHealth(), 0f, 20f);
 	}
 
 	@Override

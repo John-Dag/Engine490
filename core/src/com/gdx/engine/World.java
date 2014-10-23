@@ -170,7 +170,7 @@ public class World {
 			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
 			Projectile projectile = new Projectile(6, true, true, player.camera.position.cpy(), 
 												   rotation, scale, player.camera.direction.cpy(), player.camera.direction.cpy(), 
-												   10, 0.1f, particleManager.mistPool.obtain(), this);
+												   10, 0.1f, particleManager.projectilePool.obtain(), this);
 			Entity.entityInstances.add(projectile);
 		}
 	}

@@ -26,8 +26,9 @@ public class Spawn extends StaticEntity {
 		if (timer >= spawnTime && !entity.isActive()) {
 			entity.setIsActive(true);
 			entityInstances.add(this.entity);
-			World.enemyInstances.add((Enemy)entity);
-			timer = -1000;
+			if (entity instanceof Enemy)
+				World.enemyInstances.add((Enemy)entity);
+			timer = 0;
 		}
 	}
 	

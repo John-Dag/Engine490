@@ -90,8 +90,8 @@ public class DynamicEntity extends Entity {
 	}
 	
 	public BoundingBox getTransformedEnemyBoundingBox() {
-		return this.boundingBox.set(new Vector3(this.getPosition().x - 1.0f, this.getPosition().y - 1f, this.getPosition().z - 1.0f),
-			    					new Vector3(this.getPosition().x + 1.0f, this.getPosition().y + 1f, this.getPosition().z + 1.0f));
+		return this.boundingBox.set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 1f, this.getPosition().z - 0.5f),
+			    					new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
 	}
 	
 	public BoundingBox getTransformedEnemyDetectionBoundingBox() {
