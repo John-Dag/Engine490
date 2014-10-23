@@ -72,6 +72,111 @@
    </properties>
   </tile>
  </tileset>
+ <tileset firstgid="17" name="TileMapLarge" tilewidth="32" tileheight="32">
+  <image source="TileMapLarge.png" width="256" height="256"/>
+  <tile id="0">
+   <properties>
+    <property name="height" value="0"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="height" value="1"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="height" value="3"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="height" value="4"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="height" value="5"/>
+   </properties>
+  </tile>
+  <tile id="6">
+   <properties>
+    <property name="height" value="5"/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="height" value=""/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="17">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="18">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="19">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="20">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="21">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+  <tile id="24">
+   <properties>
+    <property name="height" value=""/>
+   </properties>
+  </tile>
+ </tileset>
  <layer name="Tile Layer 1" width="32" height="32" opacity="0.48">
   <data encoding="base64" compression="zlib">
    eJzlldEOgyAMRYXtZXPO/f/XDpOZENLbllLAZA8nUaQckBbCsixhMtHAJ3FL7Mb4CPzlvNA8e/q5+fT0o/fRfk1uSP43QPr/2w+pH+c/v1HswrjcfwrE+J5+7nmEf/b6a+pUyr8nQBq31X+0vxJ3wJrFaPe/pv5a/LPWj86KE6pfdPSjXNXg4d8aQHv2AFjyvxbv+v8Xv1QL2rva6ufiqNg8r9E9zuUr8h9t+ZkdDH4NyF/W70r4Y9HHkietflTXo/x5bnj6Q7E2av97+rVnvbdfugu4GvPwj+Yq/pl8ARLUD20=
@@ -221,4 +326,9 @@
    </properties>
   </object>
  </objectgroup>
+ <layer name="Tile Layer 2" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztwQENAAAAwqD3T20PBxQAAADwbhAAAAE=
+  </data>
+ </layer>
 </map>

@@ -50,6 +50,14 @@ public class MeshLevel {
 	private static final int UP = 3;
 	private static final int DOWN = 4;
 	
+	// array finals
+	private static final int ARRAY_EMPTY = 0;
+	private static final int ARRAY_BLOCK = 1;
+	private static final int ARRAY_RAMP_LEFT = 2;
+	private static final int ARRAY_RAMP_RIGHT = 3;
+	private static final int ARRAY_RAMP_UP = 4;
+	private static final int ARRAY_RAMP_DOWN = 5;
+	
 	// the length and width of one tile
 	private static final float SPOT_WIDTH = 1;
 	private static final float SPOT_LENGTH = 1;
@@ -63,7 +71,9 @@ public class MeshLevel {
 	
 	private TiledMap tiledMap;
 	private ModelBuilder modelBuilder;
-	private Array<ModelInstance> modelInstances;
+	private Array<ModelInstance> instances;
+	private Array<Object> objectInstances;
+	private Array<Entity> entityInstances;
 	private Model model, skySphere;
 	private ModelInstance instance;
 	private int triCount = 0;
@@ -75,6 +85,9 @@ public class MeshLevel {
 	private TiledMapTileLayer layer2;
 	private float heightOffset;
 	private float levelHeight;
+	
+	private int[][][] levelArray;
+	private int tileLayerCount;
 	
 	// These vectors and vertex info objects are used in the generation of the level mesh
 	private Vector3 p1 = new Vector3();
@@ -90,7 +103,9 @@ public class MeshLevel {
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
-		modelInstances  = new Array<ModelInstance>();
+		instances  = new Array<ModelInstance>();
+		objectInstances = new Array<Object>();
+		entityInstances = new Array<Entity>();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
 		//tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
@@ -99,7 +114,41 @@ public class MeshLevel {
 		this.layer2 = (TiledMapTileLayer) tiledMap.getLayers().get(2);
 		this.heightOffset = 0f;
 		this.levelHeight = 0f;
+		
+		// count the tile layers
+		this.tileLayerCount = 0;
+		for(int k = 0; k < tiledMap.getLayers().getCount(); k++){
+			if(tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")){
+				tileLayerCount++;
+			}
+		}
+		// initialize the levelArray
+		levelArray = new int[this.layer1.getHeight()][this.layer1.getWidth()][tileLayerCount*6];
+		for(int i = 0; i < levelArray.length; i++){
+			for(int j = 0; j < levelArray[i].length; j++){
+				for(int k = 0; k < levelArray[i][j].length; k++){
+					levelArray[i][j][k] = 0;
+				}
+			}
+		}
+		//generateLevelArray();
+		//printLevelArray();
+		
 		generateLevel();
+	}
+	
+	// print levelArray
+	public void printLevelArray(){
+		for(int i = 0; i < levelArray.length; i++){
+			for(int j = 0; j < levelArray[i].length; j++){
+				System.out.print("(");
+				for(int k = 0; k < levelArray[i][j].length; k++){
+					System.out.print(levelArray[i][j][k] + ", ");
+				}
+				System.out.print("), ");
+			}
+			System.out.println("");
+		}
 	}
 	
 	// TODO: updateHeightOffset
@@ -118,15 +167,52 @@ public class MeshLevel {
 		}
 	}
 	
+	public void generateLevelArray() {
+
+		TiledMapTile tile = null;
+		
+		for(int k = 0; k < tiledMap.getLayers().getCount(); k++){
+			if(tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")){
+				currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
+				if(currentLayer.getName().equals("Tile Layer 1")){
+					heightOffset = 0;
+				}else if(currentLayer.getName().equals("Tile Layer 2")){
+					heightOffset = 6;
+				}
+				
+				// on each cell
+				for(int i = 0; i < currentLayer.getWidth(); i++){
+					for(int j = 0; j < currentLayer.getHeight(); j++){
+						tile = currentLayer.getCell(i, j).getTile();
+						// place blocks
+						if(tile.getProperties().containsKey("height")){
+							for(int h=0; h<getHeight(tile); h++){
+								levelArray[i][j][h + (int)heightOffset] = ARRAY_BLOCK;
+							}
+						}
+						// place ramps
+						if(tile.getProperties().containsKey("ramp")){
+							levelArray[i][j][getHeight(tile) + 1] = getIntRampDirection(tile) + 1;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public Array<ModelInstance> generateLevelMesh() {
+		return instances;
+	}
+	
 	// TODO: generateLevel
-	public void generateLevel() {
+	public Array<ModelInstance> generateLevel() {
 		
 		if (isSkySphereActive) {
 			skySphere = modelBuilder.createSphere(100f, 100f, 100f, 20, 20, new Material(ColorAttribute.createDiffuse(Color.BLACK)), Usage.Position | Usage.Normal);
 			skySphere.materials.get(0).set(new IntAttribute(IntAttribute.CullFace, 0));
 			instance = new ModelInstance(skySphere);
 			instance.transform.setToTranslation(currentLayer.getHeight()/2, 0, currentLayer.getWidth()/2);
-			modelInstances.add(instance);
+			instances.add(instance);
 		}
 		
 		//modelBuilder.begin();
@@ -176,7 +262,7 @@ public class MeshLevel {
 							meshPartBuilder.rect(0,0,0, 1,0,0, 1,0,1, 0,0,1, 0,-1,0);
 							model = modelBuilder.end();
 							instance = new ModelInstance(model);
-							modelInstances.add(instance);
+							instances.add(instance);
 						}
 						
 						// make the floor tiles
@@ -210,7 +296,7 @@ public class MeshLevel {
 								}
 								model = modelBuilder.end();
 								instance = new ModelInstance(model);
-								modelInstances.add(instance);
+								instances.add(instance);
 
 							}
 							// else not a ramp
@@ -227,7 +313,7 @@ public class MeshLevel {
 								meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
 								model = modelBuilder.end();
 								instance = new ModelInstance(model);
-								modelInstances.add(instance);
+								instances.add(instance);
 							}
 						}
 						//				Node node = modelBuilder.node();
@@ -262,6 +348,7 @@ public class MeshLevel {
 		}
 		
 		currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 1");
+		return instances;
 	}
 	
 	// TODO: makeWalls
@@ -306,7 +393,13 @@ public class MeshLevel {
 				!adj.getProperties().containsKey("ramp")&&
 				!tile.getProperties().containsKey("ramp") &&
 				getHeight(adj) > getHeight(tile)){
-			for(float b1 = getHeight(tile); b1 < getHeight(adj); b1++){
+			int bottom = getHeight(tile);
+			if( layer.getName().equals("Tile Layer 2")
+					&& ((TiledMapTileLayer) tiledMap.getLayers().get(0)).getCell(i,j).getTile().getProperties().containsKey("ramp")
+					&& (getHeight((((TiledMapTileLayer) tiledMap.getLayers().get(0)).getCell(i,j)).getTile()) == 5)){
+				bottom++;
+			}
+			for(float b1 = bottom; b1 < getHeight(adj); b1++){
 				genWall(i, j, b1, direction);
 			}
 		}
@@ -336,7 +429,13 @@ public class MeshLevel {
 				adj.getProperties().containsKey("ramp")&&
 				!tile.getProperties().containsKey("ramp")
 				&& getHeight(adj) >= getHeight(tile)){
-			for(int b1 = getHeight(tile); b1 < getHeight(adj); b1++){
+			int bottom = getHeight(tile);
+			if( layer.getName().equals("Tile Layer 2")
+					&& ((TiledMapTileLayer) tiledMap.getLayers().get(0)).getCell(i,j).getTile().getProperties().containsKey("ramp")
+					&& (getHeight((((TiledMapTileLayer) tiledMap.getLayers().get(0)).getCell(i,j)).getTile()) == 5)){
+				bottom++;
+			}
+			for(int b1 = bottom; b1 < getHeight(adj); b1++){
 				genWall(i, j, b1, direction);
 			}
 			
@@ -604,7 +703,7 @@ public class MeshLevel {
 		meshPartBuilder.triangle(v1, v2, v3);
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
-		modelInstances.add(instance);
+		instances.add(instance);
 	}
 	// TODO: genWall
 	// Generates a wall segment
@@ -668,127 +767,127 @@ public class MeshLevel {
 		meshPartBuilder.rect(p1, p2, p3, p4, normal);
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
-		modelInstances.add(instance);
+		instances.add(instance);
 	}
 	
 	//Objects are read from the "objects" layer in the tile map
-		private void setObjectInstances() {
-			Vector3 objPosition;
-			MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
-			
-			for (int i = 0; i < objects.getCount(); i++) {
-				RectangleMapObject rectObj = (RectangleMapObject) objects.get(i);
-				//decal, color, intensity, pointLight, id, isActive, isRenderable
-				if (rectObj.getName().contains("Torch")) {
-					objPosition = new Vector3();
-					int height = getObjectHeight(rectObj);
-					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-					Torch torch = new Torch(objPosition, 'W', 1, true, true);
-					
-					if (rectObj.getProperties().containsKey("N"))
-						torch.setDirection('N');
-					else if (rectObj.getProperties().containsKey("S"))
-						torch.setDirection('S');
-					else if (rectObj.getProperties().containsKey("E")) 
-						torch.setDirection('E');
-					else if (rectObj.getProperties().containsKey("W"))
-						torch.setDirection('W');
-					
-					torch.setDecal(Decal.newDecal(Assets.torch, true));
-					torch.setColor(getLightColor(rectObj));
-					torch.getDecal().setScale(0.003f);
-					torch.setRotations(torch.getDirection());
-					PointLight light = new PointLight();
-					torch.setPointLight(light.set(getLightColor(rectObj), objPosition, 2f));
-					Entity.entityInstances.add(torch);
-				}
+	private void setObjectInstances() {
+		Vector3 objPosition;
+		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
 
-				else if (rectObj.getName().contains("Light")) {
-					int height = getObjectHeight(rectObj);
-					objPosition = new Vector3();
-					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-					PointLight pointLight = new PointLight();
-					pointLight.set(getLightColor(rectObj), objPosition, 20f);
-					Light light = new Light(objPosition, 2, true, true, pointLight);
-					Entity.entityInstances.add(light);
-				}
-				
-				/*
-				else if (rectObj.getName().contains("Emitter")) {
-					int height = getObjectHeight(rectObj);
-					objPosition = new Vector3();
-					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-					color = getLightColor(rectObj);
-					Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 3, false);
-					objectInstances.add(object);
-				}
-				*/
-				
-				else if (rectObj.getName().contains("Enemy")) {
-					int height = getObjectHeight(rectObj);
-					objPosition = new Vector3();
-					objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-					ModelInstance test = BuildModel.buildBoxTextureModel(1f, 1f, 1f, Assets.wallMat);
-					test.transform.setToTranslation(objPosition);
-					Vector3 rotation = new Vector3(0f, 0f, 0f);
-					Vector3 scale = new Vector3(2f, 2f, 2f);
-//					int health, Weapon currentWeapon, int id, boolean isActive,
-//					boolean isRenderable, Vector3 position, Vector3 rotation,
-//					Vector3 scale, Vector3 velocity, Vector3 acceleration,
-//					ModelInstance model
-//					Enemy enemy = new Enemy(7, true, true, objPosition, rotation, scale, new Vector3(0, 0, 0),
-//											new Vector3(0, 0, 0), test);
-//					Entity.entityInstances.add(enemy);
-				}
-				
-				else if (rectObj.getName().contains("Weapon")) {
-					int height = getObjectHeight(rectObj);
-					//float scale = 0.005f;
-					objPosition = new Vector3();
-					objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-					Assets.loadModels();
-					StaticWeapon weapon = new StaticWeapon(objPosition, 1, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class));
-					BoundingBox temp = new BoundingBox();
-					weapon.getModel().calculateBoundingBox(temp);
-					weapon.setBoundingBox(temp);
-					weapon.getModel().transform.setToTranslation(weapon.getPosition());
-					weapon.getModel().transform.scale(0.005f, 0.005f, 0.005f);
-					PointLight pointLight = new PointLight();
-					pointLight.set(getLightColor(rectObj), objPosition, 1f);
-					weapon.setPointLight(pointLight);
-					Entity.entityInstances.add(weapon);
-				}
+		for (int i = 0; i < objects.getCount(); i++) {
+			RectangleMapObject rectObj = (RectangleMapObject) objects.get(i);
+			//decal, color, intensity, pointLight, id, isActive, isRenderable
+			if (rectObj.getName().contains("Torch")) {
+				objPosition = new Vector3();
+				int height = getObjectHeight(rectObj);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				Torch torch = new Torch(objPosition, 'W', 1, true, true);
 
-				else if (rectObj.getName().contains("Mist")) {
-					int height = getObjectHeight(rectObj);
-					objPosition = new Vector3();
-					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-					PointLight pointLight = new PointLight();
-					pointLight.set(getLightColor(rectObj), objPosition, 20f);
-					Mist mist = new Mist(objPosition, 2, true, true, pointLight);
-					Entity.entityInstances.add(mist);
-				}
-				
-				else if (rectObj.getName().contains("Spawn")) {
-					int height = getObjectHeight(rectObj);
-					objPosition = new Vector3();
-					objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-					Assets.loadModels();
-					Enemy enemy = new Enemy(9, false, true, objPosition, new Vector3(0, 0, 0), 
-							new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
-							new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
-					enemy.setAnimation(new AnimationController(enemy.getModel()));
-					enemy.getStateMachine().Current = enemy.spawn;
-					enemy.setInCollision(true);
-					Spawn spawn = new Spawn(objPosition, 8, true, false, false, getSpawnTime(rectObj), enemy);
-					Entity.entityInstances.add(spawn);
-				}
+				if (rectObj.getProperties().containsKey("N"))
+					torch.setDirection('N');
+				else if (rectObj.getProperties().containsKey("S"))
+					torch.setDirection('S');
+				else if (rectObj.getProperties().containsKey("E")) 
+					torch.setDirection('E');
+				else if (rectObj.getProperties().containsKey("W"))
+					torch.setDirection('W');
 
-				else {
-					System.err.println("setObjectInstances(): Object does not exist " + rectObj.getName());
-				}
+				torch.setDecal(Decal.newDecal(Assets.torch, true));
+				torch.setColor(getLightColor(rectObj));
+				torch.getDecal().setScale(0.003f);
+				torch.setRotations(torch.getDirection());
+				PointLight light = new PointLight();
+				torch.setPointLight(light.set(getLightColor(rectObj), objPosition, 2f));
+				Entity.entityInstances.add(torch);
+			}
+
+			else if (rectObj.getName().contains("Light")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				PointLight pointLight = new PointLight();
+				pointLight.set(getLightColor(rectObj), objPosition, 20f);
+				Light light = new Light(objPosition, 2, true, true, pointLight);
+				Entity.entityInstances.add(light);
+			}
+
+			/*
+			else if (rectObj.getName().contains("Emitter")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				color = getLightColor(rectObj);
+				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 3, false);
+				objectInstances.add(object);
+			}
+			 */
+
+			else if (rectObj.getName().contains("Enemy")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				ModelInstance test = BuildModel.buildBoxTextureModel(1f, 1f, 1f, Assets.wallMat);
+				test.transform.setToTranslation(objPosition);
+				Vector3 rotation = new Vector3(0f, 0f, 0f);
+				Vector3 scale = new Vector3(2f, 2f, 2f);
+				//				int health, Weapon currentWeapon, int id, boolean isActive,
+				//				boolean isRenderable, Vector3 position, Vector3 rotation,
+				//				Vector3 scale, Vector3 velocity, Vector3 acceleration,
+				//				ModelInstance model
+				//				Enemy enemy = new Enemy(7, true, true, objPosition, rotation, scale, new Vector3(0, 0, 0),
+				//										new Vector3(0, 0, 0), test);
+				//				Entity.entityInstances.add(enemy);
+			}
+
+			else if (rectObj.getName().contains("Weapon")) {
+				int height = getObjectHeight(rectObj);
+				//float scale = 0.005f;
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				Assets.loadModels();
+				StaticWeapon weapon = new StaticWeapon(objPosition, 1, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class));
+				BoundingBox temp = new BoundingBox();
+				weapon.getModel().calculateBoundingBox(temp);
+				weapon.setBoundingBox(temp);
+				weapon.getModel().transform.setToTranslation(weapon.getPosition());
+				weapon.getModel().transform.scale(0.005f, 0.005f, 0.005f);
+				PointLight pointLight = new PointLight();
+				pointLight.set(getLightColor(rectObj), objPosition, 1f);
+				weapon.setPointLight(pointLight);
+				Entity.entityInstances.add(weapon);
+			}
+
+			else if (rectObj.getName().contains("Mist")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				PointLight pointLight = new PointLight();
+				pointLight.set(getLightColor(rectObj), objPosition, 20f);
+				Mist mist = new Mist(objPosition, 2, true, true, pointLight);
+				Entity.entityInstances.add(mist);
+			}
+
+			else if (rectObj.getName().contains("Spawn")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				Assets.loadModels();
+				Enemy enemy = new Enemy(9, false, true, objPosition, new Vector3(0, 0, 0), 
+						new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+						new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
+				enemy.setAnimation(new AnimationController(enemy.getModel()));
+				enemy.getStateMachine().Current = enemy.spawn;
+				enemy.setInCollision(true);
+				Spawn spawn = new Spawn(objPosition, 8, true, false, false, getSpawnTime(rectObj), enemy);
+				Entity.entityInstances.add(spawn);
+			}
+
+			else {
+				System.err.println("setObjectInstances(): Object does not exist " + rectObj.getName());
 			}
 		}
+	}
 
 	// returns the tile height at the given position
 	public int getHeight(Vector3 position){
@@ -840,8 +939,7 @@ public class MeshLevel {
 		return Integer.parseInt(height) + (int)heightOffset;
 	}
 	
-	//Returns the color of a light map object
-	//Note: RGB values are between 0-1, so divide any value between by 255f
+	// returns the color of a light map object
 	private Color getLightColor(RectangleMapObject object) {
 		Color color = new Color();
 		int temp;
@@ -852,30 +950,30 @@ public class MeshLevel {
 			
 			switch(temp) {
 				case(RED):
-					color.set(1f, 0f, 0f, 1f);
+					color.set(255, 0, 0, 1);
 					break;
 				case(WHITE):
-					color.set(240f/255f, 1f, 186f/255f, 1f);
+					color.set(240, 255, 186, 1);
 					break;
 				case(GREEN):
-					color.set(0f, 1f, 68f/255f, 1f);
+					color.set(0, 255, 0, 1);
 					break;
 				case(BLUE):
-					color.set(0f, 0f, 1f, 1f);
+					color.set(0, 0, 255, 1);
 					break;
 				case(PURPLE):
-					color.set(127f/255f, 0f, 1f, 1f);
+					color.set(255,0,255, 1);
 					break;
 				default:
-					color.set(0f, 0f, 0f, 1f);
+					color.set(0, 0, 0, 1);
 					break;
 			}
 		}
 		else {
 			System.err.println("Tile color not set. Default color used");
-			color.set(0f, 0f, 0f, 1f);
+			color.set(0, 0, 0, 1);
 		}
-
+		
 		return color;
 	}
 	
@@ -917,7 +1015,15 @@ public class MeshLevel {
 	}
 	
 	public Array<ModelInstance> getInstances() {
-		return modelInstances;
+		return instances;
+	}
+	
+	public Array<Object> getObjectInstances() {
+		return objectInstances;
+	}
+	
+	public Array<Entity> getEntityInstances() {
+		return entityInstances;
 	}
 	
 	// TODO: Check Collision
@@ -931,7 +1037,7 @@ public class MeshLevel {
 		
 		TiledMapTileLayer oldPosLayer, newPosLayer;
 		int oldHeightOffset, newHeightOffset;
-		if(oldPos.y > 6.5f){ 
+		if(oldPos.y >= 6.5f){ 
 			oldPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(2);
 			oldHeightOffset = 6;
 		}
@@ -939,7 +1045,7 @@ public class MeshLevel {
 			oldPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(0);
 			oldHeightOffset = 0;
 		}
-		if(newPos.y > 6.5f) {
+		if(newPos.y >= 6.5f) {
 			newPosLayer = (TiledMapTileLayer)tiledMap.getLayers().get(2);
 			newHeightOffset = 6;
 		}
@@ -993,7 +1099,7 @@ public class MeshLevel {
 					// TODO: Fix known bug: Player can access a ramp from the side, but should not be able to.
 					
 					// if oldPos tile is a ramp, it can lead us up one space
-					if (oldPosLayer.getCell(tileCoords.x, tileCoords.y) != null) {
+					if (oldPosLayer.getCell(tileCoords.x, tileCoords.y)!= null) {
 						if (oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile().getProperties().containsKey("ramp")) {
 
 							if (getHeight(newPosLayer.getCell(i, j).getTile()) + newHeightOffset > getHeight(oldPosLayer.getCell(tileCoords.x, tileCoords.y).getTile()) + oldHeightOffset + 1) {
@@ -1115,7 +1221,8 @@ public class MeshLevel {
 		return height;
 	}
 	
-	public float mapHeight(float x, float z, int heightLevel) {
+public float mapHeight(float x, float z, int heightLevel) {
+		
 		float height = 0;
 		GridPoint2 tileCoords = getTileCoords(x, z);
 
@@ -1193,13 +1300,5 @@ public class MeshLevel {
 		else {
 			return 0;
 		}
-	}
-	
-	public Array<ModelInstance> getModelInstances() {
-		return modelInstances;
-	}
-
-	public void setModelInstances(Array<ModelInstance> modelInstances) {
-		this.modelInstances = modelInstances;
 	}
 }
