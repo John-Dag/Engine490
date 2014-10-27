@@ -12,11 +12,13 @@ public class ParticleManager {
 	public PFXPool projectilePool;
 	public PFXPool torchPool;
 	public PFXPool mistPool;
+	public PFXPool rocketExplosionPool;
 	public BillboardParticleBatch billboardBatch;
 	public ParticleSystem system;
 	public ParticleEffect rocketEffect;
 	public ParticleEffect torchEffect;
 	public ParticleEffect mistEffect;
+	public ParticleEffect rocketExplosionEffect;
     public ParticleEffectLoadParameter loadParam;
 	public ParticleEffectLoader loader;
 	
@@ -29,12 +31,22 @@ public class ParticleManager {
 		Assets.loadParticleEffects(system);
 		torchEffect = Assets.manager.get("torcheffect.pfx");
 		rocketEffect = Assets.manager.get("rocketeffect.pfx");
-		mistEffect = Assets.manager.get("dropletsGreen.pfx");
+		mistEffect = Assets.manager.get("mistGreenWeapon.pfx");
+		rocketExplosionEffect = Assets.manager.get("rocketExplosionEffect.pfx");
 		projectilePool = new PFXPool(rocketEffect);
 		torchPool = new PFXPool(torchEffect);
 		mistPool = new PFXPool(mistEffect);
+		rocketExplosionPool = new PFXPool(rocketExplosionEffect);
 	}
 	
+	public PFXPool getRocketExplosionPool() {
+		return rocketExplosionPool;
+	}
+
+	public void setRocketExplosionPool(PFXPool rocketExplosionPool) {
+		this.rocketExplosionPool = rocketExplosionPool;
+	}
+
 	public PFXPool getMistPool() {
 		return mistPool;
 	}

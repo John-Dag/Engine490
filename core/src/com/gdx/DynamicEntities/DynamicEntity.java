@@ -15,7 +15,7 @@ public class DynamicEntity extends Entity {
 	private Weapon weapon;
 	private Vector3 position, rotation, scale, velocity, acceleration, angVelocity, angAccel;
 	private ModelInstance model;
-	private ParticleEffect particleEffect;
+	private ParticleEffect particleEffect, collisionEffect;
 	private boolean inCollision, isRendered, isAnimating;
 	private Quaternion rotationQuaternion;
 	private AnimationController animation;
@@ -87,16 +87,6 @@ public class DynamicEntity extends Entity {
 
 	public BoundingBox getTransformedBoundingBox() {
 		return new BoundingBox(this.boundingBox).mul(this.model.transform);
-	}
-	
-	public BoundingBox getTransformedEnemyBoundingBox() {
-		return this.boundingBox.set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 1f, this.getPosition().z - 0.5f),
-			    					new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
-	}
-	
-	public BoundingBox getTransformedEnemyDetectionBoundingBox() {
-		return this.boundingBox.set(new Vector3(this.getPosition().x - 15f, this.getPosition().y - 15f, this.getPosition().z - 15f),
-			    					new Vector3(this.getPosition().x + 15f, this.getPosition().y + 15f, this.getPosition().z + 15f));
 	}
 	
 	public BoundingBox getTransformedDetectionBoundingBox() {

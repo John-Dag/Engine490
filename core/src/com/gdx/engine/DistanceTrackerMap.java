@@ -30,6 +30,7 @@ public class DistanceTrackerMap {
     }
 
     public void addDistances(int playerPos) {
+        int test = tilesAlreadyChecked.indexOf(playerPos);
         DistanceFromPlayer start = distanceMap.get(tilesAlreadyChecked.indexOf(playerPos));
         lookingAt = new ArrayList<DistanceFromPlayer>(1);
         toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
@@ -44,7 +45,7 @@ public class DistanceTrackerMap {
             for (DistanceFromPlayer distance : lookingAt) {
                 for (int index : distance.getSpotToMoveIndex()) {
                     toCheck = distanceMap.get(index);
-                    if (toCheck.getDistFromPlayer() == -1){
+                    if (toCheck.getDistFromPlayer() == -1 && distanceMap.get(index).getSpotToMoveIndex().contains(tilesAlreadyChecked.indexOf(distance.getTileNumber()))){
                         distanceMap.get(index).setDistFromPlayer(distFromPlayer);
                         toBeLookedAt.add(toCheck);
                     }
@@ -95,11 +96,13 @@ public class DistanceTrackerMap {
         toBeLookedAt.add(start);
         tilesAlreadyChecked.add(start.getTileNumber());
         DistanceFromPlayer adjSpot;
+        ArrayList<Integer> adjs;
         do {
             lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
             toBeLookedAt = new ArrayList<DistanceFromPlayer>();
             for (DistanceFromPlayer mapObject : lookingAt) {
-                for (int ajdPos : FindAdjLocations(mapObject)){
+                adjs = new ArrayList<Integer>(FindAdjLocations(mapObject));
+                for (int ajdPos : adjs){
                     adjSpot = new DistanceFromPlayer(ajdPos);
                     if (!tilesAlreadyChecked.contains(ajdPos)) {
                         tilesAlreadyChecked.add(ajdPos);
@@ -109,23 +112,29 @@ public class DistanceTrackerMap {
                 }
                 distanceMap.add(tilesAlreadyChecked.indexOf(mapObject.getTileNumber()), mapObject);
             }
-        } while (toBeLookedAt.size() != 0);
+        }while (toBeLookedAt.size() != 0);
 
         return;
     }
 
     private boolean notAWall(int currentLoc,  int adjTileNum, int currentTileHeight, String rampDirection) {
+        if (adjTileNum < 0 || adjTileNum >= height * width)
+            return false;
+
         TiledMapTile adjTile = layer.getCell(getXPos(adjTileNum), getYPos(adjTileNum)).getTile();
         TiledMapTile currentTile = layer.getCell(getXPos(currentLoc), getYPos(currentLoc)).getTile();
         int adjHeight = Integer.parseInt(adjTile.getProperties().get("height").toString());
         int x = getXPos(adjTileNum);
         int y = getYPos(adjTileNum);
+        boolean hasHeight = adjTile.getProperties().containsKey("height");
 
         if (layer.getCell(x, y) != null //contains a tile
-                && layer.getCell(x, y).getTile().getProperties().containsKey("height")
-                && (((adjHeight == currentTileHeight + 1 && currentTile.getProperties().containsKey("ramp")) ||  adjHeight <= currentTileHeight))
-                && rampCorrectDirection(adjTile, rampDirection))
-            //(( currentTile.getProperties().containsKey("ramp") &&  (Integer.parseInt(height) + curretHeight == currentHeight + 1 ||  curretHeight - Integer.parseInt(height) = currentHeight - 1)))
+                && hasHeight
+                && (
+                    (adjHeight == currentTileHeight + 1 && currentTile.getProperties().containsKey("ramp") && rampCorrectDirection(currentTile, rampDirection))
+                        ||  (adjHeight <= currentTileHeight) /*&& !adjTile.getProperties().containsKey("ramp"))*/
+                )
+            )
             return true;
         else
             return false;
@@ -151,51 +160,50 @@ public class DistanceTrackerMap {
         int bottom, top, left, right, botLeft, botRight, topLeft, topRight;
         String adjDiagonalRamp = "can't go up a ramp from a diagonal tile";//comparing to ramp direction will always return false
 
+        //left tile
+        left = currentLoc - width;
+        if (notAWall(currentLoc, left, currentHeight, "left")) //not a wall or wrong ramp direction
+            spotNums.add(left);
+        //right tile
+        right = currentLoc + width;
+        if (notAWall(currentLoc, right, currentHeight, "right"))
+            spotNums.add(right);
         //bottom tile
-        bottom = currentLoc - width;
-        if (0 < bottom
-                && notAWall(currentLoc, bottom, currentHeight, "down")) //not a wall
+        bottom = currentLoc - 1;
+        if (notAWall(currentLoc, bottom, currentHeight, "down") && getXPos(mapObject.getTileNumber()) == getXPos(bottom))
             spotNums.add(bottom);
         //top tile
-        top = currentLoc + width;
-        if (width * height > top
-                && notAWall(currentLoc, top, currentHeight, "up"))
+        top = currentLoc + 1;
+        if (notAWall(currentLoc, top, currentHeight, "up") && getXPos(mapObject.getTileNumber()) == getXPos(top))
             spotNums.add(top);
-        //right tile
-        right = currentLoc - 1;
-        if (getXPos(currentLoc) == getXPos(right) && right >= 0
-                && notAWall(currentLoc, right, currentHeight, "right"))
-            spotNums.add(right);
-        //left tile
-        left = currentLoc + 1;
-        if (((getXPos(currentLoc) == getXPos(left) || (currentLoc == 0 && width > 1 && height > 1)))
-                && width * height >= left
-                && notAWall(currentLoc, left, currentHeight, "left"))
-            spotNums.add(left);
+
+        //top left tile
+        topLeft = currentLoc - width + 1;
+        if ((spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1)
+                && notAWall(currentLoc, topLeft, currentHeight, adjDiagonalRamp)
+                && getXPos(topLeft) == getXPos(top))
+            spotNums.add(topLeft);
 
         //bottom left tile
-        botLeft = currentLoc - width + 1;
-        if (spotNums.indexOf(bottom) != -1 && spotNums.indexOf(left) != -1
-                && notAWall(currentLoc, botLeft, currentHeight, adjDiagonalRamp))
+        botLeft = currentLoc - width - 1;
+        if ((spotNums.indexOf(bottom) != -1 && spotNums.indexOf(left) != -1)
+                && notAWall(currentLoc, botLeft, currentHeight, adjDiagonalRamp)
+                && getXPos(left) == getXPos(botLeft))
             spotNums.add(botLeft);
 
         //bottom right tile
-        botRight = currentLoc - width - 1;
-        if (spotNums.indexOf(bottom) != -1 && spotNums.indexOf(right) != -1
-                && notAWall(currentLoc, botRight, currentHeight, adjDiagonalRamp))
+        botRight = currentLoc + width - 1;
+        if ((spotNums.indexOf(bottom) != -1 && spotNums.indexOf(right) != -1)
+                && notAWall(currentLoc, botRight, currentHeight, adjDiagonalRamp)
+                && getXPos(botRight) == getXPos(right))
             spotNums.add(botRight);
 
         //top right tile
-        topRight = currentLoc + width - 1;
-        if (spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1
-                && notAWall(currentLoc, topRight, currentHeight, adjDiagonalRamp))
+        topRight = currentLoc + width + 1;
+        if ((spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1)
+                && notAWall(currentLoc, topRight, currentHeight, adjDiagonalRamp)
+                && getXPos(topRight) == getXPos(right))
             spotNums.add(topRight);
-
-        //top left tile
-        topLeft = currentLoc + width + 1;
-        if (spotNums.indexOf(top) != -1 && spotNums.indexOf(left) != -1
-                && notAWall(currentLoc, topLeft, currentHeight, adjDiagonalRamp))
-            spotNums.add(topLeft);
 
         return spotNums;
     }

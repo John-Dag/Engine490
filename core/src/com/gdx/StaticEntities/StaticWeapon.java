@@ -25,9 +25,11 @@ public class StaticWeapon extends StaticEntity {
 	@Override
 	public void update(float delta, World world) {
 		if (this.getModel() != null && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
-			if (World.player.getWeapon() == null || World.player.getWeapon().getId() != this.getId())
+			if (World.player.getWeapon() == null || World.player.getWeapon().getId() != this.getId()) {
 				this.setIsActive(false);
 				World.player.pickupWeapon(this.getId());
+				System.out.println(this.getId());
+			}
 		}
 	}
 

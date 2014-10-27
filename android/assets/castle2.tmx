@@ -208,7 +208,7 @@
     <property name="height" value="3"/>
    </properties>
   </object>
-  <object name="Light" x="511" y="512">
+  <object name="Light" x="510" y="480">
    <properties>
     <property name="color" value="3"/>
     <property name="height" value="3"/>
@@ -329,89 +329,68 @@
   <object name="Spawn" x="921" y="509">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="40"/>
    </properties>
   </object>
-  <object name="Mist" x="512" y="555">
-   <properties>
-    <property name="color" value="3"/>
-    <property name="height" value="3"/>
-   </properties>
-  </object>
-  <object name="Weapon" x="512" y="558">
+  <object name="Rocket" x="511" y="544">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
-   </properties>
-  </object>
-  <object name="Weapon" x="196" y="946">
-   <properties>
-    <property name="color" value="2"/>
-    <property name="height" value="1"/>
-   </properties>
-  </object>
-  <object name="Spawn" x="514" y="710">
-   <properties>
-    <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="40"/>
    </properties>
   </object>
   <object name="Spawn" x="804" y="951">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
-   </properties>
-  </object>
-  <object name="Spawn" x="907" y="400">
-   <properties>
-    <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="40"/>
    </properties>
   </object>
   <object name="Spawn" x="651" y="673">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="40"/>
    </properties>
   </object>
   <object name="Spawn" x="514" y="764">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="60"/>
    </properties>
   </object>
   <object name="Spawn" x="513" y="820">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="60"/>
    </properties>
   </object>
   <object name="Spawn" x="381" y="644">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
-   </properties>
-  </object>
-  <object name="Spawn" x="356" y="374">
-   <properties>
-    <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="40"/>
    </properties>
   </object>
   <object name="Spawn" x="497" y="165">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="60"/>
    </properties>
   </object>
-  <object name="Spawn" x="700" y="347">
+  <object name="Rocket" x="177" y="945">
    <properties>
+    <property name="color" value="3"/>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="40"/>
+   </properties>
+  </object>
+  <object name="Sword" x="351" y="352">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="6"/>
+    <property name="time" value="40"/>
    </properties>
   </object>
  </objectgroup>
- <layer name="Tile Layer 2" width="32" height="32" opacity="0">
+ <layer name="Tile Layer 2" width="32" height="32" opacity="0.71">
   <data encoding="base64" compression="zlib">
    eJztVsEKwCAIbSuIHXfccf//k1tQIGKlFotYh0cj8j1tpnpjjF9YQLAvXFy/5gg2O4BTaGs5bDx/EfuSuJOuB98cDgfs8L4lVmqP4uDeAfYd2nOBOW9B/NS/o7iPjG3OTppD8B4DtoiaXToHdbVvyHbQb3m/uVzk+CDJuVr8Wvte8eNaINGfOf7R+tr8C0g1Z+b7l8Z/Evo94ufWH3iutf5o6i+l32P+KPU2rN/af3Lzh6T/Yj8l/bc0O4yYPzR51Moxcv7E+T9i/l74Dx5fwxiU
   </data>

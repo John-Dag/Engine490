@@ -1,5 +1,6 @@
 package com.gdx.engine;
 
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
@@ -11,7 +12,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.model.Node;
-import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -23,14 +23,14 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
-import com.gdx.DynamicEntities.Enemy;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
-import com.gdx.StaticEntities.Spawn;
-import com.gdx.StaticEntities.StaticWeapon;
+import com.gdx.StaticEntities.EnemySpawn;
 import com.gdx.StaticEntities.Torch;
+import com.gdx.StaticEntities.WeaponSpawn;
+import com.gdx.Weapons.RocketLauncher;
+import com.gdx.Weapons.Sword;
 
 // Important note to the team: (this can be confusing)
 // World coordinates have x, y, z, with +x pointing East, and +z pointing South
@@ -341,7 +341,7 @@ public class MeshLevel {
 		heightOffset = 0;
 		
 		if (tiledMap.getLayers().get("objects") != null){
-			setObjectInstances();
+			initializeObjectInstances();
 		}
 		else{
 			System.err.println("TileMap - No object layer in current map");
@@ -771,7 +771,7 @@ public class MeshLevel {
 	}
 	
 	//Objects are read from the "objects" layer in the tile map
-	private void setObjectInstances() {
+	private void initializeObjectInstances() {
 		Vector3 objPosition;
 		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
 
@@ -810,52 +810,26 @@ public class MeshLevel {
 				pointLight.set(getLightColor(rectObj), objPosition, 20f);
 				Light light = new Light(objPosition, 2, true, true, pointLight);
 				Entity.entityInstances.add(light);
-			}
+			} 
 
-			/*
-			else if (rectObj.getName().contains("Emitter")) {
-				int height = getObjectHeight(rectObj);
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-				color = getLightColor(rectObj);
-				Object object = new Object(objPosition, new ColorAttribute(ColorAttribute.AmbientLight).color.set(color), 20f, 3, false);
-				objectInstances.add(object);
-			}
-			 */
-
-			else if (rectObj.getName().contains("Enemy")) {
-				int height = getObjectHeight(rectObj);
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				ModelInstance test = BuildModel.buildBoxTextureModel(1f, 1f, 1f, Assets.wallMat);
-				test.transform.setToTranslation(objPosition);
-				Vector3 rotation = new Vector3(0f, 0f, 0f);
-				Vector3 scale = new Vector3(2f, 2f, 2f);
-				//				int health, Weapon currentWeapon, int id, boolean isActive,
-				//				boolean isRenderable, Vector3 position, Vector3 rotation,
-				//				Vector3 scale, Vector3 velocity, Vector3 acceleration,
-				//				ModelInstance model
-				//				Enemy enemy = new Enemy(7, true, true, objPosition, rotation, scale, new Vector3(0, 0, 0),
-				//										new Vector3(0, 0, 0), test);
-				//				Entity.entityInstances.add(enemy);
-			}
-
-			else if (rectObj.getName().contains("Weapon")) {
+			else if (rectObj.getName().contains("Sword")) {
 				int height = getObjectHeight(rectObj);
 				//float scale = 0.005f;
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				Assets.loadModels();
-				StaticWeapon weapon = new StaticWeapon(objPosition, 1, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class));
-				BoundingBox temp = new BoundingBox();
-				weapon.getModel().calculateBoundingBox(temp);
-				weapon.setBoundingBox(temp);
-				weapon.getModel().transform.setToTranslation(weapon.getPosition());
-				weapon.getModel().transform.scale(0.005f, 0.005f, 0.005f);
-				PointLight pointLight = new PointLight();
-				pointLight.set(getLightColor(rectObj), objPosition, 1f);
-				weapon.setPointLight(pointLight);
-				Entity.entityInstances.add(weapon);
+				WeaponSpawn spawn = new WeaponSpawn(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
+												    new Sword(objPosition, 1, true, true, true, Assets.manager.get("sword.g3db", Model.class)));
+				Entity.entityInstances.add(spawn);
+			}
+			
+			else if (rectObj.getName().contains("Rocket")) {
+				int height = getObjectHeight(rectObj);
+				//float scale = 0.005f;
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				WeaponSpawn spawn = new WeaponSpawn(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
+													new RocketLauncher(objPosition, 2, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class)));
+				Entity.entityInstances.add(spawn);
 			}
 
 			else if (rectObj.getName().contains("Mist")) {
@@ -873,18 +847,12 @@ public class MeshLevel {
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
 				Assets.loadModels();
-				Enemy enemy = new Enemy(9, false, true, objPosition, new Vector3(0, 0, 0), 
-						new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
-						new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
-				enemy.setAnimation(new AnimationController(enemy.getModel()));
-				enemy.getStateMachine().Current = enemy.spawn;
-				enemy.setInCollision(true);
-				Spawn spawn = new Spawn(objPosition, 8, true, false, false, getSpawnTime(rectObj), enemy);
+				EnemySpawn spawn = new EnemySpawn(objPosition, 8, true, false, false, 1f, getSpawnTime(rectObj));
 				Entity.entityInstances.add(spawn);
 			}
 
 			else {
-				System.err.println("setObjectInstances(): Object does not exist " + rectObj.getName());
+				System.err.println("initializeObjectInstances(): Object does not exist " + rectObj.getName());
 			}
 		}
 	}

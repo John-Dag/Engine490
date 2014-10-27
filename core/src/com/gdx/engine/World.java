@@ -32,7 +32,7 @@ public class World {
 						    Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
 		particleManager = new ParticleManager(this);
 		meshLevel = new MeshLevel(Assets.castle, true);
-		distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 400);
+		distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
 		Entity.entityInstances.add(player);
 		enemyInstances = new Array<Enemy>();
 		boxes = new Array<BoundingBox>();
@@ -96,8 +96,8 @@ public class World {
 			timer >= player.getWeapon().getFiringDelay()) {
 			ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
 			timer = 0;
-			rayPickLevel();
-			rayPickEntities();
+			//rayPickLevel();
+			//rayPickEntities();
 			fireWeapon();
 		}
 	}
@@ -170,7 +170,7 @@ public class World {
 			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
 			Projectile projectile = new Projectile(6, true, true, player.camera.position.cpy(), 
 												   rotation, scale, player.camera.direction.cpy(), player.camera.direction.cpy(), 
-												   10, 0.1f, particleManager.projectilePool.obtain(), this);
+												   10, 0.1f, particleManager.projectilePool.obtain(), particleManager.rocketExplosionPool.obtain(), this);
 			Entity.entityInstances.add(projectile);
 		}
 	}

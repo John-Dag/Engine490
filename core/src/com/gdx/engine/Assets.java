@@ -65,6 +65,7 @@ public class Assets {
 	public static void loadModels() {
 	    manager.load("GUNFBX.g3db", Model.class);
 	    manager.load("zombie_fast.g3db", Model.class);
+	    manager.load("sword.g3db", Model.class);
 	    manager.finishLoading();
 	}
 	
@@ -74,7 +75,8 @@ public class Assets {
 	    manager.setLoader(ParticleEffect.class, loader);
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
-	    manager.load("dropletsGreen.pfx", ParticleEffect.class, loadParam);
+	    manager.load("mistGreenWeapon.pfx", ParticleEffect.class, loadParam);
+	    manager.load("rocketExplosionEffect.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
 	}
 }

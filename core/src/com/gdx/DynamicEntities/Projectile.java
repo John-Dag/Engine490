@@ -11,6 +11,7 @@ public class Projectile extends DynamicEntity {
 	private float accuracy;
 	private Vector3 movementVector, collisionVector, newPos, oldPos;
 	private Matrix4 target;
+	private ParticleEffect collisionEffect;
 	 
 	public Projectile() {
 		super();
@@ -20,28 +21,25 @@ public class Projectile extends DynamicEntity {
 	
 	public Projectile(int id, boolean isActive, boolean isRenderable, Vector3 position,
 					  Vector3 rotation, Vector3 scale, Vector3 velocity, Vector3 acceleration,
-					  int damage, float accuracy, ParticleEffect effect, World world) {
+					  int damage, float accuracy, ParticleEffect effect, ParticleEffect collisionEffect, World world) {
 		super(id, isActive, isRenderable, position, rotation, scale, velocity, acceleration, effect);
 		this.damage = damage;
 		this.accuracy = accuracy;
 		this.setParticleEffect(World.particleManager.getProjectilePool().obtain());
 		this.setRendered(false);
+		this.collisionEffect = collisionEffect;
 		movementVector = new Vector3(0, 0, 0);
 		collisionVector = new Vector3(0, 0, 0);
 		newPos = new Vector3(0, 0, 0);
 		oldPos = new Vector3(0, 0, 0);
 		target = new Matrix4();
 	}
-	
+
 	@Override
 	public void update(float time, World world) {
-		if (!this.isRendered() && this.getParticleEffect() != null) {
-			this.setRendered(true);
-			this.getParticleEffect().init();
-			this.getParticleEffect().start();
-			this.setBoundingBox(this.getParticleEffect().getBoundingBox());
-			World.particleManager.system.add(this.getParticleEffect());
-		}
+		if (!this.isRendered() && this.getParticleEffect() != null) 
+			initializeProjectileEffect();
+		
 		world.checkProjectileCollisions(this);
 		if (World.player.getWeapon() != null) {
 			this.updatePosition(world.getPlayer().getWeapon().getFiringDelay());
@@ -67,15 +65,45 @@ public class Projectile extends DynamicEntity {
 									  new Vector3(this.getPosition().x + 0.2f, this.getPosition().y + 0.2f, this.getPosition().z + 0.2f));
 
 			if (collisionVector.x == 0 || collisionVector.y == 0 || collisionVector.z == 0) {
+				if (this.getCollisionEffect() != null)
+					//initializeCollisionExplosionEffect();
 				this.removeProjectile();
 			}
+			
+			if (this.getCollisionEffect().getControllers().first().emitter.percent >= 1.0f) {
+				World.particleManager.system.remove(this.getCollisionEffect());
+				World.particleManager.getRocketExplosionPool().free(this.getCollisionEffect());
+			}
 		}
+	}
+	
+	public void initializeProjectileEffect() {
+		this.setRendered(true);
+		this.getParticleEffect().init();
+		this.getParticleEffect().start();
+		this.setBoundingBox(this.getParticleEffect().getBoundingBox());
+		World.particleManager.system.add(this.getParticleEffect());
+	}
+	
+	public void initializeCollisionExplosionEffect() {
+		this.getCollisionEffect().setTransform(target);
+		this.getCollisionEffect().init();
+		this.getCollisionEffect().start();
+		World.particleManager.system.add(this.getCollisionEffect());
 	}
 	
 	public void removeProjectile() {
 		World.particleManager.system.remove(this.getParticleEffect());
 		World.particleManager.getProjectilePool().free(this.getParticleEffect());
 		this.setIsActive(false);
+	}
+	
+	public ParticleEffect getCollisionEffect() {
+		return collisionEffect;
+	}
+
+	public void setCollisionEffect(ParticleEffect collisionEffect) {
+		this.collisionEffect = collisionEffect;
 	}
 	
 	public int getDamage() {

@@ -1,6 +1,7 @@
 package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 
 public class Enemy extends DynamicEntity {
 	public static final int MAX_HEALTH = 100;
-	public static final int DAMAGE = 1;
+	public static final int DAMAGE = 10;
 	private int health, damage;
 	public State idle;
 	public State moving;
@@ -153,8 +154,18 @@ public class Enemy extends DynamicEntity {
 		}
 		
 		else if (this.getStateMachine().Current == this.attack){
-			this.getAnimation().setAnimation("Attacking", -1);
-			world.getPlayer().takeDamage(this.getDamage());
+			this.getAnimation().setAnimation("Attacking", 1, new AnimationListener() {
+				
+				@Override
+			public void onLoop(AnimationDesc animation) {
+					// TODO Auto-generated method stub
+			}
+				
+			@Override
+			public void onEnd(AnimationDesc animation) {
+				doDamage();
+			}
+		});
 		}
 		
 		else if (this.getStateMachine().Current == this.dead) {
@@ -256,7 +267,7 @@ public class Enemy extends DynamicEntity {
 		Condition attackCondition = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-				if (enemy.getTransformedEnemyBoundingBox().intersects(World.player.getTransformedBoundingBox()) && getStateMachine().Current != dead) {
+				if (enemy.getTransformedEnemyAttackBoundingBox().intersects(World.player.getTransformedBoundingBox()) && getStateMachine().Current != dead) {
 					return true;
 				}
 				else {
@@ -286,6 +297,39 @@ public class Enemy extends DynamicEntity {
 		stateMachine.States.add(attack);
 		
 		stateMachine.Current=idle; //Set initial state
+	}
+	
+	public void doDamage() {
+		World.player.takeDamage(this.getDamage());
+	}
+	
+	public Enemy copyEnemy() {
+		Enemy enemy = new Enemy(this.getId(), this.isActive(), this.isRenderable(), this.getPosition().cpy(), this.getRotation().cpy(),
+			     				this.getScale().cpy(), this.getVelocity().cpy(), this.getAcceleration().cpy(), this.getModel());
+		enemy.initializeEnemy();
+		return enemy;
+	}
+	
+	public void initializeEnemy() {
+		this.setAnimation(new AnimationController(this.getModel()));
+		this.getStateMachine().Current = this.spawn;
+		this.setInCollision(true);
+		this.setIsActive(true);
+	}
+	
+	public BoundingBox getTransformedEnemyBoundingBox() {
+		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 1f, this.getPosition().z - 0.5f),
+			    						 new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
+	}
+	
+	public BoundingBox getTransformedEnemyDetectionBoundingBox() {
+		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 15f, this.getPosition().y - 15f, this.getPosition().z - 15f),
+			    						 new Vector3(this.getPosition().x + 15f, this.getPosition().y + 15f, this.getPosition().z + 15f));
+	}
+	
+	public BoundingBox getTransformedEnemyAttackBoundingBox() {
+		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 2f, this.getPosition().y - 2f, this.getPosition().z - 2f),
+			    						 new Vector3(this.getPosition().x + 2f, this.getPosition().y + 2f, this.getPosition().z + 2f));
 	}
 
 	public boolean isAttacking() {
@@ -340,9 +384,9 @@ public class Enemy extends DynamicEntity {
         return tileNumber % layer.getHeight();
     }
     
-    public ArrayList<Integer> shortestPath(int endLoc, int startLoc, TiledMapTileLayer layer, DistanceTrackerMap distanceMap) {
-        distanceMap.resetDistances();
-        distanceMap.addDistances(endLoc);
+    public ArrayList<Integer> shortestPath(int startLoc, int endLoc, TiledMapTileLayer layer, DistanceTrackerMap distanceMap) {
+        //distanceMap.resetDistances();
+        //distanceMap.addDistances(endLoc);
         return distanceMap.shortestPath(startLoc, endLoc);
     }
     

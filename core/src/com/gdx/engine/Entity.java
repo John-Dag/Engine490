@@ -68,5 +68,9 @@ public class Entity {
 	public void render(float delta) {
 		
 	}
+
+	public Entity spawn() {
+		return new Entity();
+	}
 }
 

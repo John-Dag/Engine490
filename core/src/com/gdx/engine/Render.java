@@ -30,8 +30,8 @@ public class Render implements Disposable {
 	private Vector3 startXZ = new Vector3(-1, 0, 0);
 	private Vector3 startY = new Vector3();
 	private Vector3 camDirXZ = new Vector3();
-	private ModelInstance gunInstance;
-	private Model gun = new Model();
+	private ModelInstance weaponInstance;
+	private Model weapon = new Model();
 	private boolean loading;
 	
 	public Render(World world) {
@@ -61,10 +61,10 @@ public class Render implements Disposable {
 	//g3db files loaded here
 	private void doneLoading() {
 		if (world.getPlayer().getWeapon() != null) {
-			gun = Assets.manager.get(world.getPlayer().getWeapon().getWeaponModelName(), Model.class);
-			gunInstance = new ModelInstance(gun);
-			gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z);
-			gunInstance.transform.scale(0.001f, 0.001f, 0.001f);
+			weapon = Assets.manager.get(world.getPlayer().getWeapon().getWeaponModelName(), Model.class);
+			weaponInstance = new ModelInstance(weapon);
+			weaponInstance.transform.setToTranslation(world.getPlayer().camera.position.x, world.getPlayer().camera.position.y, world.getPlayer().camera.position.z);
+			weaponInstance.transform.scale(0.001f, 0.001f, 0.001f);
 			loading = false;
 		}
 	}
@@ -109,18 +109,18 @@ public class Render implements Disposable {
 			}
 		}
 		
-		if (gunInstance != null && world.getPlayer().getWeapon() != null) {
-			gunInstance.transform.setToTranslation(world.getPlayer().camera.position.x, 
+		if (weaponInstance != null && world.getPlayer().getWeapon() != null) {
+			weaponInstance.transform.setToTranslation(world.getPlayer().camera.position.x, 
 												   world.getPlayer().camera.position.y - 0.1f, 
 												   world.getPlayer().camera.position.z);
 			startY.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
 			camDirXZ.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
 		
-			gunInstance.transform.rotate(startY, world.getPlayer().camera.direction.nor());
-			gunInstance.transform.rotate(startXZ, camDirXZ.nor());
-			gunInstance.transform.scale(0.005f, 0.005f, 0.005f);
-			shadowBatch.render(gunInstance);
-			renderModels(gunInstance);
+			weaponInstance.transform.rotate(startY, world.getPlayer().camera.direction.nor());
+			weaponInstance.transform.rotate(startXZ, camDirXZ.nor());
+			weaponInstance.transform.scale(0.005f, 0.005f, 0.005f);
+			shadowBatch.render(weaponInstance);
+			renderModels(weaponInstance);
 		}
 		
 		shadowBatch.end();

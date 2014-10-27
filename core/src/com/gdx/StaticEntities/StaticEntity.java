@@ -50,8 +50,8 @@ public class StaticEntity extends Entity {
 		if (this.decal != null)
 			decalBatch.add(this.decal);
 		if (this.model != null) {
-			this.model.transform.setToTranslation(this.position);
-			this.model.transform.scale(0.005f, 0.005f, 0.005f);
+			//this.model.transform.setToTranslation(this.position);
+			//this.model.transform.scale(0.005f, 0.005f, 0.005f);
 			shadowBatch.render(this.model);
 			modelBatch.render(this.model);
 		}

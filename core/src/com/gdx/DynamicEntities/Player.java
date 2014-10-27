@@ -5,10 +5,12 @@ import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.World;
 
 public class Player extends DynamicEntity {
@@ -33,6 +35,7 @@ public class Player extends DynamicEntity {
 	private float jumpVelocity;
 	private float currentHeightOffset;
 	private float currentMovementSpeed;
+	private DistanceTrackerMap distanceMap;
 	
 	public Player() {
 		super();
@@ -68,6 +71,15 @@ public class Player extends DynamicEntity {
 	@Override
 	public void update(float delta, World world) {
 		input(delta);
+		
+	    TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
+        GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
+        if (newPos != oldPos) {
+            distanceMap = world.getDistanceMap();
+            distanceMap.resetDistances();
+            distanceMap.addDistances(( playerPosition.x + layer.getWidth() * playerPosition.y));
+            world.setDistanceMap(distanceMap);
+        }
 		
 		float heightValueLvl1 = currentHeightOffset // has to do with crouching, name change may be in order
 				+ world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z, 1);
@@ -246,9 +258,14 @@ public class Player extends DynamicEntity {
 	public void pickupWeapon(int id) {
 		switch (id) {
 			case 1:
-				Weapon weapon = new Weapon(0.1f, true, "GUNFBX.g3db", 1, true, true, new Vector3(-1, 0, 0), 
-						   				   new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
-				this.setWeapon(weapon);
+				Weapon sword = new Weapon(0.1f, false, "sword.g3db", id, true, true, new Vector3(-1, 0, 0), 
+	   				                      new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+				this.setWeapon(sword);
+				break;
+			case 2:
+				Weapon rocketLauncher = new Weapon(0.1f, true, "GUNFBX.g3db", id, true, true, new Vector3(-1, 0, 0), 
+						   				   	       new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+				this.setWeapon(rocketLauncher);
 				break;
 		}
 	}
