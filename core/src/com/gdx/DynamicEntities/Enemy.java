@@ -21,16 +21,15 @@ import com.gdx.engine.World;
 import java.util.ArrayList;
 
 public class Enemy extends DynamicEntity {
-	public static final int MAX_HEALTH = 100;
-	public static final int DAMAGE = 10;
 	private int health, damage;
 	public State idle;
 	public State moving;
 	public State dead;
 	public State spawn;
 	public State attack;
-	StateMachine stateMachine;
-	boolean isSpawned, isAttacking;
+	public StateMachine stateMachine;
+	public boolean isSpawned, isAttacking;
+	public Vector3 spawnPos;
 
 	public Enemy() {
 		super();
@@ -40,15 +39,9 @@ public class Enemy extends DynamicEntity {
 				 Vector3 scale, Vector3 velocity, Vector3 acceleration, ModelInstance model) {
 		super(id, isActive, isRenderable, position, rotation,
 			  scale, velocity, acceleration, model);
-		this.health = MAX_HEALTH;
-		this.damage = DAMAGE;
 		this.isSpawned = false;
 		this.isAttacking = false;
-		BoundingBox box = new BoundingBox();
-		box.set(new Vector3(this.getPosition().x - 1, this.getPosition().y - 1, this.getPosition().z - 1),
-			    new Vector3(this.getPosition().x + 1, this.getPosition().y + 1, this.getPosition().z + 1));
-		System.out.println(this.getPosition().x + " " + this.getPosition().z);
-		this.getBoundingBox().set(box);
+		this.spawnPos = position.cpy();
 		idle = new State();
 		moving = new State();
 		dead = new State();

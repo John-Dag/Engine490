@@ -30,7 +30,6 @@ public class WeaponSpawn extends StaticEntity {
 			@Override
 			public void run() { 
 				if (!weaponRef.isActive()) {
-					System.out.println("Spawned");
 					weaponRef = (StaticWeapon)weaponRef.spawn();
 					Entity.entityInstances.add(weaponRef);
 				}

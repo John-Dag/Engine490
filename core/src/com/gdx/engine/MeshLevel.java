@@ -24,6 +24,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.EnemySpawn;
@@ -847,7 +848,10 @@ public class MeshLevel {
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
 				Assets.loadModels();
-				EnemySpawn spawn = new EnemySpawn(objPosition, 8, true, false, false, 1f, getSpawnTime(rectObj));
+				Zombie zombie = new Zombie(9, false, true, objPosition, new Vector3(0, 0, 0), 
+										   new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+										   new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
+				EnemySpawn spawn = new EnemySpawn(objPosition, 8, true, false, false, 1f, getSpawnTime(rectObj), zombie);
 				Entity.entityInstances.add(spawn);
 			}
 
