@@ -21,17 +21,36 @@ public class DistanceTrackerMap {
     ArrayList<DistanceFromPlayer> toBeLookedAt;
 
     public DistanceTrackerMap(TiledMapTileLayer layer, int playerPos) {
-        this.layer = layer;
-        width = layer.getWidth();
-        height = layer.getHeight();
-        distanceMap = new ArrayList<DistanceFromPlayer>(width * height);
-        tilesAlreadyChecked = new ArrayList<Integer>(width * height);
-        buildMap(playerPos);
+		this.layer = layer;
+		width = layer.getWidth();
+		height = layer.getHeight();
+		distanceMap = new ArrayList<DistanceFromPlayer>(width * height);
+		tilesAlreadyChecked = new ArrayList<Integer>(width * height);
+		buildMap(playerPos);
     }
 
     public void addDistances(int playerPos) {
-        int test = tilesAlreadyChecked.indexOf(playerPos);
-        DistanceFromPlayer start = distanceMap.get(tilesAlreadyChecked.indexOf(playerPos));
+		int pos = playerPos;
+		if (tilesAlreadyChecked.indexOf(playerPos) == -1) {//temp fix to erroring out if player goes to spot unreachable by enemy
+		    if (tilesAlreadyChecked.indexOf(playerPos + 1) != -1)
+		        pos = playerPos + 1;
+		    else if (tilesAlreadyChecked.indexOf(playerPos - 1) != -1)
+		        pos = playerPos - 1;
+		    else if (tilesAlreadyChecked.indexOf(playerPos + width) != -1)
+		        pos = playerPos + width;
+		    else if (tilesAlreadyChecked.indexOf(playerPos - width) != -1)
+	            pos = playerPos - width;
+		    else if (tilesAlreadyChecked.indexOf(playerPos + width + 1) != -1)
+		        pos = playerPos + width + 1;
+		    else if (tilesAlreadyChecked.indexOf(playerPos + width - 1) != -1)
+		        pos = playerPos + width - 1;
+		    else if (tilesAlreadyChecked.indexOf(playerPos - width + 1) != -1)
+		        pos = playerPos - width + 1;
+		    else if (tilesAlreadyChecked.indexOf(playerPos - width - 1) != -1)
+		        pos = playerPos - width - 1;
+		}
+		
+        DistanceFromPlayer start = distanceMap.get(tilesAlreadyChecked.indexOf(pos));
         lookingAt = new ArrayList<DistanceFromPlayer>(1);
         toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
         DistanceFromPlayer toCheck;
