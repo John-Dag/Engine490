@@ -69,11 +69,13 @@ public class Projectile extends DynamicEntity {
 					//initializeCollisionExplosionEffect();
 				this.removeProjectile();
 			}
-			
-			if (this.getCollisionEffect().getControllers().first().emitter.percent >= 1.0f) {
-				World.particleManager.system.remove(this.getCollisionEffect());
-				World.particleManager.getRocketExplosionPool().free(this.getCollisionEffect());
-			}
+//
+//			if (this.getCollisionEffect().getControllers().first().emitter.percent >= 1.0f) {
+//				System.out.println(World.particleManager.getRocketExplosionPool().peak);
+//				World.particleManager.system.remove(this.getCollisionEffect());
+//				World.particleManager.getRocketExplosionPool().free(this.getCollisionEffect());
+//				this.removeProjectile();
+//			}
 		}
 	}
 	

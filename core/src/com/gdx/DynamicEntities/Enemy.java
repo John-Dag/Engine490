@@ -114,7 +114,7 @@ public class Enemy extends DynamicEntity {
 
             float targetHeight = world.getMeshLevel().getHeightOffset()
                     + world.getMeshLevel().mapHeight(
-                    this.getPosition().x, this.getPosition().z);
+                    this.getPosition().x, this.getPosition().z, 1);
             if (this.getPosition().y > targetHeight + 30 * delta) {
                 this.getPosition().y -= 30 * delta;
 
@@ -126,7 +126,7 @@ public class Enemy extends DynamicEntity {
                         .getHeightOffset()
                         + world.getMeshLevel().mapHeight(
                         this.getPosition().x,
-                        this.getPosition().z);
+                        this.getPosition().z, 1);
             }
 		}
 		

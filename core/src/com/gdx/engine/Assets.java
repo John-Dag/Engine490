@@ -3,6 +3,7 @@ package com.gdx.engine;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -25,6 +26,7 @@ public class Assets {
 	public static TiledMap level;
 	public static TiledMap level2;
 	public static TiledMap castle;
+	public static TiledMap dungeon1;
 	public static ModelBuilder modelBuilder;
 	public static Material floorMat;
 	public static Material wallMat;
@@ -46,6 +48,7 @@ public class Assets {
 		hole = new Texture("hole.png");
 		crosshair = new Texture("crosshair.png");
 		test1 = new TextureRegion(hole);
+		dungeon1 = new TmxMapLoader().load("dungeon1.tmx");
 		level = new TmxMapLoader().load("mymap.tmx");
 		level2 = new TmxMapLoader().load("mymap2.tmx");
 		castle = new TmxMapLoader().load("castle2.tmx");
@@ -60,6 +63,7 @@ public class Assets {
 		stoneFloorMat = new Material(TextureAttribute.createDiffuse(stoneFloor));
 		weapon1 = new Texture("weapon1.png");
 		weapon1Region = new TextureRegion(weapon1);
+		wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 	}
 	
 	public static void loadModels() {

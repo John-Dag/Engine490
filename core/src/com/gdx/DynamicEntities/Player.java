@@ -27,7 +27,7 @@ public class Player extends DynamicEntity {
 	private static final int MAX_HEALTH = 100;
 	private int health;
 	public PerspectiveCamera camera;
-	private boolean mouseLocked, mouseLeft, inCollision, isCrouching;
+	private boolean mouseLocked, mouseLeft, clipping, isCrouching;
 	public Vector3 temp;
 	private World world;
 	private Vector3 collisionVector, movementVector, newPos, oldPos;
@@ -61,7 +61,7 @@ public class Player extends DynamicEntity {
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
 		this.isJumping = false;
-		this.inCollision = true;
+		this.clipping = true;
 		this.isCrouching = false;
 		this.health = MAX_HEALTH;
 		this.currentHeightOffset = PLAYER_HEIGHT_OFFSET;
@@ -87,7 +87,7 @@ public class Player extends DynamicEntity {
 				+ currentHeightOffset // has to do with crouching, name change may be in order
 				+ world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z, 2);
 		
-		if(inCollision){
+		if(clipping){
 			if(isJumping) {
 				float jumpAmt = jumpVelocity * delta;
 				if(this.camera.position.y + jumpAmt > 6){
@@ -121,7 +121,8 @@ public class Player extends DynamicEntity {
 		}
 		
 		float movAmt = currentMovementSpeed * delta;
-		movementVector.y = 0;	// jumping is done separately from the movementVector
+		if (clipping)
+			movementVector.y = 0;	// jumping is done separately from the movementVector
 		movementVector.nor();
 		
 		oldPos.set(this.camera.position);
@@ -147,7 +148,7 @@ public class Player extends DynamicEntity {
 		}
 
 		// calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the movementVector.
-		if(inCollision){
+		if (clipping){
 			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, PLAYER_SIZE, PLAYER_HEIGHT, PLAYER_SIZE);
 			movementVector.set(movementVector.x * collisionVector.x,
 					movementVector.y * collisionVector.y,
@@ -309,8 +310,8 @@ public class Player extends DynamicEntity {
 		return mouseLeft;
 	}
 
-	public boolean isInCollision() {
-		return inCollision;
+	public boolean isclipping() {
+		return clipping;
 	}
 
 	public boolean isCrouching() {
@@ -333,8 +334,8 @@ public class Player extends DynamicEntity {
 		this.mouseLeft = mouseLeft;
 	}
 
-	public void setInCollision(boolean inCollision) {
-		this.inCollision = inCollision;
+	public void setclipping(boolean clipping) {
+		this.clipping = clipping;
 	}
 
 	public void setCrouching(boolean isCrouching) {
