@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.engine.Entity;
+import com.gdx.engine.Render;
 import com.gdx.engine.World;
 
 public class DynamicEntity extends Entity {
@@ -102,7 +103,7 @@ public class DynamicEntity extends Entity {
 	public void render(ModelBatch modelBatch, DecalBatch decalBatch, ModelBatch shadowBatch) {
 		if (this.model != null) {
 			shadowBatch.render(this.model);
-			modelBatch.render(this.model);
+			modelBatch.render(this.model, Render.environment);
 		}
 	}
 	
@@ -239,7 +240,12 @@ public class DynamicEntity extends Entity {
 	}
 
 	public void setWeapon(Weapon weapon) {
-		this.weapon = weapon;
+		if (this.getWeapon() == null)
+			this.weapon = weapon;
+		else if (this.getWeapon() != weapon) {
+			Entity.entityInstances.removeValue(this.getWeapon(), true);
+			this.weapon = weapon;
+		}
 	}
 
 	public Vector3 getPosition() {

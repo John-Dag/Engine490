@@ -1,6 +1,5 @@
 package com.gdx.engine;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -21,7 +20,6 @@ public class World {
 	private MeshLevel meshLevel;
 	private Ray ray;
 	private Array<BoundingBox> boxes;
-	private float timer;
 	private Vector3 position;
 	private Vector3 out;
     private DistanceTrackerMap distanceMap;
@@ -41,9 +39,7 @@ public class World {
 	}
 	
 	public void update(float delta) {
-		rayPick();
 		updateEntities(delta);
-		timer += delta;
 	}
 	
 	public void initializeEntities() {
@@ -73,7 +69,9 @@ public class World {
 	public void checkProjectileCollisions(Projectile projectile) {
 		for (Enemy enemy : enemyInstances) {
 			if (projectile.getBoundingBox().intersects(enemy.getTransformedEnemyBoundingBox())) {
-				enemy.takeDamage(projectile.getDamage());
+				projectile.initializeBloodEffect();
+				projectile.initializeCollisionExplosionEffect();
+				enemy.takeDamage(player.getWeapon().getDamage());
 				projectile.removeProjectile();
 			}
 		}
@@ -92,14 +90,7 @@ public class World {
 	
 	//Temporary
 	public void rayPick() {
-		if (player.isMouseLeft() && player.getWeapon() != null && 
-			timer >= player.getWeapon().getFiringDelay()) {
-			ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
-			timer = 0;
-			//rayPickLevel();
-			//rayPickEntities();
-			fireWeapon();
-		}
+
 	}
 	
 	public void rayPickLevel() {
@@ -158,20 +149,6 @@ public class World {
 					}
 				}
 			}
-		}
-	}
-	
-	//Temporary
-	public void fireWeapon() {
-		if (player.getWeapon().isParticleWeapon()) {
-			Vector3 rotation = new Vector3(0, 0, 0);
-			Vector3 scale = new Vector3(0, 0, 0);
-			
-			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
-			Projectile projectile = new Projectile(6, true, true, player.camera.position.cpy(), 
-												   rotation, scale, player.camera.direction.cpy(), player.camera.direction.cpy(), 
-												   10, 0.1f, particleManager.projectilePool.obtain(), particleManager.rocketExplosionPool.obtain(), this);
-			Entity.entityInstances.add(projectile);
 		}
 	}
 	

@@ -70,6 +70,20 @@ public class GameScreen implements Screen {
 	@Override
 	public void dispose() {
 		game.dispose();
+		Assets.manager.dispose();
+		spriteBatch.dispose();
+		World.particleManager.rocketEffect.dispose();
+		World.particleManager.mistEffect.dispose();
+		World.particleManager.torchEffect.dispose();
+		World.particleManager.rocketExplosionEffect.dispose();
+		Assets.castle.dispose();
+		Assets.crosshair.dispose();
+		Assets.darkWood.dispose();
+		Assets.dungeon1.dispose();
+		Assets.floor.dispose();
+		Assets.hole.dispose();
+		Assets.level.dispose();
+		Assets.level2.dispose();
 	}
 
 	@Override

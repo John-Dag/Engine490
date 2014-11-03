@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader.ParticleEffectLoadParameter;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
+import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.utils.Pool;
 
 public class ParticleManager {
@@ -13,14 +14,19 @@ public class ParticleManager {
 	public PFXPool torchPool;
 	public PFXPool mistPool;
 	public PFXPool rocketExplosionPool;
+	public PFXPool bloodPool;
 	public BillboardParticleBatch billboardBatch;
 	public ParticleSystem system;
 	public ParticleEffect rocketEffect;
 	public ParticleEffect torchEffect;
 	public ParticleEffect mistEffect;
 	public ParticleEffect rocketExplosionEffect;
+	public ParticleEffect bloodEffect;
     public ParticleEffectLoadParameter loadParam;
 	public ParticleEffectLoader loader;
+	public RegularEmitter regularEmitter;
+	public ParticleEffect currentExplosionEffect;
+	public RegularEmitter currentEmitter;
 	
 	public ParticleManager(World world) {
 		this.world = world;
@@ -29,6 +35,7 @@ public class ParticleManager {
 		system = ParticleSystem.get();
 		system.add(billboardBatch);
 		Assets.loadParticleEffects(system);
+		bloodEffect = Assets.manager.get("bloodeffect.pfx");
 		torchEffect = Assets.manager.get("torcheffect.pfx");
 		rocketEffect = Assets.manager.get("rocketeffect.pfx");
 		mistEffect = Assets.manager.get("mistGreenWeapon.pfx");
@@ -37,6 +44,11 @@ public class ParticleManager {
 		torchPool = new PFXPool(torchEffect);
 		mistPool = new PFXPool(mistEffect);
 		rocketExplosionPool = new PFXPool(rocketExplosionEffect);
+		bloodPool = new PFXPool(bloodEffect);
+	}
+	
+	public RegularEmitter getEmitter(ParticleEffect effect) {
+		return (RegularEmitter)effect.getControllers().first().emitter;
 	}
 	
 	public PFXPool getRocketExplosionPool() {

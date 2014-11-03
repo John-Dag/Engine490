@@ -31,8 +31,8 @@ import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.Torch;
 import com.gdx.StaticEntities.WeaponSpawn;
-import com.gdx.Weapons.RocketLauncher;
-import com.gdx.Weapons.Sword;
+import com.gdx.Weapons.RocketLauncherSpawn;
+import com.gdx.Weapons.SwordSpawn;
 
 // Important note to the team: (this can be confusing)
 // World coordinates have x, y, z, with +x pointing East, and +z pointing South
@@ -102,7 +102,7 @@ public class MeshLevel {
 	
 	//private int numLevel = 1;
 	
-	public MeshLevel(){
+	public MeshLevel() {
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
 		objectInstances = new Array<Object>();
@@ -208,7 +208,6 @@ public class MeshLevel {
 	}
 	
 	public void generateLevelArray() {
-
 		TiledMapTile tile = null;
 		int layerNumber = 0;
 		
@@ -889,6 +888,7 @@ public class MeshLevel {
 	private void initializeObjectInstances() {
 		Vector3 objPosition;
 		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
+		Assets.loadModels();
 
 		for (int i = 0; i < objects.getCount(); i++) {
 			RectangleMapObject rectObj = (RectangleMapObject) objects.get(i);
@@ -933,7 +933,7 @@ public class MeshLevel {
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				WeaponSpawn spawn = new WeaponSpawn(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-												    new Sword(objPosition, 1, true, true, true, Assets.manager.get("sword.g3db", Model.class)));
+												    new SwordSpawn(objPosition, 1, true, true, true, Assets.manager.get("sword.g3db", Model.class)));
 				Entity.entityInstances.add(spawn);
 			}
 			
@@ -943,7 +943,7 @@ public class MeshLevel {
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				WeaponSpawn spawn = new WeaponSpawn(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-													new RocketLauncher(objPosition, 2, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class)));
+													new RocketLauncherSpawn(objPosition, 2, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class)));
 				Entity.entityInstances.add(spawn);
 			}
 

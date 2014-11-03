@@ -4,13 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.Weapons.RocketLauncher;
+import com.gdx.engine.Assets;
 import com.gdx.engine.DistanceTrackerMap;
+import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
 public class Player extends DynamicEntity {
@@ -31,11 +35,12 @@ public class Player extends DynamicEntity {
 	public Vector3 temp;
 	private World world;
 	private Vector3 collisionVector, movementVector, newPos, oldPos;
-	private boolean isJumping;
+	private boolean isJumping, isFiring;
 	private float jumpVelocity;
 	private float currentHeightOffset;
 	private float currentMovementSpeed;
 	private DistanceTrackerMap distanceMap;
+	private float fireDelayTimer;
 	
 	public Player() {
 		super();
@@ -63,6 +68,7 @@ public class Player extends DynamicEntity {
 		this.isJumping = false;
 		this.clipping = true;
 		this.isCrouching = false;
+		this.isFiring = false;
 		this.health = MAX_HEALTH;
 		this.currentHeightOffset = PLAYER_HEIGHT_OFFSET;
 		this.currentMovementSpeed = MOVEMENT_SPEED;
@@ -71,6 +77,7 @@ public class Player extends DynamicEntity {
 	@Override
 	public void update(float delta, World world) {
 		input(delta);
+		fireDelayTimer += delta;
 		
 	    TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
         GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
@@ -186,6 +193,13 @@ public class Player extends DynamicEntity {
 		else
 			mouseLeft = false;
 		
+		if (this.isMouseLeft() && this.getWeapon() != null && 
+			fireDelayTimer >= this.getWeapon().getFiringDelay()) {
+			//ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+			fireDelayTimer = 0;
+			fireWeapon();
+		}
+		
 		movementVector.set(0,0,0);
 		
 		// camera rotation based on mouse looking
@@ -194,7 +208,13 @@ public class Player extends DynamicEntity {
 				camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
 				
 				// calculates up and down rotation vector
-				temp.set(camera.direction).crs(camera.up).nor();
+				if (isFiring) {
+					camera.direction.y += world.getPlayer().getWeapon().getRecoil();
+					temp.set(camera.direction).crs(camera.up).nor();
+					isFiring = false;
+				}
+				else
+					temp.set(camera.direction).crs(camera.up).nor();
 				
 				Vector3 v = camera.direction;
 				float pitch = (float) ((Math.atan2( Math.sqrt(v.x*v.x + v.z*v.z),v.y) * MathUtils.radiansToDegrees));
@@ -259,15 +279,33 @@ public class Player extends DynamicEntity {
 	public void pickupWeapon(int id) {
 		switch (id) {
 			case 1:
-				Weapon sword = new Weapon(0.1f, false, "sword.g3db", id, true, true, new Vector3(-1, 0, 0), 
-	   				                      new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+				Weapon sword = new Weapon(false, id, true, true, new Vector3(-1, 0, 0), 
+	   				                      new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0),
+	   				                      Assets.manager.get("sword.g3db", Model.class));
 				this.setWeapon(sword);
+				Entity.entityInstances.add(sword);
 				break;
 			case 2:
-				Weapon rocketLauncher = new Weapon(0.1f, true, "GUNFBX.g3db", id, true, true, new Vector3(-1, 0, 0), 
-						   				   	       new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+				RocketLauncher rocketLauncher = new RocketLauncher(true, id, true, true, new Vector3(-1, 0, 0), 
+						   				   	       new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0),
+						   				   	       Assets.manager.get("GUNFBX.g3db", Model.class));
 				this.setWeapon(rocketLauncher);
+				Entity.entityInstances.add(rocketLauncher);
 				break;
+		}
+	}
+	
+	public void fireWeapon() {
+		if (this.getWeapon().isParticleWeapon()) {
+			this.isFiring = true;
+			Vector3 rotation = new Vector3(0, 0, 0);
+			Vector3 scale = new Vector3(0, 0, 0);
+			
+			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
+			Projectile projectile = new Projectile(6, true, true, this.camera.position.cpy(), 
+												   rotation, scale, this.camera.direction.cpy(), this.camera.direction.cpy(), 
+												   World.particleManager.projectilePool.obtain(), World.particleManager.rocketExplosionPool.obtain(), this.world);
+			Entity.entityInstances.add(projectile);
 		}
 	}
 	

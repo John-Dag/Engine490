@@ -77,6 +77,7 @@ public class Assets {
 		loadParam = new ParticleEffectLoader.ParticleEffectLoadParameter(particleSystem.getBatches());
 		loader = new ParticleEffectLoader(new InternalFileHandleResolver());
 	    manager.setLoader(ParticleEffect.class, loader);
+	    manager.load("bloodeffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("mistGreenWeapon.pfx", ParticleEffect.class, loadParam);

@@ -1,27 +1,52 @@
 package com.gdx.DynamicEntities;
 
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 
 public class Weapon extends DynamicEntity {
-	private float firingDelay;
+	protected float firingDelay;
+	protected float projectileSpeed;
+	protected float recoil;
+	protected int damage;
 	private boolean isParticleWeapon;
-	private String weaponModelName;
-	
+
 	public Weapon() {
 		super();
 		firingDelay = 0;
 		isParticleWeapon = false;
-		weaponModelName = "";
 	}
 
-	public Weapon(float firingDelay, boolean isParticleWeapon, String weaponModelName, int id, 
-				  boolean isActive, boolean isRenderable, Vector3 position, Vector3 rotation,
-				  Vector3 scale, Vector3 velocity, Vector3 acceleration) {
+	public Weapon(boolean isParticleWeapon, int id, boolean isActive, boolean isRenderable, Vector3 position, Vector3 rotation,
+				  Vector3 scale, Vector3 velocity, Vector3 acceleration, Model model) {
 		super(id, isActive, isRenderable, position, rotation,
 			  scale, velocity, acceleration);
-		this.firingDelay = firingDelay;
 		this.isParticleWeapon = isParticleWeapon;
-		this.weaponModelName = weaponModelName;
+		this.setModel(new ModelInstance(model));
+	}
+	
+	public int getDamage() {
+		return damage;
+	}
+
+	public void setDamage(int damage) {
+		this.damage = damage;
+	}
+
+	public float getRecoil() {
+		return recoil;
+	}
+
+	public float getProjectileSpeed() {
+		return projectileSpeed;
+	}
+
+	public void setRecoil(float recoil) {
+		this.recoil = recoil;
+	}
+	
+	public void setProjectileSpeed(float projectileSpeed) {
+		this.projectileSpeed = projectileSpeed;
 	}
 	
 	public float getFiringDelay() {
@@ -32,21 +57,11 @@ public class Weapon extends DynamicEntity {
 		return isParticleWeapon;
 	}
 
-	public String getWeaponModelName() {
-		if (weaponModelName == null)
-			System.err.println("getWeaponModelName(): No weapon specified");
-		return weaponModelName;
-	}
-
 	public void setFiringDelay(float firingDelay) {
 		this.firingDelay = firingDelay;
 	}
 
 	public void setParticleWeapon(boolean isParticleWeapon) {
 		this.isParticleWeapon = isParticleWeapon;
-	}
-
-	public void setWeaponModelName(String weaponModelName) {
-		this.weaponModelName = weaponModelName;
 	}
 }

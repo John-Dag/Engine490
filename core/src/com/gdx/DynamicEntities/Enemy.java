@@ -1,12 +1,14 @@
 package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -111,23 +113,33 @@ public class Enemy extends DynamicEntity {
                     * collisionVector.y, this.getVelocity().z
                     * collisionVector.z);
 
-
-            float targetHeight = world.getMeshLevel().getHeightOffset()
-                    + world.getMeshLevel().mapHeight(
-                    this.getPosition().x, this.getPosition().z, 1);
-            if (this.getPosition().y > targetHeight + 30 * delta) {
-                this.getPosition().y -= 30 * delta;
-
-            } else if (this.getPosition().y < targetHeight) {
-                this.getPosition().y = targetHeight;
-
-            } else {
-                this.getPosition().y = world.getMeshLevel()
-                        .getHeightOffset()
-                        + world.getMeshLevel().mapHeight(
-                        this.getPosition().x,
-                        this.getPosition().z, 1);
+            float heightValueLvl1 = world.getMeshLevel().mapHeight(
+            	     this.getPosition().x, this.getPosition().z, 1);
+            float heightValueLvl2 = 6 + world.getMeshLevel().mapHeight(
+            	     this.getPosition().x, this.getPosition().z, 2);
+            if (this.getPosition().y >= 6) {
+            	this.getPosition().y = heightValueLvl2;
             }
+            if (this.getPosition().y < 6 + 0.5f){
+            	this.getPosition().y = heightValueLvl1;
+            }
+            
+//            float targetHeight = world.getMeshLevel().getHeightOffset()
+//                    + world.getMeshLevel().mapHeight(
+//                    this.getPosition().x, this.getPosition().z, 1);
+//            if (this.getPosition().y > targetHeight + 30 * delta) {
+//                this.getPosition().y -= 30 * delta;
+//
+//            } else if (this.getPosition().y < targetHeight) {
+//                this.getPosition().y = targetHeight;
+//
+//            } else {
+//                this.getPosition().y = world.getMeshLevel()
+//                        .getHeightOffset()
+//                        + world.getMeshLevel().mapHeight(
+//                        this.getPosition().x,
+//                        this.getPosition().z, 1);
+//            }
 		}
 		
 		else if (this.getStateMachine().Current == this.spawn) {
@@ -156,7 +168,7 @@ public class Enemy extends DynamicEntity {
 				
 			@Override
 			public void onEnd(AnimationDesc animation) {
-				doDamage();
+				dealDamage();
 			}
 		});
 		}
@@ -292,7 +304,7 @@ public class Enemy extends DynamicEntity {
 		stateMachine.Current=idle; //Set initial state
 	}
 	
-	public void doDamage() {
+	public void dealDamage() {
 		World.player.takeDamage(this.getDamage());
 	}
 	
