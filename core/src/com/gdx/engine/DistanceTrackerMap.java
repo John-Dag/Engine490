@@ -2,6 +2,8 @@ package com.gdx.engine;
 
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.GridPoint2;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,8 @@ import java.util.List;
  * add adj obj to
  */
 public class DistanceTrackerMap {
-    private TiledMapTileLayer layer;
+    //private TiledMapTileLayer layer;
+    private MeshLevel meshLevel;
     //private DistanceFromPlayer playerDistanceMap[][];
     private List<DistanceFromPlayer> distanceMap;
     private int width;
@@ -20,13 +23,22 @@ public class DistanceTrackerMap {
     ArrayList<DistanceFromPlayer> lookingAt;
     ArrayList<DistanceFromPlayer> toBeLookedAt;
 
-    public DistanceTrackerMap(TiledMapTileLayer layer, int playerPos) {
-		this.layer = layer;
-		width = layer.getWidth();
-		height = layer.getHeight();
-		distanceMap = new ArrayList<DistanceFromPlayer>(width * height);
-		tilesAlreadyChecked = new ArrayList<Integer>(width * height);
-		buildMap(playerPos);
+    //  public DistanceTrackerMap(TiledMapTileLayer layer, int playerPos) {
+    //		this.layer = layer;
+    //		width = layer.getWidth();
+    //		height = layer.getHeight();
+    //		distanceMap = new ArrayList<DistanceFromPlayer>(width * height);
+    //		tilesAlreadyChecked = new ArrayList<Integer>(width * height);
+    //		buildMap(playerPos);
+    //  }
+
+    public DistanceTrackerMap(MeshLevel meshLevel, int playerPos) {
+    	this.meshLevel = meshLevel;
+    	width = meshLevel.getMapXDimension();
+    	height = meshLevel.getMapYDimension();
+    	distanceMap = new ArrayList<DistanceFromPlayer>(width * height);
+    	tilesAlreadyChecked = new ArrayList<Integer>(width * height);
+    	buildMap(playerPos);
     }
 
     public void addDistances(int playerPos) {
@@ -136,95 +148,168 @@ public class DistanceTrackerMap {
         return;
     }
 
-    private boolean notAWall(int currentLoc,  int adjTileNum, int currentTileHeight, String rampDirection) {
-        if (adjTileNum < 0 || adjTileNum >= height * width)
-            return false;
+    private boolean notAWall(int currentLoc,  int adjTileNum, int currentTileHeight, int rampDirection) {
+    	if (adjTileNum < 0 || adjTileNum >= height * width)
+    		return false;
 
-        TiledMapTile adjTile = layer.getCell(getXPos(adjTileNum), getYPos(adjTileNum)).getTile();
-        TiledMapTile currentTile = layer.getCell(getXPos(currentLoc), getYPos(currentLoc)).getTile();
-        int adjHeight = Integer.parseInt(adjTile.getProperties().get("height").toString());
-        int x = getXPos(adjTileNum);
-        int y = getYPos(adjTileNum);
-        boolean hasHeight = adjTile.getProperties().containsKey("height");
+    	//        TiledMapTile adjTile = layer.getCell(getXPos(adjTileNum), getYPos(adjTileNum)).getTile();
+    	//        TiledMapTile currentTile = layer.getCell(getXPos(currentLoc), getYPos(currentLoc)).getTile();
+    	MapTile adjTile = meshLevel.getMapTile(getXPos(adjTileNum), getYPos(adjTileNum), 0);
+    	MapTile currentTile = meshLevel.getMapTile(getXPos(currentLoc), getYPos(currentLoc), 0);
+    	//int adjHeight = Integer.parseInt(adjTile.getProperties().get("height").toString());
+    	int adjHeight = adjTile.getHeight();
+    	int x = getXPos(adjTileNum);
+    	int y = getYPos(adjTileNum);
+    	boolean hasHeight = adjHeight > -1;
 
-        if (layer.getCell(x, y) != null //contains a tile
-                && hasHeight
-                && (
-                    (adjHeight == currentTileHeight + 1 && currentTile.getProperties().containsKey("ramp") && rampCorrectDirection(currentTile, rampDirection))
-                        ||  (adjHeight <= currentTileHeight) /*&& !adjTile.getProperties().containsKey("ramp"))*/
-                )
-            )
-            return true;
-        else
-            return false;
+    	//if (layer.getCell(x, y) != null //contains a tile
+    	if (!meshLevel.outOfBounds(new GridPoint2(x, y)) //contains a tile
+    			&& hasHeight
+    			&& (
+    					//(adjHeight == currentTileHeight + 1 && currentTile.getProperties().containsKey("ramp") && rampCorrectDirection(currentTile, rampDirection))
+    					(adjHeight == currentTileHeight + 1 && currentTile.getRampDirection() != -1 && rampCorrectDirection(currentTile, rampDirection))
+    					||  (adjHeight <= currentTileHeight) /*&& !adjTile.getProperties().containsKey("ramp"))*/
+    					)
+    			)
+    		return true;
+    	else
+    		return false;
     }
 
-    private boolean rampCorrectDirection(TiledMapTile adjTile, String rampDirection) {
-        if (adjTile.getProperties().containsKey("ramp")) {
-            if (adjTile.getProperties().get("ramp").toString().equals(rampDirection))
-                return true;//right direction
-            else
-                return false;//wrong direction
-        }
-        else
-            return true;//no ramp
+    //  private boolean rampCorrectDirection(TiledMapTile adjTile, String rampDirection) {
+    //  if (adjTile.getProperties().containsKey("ramp")) {
+    //      if (adjTile.getProperties().get("ramp").toString().equals(rampDirection))
+    //          return true;//right direction
+    //      else
+    //          return false;//wrong direction
+    //  }
+    //  else
+    //      return true;//no ramp
+    //}
+
+    private boolean rampCorrectDirection(MapTile adjTile, int rampDirection) {
+    	if (adjTile.getRampDirection() != -1) {
+    		if (adjTile.getRampDirection() == rampDirection)
+    			return true;//right direction
+    		else
+    			return false;//wrong direction
+    	}
+    	else
+    		return true;//no ramp
     }
+
+    //  private ArrayList<Integer> FindAdjLocations(DistanceFromPlayer mapObject) {
+    //  TiledMapTile tile = layer.getCell(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber())).getTile();
+    //  int currentHeight = Integer.parseInt(tile.getProperties().get("height").toString());
+    //  int currentLoc = mapObject.getTileNumber();
+    //  //calculate adj rooms
+    //  ArrayList<Integer> spotNums = new ArrayList<Integer>(1);
+    //  int bottom, top, left, right, botLeft, botRight, topLeft, topRight;
+    //  String adjDiagonalRamp = "can't go up a ramp from a diagonal tile";//comparing to ramp direction will always return false
+    //
+    //  //left tile
+    //  left = currentLoc - width;
+    //  if (notAWall(currentLoc, left, currentHeight, "left")) //not a wall or wrong ramp direction
+    //      spotNums.add(left);
+    //  //right tile
+    //  right = currentLoc + width;
+    //  if (notAWall(currentLoc, right, currentHeight, "right"))
+    //      spotNums.add(right);
+    //  //bottom tile
+    //  bottom = currentLoc - 1;
+    //  if (notAWall(currentLoc, bottom, currentHeight, "down") && getXPos(mapObject.getTileNumber()) == getXPos(bottom))
+    //      spotNums.add(bottom);
+    //  //top tile
+    //  top = currentLoc + 1;
+    //  if (notAWall(currentLoc, top, currentHeight, "up") && getXPos(mapObject.getTileNumber()) == getXPos(top))
+    //      spotNums.add(top);
+    //
+    //  //top left tile
+    //  topLeft = currentLoc - width + 1;
+    //  if ((spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1)
+    //          && notAWall(currentLoc, topLeft, currentHeight, adjDiagonalRamp)
+    //          && getXPos(topLeft) == getXPos(top))
+    //      spotNums.add(topLeft);
+    //
+    //  //bottom left tile
+    //  botLeft = currentLoc - width - 1;
+    //  if ((spotNums.indexOf(bottom) != -1 && spotNums.indexOf(left) != -1)
+    //          && notAWall(currentLoc, botLeft, currentHeight, adjDiagonalRamp)
+    //          && getXPos(left) == getXPos(botLeft))
+    //      spotNums.add(botLeft);
+    //
+    //  //bottom right tile
+    //  botRight = currentLoc + width - 1;
+    //  if ((spotNums.indexOf(bottom) != -1 && spotNums.indexOf(right) != -1)
+    //          && notAWall(currentLoc, botRight, currentHeight, adjDiagonalRamp)
+    //          && getXPos(botRight) == getXPos(right))
+    //      spotNums.add(botRight);
+    //
+    //  //top right tile
+    //  topRight = currentLoc + width + 1;
+    //  if ((spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1)
+    //          && notAWall(currentLoc, topRight, currentHeight, adjDiagonalRamp)
+    //          && getXPos(topRight) == getXPos(right))
+    //      spotNums.add(topRight);
+    //
+    //  return spotNums;
+    //}
 
     private ArrayList<Integer> FindAdjLocations(DistanceFromPlayer mapObject) {
-        TiledMapTile tile = layer.getCell(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber())).getTile();
-        int currentHeight = Integer.parseInt(tile.getProperties().get("height").toString());
-        int currentLoc = mapObject.getTileNumber();
-        //calculate adj rooms
-        ArrayList<Integer> spotNums = new ArrayList<Integer>(1);
-        int bottom, top, left, right, botLeft, botRight, topLeft, topRight;
-        String adjDiagonalRamp = "can't go up a ramp from a diagonal tile";//comparing to ramp direction will always return false
+    	MapTile tile = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), 0);
+    	int currentHeight = tile.getHeight();
+    	int currentLoc = mapObject.getTileNumber();
+    	//calculate adj rooms
+    	ArrayList<Integer> spotNums = new ArrayList<Integer>(1);
+    	int bottom, top, left, right, botLeft, botRight, topLeft, topRight;
+    	int adjDiagonalRamp = -2;	//comparing to ramp direction will always return false
 
-        //left tile
-        left = currentLoc - width;
-        if (notAWall(currentLoc, left, currentHeight, "left")) //not a wall or wrong ramp direction
-            spotNums.add(left);
-        //right tile
-        right = currentLoc + width;
-        if (notAWall(currentLoc, right, currentHeight, "right"))
-            spotNums.add(right);
-        //bottom tile
-        bottom = currentLoc - 1;
-        if (notAWall(currentLoc, bottom, currentHeight, "down") && getXPos(mapObject.getTileNumber()) == getXPos(bottom))
-            spotNums.add(bottom);
-        //top tile
-        top = currentLoc + 1;
-        if (notAWall(currentLoc, top, currentHeight, "up") && getXPos(mapObject.getTileNumber()) == getXPos(top))
-            spotNums.add(top);
+    	//left tile
+    	left = currentLoc - width;
+    	if (notAWall(currentLoc, left, currentHeight, MeshLevel.LEFT)) //not a wall or wrong ramp direction
+    		spotNums.add(left);
+    	//right tile
+    	right = currentLoc + width;
+    	if (notAWall(currentLoc, right, currentHeight, MeshLevel.RIGHT))
+    		spotNums.add(right);
+    	//bottom tile
+    	bottom = currentLoc - 1;
+    	if (notAWall(currentLoc, bottom, currentHeight, MeshLevel.DOWN) && getXPos(mapObject.getTileNumber()) == getXPos(bottom))
+    		spotNums.add(bottom);
+    	//top tile
+    	top = currentLoc + 1;
+    	if (notAWall(currentLoc, top, currentHeight, MeshLevel.UP) && getXPos(mapObject.getTileNumber()) == getXPos(top))
+    		spotNums.add(top);
 
-        //top left tile
-        topLeft = currentLoc - width + 1;
-        if ((spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1)
-                && notAWall(currentLoc, topLeft, currentHeight, adjDiagonalRamp)
-                && getXPos(topLeft) == getXPos(top))
-            spotNums.add(topLeft);
+    	//top left tile
+    	topLeft = currentLoc - width + 1;
+    	if ((spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1)
+    			&& notAWall(currentLoc, topLeft, currentHeight, adjDiagonalRamp)
+    			&& getXPos(topLeft) == getXPos(top))
+    		spotNums.add(topLeft);
 
-        //bottom left tile
-        botLeft = currentLoc - width - 1;
-        if ((spotNums.indexOf(bottom) != -1 && spotNums.indexOf(left) != -1)
-                && notAWall(currentLoc, botLeft, currentHeight, adjDiagonalRamp)
-                && getXPos(left) == getXPos(botLeft))
-            spotNums.add(botLeft);
+    	//bottom left tile
+    	botLeft = currentLoc - width - 1;
+    	if ((spotNums.indexOf(bottom) != -1 && spotNums.indexOf(left) != -1)
+    			&& notAWall(currentLoc, botLeft, currentHeight, adjDiagonalRamp)
+    			&& getXPos(left) == getXPos(botLeft))
+    		spotNums.add(botLeft);
 
-        //bottom right tile
-        botRight = currentLoc + width - 1;
-        if ((spotNums.indexOf(bottom) != -1 && spotNums.indexOf(right) != -1)
-                && notAWall(currentLoc, botRight, currentHeight, adjDiagonalRamp)
-                && getXPos(botRight) == getXPos(right))
-            spotNums.add(botRight);
+    	//bottom right tile
+    	botRight = currentLoc + width - 1;
+    	if ((spotNums.indexOf(bottom) != -1 && spotNums.indexOf(right) != -1)
+    			&& notAWall(currentLoc, botRight, currentHeight, adjDiagonalRamp)
+    			&& getXPos(botRight) == getXPos(right))
+    		spotNums.add(botRight);
 
-        //top right tile
-        topRight = currentLoc + width + 1;
-        if ((spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1)
-                && notAWall(currentLoc, topRight, currentHeight, adjDiagonalRamp)
-                && getXPos(topRight) == getXPos(right))
-            spotNums.add(topRight);
+    	//top right tile
+    	topRight = currentLoc + width + 1;
+    	if ((spotNums.indexOf(top) != -1 && spotNums.indexOf(right) != -1)
+    			&& notAWall(currentLoc, topRight, currentHeight, adjDiagonalRamp)
+    			&& getXPos(topRight) == getXPos(right))
+    		spotNums.add(topRight);
 
-        return spotNums;
+    	return spotNums;
     }
 
     private int getXPos(int tileNumber) {

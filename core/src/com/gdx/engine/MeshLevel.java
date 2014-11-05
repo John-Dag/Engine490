@@ -41,16 +41,17 @@ import com.gdx.Weapons.SwordSpawn;
 
 public class MeshLevel {
 	public static Color skyColor = Color.BLACK;
-	private static final float ROOT_PT5 = 0.70710678f;
-	private static final int NORTH = 1;
-	private static final int SOUTH = 2;
-	private static final int EAST = 3;
-	private static final int WEST = 4;
+	public static final float ROOT_PT5 = 0.70710678f;
+	public static final int NORTH = 1;
+	public static final int SOUTH = 2;
+	public static final int EAST = 3;
+	public static final int WEST = 4;
+	
 	// the direction of the ramp gradient (left = north, etc)
-	private static final int LEFT = 1;
-	private static final int RIGHT = 2;
-	private static final int UP = 3;
-	private static final int DOWN = 4;
+	public static final int LEFT = 1;
+	public static final int RIGHT = 2;
+	public static final int UP = 3;
+	public static final int DOWN = 4;
 	
 	// the length and width of one tile
 	private static final float SPOT_WIDTH = 1;
@@ -75,6 +76,7 @@ public class MeshLevel {
 	private boolean isSkySphereActive;
 	//private TiledMapTileLayer tiledMapLayer0;
 	private TiledMapTileLayer currentLayer;
+	private int currentLayerNumber;
 	private TiledMapTileLayer layer1;
 	private TiledMapTileLayer layer2;
 	private float heightOffset;
@@ -97,18 +99,22 @@ public class MeshLevel {
 	private Vector3 normal = new Vector3();
 	
 	private boolean combinedWalls;
+	private boolean ceiling;
 	
 	private Random rand = new Random();
 	
 	//private int numLevel = 1;
 	
-	public MeshLevel() {
+	public MeshLevel(boolean isSkySphereActive){
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
 		objectInstances = new Array<Object>();
 		entityInstances = new Array<Entity>();
+		currentLayerNumber = 0;
 		this.heightOffset = 0f;
-		tileLayerCount = 1;
+		combinedWalls = true;
+		ceiling = true;
+		tileLayerCount = 2;
 		tileLayerWidth = 64;
 		tileLayerHeight = 64;
 		levelArray = new MapTile[tileLayerWidth][tileLayerHeight][tileLayerCount];
@@ -119,7 +125,7 @@ public class MeshLevel {
 				}
 			}
 		}
-		
+		initializeLevelArray();
 		generateBSPDungeonArray();
 		generateLevelMesh();
 	}
@@ -157,7 +163,7 @@ public class MeshLevel {
 				}
 			}
 		}
-		generateBSPDungeonArray();
+		//generateBSPDungeonArray();
 		generateLevelArray();
 		//printLevelArray();
 		generateLevelMesh();
@@ -177,11 +183,97 @@ public class MeshLevel {
 		}
 	}
 	
-	public void generateBSPDungeonArray(){
-		splitBSP(new BSPTree(null, 0, 63, 0, 63));
+	private void initializeLevelArray(){
+		for (int i = 0; i < levelArray.length; i++){
+			for(int j = 0; j < levelArray[i].length; j++){
+//				for(int k = 0; k < levelArray[i][j].length; k++){
+//					if(k==0){
+//						levelArray[i][j][k].setHeight(-1);
+//					}else{
+//						levelArray[i][j][k].setHeight(0);
+//					}
+//					levelArray[i][j][k].setRampDirection(-1);
+//				}
+				levelArray[i][j][0].setHeight(-1);
+				if(ceiling){
+					levelArray[i][j][1].setHeight(0);
+				}else{
+					levelArray[i][j][1].setHeight(-1);
+				}
+				levelArray[i][j][0].setRampDirection(-1);
+				levelArray[i][j][1].setRampDirection(-1);
+			}
+		}
 	}
 	
-	public void splitBSP(BSPTree tree){
+	private void createDungeonRoom(int x1, int x2, int y1, int y2) {
+		x1 += rand.nextInt(2) + 1;
+		x2 -= rand.nextInt(2) + 1;
+		y1 += rand.nextInt(2) + 1;
+		y2 -= rand.nextInt(2) + 1;
+		for(int i = y1; i < y2; i++){
+			for(int j = x1; j < x2; j++){
+				levelArray[j][i][0].setHeight(1);
+			}
+		}
+	}
+	
+	private void generateBSPDungeonArray(){
+		splitBSP(new BSPTree(null, 0, 63, 0, 63));
+		// set walls
+		for (int i = 0; i < levelArray.length; i++){
+			for(int j = 0; j < levelArray[i].length; j++){
+				for(int k = 0; k < levelArray[i][j].length; k++){
+					setWalls(i,j,k);
+				}
+			}
+		}
+	}
+	
+	public GridPoint2 getStartingPoint(){
+		for (int i = 0; i < levelArray.length; i++){
+			for(int j = 0; j < levelArray[i].length; j++){
+				for(int k = 0; k < levelArray[i][j].length; k++){
+					if(levelArray[i][j][k].getHeight() == 1){
+						return new GridPoint2(i,j);
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	private void setWalls(int i, int j, int k){
+		if(levelArray[i][j][k].getHeight() == -1){
+			// check out of bounds
+			if(!outOfBounds(i+1, j)){
+				if(levelArray[i+1][j][k].getHeight() == 1){
+					levelArray[i][j][k].setHeight(5);
+					return;
+				}
+			}
+			if(!outOfBounds(i-1, j)){
+				if(levelArray[i-1][j][k].getHeight() == 1){
+					levelArray[i][j][k].setHeight(5);
+					return;
+				}
+			}
+			if(!outOfBounds(i, j+1)){
+				if(levelArray[i][j+1][k].getHeight() == 1){
+					levelArray[i][j][k].setHeight(5);
+					return;
+				}
+			}
+			if(!outOfBounds(i, j-1)){
+				if(levelArray[i][j-1][k].getHeight() == 1){
+					levelArray[i][j][k].setHeight(5);
+					return;
+				}
+			}
+		}
+	}
+	
+	private void splitBSP(BSPTree tree){
 		System.out.println("(" + tree.x1 + "-" + tree.x2 + "," + tree.y1 + "-" + tree.y2 + ")");
 		int splitSpot = -1;
 		if(rand.nextInt(2) == 0) {
@@ -193,6 +285,17 @@ public class MeshLevel {
 				tree.setRightChild(new BSPTree(tree, splitSpot, tree.x2, tree.y1, tree.y2));
 				splitBSP(tree.getLeftChild());
 				splitBSP(tree.getRightChild());
+			}else if(tree.y2 - tree.y1 > 32){
+				// split horizontally (y) with a padding of 4 tiles on either side
+				splitSpot = tree.y1 + 8 + rand.nextInt((tree.y2-8) - (tree.y1+8));
+				System.out.print("HorizontalSplit at " + splitSpot + " ");
+				tree.setLeftChild(new BSPTree(tree, tree.x1, tree.x2, tree.y1, splitSpot-1));
+				tree.setRightChild(new BSPTree(tree, tree.x1, tree.x2, splitSpot, tree.y2));
+				splitBSP(tree.getLeftChild());
+				splitBSP(tree.getRightChild());
+			}else{
+				// done splitting, create room  from (tree.x1+2, tree.y1+2) to (tree.x2-2, tree.y2-2)
+				createDungeonRoom(tree.x1, tree.x2, tree.y1, tree.y2);
 			}
 		}else{
 			if(tree.y2 - tree.y1 > 16){
@@ -203,11 +306,118 @@ public class MeshLevel {
 				tree.setRightChild(new BSPTree(tree, tree.x1, tree.x2, splitSpot, tree.y2));
 				splitBSP(tree.getLeftChild());
 				splitBSP(tree.getRightChild());
+			}else if(tree.x2 - tree.x1 > 32){
+				// split vertically (x) with a padding of 4 tiles on either side
+				splitSpot = tree.x1 + 8 + rand.nextInt((tree.x2-8) - (tree.x1+8));
+				System.out.print("VerticalSplit at " + splitSpot + " ");
+				tree.setLeftChild(new BSPTree(tree, tree.x1, splitSpot-1, tree.y1, tree.y2));
+				tree.setRightChild(new BSPTree(tree, splitSpot, tree.x2, tree.y1, tree.y2));
+				splitBSP(tree.getLeftChild());
+				splitBSP(tree.getRightChild());
+			}else{
+				// done splitting, create room from (tree.x1+2, tree.y1+2) to (tree.x2-2, tree.y2-2)
+				createDungeonRoom(tree.x1, tree.x2, tree.y1, tree.y2);
 			}
+		}
+		// connect the two children
+		if(tree.getLeftChild() == null || tree.getRightChild() == null){
+			connectDungeonRooms(tree.getParent());
+		}
+	}
+	
+	private void connectDungeonRooms(BSPTree parent){
+		BSPTree left = parent.getLeftChild();
+		BSPTree right = parent.getRightChild();
+//		int leftXMidPoint = (left.x2 - left.x1) / 2;
+//		int leftYMidPoint = (left.y2 - left.y1) / 2;
+//		int rightXMidPoint = (right.x2 - right.x1)/ 2;
+//		int rightYMidPoint = (right.y2 - right.y1)/ 2;
+		int heightValue;
+		int connectorCount;
+		int i,j;
+		int midPointX = (left.x1 + left.x2 + right.x1 + right.x2)/4; 
+		int midPointY = (left.y1 + left.y2 + right.y1 + right.y2)/4;
+		if(left.x2 < right.x1 || right.x2 < left.x1){
+			// vertical split
+			connectorCount = 0;
+			heightValue = -1;
+			i = midPointX;
+			while(heightValue != 1 && connectorCount < 16){
+				if(!outOfBounds(i, midPointY)){
+					levelArray[i][midPointY][0].setHeight(1);
+				}else{heightValue = 1;}
+				i++;
+				if(!outOfBounds(i, midPointY)){
+					heightValue = levelArray[i][midPointY][0].getHeight();
+				}else{heightValue = 1;}
+				connectorCount++;
+			}
+			connectorCount = 0;
+			heightValue = -1;
+			i = midPointX-1;
+			while(heightValue != 1 && connectorCount < 16){
+				if(!outOfBounds(i, midPointY)){
+					levelArray[i][midPointY][0].setHeight(1);
+				}else{heightValue = 1;}
+				i--;
+				if(!outOfBounds(i, midPointY)){
+					heightValue = levelArray[i][midPointY][0].getHeight();
+				}else{heightValue = 1;}
+				connectorCount++;
+			}
+//		}else if(right.x2 < left.x1){
+//			// vertical split
+//			midPoint = (left.y1 + left.y2 + right.y1 + right.y2) / 4;
+//			for(int i = right.x2-2; i < left.x1+2; i++){
+//				if(!outOfBounds(i, midPoint)){
+//					levelArray[i][midPoint][0].setHeight(1);
+//				}
+//			}
+		}else if(left.y2 < right.y1 || right.y2 < left.y1){
+			// horizontal split
+			connectorCount = 0;
+			heightValue = -1;
+			j = midPointY;
+			while(heightValue != 1 && connectorCount < 16){
+				if(!outOfBounds(midPointX, j)){
+					levelArray[midPointX][j][0].setHeight(1);
+				}else{heightValue = 1;}
+				j++;
+				if(!outOfBounds(midPointX, j)){
+					heightValue = levelArray[midPointX][j][0].getHeight();
+				}else{heightValue = 1;}
+				connectorCount++;
+			}
+			connectorCount = 0;
+			heightValue = -1;
+			j = midPointY-1;
+			while(heightValue != 1 && connectorCount < 16){
+				if(!outOfBounds(midPointX, j)){
+					levelArray[midPointX][j][0].setHeight(1);
+				}else{heightValue = 1;}
+				j--;
+				if(!outOfBounds(midPointX, j)){
+					heightValue = levelArray[midPointX][j][0].getHeight();
+				}else{heightValue = 1;}
+				connectorCount++;
+			}
+//		}else{
+//			// horizontal split
+//			midPoint = (left.x1 + left.x2 + right.x1 + right.x2) / 4;
+//			for(int j = right.y2-2; j < left.y1+2; j++){
+//				if(!outOfBounds(midPoint, j)){
+//					levelArray[midPoint][j][0].setHeight(1);
+//				}
+//			}
+		}
+		if(parent.getParent()!= null){
+			connectDungeonRooms(parent.getParent());
+
 		}
 	}
 	
 	public void generateLevelArray() {
+
 		TiledMapTile tile = null;
 		int layerNumber = 0;
 		
@@ -271,8 +481,10 @@ public class MeshLevel {
 					if(levelArray[i][j][0] != null){
 						tile1 = levelArray[i][j][0];
 					}
-					if(levelArray[i][j][1] != null){
-						tile2 = levelArray[i][j][1];
+					if(tileLayerCount > 1){
+						if(levelArray[i][j][1] != null){
+							tile2 = levelArray[i][j][1];
+						}
 					}
 
 					MapTile currentTile = null;
@@ -328,6 +540,7 @@ public class MeshLevel {
 							instance = new ModelInstance(model);
 							instances.add(instance);
 
+
 						}
 						else if(k == 0 && currentTile.getHeight() == 5 && tile2.getHeight() != -1){
 							// don't make this polygon because it is hidden by level2
@@ -372,14 +585,18 @@ public class MeshLevel {
 		
 		heightOffset = 0;
 		
-		if (tiledMap.getLayers().get("objects") != null){
-			initializeObjectInstances();
-		}
-		else{
-			System.err.println("TileMap - No object layer in current map");
-		}
+		if (tiledMap != null){
+			if (tiledMap.getLayers().get("objects") != null){
+				initializeObjectInstances();
+			}
+			else{
+				System.err.println("TileMap - No object layer in current map");
+			}
 		
-		currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 1");
+		
+			currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 1");
+			//currentLayerNumber = 0;
+		}
 		return instances;
 	}
 	
@@ -1069,7 +1286,7 @@ public class MeshLevel {
 			String direction = tile.getProperties().get("ramp").toString();
 			return direction;
 		} else {
-			return "NAR";
+			return "NAR"; // not a ramp
 		}
 	}
 	
@@ -1091,7 +1308,7 @@ public class MeshLevel {
 		}
 		else{
 			// not a ramp
-			intDir = 0;
+			intDir = -1;
 		}
 		return intDir;
 	}
@@ -1264,7 +1481,11 @@ public class MeshLevel {
 	}
 	
 	public boolean outOfBounds(GridPoint2 point){
-		if (point.x < 0 || point.x >= tileLayerWidth || point.y < 0 || point.y >= tileLayerHeight){
+		return outOfBounds(point.x, point.y);
+	}
+	
+	public boolean outOfBounds(int x, int y){
+		if (x < 0 || x >= tileLayerWidth || y < 0 || y >= tileLayerHeight){
 			return true;
 		} else {
 			return false;
@@ -1276,38 +1497,45 @@ public class MeshLevel {
 		float height = 0;
 		GridPoint2 tileCoords = getTileCoords(x, z);
 
-		TiledMapTile tile;
+		//TiledMapTile tile;
+		MapTile tile;
 		if (heightLevel == 1){
-			tile = layer1.getCell(tileCoords.x, tileCoords.y).getTile();
+			//tile = layer1.getCell(tileCoords.x, tileCoords.y).getTile();
+			tile = getMapTile(tileCoords.x, tileCoords.y, 0);
 		} else {
-			tile = layer2.getCell(tileCoords.x, tileCoords.y).getTile();
+			//tile = layer2.getCell(tileCoords.x, tileCoords.y).getTile();
+			tile = getMapTile(tileCoords.x, tileCoords.y, 1);
 		}
 
 		// this is in case the player is on level 2 but there is no floor there, so level 1 is used
-		height = (float)getHeight(tile);
+		//height = (float)getHeight(tile);
+		height = (float)tile.getHeight();
 		if (height == -1f) {
-			currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+			//currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
 			heightOffset = 0;
 		}
 
-		if (tile.getProperties().containsKey("ramp")) {
+
+		//if (tile.getProperties().containsKey("ramp")) {
+		if (tile.getRampDirection() > 0) {
 			//height = (float)getHeight(tile);
 			int temp = 0;
-			String direction = getRampDirection(tile);
+			//String direction = getRampDirection(tile);
+			int direction = tile.getRampDirection();
 
-			if (direction.equals("up"))	{ // -x direction
+			if (direction == UP)	{ // -x direction
 				temp = (int)x;
 				height += x - temp;
 			}
-			else if (direction.equals("down")) { // +x direction
+			else if (direction == DOWN) { // +x direction
 				temp = (int)x;
 				height += 1 - (x - temp);
 			}
-			else if(direction.equals("left")) { // -z direction
+			else if(direction == LEFT) { // -z direction
 				temp = (int)z;
 				height += 1 - (z - temp);
 			}
-			else if (direction.equals("right"))	{ // +z direction
+			else if (direction == RIGHT)	{ // +z direction
 				temp = (int)z;
 				height += z - temp;
 			}
@@ -1349,5 +1577,17 @@ public class MeshLevel {
 		else {
 			return 0;
 		}
+	}
+	
+	public int getMapXDimension(){
+		return tileLayerWidth;
+	}
+	
+	public int getMapYDimension(){
+		return tileLayerHeight;
+	}
+	
+	public MapTile getMapTile(int x, int y, int z){
+		return levelArray[x][y][z];
 	}
 }

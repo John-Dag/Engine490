@@ -3,6 +3,7 @@ package com.gdx.engine;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -25,12 +26,34 @@ public class World {
     private DistanceTrackerMap distanceMap;
 	
 	public World() {
-		player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
-						    new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
-						    Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
-		particleManager = new ParticleManager(this);
-		meshLevel = new MeshLevel(Assets.castle, true);
-		distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
+		boolean bspDungeon = false;
+
+		if(bspDungeon){
+
+			// must come after meshlevel
+			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
+							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
+
+			particleManager = new ParticleManager(this);
+			meshLevel = new MeshLevel(true);
+			GridPoint2 playerPos = new GridPoint2();
+			playerPos.set(meshLevel.getStartingPoint());
+			player.camera.position.set(playerPos.x, player.camera.position.y, playerPos.y);
+
+		}else{
+
+			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
+							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
+
+			// must come before meshlevel, and after player
+			particleManager = new ParticleManager(this);
+			meshLevel = new MeshLevel(Assets.castle, true);
+
+		}
+		//distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
+		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
 		Entity.entityInstances.add(player);
 		enemyInstances = new Array<Enemy>();
 		boxes = new Array<BoundingBox>();
