@@ -34,8 +34,8 @@ public class RocketLauncher extends Weapon {
 	@Override
 	public void update(float delta, World world) {
 		this.getModel().transform.setToTranslation(world.getPlayer().camera.position.x, 
-				   world.getPlayer().camera.position.y - 0.1f, 
-				   world.getPlayer().camera.position.z);
+				   								   world.getPlayer().camera.position.y - 0.1f, 
+				   								   world.getPlayer().camera.position.z);
 		startY.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
 		camDirXZ.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
 

@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.Weapons.RocketLauncher;
+import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
@@ -208,6 +209,7 @@ public class Player extends DynamicEntity {
 				camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
 				
 				// calculates up and down rotation vector
+				// weapon recoil added here
 				if (isFiring) {
 					camera.direction.y += world.getPlayer().getWeapon().getRecoil();
 					temp.set(camera.direction).crs(camera.up).nor();
@@ -279,7 +281,7 @@ public class Player extends DynamicEntity {
 	public void pickupWeapon(int id) {
 		switch (id) {
 			case 1:
-				Weapon sword = new Weapon(false, id, true, true, new Vector3(-1, 0, 0), 
+				Sword sword = new Sword(false, id, true, true, new Vector3(-1, 0, 0), 
 	   				                      new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0),
 	   				                      Assets.manager.get("sword.g3db", Model.class));
 				this.setWeapon(sword);

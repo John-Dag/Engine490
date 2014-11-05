@@ -71,7 +71,6 @@ public class DynamicEntity extends Entity {
 		this.detectionBox = new BoundingBox();
 		//this.model.calculateBoundingBox(this.boundingBox);
 		this.detectionBox.set(this.boundingBox);
-		this.detectionBox.ext(15, 15, 15);
 		this.isRendered = false;
 		this.acceleration = acceleration;
 		this.angAccel = new Vector3(0, 0, 0);
@@ -120,7 +119,6 @@ public class DynamicEntity extends Entity {
 	public void updatePosition(float time)
 	{
 		Vector3 timeV=new Vector3(time,time,time);
-		
 
 		position.add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
 		//rotation.add(new Vector3(angVelocity.add(new Vector3(angAccel).scl(timeV))).scl(timeV));

@@ -28,10 +28,6 @@ public class Render implements Disposable {
 	private ModelBatch shadowBatch;
 	private DefaultShaderProvider shaderProvider;
 	private Vector3 position;
-	private Vector3 startXZ = new Vector3(-1, 0, 0);
-	private Vector3 startY = new Vector3();
-	private Vector3 camDirXZ = new Vector3();
-	private ModelInstance weaponInstance;
 	private Model weapon = new Model();
 	private boolean loading;
 	
@@ -104,9 +100,6 @@ public class Render implements Disposable {
 			if (entity.isRenderable() && entity.isActive()) {
 				entity.render(modelBatch, decalBatch, shadowBatch);
 			}
-		}
-		
-		if (weaponInstance != null && world.getPlayer().getWeapon() != null) {
 		}
 		
 		shadowBatch.end();

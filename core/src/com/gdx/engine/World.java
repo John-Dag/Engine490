@@ -69,7 +69,7 @@ public class World {
 	public void checkProjectileCollisions(Projectile projectile) {
 		for (Enemy enemy : enemyInstances) {
 			if (projectile.getBoundingBox().intersects(enemy.getTransformedEnemyBoundingBox())) {
-				projectile.initializeBloodEffect();
+				//projectile.initializeBloodEffect();
 				projectile.initializeCollisionExplosionEffect();
 				enemy.takeDamage(player.getWeapon().getDamage());
 				projectile.removeProjectile();

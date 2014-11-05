@@ -24,18 +24,21 @@ public class Sword extends Weapon {
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
 		this.getModel().transform.setToTranslation(World.player.camera.position.x, World.player.camera.position.y, World.player.camera.position.z);
-		this.getModel().transform.scale(0.001f, 0.001f, 0.001f);
+		this.getModel().transform.scale(0.009f, 0.009f, 0.009f);
 	}
 	
 	public void update(float delta, World world) {
 		this.getModel().transform.setToTranslation(world.getPlayer().camera.position.x, 
-				   world.getPlayer().camera.position.y - 0.1f, 
-				   world.getPlayer().camera.position.z);
+				   								   world.getPlayer().camera.position.y, 
+				   								   world.getPlayer().camera.position.z);
 		startY.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
-		camDirXZ.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
+		camDirXZ.set(-world.getPlayer().camera.direction.x, 0, -world.getPlayer().camera.direction.z);
 
 		this.getModel().transform.rotate(startY, world.getPlayer().camera.direction.nor());
 		this.getModel().transform.rotate(startXZ, camDirXZ.nor());
-		this.getModel().transform.scale(0.005f, 0.005f, 0.005f);
+		this.getModel().transform.scale(0.009f, 0.009f, 0.009f);
+//		this.getModel().transform.translate(world.getPlayer().camera.position.x, 
+//				   							world.getPlayer().camera.position.y, 
+//				   							world.getPlayer().camera.position.z);
 	}
 }
