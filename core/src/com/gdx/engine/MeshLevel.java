@@ -235,7 +235,7 @@ public class MeshLevel {
 			for(int j = 0; j < levelArray[i].length; j++){
 				for(int k = 0; k < levelArray[i][j].length; k++){
 					if(levelArray[i][j][k].getHeight() == 1){
-						return new GridPoint2(i,j);
+						return new GridPoint2(j,i);
 					}
 				}
 			}
@@ -1496,6 +1496,10 @@ public class MeshLevel {
 
 		float height = 0;
 		GridPoint2 tileCoords = getTileCoords(x, z);
+		if(outOfBounds(tileCoords)){
+			System.err.println("mapHeight call to out of bounds location");
+			return -1f;
+		}
 
 		//TiledMapTile tile;
 		MapTile tile;

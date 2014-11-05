@@ -39,7 +39,7 @@ public class World {
 			meshLevel = new MeshLevel(true);
 			GridPoint2 playerPos = new GridPoint2();
 			playerPos.set(meshLevel.getStartingPoint());
-			player.camera.position.set(playerPos.x, player.camera.position.y, playerPos.y);
+			player.camera.position.set(playerPos.x+0.5f, player.camera.position.y, playerPos.y+0.5f);
 
 		}else{
 

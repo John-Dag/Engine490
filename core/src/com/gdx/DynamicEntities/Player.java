@@ -29,7 +29,7 @@ public class Player extends DynamicEntity {
 	private static final float JUMP_SPEED = 10f;
 	private static final float GRAVITY = 30f;
 	private static final int MIN_HEALTH = 0;
-	private static final int MAX_HEALTH = 100;
+	private static final int MAX_HEALTH = 10000;
 	private int health;
 	public PerspectiveCamera camera;
 	private boolean mouseLocked, mouseLeft, clipping, isCrouching;
@@ -62,7 +62,7 @@ public class Player extends DynamicEntity {
 		this.camera.position.set(position.x, position.y, position.z);
 		this.camera.lookAt(position.x + 1, position.y, position.z + 1);
 		this.camera.near = 0.01f;
-		this.camera.far = 15f;
+		this.camera.far = 16f;
 		this.movementVector = new Vector3(0,0,0);
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
@@ -80,12 +80,13 @@ public class Player extends DynamicEntity {
 		input(delta);
 		fireDelayTimer += delta;
 		
-	    TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
+	    //TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
         GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
         if (newPos != oldPos) {
             distanceMap = world.getDistanceMap();
             distanceMap.resetDistances();
-            distanceMap.addDistances(( playerPosition.x + layer.getWidth() * playerPosition.y));
+            //distanceMap.addDistances(( playerPosition.x + layer.getWidth() * playerPosition.y));
+            distanceMap.addDistances(( playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
             world.setDistanceMap(distanceMap);
         }
 		
@@ -129,8 +130,9 @@ public class Player extends DynamicEntity {
 		}
 		
 		float movAmt = currentMovementSpeed * delta;
-		if (clipping)
+		if(clipping){
 			movementVector.y = 0;	// jumping is done separately from the movementVector
+		}
 		movementVector.nor();
 		
 		oldPos.set(this.camera.position);
@@ -151,7 +153,7 @@ public class Player extends DynamicEntity {
 		}
 
 		if (world.getMeshLevel().mapHeight(newPos.x, newPos.z, newPosLevel) < 
-		    world.getMeshLevel().mapHeight(oldPos.x, oldPos.z, oldPosLevel)){
+				world.getMeshLevel().mapHeight(oldPos.x, oldPos.z, oldPosLevel)){
 			isJumping = true;
 		}
 
@@ -260,6 +262,14 @@ public class Player extends DynamicEntity {
 			currentHeightOffset = CROUCH_HEIGHT;
 			currentMovementSpeed = CROUCH_SPEED;
 		}
+		// to toggle clipping (commented out because distance tracker crashes it when clipping is off)
+//		if (Gdx.input.isKeyPressed(Keys.L)) {
+//			if(clipping){
+//				clipping = false;
+//			}else{
+//				clipping = true;
+//			}
+//		}
 		else {
 			isCrouching = false;
 			currentHeightOffset = PLAYER_HEIGHT_OFFSET;
