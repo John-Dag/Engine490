@@ -29,7 +29,7 @@ public class Player extends DynamicEntity {
 	private static final float JUMP_SPEED = 10f;
 	private static final float GRAVITY = 30f;
 	private static final int MIN_HEALTH = 0;
-	private static final int MAX_HEALTH = 10000;
+	private static final int MAX_HEALTH = 100;
 	private int health;
 	public PerspectiveCamera camera;
 	private boolean mouseLocked, mouseLeft, clipping, isCrouching;

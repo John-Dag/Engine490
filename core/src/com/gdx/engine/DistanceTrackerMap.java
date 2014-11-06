@@ -143,7 +143,7 @@ public class DistanceTrackerMap {
                 }
                 distanceMap.add(tilesAlreadyChecked.indexOf(mapObject.getTileNumber()), mapObject);
             }
-        }while (toBeLookedAt.size() != 0);
+        } while (toBeLookedAt.size() != 0);
 
         return;
     }

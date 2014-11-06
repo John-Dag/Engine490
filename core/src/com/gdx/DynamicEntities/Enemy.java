@@ -79,8 +79,9 @@ public class Enemy extends DynamicEntity {
             } catch (Exception ex) {
                 path = new ArrayList<Integer>();
             }
-            if (path.size() == 0)
+            if (path.size() == 0) 
                 return;
+
             this.getAnimation().setAnimation("Walking", -1);
             Vector3 vel = new Vector3();
             int y = path.get(0) / width;
@@ -120,7 +121,7 @@ public class Enemy extends DynamicEntity {
             if (this.getPosition().y >= 6) {
             	this.getPosition().y = heightValueLvl2;
             }
-            if (this.getPosition().y < 6 + 0.5f){
+            if (this.getPosition().y < 6 + 0.5f) {
             	this.getPosition().y = heightValueLvl1;
             }
             
@@ -159,16 +160,17 @@ public class Enemy extends DynamicEntity {
 		}
 		
 		else if (this.getStateMachine().Current == this.attack){
-			this.getAnimation().setAnimation("Attacking", 1, new AnimationListener() {
-				
+            this.getVelocity().set(0,0,0); 
+			this.getAnimation().setAnimation("Attacking", -1, new AnimationListener() {
+			
 				@Override
 			public void onLoop(AnimationDesc animation) {
-					// TODO Auto-generated method stub
+				dealDamage();
 			}
 				
 			@Override
 			public void onEnd(AnimationDesc animation) {
-				dealDamage();
+				
 			}
 		});
 		}
@@ -193,7 +195,7 @@ public class Enemy extends DynamicEntity {
 	}
 	
 	private void StateMachineUsage(Enemy enemy){
-		Condition idleCondition=new Condition() {
+		Condition idleCondition = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
 				/*
@@ -221,7 +223,7 @@ public class Enemy extends DynamicEntity {
 			}
 		};
 		
-		Condition movingCondition=new Condition() {
+		final Condition inAggroRange = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
 //				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
@@ -240,15 +242,37 @@ public class Enemy extends DynamicEntity {
 //                else
 //                	return false;
       
-				if (enemy.getTransformedEnemyDetectionBoundingBox().intersects(World.player.getTransformedBoundingBox()) && !enemy.isAttacking)
+				if (enemy.getTransformedEnemyDetectionBoundingBox().intersects(World.player.getTransformedBoundingBox()))
 					return true;
-				else
+				else 
 					return false;
-				
 			}
 		};
 		
-		Condition deadCondition=new Condition() {
+		Condition outOfAggroRange = new Condition() {
+			@Override
+			public boolean IsSatisfied(Enemy enemy) {
+//				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
+//				GridPoint2 playerPosition = new GridPoint2((int)World.player.camera.position.x, (int)World.player.camera.position.z);
+//				TiledMapTileLayer layer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
+//				int width = layer.getWidth();
+//                TiledMapTileLayer firstLayer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
+//                TiledMapTile playerTile = firstLayer.getCell((int)playerPosition.x, (int)playerPosition.y).getTile();
+//                int playerTileHeight = Integer.parseInt(playerTile.getProperties().get("height").toString());
+//
+//                if (enemy.seesPlayer(enemyPosition.x + width * enemyPosition.y, 
+//                					 playerPosition.x + width * playerPosition.y, 
+//                					 playerTileHeight, layer)) {
+//                	return true;
+//                }
+//                else
+//                	return false;
+      
+				return !inAggroRange.IsSatisfied(enemy);
+			}
+		};
+		
+		Condition enemyDead = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
 				if (enemy.health <= 0) {
@@ -259,20 +283,30 @@ public class Enemy extends DynamicEntity {
 			}
 		};
 		
-		Condition spawnCondition = new Condition() {
+		Condition playerDead = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-				if (!enemy.isSpawned)
+				if (!World.player.isActive())
 					return true;
 				else
 					return false;
 			}
 		};
+	
+//		Condition spawnCondition = new Condition() {
+//			@Override
+//			public boolean IsSatisfied(Enemy enemy) {
+//				if (!enemy.isSpawned)
+//					return true;
+//				else
+//					return false;
+//			}
+//		};
 		
-		Condition attackCondition = new Condition() {
+		final Condition inAttackRange = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-				if (enemy.getTransformedEnemyAttackBoundingBox().intersects(World.player.getTransformedBoundingBox()) && getStateMachine().Current != dead) {
+				if (enemy.getTransformedEnemyAttackBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
 					return true;
 				}
 				else {
@@ -280,20 +314,24 @@ public class Enemy extends DynamicEntity {
 				}
 			}
 		};
-
-		/*
-		idle.LinkedStates.put(movingCondition, moving);
-		idle.LinkedStates.put(deadCondition, dead);
-		idle.LinkedStates.put(spawnCondition, spawn);
-		moving.LinkedStates.put(idleCondition, idle);
-		moving.LinkedStates.put(deadCondition, dead);
-		moving.LinkedStates.put(attackCondition, attack);
-		*/
-		idle.LinkedStates.put(idleCondition, idle);
-		moving.LinkedStates.put(movingCondition, moving);
-		dead.LinkedStates.put(deadCondition, dead);
-		spawn.LinkedStates.put(spawnCondition, spawn);
-		attack.LinkedStates.put(attackCondition, attack);
+		
+		Condition outOfAttackRange = new Condition() {
+			@Override
+			public boolean IsSatisfied(Enemy enemy) {
+				return !inAttackRange.IsSatisfied(enemy);
+			}
+		};
+		
+		idle.LinkedStates.put(inAggroRange, moving);
+		idle.LinkedStates.put(enemyDead, dead);
+		moving.LinkedStates.put(outOfAggroRange, idle);
+		moving.LinkedStates.put(inAttackRange, attack);
+		moving.LinkedStates.put(enemyDead, dead);
+		moving.LinkedStates.put(playerDead, idle);
+		attack.LinkedStates.put(playerDead, idle);
+		attack.LinkedStates.put(enemyDead, dead);
+		attack.LinkedStates.put(outOfAttackRange, moving);
+		attack.LinkedStates.put(outOfAggroRange, idle);
 		
 		stateMachine.States.add(idle);
 		stateMachine.States.add(moving);
@@ -301,7 +339,7 @@ public class Enemy extends DynamicEntity {
 		stateMachine.States.add(spawn);
 		stateMachine.States.add(attack);
 		
-		stateMachine.Current=idle; //Set initial state
+		stateMachine.Current = idle; //Set initial state
 	}
 	
 	public void dealDamage() {

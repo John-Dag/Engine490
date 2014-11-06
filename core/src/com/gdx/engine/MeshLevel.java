@@ -26,11 +26,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Enemies.Zombie;
-import com.gdx.StaticEntities.EnemySpawn;
+import com.gdx.StaticEntities.EnemySpawner;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.Torch;
-import com.gdx.StaticEntities.WeaponSpawn;
+import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.Weapons.RocketLauncherSpawn;
 import com.gdx.Weapons.SwordSpawn;
 
@@ -1149,7 +1149,7 @@ public class MeshLevel {
 				//float scale = 0.005f;
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				WeaponSpawn spawn = new WeaponSpawn(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
+				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
 												    new SwordSpawn(objPosition, 1, true, true, true, Assets.manager.get("sword.g3db", Model.class)));
 				Entity.entityInstances.add(spawn);
 			}
@@ -1159,7 +1159,7 @@ public class MeshLevel {
 				//float scale = 0.005f;
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				WeaponSpawn spawn = new WeaponSpawn(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
+				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
 													new RocketLauncherSpawn(objPosition, 2, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class)));
 				Entity.entityInstances.add(spawn);
 			}
@@ -1182,7 +1182,7 @@ public class MeshLevel {
 				Zombie zombie = new Zombie(9, false, true, objPosition, new Vector3(0, 0, 0), 
 										   new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 										   new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
-				EnemySpawn spawn = new EnemySpawn(objPosition, 8, true, false, false, 1f, getSpawnTime(rectObj), zombie);
+				EnemySpawner spawn = new EnemySpawner(objPosition, 8, true, false, false, 1f, getSpawnTime(rectObj), zombie);
 				Entity.entityInstances.add(spawn);
 			}
 
@@ -1493,7 +1493,6 @@ public class MeshLevel {
 	}
 	
 	public float mapHeight(float x, float z, int heightLevel) {
-
 		float height = 0;
 		GridPoint2 tileCoords = getTileCoords(x, z);
 		if(outOfBounds(tileCoords)){

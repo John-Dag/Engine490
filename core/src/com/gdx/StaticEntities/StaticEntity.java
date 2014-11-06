@@ -1,6 +1,7 @@
 package com.gdx.StaticEntities;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
@@ -38,6 +39,14 @@ public class StaticEntity extends Entity {
 		this.position = position;
 		this.isDecalFacing = isDecalFacing;
 		this.effect = new ParticleEffect();
+	}
+
+	public StaticEntity(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, Model model) {
+		super(id, isActive, isRenderable);
+		this.position = position;
+		this.isDecalFacing = isDecalFacing;
+		this.effect = new ParticleEffect();
+		this.setModel(new ModelInstance(model));
 	}
 	
 	@Override
