@@ -4,16 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.gdx.Weapons.RocketLauncher;
-import com.gdx.Weapons.Sword;
-import com.gdx.engine.Assets;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
@@ -53,7 +48,6 @@ public class Player extends DynamicEntity {
 		super(id, isActive, isRenderable, position, rotation, scale, velocity,
 			  acceleration, model);
 		this.world = world;
-		this.setWeapon(weapon);
 		this.camera = new PerspectiveCamera();
 		this.collisionVector = new Vector3(1, 1, 1);
 		this.mouseLocked = false;
@@ -288,25 +282,6 @@ public class Player extends DynamicEntity {
 		}
 	}
 	
-	public void pickupWeapon(int id) {
-		switch (id) {
-			case 1:
-				Sword sword = new Sword(false, id, true, true, new Vector3(-1, 0, 0), 
-	   				                      new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0),
-	   				                      Assets.manager.get("sword.g3db", Model.class));
-				this.setWeapon(sword);
-				Entity.entityInstances.add(sword);
-				break;
-			case 2:
-				RocketLauncher rocketLauncher = new RocketLauncher(true, id, true, true, new Vector3(-1, 0, 0), 
-						   				   	       new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0),
-						   				   	       Assets.manager.get("GUNFBX.g3db", Model.class));
-				this.setWeapon(rocketLauncher);
-				Entity.entityInstances.add(rocketLauncher);
-				break;
-		}
-	}
-	
 	public void fireWeapon() {
 		if (this.getWeapon().isParticleWeapon()) {
 			this.isFiring = true;
@@ -327,7 +302,7 @@ public class Player extends DynamicEntity {
 	
 	public void respawnPlayer(Player player) {
 		player.camera.position.set(new Vector3(2f, 1.5f, 2f));
-		player.setWeapon(null);
+		player.setWeapon(new Weapon());
 		player.setHealth(MAX_HEALTH);
 	}
 	

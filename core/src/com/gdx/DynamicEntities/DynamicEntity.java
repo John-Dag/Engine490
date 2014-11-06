@@ -112,7 +112,7 @@ public class DynamicEntity extends Entity {
 		
 		if (this.getModel() != null) {
 			world.getBoundingBoxes().add(this.getBoundingBox());
-			world.getMeshLevel().getInstances().add(this.getModel());
+			//world.getMeshLevel().getInstances().add(this.getModel());
 		}
 	}
 
@@ -238,11 +238,17 @@ public class DynamicEntity extends Entity {
 	}
 
 	public void setWeapon(Weapon weapon) {
-		if (this.getWeapon() == null)
+		if (this.weapon == null) {
 			this.weapon = weapon;
-		else if (this.getWeapon() != weapon) {
-			Entity.entityInstances.removeValue(this.getWeapon(), true);
+			this.weapon.setPickedup(true);
+			Entity.entityInstances.add(this.weapon);
+		}
+		
+		else if (this.getWeapon().getId() != weapon.getId()) {
+			this.weapon.setIsActive(false);
 			this.weapon = weapon;
+			this.weapon.setPickedup(true);
+			Entity.entityInstances.add(this.weapon);
 		}
 	}
 

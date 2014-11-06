@@ -10,11 +10,9 @@ public class DesktopLauncher {
 		config.title = "Engine 490";
 //		config.width = 1366;
 //		config.height = 768;
-		config.width = 960;
-		config.height = 540;
-		config.vSyncEnabled = false;
-		//config.width = 1920;
-		//config.height = 1080;
+		config.width = 1920;
+		config.height = 1080;
+		//config.vSyncEnabled = false;
 		//config.resizable = false;
 		//config.fullscreen = true;
 		new LwjglApplication(new Engine(), config);

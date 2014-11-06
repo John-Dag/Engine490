@@ -1,14 +1,12 @@
 package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -195,33 +193,44 @@ public class Enemy extends DynamicEntity {
 	}
 	
 	private void StateMachineUsage(Enemy enemy){
-		Condition idleCondition = new Condition() {
+		Condition enemyDead = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
-				/*
-				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
-				GridPoint2 playerPosition = new GridPoint2((int)World.player.camera.position.x, (int)World.player.camera.position.z);
-				TiledMapTileLayer layer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
-				int width = layer.getWidth();
-                TiledMapTileLayer firstLayer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
-                TiledMapTile playerTile = firstLayer.getCell((int)playerPosition.x, (int)playerPosition.y).getTile();
-                int playerTileHeight = Integer.parseInt(playerTile.getProperties().get("height").toString());
-
-                if (!enemy.seesPlayer(enemyPosition.x + width * enemyPosition.y, 
-                					  playerPosition.x + width * playerPosition.y, 
-                					  playerTileHeight, layer)) {
-                	return true;
-                }
-                else
-                	return false;
-*/
-				if (!enemy.getTransformedEnemyDetectionBoundingBox().intersects(World.player.getTransformedBoundingBox()))
+				if (enemy.health <= 0) {
 					return true;
+				}
 				else
 					return false;
-
 			}
 		};
+		
+//		Condition idleCondition = new Condition() {
+//			@Override
+//			public boolean IsSatisfied(Enemy enemy) {
+//				
+//				GridPoint2 enemyPosition = new GridPoint2((int)enemy.getPosition().x, (int)enemy.getPosition().z);
+//				GridPoint2 playerPosition = new GridPoint2((int)World.player.camera.position.x, (int)World.player.camera.position.z);
+//				TiledMapTileLayer layer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
+//				int width = layer.getWidth();
+//                TiledMapTileLayer firstLayer = (TiledMapTileLayer)Assets.castle.getLayers().get(0);
+//                TiledMapTile playerTile = firstLayer.getCell((int)playerPosition.x, (int)playerPosition.y).getTile();
+//                int playerTileHeight = Integer.parseInt(playerTile.getProperties().get("height").toString());
+//
+//                if (!enemy.seesPlayer(enemyPosition.x + width * enemyPosition.y, 
+//                					  playerPosition.x + width * playerPosition.y, 
+//                					  playerTileHeight, layer)) {
+//                	return true;
+//                }
+//                else
+//                	return false;
+//
+//				if (!enemy.getTransformedEnemyDetectionBoundingBox().intersects(World.player.getTransformedBoundingBox()))
+//					return true;
+//				else
+//					return false;
+//
+//			}
+//		};
 		
 		final Condition inAggroRange = new Condition() {
 			@Override
@@ -272,17 +281,6 @@ public class Enemy extends DynamicEntity {
 			}
 		};
 		
-		Condition enemyDead = new Condition() {
-			@Override
-			public boolean IsSatisfied(Enemy enemy) {
-				if (enemy.health <= 0) {
-					return true;
-				}
-				else
-					return false;
-			}
-		};
-		
 		Condition playerDead = new Condition() {
 			@Override
 			public boolean IsSatisfied(Enemy enemy) {
@@ -315,12 +313,12 @@ public class Enemy extends DynamicEntity {
 			}
 		};
 		
-		Condition outOfAttackRange = new Condition() {
-			@Override
-			public boolean IsSatisfied(Enemy enemy) {
-				return !inAttackRange.IsSatisfied(enemy);
-			}
-		};
+//		Condition outOfAttackRange = new Condition() {
+//			@Override
+//			public boolean IsSatisfied(Enemy enemy) {
+//				return !inAttackRange.IsSatisfied(enemy);
+//			}
+//		};
 		
 		idle.LinkedStates.put(inAggroRange, moving);
 		idle.LinkedStates.put(enemyDead, dead);
@@ -330,8 +328,8 @@ public class Enemy extends DynamicEntity {
 		moving.LinkedStates.put(playerDead, idle);
 		attack.LinkedStates.put(playerDead, idle);
 		attack.LinkedStates.put(enemyDead, dead);
-		attack.LinkedStates.put(outOfAttackRange, moving);
-		attack.LinkedStates.put(outOfAggroRange, idle);
+		//attack.LinkedStates.put(outOfAttackRange, moving);
+		//attack.LinkedStates.put(outOfAggroRange, idle);
 		
 		stateMachine.States.add(idle);
 		stateMachine.States.add(moving);

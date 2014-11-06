@@ -9,7 +9,7 @@ public class Weapon extends DynamicEntity {
 	protected float projectileSpeed;
 	protected float recoil;
 	protected int damage;
-	private boolean isParticleWeapon;
+	private boolean isParticleWeapon, isPickedup;
 
 	public Weapon() {
 		super();
@@ -23,6 +23,14 @@ public class Weapon extends DynamicEntity {
 			  scale, velocity, acceleration);
 		this.isParticleWeapon = isParticleWeapon;
 		this.setModel(new ModelInstance(model));
+	}
+
+	public boolean isPickedup() {
+		return isPickedup;
+	}
+
+	public void setPickedup(boolean isPickedup) {
+		this.isPickedup = isPickedup;
 	}
 	
 	public int getDamage() {

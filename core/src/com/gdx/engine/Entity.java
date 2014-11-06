@@ -2,6 +2,7 @@ package com.gdx.engine;
 
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 public class Entity {
@@ -70,6 +71,10 @@ public class Entity {
 	}
 
 	public Entity spawn() {
+		return new Entity();
+	}
+	
+	public Entity spawn(Vector3 spawnPos) {
 		return new Entity();
 	}
 }

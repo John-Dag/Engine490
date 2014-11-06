@@ -1,10 +1,8 @@
 package com.gdx.Weapons;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.engine.Assets;
 import com.gdx.engine.World;
@@ -27,20 +25,37 @@ public class RocketLauncher extends Weapon {
 		this.projectileSpeed = PROJECTILE_SPEED;
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
-		this.getModel().transform.setToTranslation(World.player.camera.position.x, World.player.camera.position.y, World.player.camera.position.z);
-		this.getModel().transform.scale(0.001f, 0.001f, 0.001f);
+	}
+	
+	@Override
+	public Weapon spawn(Vector3 spawnPos) {
+		RocketLauncher launcher = new RocketLauncher(true, 1, true, true, new Vector3(-1, 0, 0), 
+		   	       new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0),
+		   	       Assets.manager.get("GUNFBX.g3db", Model.class));
+		BoundingBox temp = new BoundingBox();
+		launcher.getModel().calculateBoundingBox(temp);
+		launcher.setBoundingBox(temp);
+		launcher.getModel().transform.setToTranslation(spawnPos);
+		launcher.getModel().transform.scale(0.005f, 0.005f, 0.005f);
+		return launcher;
 	}
 	
 	@Override
 	public void update(float delta, World world) {
-		this.getModel().transform.setToTranslation(world.getPlayer().camera.position.x, 
-				   								   world.getPlayer().camera.position.y - 0.1f, 
-				   								   world.getPlayer().camera.position.z);
-		startY.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
-		camDirXZ.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
-
-		this.getModel().transform.rotate(startY, world.getPlayer().camera.direction.nor());
-		this.getModel().transform.rotate(startXZ, camDirXZ.nor());
-		this.getModel().transform.scale(0.005f, 0.005f, 0.005f);
+		if (this.isPickedup()) {
+			this.getModel().transform.setToTranslation(world.getPlayer().camera.position.x, 
+					   								   world.getPlayer().camera.position.y - 0.1f, 
+					   								   world.getPlayer().camera.position.z);
+			startY.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
+			camDirXZ.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
+	
+			this.getModel().transform.rotate(startY, world.getPlayer().camera.direction.nor());
+			this.getModel().transform.rotate(startXZ, camDirXZ.nor());
+			this.getModel().transform.scale(0.005f, 0.005f, 0.005f);
+		}
+		
+		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
+			world.player.setWeapon(this);
+		}
 	}
 }

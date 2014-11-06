@@ -2,7 +2,9 @@ package com.gdx.Weapons;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Weapon;
+import com.gdx.engine.Assets;
 import com.gdx.engine.World;
 
 public class Sword extends Weapon {
@@ -23,20 +25,39 @@ public class Sword extends Weapon {
 		this.projectileSpeed = PROJECTILE_SPEED;
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
-		this.getModel().transform.setToTranslation(World.player.camera.position.x, World.player.camera.position.y, World.player.camera.position.z);
-		this.getModel().transform.scale(0.009f, 0.009f, 0.009f);
 	}
 	
+	@Override
+	public Weapon spawn(Vector3 spawnPos) {
+		Sword sword = new Sword(false, 2, true, true, new Vector3(-1, 0, 0), 
+                   new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0),
+                   Assets.manager.get("sword.g3db", Model.class));
+		BoundingBox temp = new BoundingBox();
+		sword.getModel().calculateBoundingBox(temp);
+		temp.ext(5, -5, 5);
+		sword.setBoundingBox(temp);
+		sword.getModel().transform.setToTranslation(spawnPos);
+		sword.getModel().transform.scale(0.009f, 0.009f, 0.009f);
+		return sword;
+	}
+	
+	@Override
 	public void update(float delta, World world) {
-		this.getModel().transform.setToTranslation(world.getPlayer().camera.position.x, 
-				   world.getPlayer().camera.position.y, 
-				   world.getPlayer().camera.position.z);
-		startY.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
-		camDirXZ.set(-world.getPlayer().camera.direction.x, 0, -world.getPlayer().camera.direction.z);
-
-		this.getModel().transform.rotate(startY, world.getPlayer().camera.direction.nor());
-		this.getModel().transform.rotate(startXZ, camDirXZ.nor());
-		this.getModel().transform.scale(0.009f, 0.009f, 0.009f);
-		this.getModel().transform.translate(-35f, 0f, 10f);
+		if (this.isPickedup()) {
+			this.getModel().transform.setToTranslation(world.getPlayer().camera.position.x, 
+					   world.getPlayer().camera.position.y, 
+					   world.getPlayer().camera.position.z);
+			startY.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
+			camDirXZ.set(-world.getPlayer().camera.direction.x, 0, -world.getPlayer().camera.direction.z);
+	
+			this.getModel().transform.rotate(startY, world.getPlayer().camera.direction.nor());
+			this.getModel().transform.rotate(startXZ, camDirXZ.nor());
+			this.getModel().transform.scale(0.009f, 0.009f, 0.009f);
+			this.getModel().transform.translate(-35f, 0f, 10f);
+		}
+		
+		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
+			world.player.setWeapon(this);
+		}
 	}
 }

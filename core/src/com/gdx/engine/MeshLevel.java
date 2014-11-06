@@ -31,8 +31,8 @@ import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.Torch;
 import com.gdx.StaticEntities.WeaponSpawner;
-import com.gdx.Weapons.RocketLauncherSpawn;
-import com.gdx.Weapons.SwordSpawn;
+import com.gdx.Weapons.RocketLauncher;
+import com.gdx.Weapons.Sword;
 
 // Important note to the team: (this can be confusing)
 // World coordinates have x, y, z, with +x pointing East, and +z pointing South
@@ -1149,8 +1149,9 @@ public class MeshLevel {
 				//float scale = 0.005f;
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				Sword sword = (Sword) new Sword().spawn(objPosition);
 				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-												    new SwordSpawn(objPosition, 1, true, true, true, Assets.manager.get("sword.g3db", Model.class)));
+												        sword);
 				Entity.entityInstances.add(spawn);
 			}
 			
@@ -1159,8 +1160,9 @@ public class MeshLevel {
 				//float scale = 0.005f;
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(objPosition);
 				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-													new RocketLauncherSpawn(objPosition, 2, true, true, true, Assets.manager.get("GUNFBX.g3db", Model.class)));
+														launcher);
 				Entity.entityInstances.add(spawn);
 			}
 

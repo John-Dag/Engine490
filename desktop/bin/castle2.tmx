@@ -332,13 +332,6 @@
     <property name="time" value="40"/>
    </properties>
   </object>
-  <object name="Rocket" x="511" y="544">
-   <properties>
-    <property name="color" value="2"/>
-    <property name="height" value="1"/>
-    <property name="time" value="40"/>
-   </properties>
-  </object>
   <object name="Spawn" x="804" y="951">
    <properties>
     <property name="height" value="1"/>
@@ -375,7 +368,7 @@
     <property name="time" value="60"/>
    </properties>
   </object>
-  <object name="Rocket" x="177" y="945">
+  <object name="Sword" x="465" y="528">
    <properties>
     <property name="color" value="3"/>
     <property name="height" value="1"/>
@@ -386,6 +379,20 @@
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="6"/>
+    <property name="time" value="40"/>
+   </properties>
+  </object>
+  <object name="Rocket" x="176" y="944">
+   <properties>
+    <property name="color" value="3"/>
+    <property name="height" value="1"/>
+    <property name="time" value="40"/>
+   </properties>
+  </object>
+  <object name="Rocket" x="557" y="527">
+   <properties>
+    <property name="color" value="3"/>
+    <property name="height" value="1"/>
     <property name="time" value="40"/>
    </properties>
   </object>
