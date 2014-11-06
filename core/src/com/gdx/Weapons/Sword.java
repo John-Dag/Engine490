@@ -29,16 +29,14 @@ public class Sword extends Weapon {
 	
 	public void update(float delta, World world) {
 		this.getModel().transform.setToTranslation(world.getPlayer().camera.position.x, 
-				   								   world.getPlayer().camera.position.y, 
-				   								   world.getPlayer().camera.position.z);
+				   world.getPlayer().camera.position.y, 
+				   world.getPlayer().camera.position.z);
 		startY.set(world.getPlayer().camera.direction.x, 0, world.getPlayer().camera.direction.z);
 		camDirXZ.set(-world.getPlayer().camera.direction.x, 0, -world.getPlayer().camera.direction.z);
 
 		this.getModel().transform.rotate(startY, world.getPlayer().camera.direction.nor());
 		this.getModel().transform.rotate(startXZ, camDirXZ.nor());
 		this.getModel().transform.scale(0.009f, 0.009f, 0.009f);
-//		this.getModel().transform.translate(world.getPlayer().camera.position.x, 
-//				   							world.getPlayer().camera.position.y, 
-//				   							world.getPlayer().camera.position.z);
+		this.getModel().transform.translate(-35f, 0f, 10f);
 	}
 }
