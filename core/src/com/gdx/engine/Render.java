@@ -37,7 +37,7 @@ public class Render implements Disposable {
 	
 		//Changes the max number point lights in the default shader
 		shaderProvider = new DefaultShaderProvider();
-		shaderProvider.config.numPointLights = 30;
+		shaderProvider.config.numPointLights = 100;
 		
 		//Environment settings
 		environment = new Environment();
@@ -80,6 +80,8 @@ public class Render implements Disposable {
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
 		Gdx.gl.glCullFace(GL20.GL_FRONT);
+//		if (World.changingLevel)
+//			return;
 		modelBatch.begin(world.getPlayer().camera);
 		renderParticles();
 		shadowLight.begin(world.getPlayer().camera.position, world.getPlayer().camera.direction);

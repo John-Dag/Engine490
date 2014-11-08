@@ -396,6 +396,13 @@
     <property name="time" value="40"/>
    </properties>
   </object>
+  <object name="Portal" x="80" y="754">
+   <properties>
+    <property name="color" value="3"/>
+    <property name="height" value="1"/>
+    <property name="time" value="40"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer name="Tile Layer 2" width="32" height="32" opacity="0">
   <data encoding="base64" compression="zlib">

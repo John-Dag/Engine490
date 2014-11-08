@@ -81,6 +81,7 @@ public class Assets {
 	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("mistGreenWeapon.pfx", ParticleEffect.class, loadParam);
+	    manager.load("portalEffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketExplosionEffect.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
 	}

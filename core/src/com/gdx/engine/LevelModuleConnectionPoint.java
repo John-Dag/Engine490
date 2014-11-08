@@ -3,7 +3,6 @@ package com.gdx.engine;
 // These keep track of where the level module can connect to other level modules through connectors
 // Their frame of reference is with respect to the level module that owns it, so offsets are applied at a higher level
 public class LevelModuleConnectionPoint {
-
 	private int x,y,z;
 	
 	public LevelModuleConnectionPoint(){

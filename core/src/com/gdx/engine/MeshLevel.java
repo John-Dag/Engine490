@@ -29,6 +29,7 @@ import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.EnemySpawner;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
+import com.gdx.StaticEntities.Portal;
 import com.gdx.StaticEntities.Torch;
 import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.Weapons.RocketLauncher;
@@ -113,7 +114,7 @@ public class MeshLevel {
 		currentLayerNumber = 0;
 		this.heightOffset = 0f;
 		combinedWalls = true;
-		ceiling = true;
+		ceiling = false;
 		tileLayerCount = 2;
 		tileLayerWidth = 64;
 		tileLayerHeight = 64;
@@ -163,9 +164,7 @@ public class MeshLevel {
 				}
 			}
 		}
-		//generateBSPDungeonArray();
 		generateLevelArray();
-		//printLevelArray();
 		generateLevelMesh();
 	}
 	
@@ -186,14 +185,6 @@ public class MeshLevel {
 	private void initializeLevelArray(){
 		for (int i = 0; i < levelArray.length; i++){
 			for(int j = 0; j < levelArray[i].length; j++){
-//				for(int k = 0; k < levelArray[i][j].length; k++){
-//					if(k==0){
-//						levelArray[i][j][k].setHeight(-1);
-//					}else{
-//						levelArray[i][j][k].setHeight(0);
-//					}
-//					levelArray[i][j][k].setRampDirection(-1);
-//				}
 				levelArray[i][j][0].setHeight(-1);
 				if(ceiling){
 					levelArray[i][j][1].setHeight(0);
@@ -211,15 +202,75 @@ public class MeshLevel {
 		x2 -= rand.nextInt(2) + 1;
 		y1 += rand.nextInt(2) + 1;
 		y2 -= rand.nextInt(2) + 1;
+
+		Color color = new Color();
+		Assets.loadModels();
 		for(int i = y1; i < y2; i++){
 			for(int j = x1; j < x2; j++){
 				levelArray[j][i][0].setHeight(1);
+				// chance to create an enemy
+				if(rand.nextInt(1000) > 995){
+					createEnemySpawner(j, i, 50);
+				}
+				// chance to create a point light
+				if(rand.nextInt(1000) > 997){
+					color.set(0f, 1f, 68f/255f, 1f);
+					createPointLight(j, i, color);
+				}
+				if(rand.nextInt(1000) > 997){
+					color.set(0f, 0f, 1f, 1f);
+					createPointLight(j, i, color);
+				}
+				if(rand.nextInt(1000) > 997){
+					color.set(127f/255f, 0f, 1f, 1f);
+					createPointLight(j, i, color);
+				}
+				// chance to create mist
+				if(rand.nextInt(1000) > 997){
+					color.set(0f, 1f, 68f/255f, 1f);
+					createMist(j, i, color);
+				}
+				// chance to create weapons
+				if(rand.nextInt(1000) > 995){
+					color.set(0f, 1f, 68f/255f, 1f);
+					createRocket(j, i, 40);
+				}
+				if(rand.nextInt(1000) > 997){
+					color.set(0f, 1f, 68f/255f, 1f);
+					createSword(j, i, 40);
+				}
 			}
 		}
 	}
 	
+	// returns wall facing direction if the tile is next to a wall, -1 if not next to a wall
+	// Note: if the tile is next to more than one wall, this function will only return one wall direction
+	private int nextToWall(int i, int j){
+		if(!outOfBounds(i+1, j)){
+			if(levelArray[i+1][j][0].getHeight() != 1){
+				return NORTH;
+			}
+		}
+		if(!outOfBounds(i-1, j)){
+			if(levelArray[i-1][j][0].getHeight() != 1){
+				return SOUTH;
+			}
+		}
+		if(!outOfBounds(i, j+1)){
+			if(levelArray[i][j+1][0].getHeight() != 1){
+				return EAST;
+			}
+		}
+		if(!outOfBounds(i, j-1)){
+			if(levelArray[i][j-1][0].getHeight() != 1){
+				return WEST;
+			}
+		}
+		return -1;
+	}
+	
 	private void generateBSPDungeonArray(){
-		splitBSP(new BSPTree(null, 0, 63, 0, 63));
+		splitBSP(new BSPTree(null, 0, tileLayerWidth - 1, 0, tileLayerHeight - 1));
 		// set walls
 		for (int i = 0; i < levelArray.length; i++){
 			for(int j = 0; j < levelArray[i].length; j++){
@@ -249,24 +300,36 @@ public class MeshLevel {
 			if(!outOfBounds(i+1, j)){
 				if(levelArray[i+1][j][k].getHeight() == 1){
 					levelArray[i][j][k].setHeight(5);
+					if((rand.nextInt(1000)> 970)){
+						createTorch(i+1, j, SOUTH);
+					}
 					return;
 				}
 			}
 			if(!outOfBounds(i-1, j)){
 				if(levelArray[i-1][j][k].getHeight() == 1){
 					levelArray[i][j][k].setHeight(5);
+					if((rand.nextInt(1000)> 970)){
+						createTorch(i-1, j, NORTH);
+					}
 					return;
 				}
 			}
 			if(!outOfBounds(i, j+1)){
 				if(levelArray[i][j+1][k].getHeight() == 1){
 					levelArray[i][j][k].setHeight(5);
+					if((rand.nextInt(1000)> 970)){
+						createTorch(i, j+1, EAST);
+					}
 					return;
 				}
 			}
 			if(!outOfBounds(i, j-1)){
 				if(levelArray[i][j-1][k].getHeight() == 1){
 					levelArray[i][j][k].setHeight(5);
+					if((rand.nextInt(1000)> 970)){
+						createTorch(i, j-1, WEST);
+					}
 					return;
 				}
 			}
@@ -274,53 +337,48 @@ public class MeshLevel {
 	}
 	
 	private void splitBSP(BSPTree tree){
-		System.out.println("(" + tree.x1 + "-" + tree.x2 + "," + tree.y1 + "-" + tree.y2 + ")");
 		int splitSpot = -1;
-		if(rand.nextInt(2) == 0) {
-			if(tree.x2 - tree.x1 > 16){
+		if (rand.nextInt(2) == 0) {
+			if (tree.x2 - tree.x1 > 16) {
 				// split vertically (x) with a padding of 4 tiles on either side
 				splitSpot = tree.x1 + 8 + rand.nextInt((tree.x2-8) - (tree.x1+8));
-				System.out.print("VerticalSplit at " + splitSpot + " ");
 				tree.setLeftChild(new BSPTree(tree, tree.x1, splitSpot-1, tree.y1, tree.y2));
 				tree.setRightChild(new BSPTree(tree, splitSpot, tree.x2, tree.y1, tree.y2));
 				splitBSP(tree.getLeftChild());
 				splitBSP(tree.getRightChild());
-			}else if(tree.y2 - tree.y1 > 32){
+			} else if (tree.y2 - tree.y1 > 32) {
 				// split horizontally (y) with a padding of 4 tiles on either side
 				splitSpot = tree.y1 + 8 + rand.nextInt((tree.y2-8) - (tree.y1+8));
-				System.out.print("HorizontalSplit at " + splitSpot + " ");
 				tree.setLeftChild(new BSPTree(tree, tree.x1, tree.x2, tree.y1, splitSpot-1));
 				tree.setRightChild(new BSPTree(tree, tree.x1, tree.x2, splitSpot, tree.y2));
 				splitBSP(tree.getLeftChild());
 				splitBSP(tree.getRightChild());
-			}else{
+			} else {
 				// done splitting, create room  from (tree.x1+2, tree.y1+2) to (tree.x2-2, tree.y2-2)
 				createDungeonRoom(tree.x1, tree.x2, tree.y1, tree.y2);
 			}
-		}else{
-			if(tree.y2 - tree.y1 > 16){
+		} else {
+			if (tree.y2 - tree.y1 > 16) {
 				// split horizontally (y)
 				splitSpot = tree.y1 + 8 + rand.nextInt((tree.y2-8) - (tree.y1+8));
-				System.out.print("HorizontalSplit at " + splitSpot + " ");
 				tree.setLeftChild(new BSPTree(tree, tree.x1, tree.x2, tree.y1, splitSpot-1));
 				tree.setRightChild(new BSPTree(tree, tree.x1, tree.x2, splitSpot, tree.y2));
 				splitBSP(tree.getLeftChild());
 				splitBSP(tree.getRightChild());
-			}else if(tree.x2 - tree.x1 > 32){
+			} else if (tree.x2 - tree.x1 > 32) {
 				// split vertically (x) with a padding of 4 tiles on either side
 				splitSpot = tree.x1 + 8 + rand.nextInt((tree.x2-8) - (tree.x1+8));
-				System.out.print("VerticalSplit at " + splitSpot + " ");
 				tree.setLeftChild(new BSPTree(tree, tree.x1, splitSpot-1, tree.y1, tree.y2));
 				tree.setRightChild(new BSPTree(tree, splitSpot, tree.x2, tree.y1, tree.y2));
 				splitBSP(tree.getLeftChild());
 				splitBSP(tree.getRightChild());
-			}else{
+			} else {
 				// done splitting, create room from (tree.x1+2, tree.y1+2) to (tree.x2-2, tree.y2-2)
 				createDungeonRoom(tree.x1, tree.x2, tree.y1, tree.y2);
 			}
 		}
 		// connect the two children
-		if(tree.getLeftChild() == null || tree.getRightChild() == null){
+		if (tree.getLeftChild() == null || tree.getRightChild() == null) {
 			connectDungeonRooms(tree.getParent());
 		}
 	}
@@ -328,120 +386,55 @@ public class MeshLevel {
 	private void connectDungeonRooms(BSPTree parent){
 		BSPTree left = parent.getLeftChild();
 		BSPTree right = parent.getRightChild();
-//		int leftXMidPoint = (left.x2 - left.x1) / 2;
-//		int leftYMidPoint = (left.y2 - left.y1) / 2;
-//		int rightXMidPoint = (right.x2 - right.x1)/ 2;
-//		int rightYMidPoint = (right.y2 - right.y1)/ 2;
-		int heightValue;
-		int connectorCount;
-		int i,j;
-		int midPointX = (left.x1 + left.x2 + right.x1 + right.x2)/4; 
-		int midPointY = (left.y1 + left.y2 + right.y1 + right.y2)/4;
-		if(left.x2 < right.x1 || right.x2 < left.x1){
-			// vertical split
-			connectorCount = 0;
-			heightValue = -1;
-			i = midPointX;
-			while(heightValue != 1 && connectorCount < 16){
-				if(!outOfBounds(i, midPointY)){
-					levelArray[i][midPointY][0].setHeight(1);
-				}else{heightValue = 1;}
-				i++;
-				if(!outOfBounds(i, midPointY)){
-					heightValue = levelArray[i][midPointY][0].getHeight();
-				}else{heightValue = 1;}
-				connectorCount++;
-			}
-			connectorCount = 0;
-			heightValue = -1;
-			i = midPointX-1;
-			while(heightValue != 1 && connectorCount < 16){
-				if(!outOfBounds(i, midPointY)){
-					levelArray[i][midPointY][0].setHeight(1);
-				}else{heightValue = 1;}
-				i--;
-				if(!outOfBounds(i, midPointY)){
-					heightValue = levelArray[i][midPointY][0].getHeight();
-				}else{heightValue = 1;}
-				connectorCount++;
-			}
-//		}else if(right.x2 < left.x1){
-//			// vertical split
-//			midPoint = (left.y1 + left.y2 + right.y1 + right.y2) / 4;
-//			for(int i = right.x2-2; i < left.x1+2; i++){
-//				if(!outOfBounds(i, midPoint)){
-//					levelArray[i][midPoint][0].setHeight(1);
-//				}
-//			}
-		}else if(left.y2 < right.y1 || right.y2 < left.y1){
-			// horizontal split
-			connectorCount = 0;
-			heightValue = -1;
-			j = midPointY;
-			while(heightValue != 1 && connectorCount < 16){
-				if(!outOfBounds(midPointX, j)){
-					levelArray[midPointX][j][0].setHeight(1);
-				}else{heightValue = 1;}
-				j++;
-				if(!outOfBounds(midPointX, j)){
-					heightValue = levelArray[midPointX][j][0].getHeight();
-				}else{heightValue = 1;}
-				connectorCount++;
-			}
-			connectorCount = 0;
-			heightValue = -1;
-			j = midPointY-1;
-			while(heightValue != 1 && connectorCount < 16){
-				if(!outOfBounds(midPointX, j)){
-					levelArray[midPointX][j][0].setHeight(1);
-				}else{heightValue = 1;}
-				j--;
-				if(!outOfBounds(midPointX, j)){
-					heightValue = levelArray[midPointX][j][0].getHeight();
-				}else{heightValue = 1;}
-				connectorCount++;
-			}
-//		}else{
-//			// horizontal split
-//			midPoint = (left.x1 + left.x2 + right.x1 + right.x2) / 4;
-//			for(int j = right.y2-2; j < left.y1+2; j++){
-//				if(!outOfBounds(midPoint, j)){
-//					levelArray[midPoint][j][0].setHeight(1);
-//				}
-//			}
-		}
-		if(parent.getParent()!= null){
-			connectDungeonRooms(parent.getParent());
 
+		GridPoint2 leftCenter = new GridPoint2((left.x1 + left.x2)/2, (left.y1 + left.y2)/2);
+		GridPoint2 rightCenter = new GridPoint2((right.x1 + right.x2)/2, (right.y1 + right.y2)/2);
+
+		if (left.x2 < right.x1) {
+			// vertical split
+			for (int i = leftCenter.x; i < rightCenter.x; i++) {
+				if (!outOfBounds(i, leftCenter.y)) {
+					levelArray[i][leftCenter.y][0].setHeight(1);
+				}
+			}
+		} else if (left.y2 < right.y1) {
+			// horizontal split
+			for (int i = leftCenter.y; i < rightCenter.y; i++) {
+				if (!outOfBounds(leftCenter.x, i)) {
+					levelArray[leftCenter.x][i][0].setHeight(1);
+				}
+			}
+		}
+		if (parent.getParent()!= null) {
+			connectDungeonRooms(parent.getParent());
 		}
 	}
 	
 	public void generateLevelArray() {
-
 		TiledMapTile tile = null;
 		int layerNumber = 0;
 		
-		for(int k = 0; k < tiledMap.getLayers().getCount(); k++){
-			if(tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")){
+		for (int k = 0; k < tiledMap.getLayers().getCount(); k++) {
+			if (tiledMap.getLayers().get(k).getName().startsWith("Tile Layer")) {
 				currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get(k);
-				if(currentLayer.getName().equals("Tile Layer 1")){
+				if (currentLayer.getName().equals("Tile Layer 1")) {
 					heightOffset = 0;
 					layerNumber = 0;
-				}else if(currentLayer.getName().equals("Tile Layer 2")){
+				} else if (currentLayer.getName().equals("Tile Layer 2")) {
 					heightOffset = 6;
 					layerNumber = 1;
 				}
 				
 				// on each cell
-				for(int i = 0; i < currentLayer.getWidth(); i++){
-					for(int j = 0; j < currentLayer.getHeight(); j++){
+				for (int i = 0; i < currentLayer.getWidth(); i++) {
+					for (int j = 0; j < currentLayer.getHeight(); j++) {
 						tile = currentLayer.getCell(i, j).getTile();
 						// place blocks
-						if(tile.getProperties().containsKey("height")){
+						if (tile.getProperties().containsKey("height")) {
 							levelArray[i][j][layerNumber].setHeight(getHeight(tile));
 						}
 						// place ramps
-						if(tile.getProperties().containsKey("ramp")){
+						if (tile.getProperties().containsKey("ramp")) {
 							levelArray[i][j][layerNumber].setRampDirection(getIntRampDirection(tile));
 						}
 					}
@@ -475,26 +468,26 @@ public class MeshLevel {
 			//modelBuilder.begin();
 
 			// on each cell
-			for(int i = 0; i < tileLayerWidth; i++){
-				for(int j = 0; j < tileLayerHeight; j++){
+			for (int i = 0; i < tileLayerWidth; i++) {
+				for (int j = 0; j < tileLayerHeight; j++) {
 
-					if(levelArray[i][j][0] != null){
+					if (levelArray[i][j][0] != null) {
 						tile1 = levelArray[i][j][0];
 					}
-					if(tileLayerCount > 1){
-						if(levelArray[i][j][1] != null){
+					if (tileLayerCount > 1) {
+						if (levelArray[i][j][1] != null) {
 							tile2 = levelArray[i][j][1];
 						}
 					}
 
 					MapTile currentTile = null;
-					if(levelArray[i][j][k] != null){
+					if (levelArray[i][j][k] != null) {
 						currentTile = levelArray[i][j][k];
 					}
 
 					// make lvl2 ceilings
-					if(tile2 != null && tile2.getHeight() != -1
-							&& tile1 != null && tile1.getHeight() != 5){
+					if (tile2 != null && tile2.getHeight() != -1
+							&& tile1 != null && tile1.getHeight() != 5) {
 						modelBuilder.begin();
 						Node node = modelBuilder.node();
 						node.translation.set(j,5,i);
@@ -510,9 +503,9 @@ public class MeshLevel {
 					}
 
 					// make the floor tiles
-					if(currentTile.getHeight() != -1){
+					if (currentTile.getHeight() != -1) {
 						// if ramp
-						if(currentTile.getRampDirection() != -1){
+						if (currentTile.getRampDirection() != -1) {
 							modelBuilder.begin();
 							Node node = modelBuilder.node();
 							node.translation.set(j, currentTile.getHeight()+heightOffset, i);
@@ -527,7 +520,7 @@ public class MeshLevel {
 							else if (currentTile.getRampDirection() == DOWN) { // +x direction
 								meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
 							}	
-							else if(currentTile.getRampDirection() == LEFT) { // +z direction
+							else if (currentTile.getRampDirection() == LEFT) { // +z direction
 								meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
 							}	
 							else if (currentTile.getRampDirection() == RIGHT)	{ // -z direction
@@ -542,7 +535,7 @@ public class MeshLevel {
 
 
 						}
-						else if(k == 0 && currentTile.getHeight() == 5 && tile2.getHeight() != -1){
+						else if (k == 0 && currentTile.getHeight() == 5 && tile2.getHeight() != -1) {
 							// don't make this polygon because it is hidden by level2
 						}
 						// else not a ramp
@@ -589,7 +582,7 @@ public class MeshLevel {
 			if (tiledMap.getLayers().get("objects") != null){
 				initializeObjectInstances();
 			}
-			else{
+			else {
 				System.err.println("TileMap - No object layer in current map");
 			}
 		
@@ -597,6 +590,7 @@ public class MeshLevel {
 			currentLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 1");
 			//currentLayerNumber = 0;
 		}
+		
 		return instances;
 	}
 	
@@ -627,7 +621,7 @@ public class MeshLevel {
 		}
 		
 		MapTile adj = null;
-		if(looki >= 0 && looki < tileLayerWidth && lookj >= 0 && lookj < tileLayerHeight){
+		if (looki >= 0 && looki < tileLayerWidth && lookj >= 0 && lookj < tileLayerHeight) {
 			adj = levelArray[looki][lookj][k];
 		}
 		
@@ -643,11 +637,11 @@ public class MeshLevel {
 					&& levelArray[i][j][0].getHeight() == 5){
 				bottom++;
 			}
-			if(!combinedWalls){
+			if (!combinedWalls) {
 				for(float b1 = bottom; b1 < adj.getHeight(); b1++){
 					genWall(i, j, b1, direction);
 				}
-			}else{
+			} else {
 				genCombinedWall(i, j, bottom, adj.getHeight(), direction);
 			}
 		}
@@ -657,15 +651,15 @@ public class MeshLevel {
 				tile.getRampDirection() != -1 &&
 				adj.getRampDirection() == -1 &&
 				adj.getHeight() > tile.getHeight()){
-			if(!combinedWalls){
-				for(float b1 = tile.getHeight()+1; b1 < adj.getHeight(); b1++){
+			if (!combinedWalls) {
+				for (float b1 = tile.getHeight()+1; b1 < adj.getHeight(); b1++) {
 					genWall(i, j, b1, direction);
 				}
-			}else{
+			} else {
 				genCombinedWall(i, j, tile.getHeight()+1, adj.getHeight(), direction);
 			}
 			// generate the walls at the bottom of ramp slopes (if any)
-			if(tile.getRampDirection() == direction){
+			if (tile.getRampDirection() == direction) {
 				genWall(i, j, tile.getHeight(), direction);
 			}
 			
@@ -687,11 +681,11 @@ public class MeshLevel {
 					&& levelArray[i][j][0].getHeight() == 5){
 				bottom++;
 			}
-			if(!combinedWalls){
-				for(int b1 = bottom; b1 < adj.getHeight(); b1++){
+			if (!combinedWalls) {
+				for (int b1 = bottom; b1 < adj.getHeight(); b1++) {
 					genWall(i, j, b1, direction);
 				}
-			}else{
+			} else {
 				genCombinedWall(i, j, bottom, adj.getHeight(), direction);
 			}
 
@@ -706,11 +700,11 @@ public class MeshLevel {
 				adj.getRampDirection() != -1 &&
 				tile.getRampDirection() != -1 &&
 				adj.getHeight() > tile.getHeight()){
-			if(!combinedWalls){
-				for(float b1 = tile.getHeight()+1; b1 < adj.getHeight(); b1++){
+			if (!combinedWalls) {
+				for (float b1 = tile.getHeight()+1; b1 < adj.getHeight(); b1++) {
 					genWall(i, j, b1, direction);
 				}
-			}else{
+			} else {
 				genCombinedWall(i, j, tile.getHeight()+1, adj.getHeight(), direction);
 			}
 
@@ -722,17 +716,16 @@ public class MeshLevel {
 	}
 	
 	private void makeTriangleSegments(int currRampDir, int currHeight, int adjRampDir, int adjHeight, 
-			int wallFaceDir, int j, int i){
-		
+									  int wallFaceDir, int j, int i){
 		// case where the adjacent tile is a ramp
 		if(adjRampDir > 0){
 			switch(wallFaceDir){
 			case(NORTH):
-				if(adjRampDir == LEFT){
+				if (adjRampDir == LEFT) {
 					// need to make a rectangle
 					genWall(i, j, adjHeight, wallFaceDir);
 				}
-				if(adjRampDir == UP){
+				if (adjRampDir == UP) {
 					// need to make a triangle
 					p1.set(0,0,1);
 					p2.set(1,1,1);
@@ -743,7 +736,7 @@ public class MeshLevel {
 					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
 					genTriangle(v1, v2, v3, j, adjHeight, i);
 				}
-				if(adjRampDir == DOWN){
+				if (adjRampDir == DOWN) {
 					// need to make a triangle
 					p1.set(0,1,1);
 					p2.set(1,0,1);
@@ -756,11 +749,11 @@ public class MeshLevel {
 				}
 				break;
 			case(SOUTH):
-				if(adjRampDir == RIGHT){
+				if (adjRampDir == RIGHT) {
 					// need to make a rectangle
 					genWall(i, j, adjHeight, wallFaceDir);
 				}
-				if(adjRampDir == UP){
+				if (adjRampDir == UP) {
 					// need to make a triangle
 					p1.set(1,1,0);
 					p2.set(0,0,0);
@@ -771,7 +764,7 @@ public class MeshLevel {
 					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
 					genTriangle(v1, v2, v3, j, adjHeight, i);
 				}
-				if(adjRampDir == DOWN){
+				if (adjRampDir == DOWN) {
 					// need to make a triangle
 					p1.set(1,0,0);
 					p2.set(0,1,0);
@@ -784,11 +777,11 @@ public class MeshLevel {
 				}
 				break;
 			case(EAST):
-				if(adjRampDir == UP){
+				if (adjRampDir == UP) {
 					// need to make a rectangle
 					genWall(i, j, adjHeight, wallFaceDir);
 				}
-				if(adjRampDir == LEFT){
+				if (adjRampDir == LEFT) {
 					// need to make a triangle
 					p1.set(0,1,0);
 					p2.set(0,0,1);
@@ -799,7 +792,7 @@ public class MeshLevel {
 					v3.setPos(p3).setNor(normal).setUV(1.0f, 1.0f);
 					genTriangle(v1, v2, v3, j, adjHeight, i);
 				}
-				if(adjRampDir == RIGHT){
+				if (adjRampDir == RIGHT) {
 					// need to make a triangle
 					p1.set(0,0,0);
 					p2.set(0,1,1);
@@ -812,11 +805,11 @@ public class MeshLevel {
 				}
 				break;
 			case(WEST):
-				if(adjRampDir == DOWN){
+				if (adjRampDir == DOWN) {
 					// need to make a rectangle
 					genWall(i, j, adjHeight, wallFaceDir);
 				}
-				if(adjRampDir == LEFT){
+				if (adjRampDir == LEFT) {
 					// need to make a triangle
 					p1.set(1,0,1);
 					p2.set(1,1,0);
@@ -827,7 +820,7 @@ public class MeshLevel {
 					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
 					genTriangle(v1, v2, v3, j, adjHeight, i);
 				}
-				if(adjRampDir == RIGHT){
+				if (adjRampDir == RIGHT) {
 					// need to make a triangle
 					p1.set(1,1,1);
 					p2.set(1,0,0);
@@ -844,11 +837,11 @@ public class MeshLevel {
 			}
 		}
 		// case where the current tile is a ramp
-		if(currRampDir > 0){
+		if (currRampDir > 0) {
 			switch(currRampDir){
 			case(UP):
 				//
-				if(wallFaceDir == NORTH){
+				if (wallFaceDir == NORTH) {
 					p1.set(0,0,1);
 					p2.set(0,1,1);
 					p3.set(1,1,1);
@@ -858,7 +851,7 @@ public class MeshLevel {
 					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
 					genTriangle(v1, v2, v3, j, currHeight, i);
 				}
-				if(wallFaceDir == SOUTH){
+				if (wallFaceDir == SOUTH) {
 					p1.set(1,1,0);
 					p2.set(0,1,0);
 					p3.set(0,0,0);
@@ -871,7 +864,7 @@ public class MeshLevel {
 			break;
 			case(DOWN):
 				//
-				if(wallFaceDir == NORTH){
+				if (wallFaceDir == NORTH) {
 					p1.set(0,1,1);
 					p2.set(1,1,1);
 					p3.set(1,0,1);
@@ -881,7 +874,7 @@ public class MeshLevel {
 					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
 					genTriangle(v1, v2, v3, j, currHeight, i);
 				}
-				if(wallFaceDir == SOUTH){
+				if (wallFaceDir == SOUTH) {
 					p1.set(1,0,0);
 					p2.set(1,1,0);
 					p3.set(0,1,0);
@@ -894,7 +887,7 @@ public class MeshLevel {
 			break;
 			case(LEFT):
 				//
-				if(wallFaceDir == WEST){
+				if (wallFaceDir == WEST) {
 					p1.set(1,0,1);
 					p2.set(1,1,1);
 					p3.set(1,1,0);
@@ -904,7 +897,7 @@ public class MeshLevel {
 					v3.setPos(p3).setNor(normal).setUV(0.0f, 0.0f);
 					genTriangle(v1, v2, v3, j, currHeight, i);
 				}
-				if(wallFaceDir == EAST){
+				if (wallFaceDir == EAST) {
 					p1.set(0,1,0);
 					p2.set(0,1,1);
 					p3.set(0,0,1);
@@ -917,7 +910,7 @@ public class MeshLevel {
 			break;
 			case(RIGHT):
 				//
-				if(wallFaceDir == WEST){
+				if (wallFaceDir == WEST) {
 					p1.set(1,1,1);
 					p2.set(1,1,0);
 					p3.set(1,0,0);
@@ -927,7 +920,7 @@ public class MeshLevel {
 					v3.setPos(p3).setNor(normal).setUV(0.0f, 1.0f);
 					genTriangle(v1, v2, v3, j, currHeight, i);
 				}
-				if(wallFaceDir == EAST){
+				if (wallFaceDir == EAST) {
 					p1.set(0,0,0);
 					p2.set(0,1,0);
 					p3.set(0,1,1);
@@ -971,7 +964,7 @@ public class MeshLevel {
 	private void genWall(float cellj, float celli, float bottom, int direction){
 		String dirString;
 		
-		switch(direction){
+		switch(direction) {
 		case NORTH:
 			dirString = "North";
 			
@@ -1033,53 +1026,52 @@ public class MeshLevel {
 	
 	private void genCombinedWall(float cellj, float celli, float bottom, float top, int direction){
 		String dirString;
-		
 		float height = top - bottom;
 		
-		switch(direction){
-		case NORTH:
-			dirString = "North";
+		switch(direction) {
+			case NORTH:
+				dirString = "North";
+				
+				p1.set(1, 0, 1);
+				p2.set(0, 0, 1);
+				p3.set(0, height, 1);
+				p4.set(1, height, 1);
+				normal.set(0f,0f,-1f);
+				
+				break;
+			case SOUTH:
+				dirString = "South";
+				
+				p1.set(0, 0, 0);
+				p2.set(1, 0, 0);
+				p3.set(1, height, 0);
+				p4.set(0, height, 0);
+				normal.set(0f,0f,1f);
+				
+				break;
+			case EAST:
+				dirString = "East";
 			
-			p1.set(1, 0, 1);
-			p2.set(0, 0, 1);
-			p3.set(0, height, 1);
-			p4.set(1, height, 1);
-			normal.set(0f,0f,-1f);
+				p1.set(0, 0, 1);
+				p2.set(0, 0, 0);
+				p3.set(0, height, 0);
+				p4.set(0, height, 1);
+				normal.set(1f,0f,0f);
+				
+				break;
+			case WEST:
+				dirString = "West";
 			
-			break;
-		case SOUTH:
-			dirString = "South";
-			
-			p1.set(0, 0, 0);
-			p2.set(1, 0, 0);
-			p3.set(1, height, 0);
-			p4.set(0, height, 0);
-			normal.set(0f,0f,1f);
-			
-			break;
-		case EAST:
-			dirString = "East";
-		
-			p1.set(0, 0, 1);
-			p2.set(0, 0, 0);
-			p3.set(0, height, 0);
-			p4.set(0, height, 1);
-			normal.set(1f,0f,0f);
-			
-			break;
-		case WEST:
-			dirString = "West";
-		
-			p1.set(1, 0, 0);
-			p2.set(1, 0, 1);
-			p3.set(1, height, 1);
-			p4.set(1, height, 0);
-			normal.set(-1f,0f,0f);
-			
-			break;
-		default:
-			dirString = "Error";
-			System.err.println("Error: direction not recognized");
+				p1.set(1, 0, 0);
+				p2.set(1, 0, 1);
+				p3.set(1, height, 1);
+				p4.set(1, height, 0);
+				normal.set(-1f,0f,0f);
+				
+				break;
+			default:
+				dirString = "Error";
+				System.err.println("Error: direction not recognized");
 		}
 
 		v1.setPos(p1).setNor(normal).setUV(0.0f, height);
@@ -1187,10 +1179,112 @@ public class MeshLevel {
 				EnemySpawner spawn = new EnemySpawner(objPosition, 8, true, false, false, 1f, getSpawnTime(rectObj), zombie);
 				Entity.entityInstances.add(spawn);
 			}
+			
+			else if (rectObj.getName().contains("Portal")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				PointLight pointLight = new PointLight();
+				pointLight.set(getLightColor(rectObj), objPosition, 20f);
+				Portal portal = new Portal(objPosition, 2, true, true, pointLight);
+				Entity.entityInstances.add(portal);
+			}
 
 			else {
 				System.err.println("initializeObjectInstances(): Object does not exist " + rectObj.getName());
 			}
+		}
+	}
+	
+	private void createRocket(int xPos, int yPos, float spawnTime){
+		if(!outOfBounds(xPos, yPos)){
+			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight();
+			Vector3 objPosition = new Vector3(yPos+0.5f, height+0.5f, xPos+0.5f);
+			RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(objPosition);
+			WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, spawnTime, Color.MAROON, 
+													launcher);
+			Entity.entityInstances.add(spawn);
+		}
+	}
+	
+	private void createSword(int xPos, int yPos, float spawnTime){
+		if(!outOfBounds(xPos, yPos)){
+			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight();
+			Vector3 objPosition = new Vector3(yPos+0.5f, height+0.5f, xPos+0.5f);
+			Sword sword = (Sword) new Sword().spawn(new Vector3(objPosition.x - 0.4f, objPosition.y, objPosition.z));
+			WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, spawnTime, Color.MAROON, 
+											        sword);
+			Entity.entityInstances.add(spawn);
+		}
+	}
+	
+	private void createTorch(int xPos, int yPos, int direction){
+		if(!outOfBounds(xPos, yPos)){
+			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight()+1;
+			Vector3 objPosition = new Vector3(yPos+0.5f, height, xPos+0.5f);
+			Torch torch = new Torch(objPosition, 'W', 1, true, true);
+
+			if (direction == NORTH){
+				torch.setDirection('N');
+				objPosition.z += 0.32f;
+				torch.setPosition(objPosition);
+			}
+			else if (direction == SOUTH){
+				objPosition.z -= 0.32f;
+				torch.setDirection('S');
+			}
+			else if (direction == EAST){
+				objPosition.x -= 0.32f;
+				torch.setDirection('E');
+			}
+			else if (direction == WEST){
+				objPosition.x += 0.32f;
+				torch.setDirection('W');
+			}
+
+			torch.setDecal(Decal.newDecal(Assets.torch, true));
+			torch.setColor(Color.WHITE);
+			torch.getDecal().setScale(0.003f);
+			torch.setRotations(torch.getDirection());
+			PointLight light = new PointLight();
+			torch.setPointLight(light.set(torch.getColor(), objPosition, 2f));
+			Entity.entityInstances.add(torch);
+		}
+	}
+	
+	private void createMist(int xPos, int yPos, Color color){
+		if(!outOfBounds(xPos, yPos)){
+			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight();
+			Vector3 objPosition = new Vector3(yPos+0.5f, height, xPos+0.5f);
+			PointLight pointLight = new PointLight();
+			pointLight.set(color, objPosition, 20f);
+			Mist mist = new Mist(objPosition, 2, true, true, pointLight);
+			Entity.entityInstances.add(mist);
+		}
+	}
+	
+	// TODO: I need to add these creators for the other types of objects
+	private void createPointLight(int xPos, int yPos, Color color){
+		if(!outOfBounds(xPos, yPos)){
+			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight() + 3;
+			Vector3 objPosition = new Vector3(yPos+0.5f, height, xPos+0.5f);
+			PointLight pointLight = new PointLight();
+			pointLight.set(color, objPosition, 20f);
+			Light light = new Light(objPosition, 2, true, true, pointLight);
+			Entity.entityInstances.add(light);
+		}
+	}
+
+	private void createEnemySpawner(int xPos, int yPos, float spawnTime){
+		if(!outOfBounds(xPos, yPos)){
+			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight();
+			Assets.loadModels();
+			Vector3 objPosition = new Vector3(yPos+0.5f, height, xPos+0.5f);
+			Zombie zombie = new Zombie(9, false, true, objPosition, new Vector3(0, 0, 0), 
+					new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+					new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
+			EnemySpawner spawn = new EnemySpawner(objPosition, 8, true, false, false, 1f, spawnTime, zombie);
+			Entity.entityInstances.add(spawn);
 		}
 	}
 

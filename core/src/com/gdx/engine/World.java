@@ -9,11 +9,12 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
 
-public class World {
+public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
 	public static Player player;
 	public static ParticleManager particleManager;
@@ -47,7 +48,6 @@ public class World {
 			// must come before meshlevel, and after player
 			particleManager = new ParticleManager(this);
 			meshLevel = new MeshLevel(Assets.castle, true);
-
 		}
 		
 		//distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
@@ -57,6 +57,25 @@ public class World {
 		boxes = new Array<BoundingBox>();
 		position = new Vector3();
 		out = new Vector3();
+	}
+	
+	public void enterDungeon() {
+		Entity.entityInstances.clear();
+		enemyInstances.clear();
+		meshLevel.getInstances().clear();
+		particleManager.system.removeAll();
+		Render.environment.pointLights.removeRange(0, Render.environment.pointLights.size - 1);
+		meshLevel = new MeshLevel(true);
+		GridPoint2 playerPos = new GridPoint2();
+		playerPos.set(meshLevel.getStartingPoint());
+		player.camera.position.set(playerPos.x+0.5f, player.camera.position.y, playerPos.y+0.5f);
+		player.camera.lookAt(50f, 1.5f, 50f);
+		Entity.entityInstances.add(player);
+		if (player.getWeapon() != null)
+			Entity.entityInstances.add(player.getWeapon());
+		initializeEntities();
+		boxes.clear();
+		createBoundingBoxes();
 	}
 	
 	public void update(float delta) {
@@ -71,7 +90,7 @@ public class World {
 	
 	private void updateEntities(float delta) {
 		int size = Entity.entityInstances.size;
-		
+
 		for (int i = 0; i < size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
 			
@@ -80,7 +99,6 @@ public class World {
 			}
 			
 			else {
-				//System.out.println("Removed: " + size);
 				entity.removeEntity(i);
 				size -= 1;
 			}
@@ -210,5 +228,11 @@ public class World {
 	
 	public Vector3 getOut() {
 		return out;
+	}
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
 	}
 }

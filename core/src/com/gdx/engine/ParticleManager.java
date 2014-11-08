@@ -15,6 +15,7 @@ public class ParticleManager {
 	public PFXPool mistPool;
 	public PFXPool rocketExplosionPool;
 	public PFXPool bloodPool;
+	public PFXPool portalPool;
 	public BillboardParticleBatch billboardBatch;
 	public ParticleSystem system;
 	public ParticleEffect rocketEffect;
@@ -22,6 +23,7 @@ public class ParticleManager {
 	public ParticleEffect mistEffect;
 	public ParticleEffect rocketExplosionEffect;
 	public ParticleEffect bloodEffect;
+	public ParticleEffect portalEffect;
     public ParticleEffectLoadParameter loadParam;
 	public ParticleEffectLoader loader;
 	public RegularEmitter regularEmitter;
@@ -39,10 +41,12 @@ public class ParticleManager {
 		torchEffect = Assets.manager.get("torcheffect.pfx");
 		rocketEffect = Assets.manager.get("rocketeffect.pfx");
 		mistEffect = Assets.manager.get("mistGreenWeapon.pfx");
+		portalEffect = Assets.manager.get("portalEffect.pfx");
 		rocketExplosionEffect = Assets.manager.get("rocketExplosionEffect.pfx");
 		projectilePool = new PFXPool(rocketEffect);
 		torchPool = new PFXPool(torchEffect);
 		mistPool = new PFXPool(mistEffect);
+		portalPool = new PFXPool(portalEffect);
 		rocketExplosionPool = new PFXPool(rocketExplosionEffect);
 		bloodPool = new PFXPool(bloodEffect);
 	}

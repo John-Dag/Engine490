@@ -60,8 +60,8 @@ public class Enemy extends DynamicEntity {
 		
 		GridPoint2 thisPosition = new GridPoint2((int)this.getPosition().x, (int)this.getPosition().z);
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
-		TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);
-		int width = layer.getWidth();
+		//TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);
+		int width = world.getMeshLevel().getMapXDimension();
 		ArrayList<Integer> path;
 		
 		if (this.getStateMachine().Current == this.idle) {
@@ -73,7 +73,7 @@ public class Enemy extends DynamicEntity {
             try {
                 path = this.shortestPath(thisPosition.x + width
                         * thisPosition.y, playerPosition.x + width
-                        * playerPosition.y, layer, world.getDistanceMap());
+                        * playerPosition.y, world.getDistanceMap());
             } catch (Exception ex) {
                 path = new ArrayList<Integer>();
             }
@@ -425,7 +425,7 @@ public class Enemy extends DynamicEntity {
         return tileNumber % layer.getHeight();
     }
     
-    public ArrayList<Integer> shortestPath(int startLoc, int endLoc, TiledMapTileLayer layer, DistanceTrackerMap distanceMap) {
+    public ArrayList<Integer> shortestPath(int startLoc, int endLoc, DistanceTrackerMap distanceMap) {
         //distanceMap.resetDistances();
         //distanceMap.addDistances(endLoc);
         return distanceMap.shortestPath(startLoc, endLoc);
