@@ -1243,7 +1243,9 @@ public class MeshLevel {
 			}
 
 			torch.setDecal(Decal.newDecal(Assets.torch, true));
-			torch.setColor(Color.WHITE);
+			Color color = new Color();
+			color.set(240f/255f, 1f, 186f/255f, 1f);
+			torch.setColor(color);
 			torch.getDecal().setScale(0.003f);
 			torch.setRotations(torch.getDirection());
 			PointLight light = new PointLight();

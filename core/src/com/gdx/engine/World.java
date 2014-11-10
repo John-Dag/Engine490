@@ -39,7 +39,7 @@ public class World implements Disposable {
 			meshLevel = new MeshLevel(true);
 			GridPoint2 playerPos = new GridPoint2();
 			playerPos.set(meshLevel.getStartingPoint());
-			player.camera.position.set(playerPos.x+0.5f, player.camera.position.y, playerPos.y+0.5f);
+			player.camera.position.set(playerPos.x + 0.5f, player.camera.position.y, playerPos.y + 0.5f);
 		} else {
 			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
@@ -76,6 +76,7 @@ public class World implements Disposable {
 		initializeEntities();
 		boxes.clear();
 		createBoundingBoxes();
+		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
 	}
 	
 	public void update(float delta) {

@@ -80,8 +80,6 @@ public class Render implements Disposable {
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
 		Gdx.gl.glCullFace(GL20.GL_FRONT);
-//		if (World.changingLevel)
-//			return;
 		modelBatch.begin(world.getPlayer().camera);
 		renderParticles();
 		shadowLight.begin(world.getPlayer().camera.position, world.getPlayer().camera.direction);
