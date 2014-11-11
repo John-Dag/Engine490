@@ -4,6 +4,8 @@ public class MapTile {
 	private static int NULL_VALUE = -1;
 	private int rampDirection;
 	private int height;
+	private int textureId=-1;
+	private int wallTextureId=-2;
 	
 	public MapTile(){
 		rampDirection = NULL_VALUE;
@@ -33,5 +35,23 @@ public class MapTile {
 
 	public void setHeight(int height) {
 		this.height = height;
+	}
+	
+	public void setTextureId(int textureId) {
+		this.textureId=textureId;
+		
+	}
+	public int getTextureId() {
+		return textureId;
+		
+	}
+	
+	public void setWallTextureId(int textureId) {
+		this.wallTextureId=textureId;
+		
+	}
+	public int getWallTextureId() {
+		return wallTextureId;
+		
 	}
 }

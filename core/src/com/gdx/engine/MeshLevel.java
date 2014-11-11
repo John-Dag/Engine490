@@ -1,5 +1,7 @@
 package com.gdx.engine;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import com.badlogic.gdx.graphics.Color;
@@ -30,6 +32,8 @@ import com.gdx.StaticEntities.EnemySpawner;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.Portal;
+import com.gdx.StaticEntities.PowerUpSpawn;
+import com.gdx.StaticEntities.SpeedBoost;
 import com.gdx.StaticEntities.Torch;
 import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.Weapons.RocketLauncher;
@@ -106,6 +110,11 @@ public class MeshLevel {
 	
 	//private int numLevel = 1;
 	
+	//Texture stuff
+	public Map<Integer,Material> MapMaterials=new HashMap<Integer,Material>();	//Maps texture Ids to Materials
+	public Map<String,Integer> MaterialIds=new HashMap<String,Integer>();		//Maps texture filenames to texture Ids
+	//End Texture stuff
+	
 	public MeshLevel(boolean isSkySphereActive){
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
@@ -128,6 +137,7 @@ public class MeshLevel {
 		}
 		initializeLevelArray();
 		generateBSPDungeonArray();
+		Assets.loadMeshLevelTextures(tiledMap, levelArray, MapMaterials, MaterialIds);
 		generateLevelMesh();
 	}
 	
@@ -165,6 +175,7 @@ public class MeshLevel {
 			}
 		}
 		generateLevelArray();
+		Assets.loadMeshLevelTextures(tiledMap, levelArray, MapMaterials, MaterialIds);
 		generateLevelMesh();
 	}
 	
@@ -494,7 +505,7 @@ public class MeshLevel {
 						meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
 								GL20.GL_TRIANGLES,
 								Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-								Assets.wallMat);
+								MapMaterials.get(currentTile.getWallTextureId()));
 
 						meshPartBuilder.rect(0,0,0, 1,0,0, 1,0,1, 0,0,1, 0,-1,0);
 						model = modelBuilder.end();
@@ -512,7 +523,7 @@ public class MeshLevel {
 							meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
 									GL20.GL_TRIANGLES, 
 									Usage.Position | Usage.Normal | Usage.TextureCoordinates,
-									Assets.stoneFloorMat);
+									MapMaterials.get(currentTile.getTextureId()));
 
 							if (currentTile.getRampDirection() == UP)	{ // -x direction
 								meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
@@ -546,7 +557,7 @@ public class MeshLevel {
 							meshPartBuilder = modelBuilder.part("floor" + i + "_" + j, 
 									GL20.GL_TRIANGLES,
 									Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-									Assets.stoneFloorMat);
+									MapMaterials.get(currentTile.getTextureId()));
 
 							meshPartBuilder.rect(0,0,1, 1,0,1, 1,0,0, 0,0,0, 0,1,0);
 							model = modelBuilder.end();
@@ -950,7 +961,7 @@ public class MeshLevel {
 				Usage.Position
 				| Usage.Normal
 				| Usage.TextureCoordinates
-				, Assets.wallMat
+				, MapMaterials.get(levelArray[offset3][offset1][0].getWallTextureId())
 				);
 
 		meshPartBuilder.triangle(v1, v2, v3);
@@ -1016,7 +1027,7 @@ public class MeshLevel {
 		meshPartBuilder = modelBuilder.part(dirString + "_wall" + celli + "_" + cellj, 
 				GL20.GL_TRIANGLES, 
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-				Assets.wallMat);
+				MapMaterials.get(levelArray[(int)cellj][(int)celli][0].getWallTextureId()));
 
 		meshPartBuilder.rect(p1, p2, p3, p4, normal);
 		model = modelBuilder.end();
@@ -1085,7 +1096,7 @@ public class MeshLevel {
 		meshPartBuilder = modelBuilder.part(dirString + "_wall" + celli + "_" + cellj, 
 				GL20.GL_TRIANGLES, 
 				Usage.Position | Usage.Normal | Usage.TextureCoordinates, 
-				Assets.wallMat);
+				MapMaterials.get(levelArray[(int)cellj][(int)celli][0].getWallTextureId()));
 
 		meshPartBuilder.rect(v1, v2, v3, v4);
 		model = modelBuilder.end();
@@ -1188,6 +1199,16 @@ public class MeshLevel {
 				pointLight.set(getLightColor(rectObj), objPosition, 20f);
 				Portal portal = new Portal(objPosition, 2, true, true, pointLight);
 				Entity.entityInstances.add(portal);
+			}
+			
+			else if (rectObj.getName().contains("SpeedBoost")) {
+				objPosition = new Vector3();
+				int height = getObjectHeight(rectObj);
+				float duration = getPowerUpDuration(rectObj);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
+						new SpeedBoost(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
+				Entity.entityInstances.add(spawn);
 			}
 
 			else {
@@ -1327,6 +1348,17 @@ public class MeshLevel {
 		}
 		
 		return Float.parseFloat(time);
+	}
+	
+	// returns how long the powerUp lasts for
+	public float getPowerUpDuration(RectangleMapObject object) {
+		String duration = "0";
+		
+		if (object.getProperties().containsKey("duration")) {
+			duration = object.getProperties().get("duration").toString();
+		}
+		
+		return Float.parseFloat(duration);
 	}
 	
 	// returns the height of the given map object

@@ -34,7 +34,7 @@ public class World implements Disposable {
 			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
 							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
-
+			
 			particleManager = new ParticleManager(this);
 			meshLevel = new MeshLevel(true);
 			GridPoint2 playerPos = new GridPoint2();
@@ -44,7 +44,6 @@ public class World implements Disposable {
 			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
 							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
-
 			// must come before meshlevel, and after player
 			particleManager = new ParticleManager(this);
 			meshLevel = new MeshLevel(Assets.castle, true);

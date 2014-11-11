@@ -37,6 +37,7 @@ public class Player extends DynamicEntity {
 	private float currentMovementSpeed;
 	private DistanceTrackerMap distanceMap;
 	private float fireDelayTimer;
+	private float speedScalar; //Scales the speed of the player.
 	
 	public Player() {
 		super();
@@ -56,7 +57,7 @@ public class Player extends DynamicEntity {
 		this.camera.position.set(position.x, position.y, position.z);
 		this.camera.lookAt(position.x + 1, position.y, position.z + 1);
 		this.camera.near = 0.01f;
-		this.camera.far = 16f;
+		this.camera.far = 15f;
 		this.movementVector = new Vector3(0,0,0);
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
@@ -67,6 +68,7 @@ public class Player extends DynamicEntity {
 		this.health = MAX_HEALTH;
 		this.currentHeightOffset = PLAYER_HEIGHT_OFFSET;
 		this.currentMovementSpeed = MOVEMENT_SPEED;
+		this.speedScalar = 1f; // 1 = default movespeed
 	}
 	
 	@Override
@@ -122,7 +124,7 @@ public class Player extends DynamicEntity {
 			}
 		}
 		
-		float movAmt = currentMovementSpeed * delta;
+		float movAmt = (currentMovementSpeed *speedScalar) * delta;
 		if(clipping){
 			movementVector.y = 0;	// jumping is done separately from the movementVector
 		}
@@ -253,7 +255,7 @@ public class Player extends DynamicEntity {
 		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
 			isCrouching = true;
 			currentHeightOffset = CROUCH_HEIGHT;
-			currentMovementSpeed = CROUCH_SPEED;
+			currentMovementSpeed = CROUCH_SPEED * speedScalar;
 		}
 		// to toggle clipping (commented out because distance tracker crashes it when clipping is off)
 //		if (Gdx.input.isKeyPressed(Keys.L)) {
@@ -281,6 +283,14 @@ public class Player extends DynamicEntity {
 		}
 	}
 	
+	public float getSpeedScalar() {
+		return speedScalar;
+	}
+
+	public void setSpeedScalar(float speedScalar) {
+		this.speedScalar = speedScalar;
+	}
+
 	public void fireWeapon() {
 		if (this.getWeapon().isParticleWeapon()) {
 			this.isFiring = true;
