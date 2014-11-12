@@ -11,9 +11,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
+import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 
 public class Player extends DynamicEntity {
+	public static float FOG_DISTANCE = 15f;
 	private static final float ROTATION_SPEED = 0.2f;
 	private static final float MOVEMENT_SPEED = 8.0f;
 	private static final float CROUCH_SPEED = 2.0f;
@@ -57,7 +59,7 @@ public class Player extends DynamicEntity {
 		this.camera.position.set(position.x, position.y, position.z);
 		this.camera.lookAt(position.x + 1, position.y, position.z + 1);
 		this.camera.near = 0.01f;
-		this.camera.far = 15f;
+		this.camera.far = FOG_DISTANCE;
 		this.movementVector = new Vector3(0,0,0);
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
@@ -281,8 +283,23 @@ public class Player extends DynamicEntity {
 			movVect = tileCenter.sub(camPosition);
 			camera.position.add(movVect.x * delta, 0, movVect.y * delta);
 		}
+		
+		if (Gdx.input.isKeyJustPressed(Keys.GRAVE)) {
+			if (!GameScreen.isConsoleActive)
+				GameScreen.isConsoleActive = true;
+			else
+				GameScreen.isConsoleActive = false;
+		}
 	}
 	
+	public boolean isClipping() {
+		return clipping;
+	}
+
+	public void setClipping(boolean clipping) {
+		this.clipping = clipping;
+	}
+
 	public float getSpeedScalar() {
 		return speedScalar;
 	}
@@ -342,10 +359,6 @@ public class Player extends DynamicEntity {
 
 	public boolean isMouseLeft() {
 		return mouseLeft;
-	}
-
-	public boolean isclipping() {
-		return clipping;
 	}
 
 	public boolean isCrouching() {

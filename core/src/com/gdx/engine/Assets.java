@@ -225,7 +225,6 @@ public class Assets {
 													.get(filename));
 								}
 							}
-
 						}
 					}
 				}
