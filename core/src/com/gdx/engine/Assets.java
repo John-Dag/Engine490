@@ -29,10 +29,7 @@ public class Assets {
 	public static Texture wall;
 	public static Texture stoneFloor;
 	public static Texture darkWood;
-	public static TiledMap level;
-	public static TiledMap level2;
-	public static TiledMap castle;
-	public static TiledMap dungeon1;
+	public static TiledMap mymap, mymap2, dungeon1, castle2, castle3;
 	public static ModelBuilder modelBuilder;
 	public static Material floorMat;
 	public static Material wallMat;
@@ -55,12 +52,13 @@ public class Assets {
 		crosshair = new Texture("crosshair.png");
 		test1 = new TextureRegion(hole);
 		dungeon1 = new TmxMapLoader().load("dungeon1.tmx");
-		level = new TmxMapLoader().load("mymap.tmx");
-		level2 = new TmxMapLoader().load("mymap2.tmx");
-		castle = new TmxMapLoader().load("castle3.tmx");
+		mymap = new TmxMapLoader().load("mymap.tmx");
+		mymap2 = new TmxMapLoader().load("mymap2.tmx");
+		castle2 = new TmxMapLoader().load("castle2.tmx");
+		castle3 = new TmxMapLoader().load("castle3.tmx");
 		darkWood = new Texture("darkWoodTex.png");
-		floor = new Texture("floor.png");
-		wall = new Texture("wall.png");
+		floor = new Texture("floorHighres.png");
+		wall = new Texture("wallHighres.png");
 		stoneFloor = new Texture("stonefloor.png");
 		modelBuilder = new ModelBuilder();
 		floorMat = new Material(TextureAttribute.createDiffuse(floor));
@@ -149,8 +147,8 @@ public class Assets {
 										Texture texture = manager.get(filename,
 												Texture.class);
 										texture.setFilter(
-												TextureFilter.MipMapLinearLinear,
-												TextureFilter.Linear);
+												TextureFilter.MipMapLinearNearest,
+												TextureFilter.Nearest);
 										texture.setWrap(TextureWrap.Repeat,
 												TextureWrap.Repeat);
 										Material material = new Material(
@@ -211,8 +209,8 @@ public class Assets {
 										Texture texture = manager.get(filename,
 												Texture.class);
 										texture.setFilter(
-												TextureFilter.MipMapLinearLinear,
-												TextureFilter.Linear);
+												TextureFilter.MipMapLinearNearest,
+												TextureFilter.Nearest);
 										texture.setWrap(TextureWrap.Repeat,
 												TextureWrap.Repeat);
 										Material material = new Material(
@@ -237,8 +235,8 @@ public class Assets {
 		// Load default Textures and create materials
 		MaterialIds.put("stonefloor.png", -1);
 		Texture texture = manager.get("stonefloor.png", Texture.class);
-		texture.setFilter(TextureFilter.MipMapLinearLinear,
-				TextureFilter.Linear);
+		texture.setFilter(TextureFilter.MipMapLinearNearest,
+				TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		Material material = new Material(
 				TextureAttribute.createDiffuse(texture));
@@ -246,8 +244,8 @@ public class Assets {
 
 		MaterialIds.put("wall.png", -2);
 		texture = manager.get("wall.png", Texture.class);
-		texture.setFilter(TextureFilter.MipMapLinearLinear,
-				TextureFilter.Linear);
+		texture.setFilter(TextureFilter.MipMapLinearNearest,
+				TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		material = new Material(TextureAttribute.createDiffuse(texture));
 		MapMaterials.put(-2, material);

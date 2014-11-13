@@ -58,6 +58,11 @@ public class MeshLevel {
 	public static final int UP = 3;
 	public static final int DOWN = 4;
 	
+	public MeshPartBuilder meshPartBuilder;
+	public ModelBuilder modelBuilder;
+	public ModelInstance instance;
+	public Model model; 
+	
 	// the length and width of one tile
 	private static final float SPOT_WIDTH = 1;
 	private static final float SPOT_LENGTH = 1;
@@ -70,14 +75,9 @@ public class MeshLevel {
 	private final int PURPLE = 4;
 	
 	private TiledMap tiledMap;
-	private ModelBuilder modelBuilder;
 	private Array<ModelInstance> instances;
-	private Array<Object> objectInstances;
-	private Array<Entity> entityInstances;
-	private Model model, skySphere;
-	private ModelInstance instance;
+	private Model skySphere;
 	private int triCount = 0;
-	private MeshPartBuilder meshPartBuilder;
 	private boolean isSkySphereActive;
 	//private TiledMapTileLayer tiledMapLayer0;
 	private TiledMapTileLayer currentLayer;
@@ -118,8 +118,6 @@ public class MeshLevel {
 	public MeshLevel(boolean isSkySphereActive){
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
-		objectInstances = new Array<Object>();
-		entityInstances = new Array<Entity>();
 		currentLayerNumber = 0;
 		this.heightOffset = 0f;
 		combinedWalls = true;
@@ -144,8 +142,6 @@ public class MeshLevel {
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
-		objectInstances = new Array<Object>();
-		entityInstances = new Array<Entity>();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
 		//tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
@@ -1152,7 +1148,7 @@ public class MeshLevel {
 				//float scale = 0.005f;
 				objPosition = new Vector3();
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				Sword sword = (Sword) new Sword().spawn(objPosition);
+				Sword sword = (Sword) new Sword().spawn(new Vector3(objPosition.x - 0.4f, objPosition.y, objPosition.z));
 				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
 												        sword);
 				Entity.entityInstances.add(spawn);
@@ -1449,14 +1445,6 @@ public class MeshLevel {
 	
 	public Array<ModelInstance> getInstances() {
 		return instances;
-	}
-	
-	public Array<Object> getObjectInstances() {
-		return objectInstances;
-	}
-	
-	public Array<Entity> getEntityInstances() {
-		return entityInstances;
 	}
 	
 	// TODO: Check Collision

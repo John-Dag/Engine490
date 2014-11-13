@@ -1,8 +1,12 @@
 package com.gdx.engine;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
@@ -10,15 +14,18 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
 
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
+    public static boolean isWireframeEnabled;
 	public static Player player;
 	public static ParticleManager particleManager;
 	public static Array<Enemy> enemyInstances;
+	public Array<ModelInstance> wireInstances;
 	private MeshLevel meshLevel;
 	private Ray ray;
 	private Array<BoundingBox> boxes;
@@ -46,7 +53,7 @@ public class World implements Disposable {
 							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
 			// must come before meshlevel, and after player
 			particleManager = new ParticleManager(this);
-			meshLevel = new MeshLevel(Assets.castle, true);
+			meshLevel = new MeshLevel(Assets.castle3, true);
 		}
 		
 		//distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
@@ -56,6 +63,8 @@ public class World implements Disposable {
 		boxes = new Array<BoundingBox>();
 		position = new Vector3();
 		out = new Vector3();
+		wireInstances = new Array<ModelInstance>();
+		isWireframeEnabled = false;
 	}
 	
 	public void enterDungeon() {
@@ -78,6 +87,29 @@ public class World implements Disposable {
 		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
 	}
 	
+	public void loadLevel(TiledMap map) {
+		Entity.entityInstances.clear();
+		enemyInstances.clear();
+		meshLevel.getInstances().clear();
+		particleManager.system.removeAll();
+		Render.environment.pointLights.removeRange(0, Render.environment.pointLights.size - 1);
+		try {
+			meshLevel = new MeshLevel(map, true);
+		} catch(Exception e) {
+			System.err.println("Error loading specified map. Loading default.");
+			meshLevel = new MeshLevel(Assets.castle3, true);
+		}
+		GridPoint2 playerPos = new GridPoint2();
+		playerPos.set(meshLevel.getStartingPoint());
+		player.camera.position.set(playerPos.x+0.5f, player.camera.position.y, playerPos.y+0.5f);
+		player.camera.lookAt(50f, 1.5f, 50f);
+		Entity.entityInstances.add(player);
+		initializeEntities();
+		boxes.clear();
+		createBoundingBoxes();
+		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+	}
+	
 	public void update(float delta) {
 		updateEntities(delta);
 	}
@@ -89,25 +121,77 @@ public class World implements Disposable {
 	}
 	
 	private void updateEntities(float delta) {
-		int size = Entity.entityInstances.size;
-
+    	int size = Entity.entityInstances.size;
+		
+		wireInstances.clear();
+		
 		for (int i = 0; i < size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
 			
 			if (entity.isActive()) {
 				entity.update(delta, this);
+				
+				//
+				if(isWireframeEnabled) {
+					Material material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
+					BoundingBox box;
+					Vector3[] corners;
+					if(entity instanceof Enemy) {
+						box = ((Enemy) entity).getTransformedBoundingBox();
+						if(box != null) {
+							
+							corners = box.getCorners();
+							//meshLevel.meshPartBuilder.setColor(Color.GREEN);
+							createWireframeBox(corners, material);
+							meshLevel.instance = new ModelInstance(meshLevel.model);
+							wireInstances.add(meshLevel.instance);
+						}
+					}
+					if(entity instanceof Projectile) {
+						box = ((DynamicEntity) entity).getBoundingBox();
+						if(box != null) {
+							corners = box.getCorners();
+							//meshLevel.meshPartBuilder.setColor(Color.GREEN);
+							createWireframeBox(corners, material);
+							meshLevel.instance = new ModelInstance(meshLevel.model);
+							wireInstances.add(meshLevel.instance);
+						}
+					}
+				}
 			}
 			
 			else {
+				//System.out.println("Removed: " + size);
 				entity.removeEntity(i);
 				size -= 1;
 			}
 		}
 	}
 	
+	private ModelInstance createWireframeBox(Vector3[] corners, Material material) {
+		meshLevel.modelBuilder.begin();
+		meshLevel.meshPartBuilder = meshLevel.modelBuilder.part("boxes", 
+				GL20.GL_LINES,
+				Usage.Position | Usage.Color, material);
+		meshLevel.meshPartBuilder.line(corners[0], corners[1]);
+		meshLevel.meshPartBuilder.line(corners[1], corners[2]);
+		meshLevel.meshPartBuilder.line(corners[2], corners[3]);
+		meshLevel.meshPartBuilder.line(corners[3], corners[0]);
+		meshLevel.meshPartBuilder.line(corners[4], corners[5]);
+		meshLevel.meshPartBuilder.line(corners[5], corners[6]);
+		meshLevel.meshPartBuilder.line(corners[6], corners[7]);
+		meshLevel.meshPartBuilder.line(corners[7], corners[4]);
+		meshLevel.meshPartBuilder.line(corners[0], corners[4]);
+		meshLevel.meshPartBuilder.line(corners[1], corners[5]);
+		meshLevel.meshPartBuilder.line(corners[2], corners[6]);
+		meshLevel.meshPartBuilder.line(corners[3], corners[7]);
+		meshLevel.model = meshLevel.modelBuilder.end();
+		return new ModelInstance(meshLevel.model);
+	}
+	
 	public void checkProjectileCollisions(Projectile projectile) {
 		for (Enemy enemy : enemyInstances) {
-			if (projectile.getBoundingBox().intersects(enemy.getTransformedEnemyBoundingBox())) {
+			if (projectile.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
 				//projectile.initializeBloodEffect();
 				projectile.initializeCollisionExplosionEffect();
 				enemy.takeDamage(player.getWeapon().getDamage());

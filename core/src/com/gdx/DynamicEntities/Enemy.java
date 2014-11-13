@@ -358,8 +358,9 @@ public class Enemy extends DynamicEntity {
 		this.setIsActive(true);
 	}
 	
-	public BoundingBox getTransformedEnemyBoundingBox() {
-		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 1f, this.getPosition().z - 0.5f),
+	@Override
+	public BoundingBox getTransformedBoundingBox() {
+		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 0f, this.getPosition().z - 0.5f),
 			    						 new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
 	}
 	
@@ -369,8 +370,8 @@ public class Enemy extends DynamicEntity {
 	}
 	
 	public BoundingBox getTransformedEnemyAttackBoundingBox() {
-		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 2f, this.getPosition().y - 2f, this.getPosition().z - 2f),
-			    						 new Vector3(this.getPosition().x + 2f, this.getPosition().y + 2f, this.getPosition().z + 2f));
+		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 1f, this.getPosition().y - 0f, this.getPosition().z - 1f),
+			    						 new Vector3(this.getPosition().x + 1f, this.getPosition().y + 1f, this.getPosition().z + 1f));
 	}
 
 	public boolean isAttacking() {

@@ -75,7 +75,8 @@ public class Player extends DynamicEntity {
 	
 	@Override
 	public void update(float delta, World world) {
-		input(delta);
+		if (!GameScreen.isConsoleActive)
+			input(delta);
 		fireDelayTimer += delta;
 		
 	    //TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
@@ -283,15 +284,16 @@ public class Player extends DynamicEntity {
 			movVect = tileCenter.sub(camPosition);
 			camera.position.add(movVect.x * delta, 0, movVect.y * delta);
 		}
-		
-		if (Gdx.input.isKeyJustPressed(Keys.GRAVE)) {
-			if (!GameScreen.isConsoleActive)
-				GameScreen.isConsoleActive = true;
-			else
-				GameScreen.isConsoleActive = false;
-		}
 	}
 	
+	public float getCurrentMovementSpeed() {
+		return currentMovementSpeed;
+	}
+
+	public void setCurrentMovementSpeed(float currentMovementSpeed) {
+		this.currentMovementSpeed = currentMovementSpeed;
+	}
+
 	public boolean isClipping() {
 		return clipping;
 	}

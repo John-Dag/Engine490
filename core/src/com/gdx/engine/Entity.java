@@ -3,6 +3,7 @@ package com.gdx.engine;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 
 public class Entity {
@@ -35,6 +36,10 @@ public class Entity {
 	// Overridden by classes that extend Entity
 	public void update(float delta, World world) {
 
+	}
+	
+	public BoundingBox getTransformedBoundingBox() {
+		return new BoundingBox();
 	}
 	
 	// Overridden by classes that extend Entity

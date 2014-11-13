@@ -46,7 +46,7 @@ public class Projectile extends DynamicEntity {
 		if (World.particleManager.regularEmitter != null) {
 			World.particleManager.regularEmitter.update();
 			if (World.particleManager.regularEmitter.isComplete()) {
-				System.out.println(world.particleManager.rocketExplosionPool.peak);
+				//System.out.println(world.particleManager.rocketExplosionPool.peak);
 				World.particleManager.currentExplosionEffect.reset();
 				World.particleManager.system.remove(World.particleManager.currentExplosionEffect);
 				World.particleManager.getRocketExplosionPool().free(World.particleManager.currentExplosionEffect);

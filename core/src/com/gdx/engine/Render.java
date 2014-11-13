@@ -102,6 +102,11 @@ public class Render implements Disposable {
 			}
 		}
 		
+		for (ModelInstance wireInstance : world.wireInstances) {
+			renderModels(wireInstance);
+			renderCount++;
+		}
+		
 		shadowBatch.end();
 		shadowLight.end();
 		modelBatch.end();
