@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
@@ -298,6 +299,12 @@ public class Player extends DynamicEntity {
 			movVect = tileCenter.sub(camPosition);
 			camera.position.add(movVect.x * delta, 0, movVect.y * delta);
 		}
+	}
+	
+	@Override
+	public BoundingBox getTransformedBoundingBox() {
+		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 0f, this.getPosition().z - 0.5f),
+			    						 new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
 	}
 	
 	public float getCurrentMovementSpeed() {

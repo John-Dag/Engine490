@@ -73,7 +73,7 @@ public class Assets {
 	public static void loadModels() {
 	    manager.load("GUNFBX.g3db", Model.class);
 	    manager.load("zombie_fast.g3db", Model.class);
-	    manager.load("sword.g3db", Model.class);
+	    manager.load("sword2.g3db", Model.class);
 	    manager.load("FireFlower.g3db", Model.class);
 	    manager.finishLoading();
 	}

@@ -19,6 +19,7 @@ import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
+import com.gdx.DynamicEntities.Weapon;
 
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
@@ -160,8 +161,29 @@ public class World implements Disposable {
 						}
 					}
 					if(entity instanceof Ability) {
-						System.out.println("HI");
 						box = ((Ability) entity).getBoundingBox();
+						if(box != null) {
+							corners = box.getCorners();
+							Color color = new Color(Color.GREEN);
+							meshLevel.meshPartBuilder.setColor(color);
+							createWireframeBox(corners, material);
+							meshLevel.instance = new ModelInstance(meshLevel.model);
+							wireInstances.add(meshLevel.instance);
+						}
+					}
+					if(entity instanceof Weapon) {
+						box = ((Weapon) entity).getTransformedBoundingBox();
+						if(box != null) {
+							corners = box.getCorners();
+							Color color = new Color(Color.GREEN);
+							meshLevel.meshPartBuilder.setColor(color);
+							createWireframeBox(corners, material);
+							meshLevel.instance = new ModelInstance(meshLevel.model);
+							wireInstances.add(meshLevel.instance);
+						}
+					}
+					if(entity instanceof Player) {
+						box = ((Player) entity).getTransformedBoundingBox();
 						if(box != null) {
 							corners = box.getCorners();
 							Color color = new Color(Color.GREEN);
@@ -220,6 +242,14 @@ public class World implements Disposable {
 				enemy.takeDamage(ability.getDamage());
 				if (ability.isStunAbility()) 
 					enemy.setVelocity(new Vector3(0, 0, 0));
+			}
+		}
+	}
+	
+	public void checkWeaponCollision(Weapon weapon) {
+		for (Enemy enemy : enemyInstances) {
+			if (weapon.getTransformedBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
+				enemy.takeDamage(weapon.getDamage());
 			}
 		}
 	}

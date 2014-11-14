@@ -1,6 +1,9 @@
 package com.gdx.Weapons;
 
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
+import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Weapon;
@@ -8,10 +11,10 @@ import com.gdx.engine.Assets;
 import com.gdx.engine.World;
 
 public class Sword extends Weapon {
-	private final float FIRING_DELAY = 0.5f;
+	private final float FIRING_DELAY = 0.8f;
 	private final float PROJECTILE_SPEED = 5f;
 	private final float RECOIL = 0f;
-	private final int DAMAGE = 20;
+	private final int DAMAGE = 1;
 	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0);
 	
 	public Sword() {
@@ -25,24 +28,25 @@ public class Sword extends Weapon {
 		this.projectileSpeed = PROJECTILE_SPEED;
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
+		this.setAnimation(new AnimationController(this.getModel()));
 	}
 	
 	@Override 
 	public void fireWeapon(World world) {
-
+		this.setAnimation(new AnimationController(this.getModel()));
+		this.getAnimation().animate(this.getModel().animations.get(0).id, 1, -1f, null, 0.2f);
 	}
 	
 	@Override
 	public Weapon spawn(Vector3 spawnPos) {
 		Sword sword = new Sword(false, 2, true, true, new Vector3(-1, 0, 0), 
                    new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0),
-                   Assets.manager.get("sword.g3db", Model.class));
+                   Assets.manager.get("sword2.g3db", Model.class));
 		BoundingBox temp = new BoundingBox();
 		sword.getModel().calculateBoundingBox(temp);
-		temp.ext(5, -5, 5);
 		sword.setBoundingBox(temp);
 		sword.getModel().transform.setToTranslation(spawnPos);
-		sword.getModel().transform.scale(0.009f, 0.009f, 0.009f);
+		//sword.getModel().transform.scale(0.009f, 0.009f, 0.009f);
 		return sword;
 	}
 	
@@ -57,8 +61,15 @@ public class Sword extends Weapon {
 	
 			this.getModel().transform.rotate(startY, world.getPlayer().camera.direction.nor());
 			this.getModel().transform.rotate(startXZ, camDirXZ.nor());
-			this.getModel().transform.scale(0.009f, 0.009f, 0.009f);
-			this.getModel().transform.translate(-35f, 0f, 10f);
+			//this.getModel().transform.scale(0.009f, 0.009f, 0.009f);
+			this.getModel().transform.translate(-1f, 0.1f, 0.15f);
+			if (this.getAnimation().current != null) {
+				this.getAnimation().animate(this.getModel().animations.get(0).id, 1, -1f, null, 0.2f);
+				this.getAnimation().update(delta);
+				
+				if (this.getAnimation().current.loopCount != 0)
+					world.checkWeaponCollision(this);;
+			}
 		}
 		
 		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
