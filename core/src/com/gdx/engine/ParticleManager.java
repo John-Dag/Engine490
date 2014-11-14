@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader.ParticleEffectLoadParameter;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.particles.batches.BillboardParticleBatch;
+import com.badlogic.gdx.graphics.g3d.particles.batches.PointSpriteParticleBatch;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.utils.Pool;
 
@@ -16,11 +17,14 @@ public class ParticleManager {
 	public PFXPool rocketExplosionPool;
 	public PFXPool bloodPool;
 	public PFXPool portalPool;
+	public PFXPool blizzardPool;
 	public BillboardParticleBatch billboardBatch;
+	public PointSpriteParticleBatch pointSpriteBatch;
 	public ParticleSystem system;
 	public ParticleEffect rocketEffect;
 	public ParticleEffect torchEffect;
 	public ParticleEffect mistEffect;
+	public ParticleEffect blizzardEffect;
 	public ParticleEffect rocketExplosionEffect;
 	public ParticleEffect bloodEffect;
 	public ParticleEffect portalEffect;
@@ -34,14 +38,18 @@ public class ParticleManager {
 		this.world = world;
 		billboardBatch = new BillboardParticleBatch();
 		billboardBatch.setCamera(world.getPlayer().camera);
+		pointSpriteBatch = new PointSpriteParticleBatch();
+		pointSpriteBatch.setCamera(world.getPlayer().camera);
 		system = ParticleSystem.get();
 		system.add(billboardBatch);
+		system.add(pointSpriteBatch);
 		Assets.loadParticleEffects(system);
 		bloodEffect = Assets.manager.get("bloodeffect.pfx");
 		torchEffect = Assets.manager.get("torcheffect.pfx");
 		rocketEffect = Assets.manager.get("rocketeffect.pfx");
 		mistEffect = Assets.manager.get("mistGreenWeapon.pfx");
 		portalEffect = Assets.manager.get("portalEffect.pfx");
+		blizzardEffect = Assets.manager.get("blizzard.pfx");
 		rocketExplosionEffect = Assets.manager.get("rocketExplosionEffect.pfx");
 		projectilePool = new PFXPool(rocketEffect);
 		torchPool = new PFXPool(torchEffect);
@@ -49,6 +57,7 @@ public class ParticleManager {
 		portalPool = new PFXPool(portalEffect);
 		rocketExplosionPool = new PFXPool(rocketExplosionEffect);
 		bloodPool = new PFXPool(bloodEffect);
+		blizzardPool = new PFXPool(blizzardEffect);
 	}
 	
 	public RegularEmitter getEmitter(ParticleEffect effect) {

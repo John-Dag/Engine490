@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.Abilities.Blizzard;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
@@ -33,7 +34,7 @@ public class Player extends DynamicEntity {
 	public Vector3 temp;
 	private World world;
 	private Vector3 collisionVector, movementVector, newPos, oldPos;
-	private boolean isJumping, isFiring;
+	private boolean isJumping, isFiring, isCooldownActive;
 	private float jumpVelocity;
 	private float currentHeightOffset;
 	private float currentMovementSpeed;
@@ -66,6 +67,7 @@ public class Player extends DynamicEntity {
 		this.isJumping = false;
 		this.clipping = true;
 		this.isCrouching = false;
+		this.isCooldownActive = false;
 		this.isFiring = false;
 		this.health = MAX_HEALTH;
 		this.currentHeightOffset = PLAYER_HEIGHT_OFFSET;
@@ -73,6 +75,14 @@ public class Player extends DynamicEntity {
 		this.speedScalar = 1f; // 1 = default movespeed
 	}
 	
+	public boolean isCooldownActive() {
+		return isCooldownActive;
+	}
+
+	public void setCooldownActive(boolean isCooldownActive) {
+		this.isCooldownActive = isCooldownActive;
+	}
+
 	@Override
 	public void update(float delta, World world) {
 		if (!GameScreen.isConsoleActive)
@@ -254,6 +264,10 @@ public class Player extends DynamicEntity {
 				isJumping = true;
 				jumpVelocity = JUMP_SPEED;
 			}
+		}
+		if (Gdx.input.isKeyJustPressed(Keys.E)) {
+			if (!this.isCooldownActive && this.getAbility() == null)
+				this.setAbility(new Blizzard(10, false, true, new Vector3(0, 0, 0)));
 		}
 		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
 			isCrouching = true;

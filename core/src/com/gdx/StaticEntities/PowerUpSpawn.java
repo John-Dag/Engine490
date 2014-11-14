@@ -34,7 +34,6 @@ public class PowerUpSpawn extends StaticEntity {
 		powerRef = (PowerUp) powerUp.spawn();
 		Entity.entityInstances.add(powerRef);
 		
-		
 		Timer.schedule(new Task() {
 			@Override
 			public void run() { 

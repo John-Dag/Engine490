@@ -88,6 +88,7 @@ public class Assets {
 	    manager.load("mistGreenWeapon.pfx", ParticleEffect.class, loadParam);
 	    manager.load("portalEffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketExplosionEffect.pfx", ParticleEffect.class, loadParam);
+	    manager.load("blizzard.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
 	}
 	
@@ -228,13 +229,17 @@ public class Assets {
 				}
 			}
 
-		manager.load("stonefloor.png", Texture.class, param);
-		manager.load("wall.png", Texture.class, param);
+		//manager.load("stonefloor.png", Texture.class, param);
+		//manager.load("wall.png", Texture.class, param);
+		manager.load("floorHighres.png", Texture.class, param);
+		manager.load("wallHighres.png", Texture.class, param);
 		manager.finishLoading();
 
 		// Load default Textures and create materials
-		MaterialIds.put("stonefloor.png", -1);
-		Texture texture = manager.get("stonefloor.png", Texture.class);
+		//MaterialIds.put("stonefloor.png", -1);
+		//Texture texture = manager.get("stonefloor.png", Texture.class);
+		MaterialIds.put("floorHighres.png", -1);
+		Texture texture = manager.get("floorHighres.png", Texture.class);
 		texture.setFilter(TextureFilter.MipMapLinearNearest,
 				TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
@@ -242,8 +247,10 @@ public class Assets {
 				TextureAttribute.createDiffuse(texture));
 		MapMaterials.put(-1, material);
 
-		MaterialIds.put("wall.png", -2);
-		texture = manager.get("wall.png", Texture.class);
+		//MaterialIds.put("wall.png", -2);
+		//texture = manager.get("wall.png", Texture.class);
+		MaterialIds.put("wallHighres.png", -2);
+		texture = manager.get("wallHighres.png", Texture.class);
 		texture.setFilter(TextureFilter.MipMapLinearNearest,
 				TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);

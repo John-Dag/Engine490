@@ -14,6 +14,7 @@ import com.gdx.engine.World;
 
 public class DynamicEntity extends Entity {
 	private Weapon weapon;
+	private Ability ability;
 	private Vector3 position, rotation, scale, velocity, acceleration, angVelocity, angAccel;
 	private ModelInstance model;
 	private ParticleEffect particleEffect, collisionEffect;
@@ -31,6 +32,12 @@ public class DynamicEntity extends Entity {
 		scale = new Vector3(0, 0, 0);
 		acceleration = new Vector3(0, 0, 0);
 		model = null;
+	}
+	
+	public DynamicEntity(int id, boolean isActive, boolean isRenderable, Vector3 position) {
+		super(id, isActive, isRenderable);
+		this.position = position;
+		this.boundingBox = new BoundingBox();
 	}
 
 	public DynamicEntity(int id, boolean isActive, boolean isRenderable, Vector3 position,
@@ -75,6 +82,14 @@ public class DynamicEntity extends Entity {
 		this.acceleration = acceleration;
 		this.angAccel = new Vector3(0, 0, 0);
 		this.angVelocity = new Vector3(0, 0, 0);
+	}
+	
+	public Ability getAbility() {
+		return ability;
+	}
+
+	public void setAbility(Ability ability) {
+		this.ability = ability;
 	}
 
 	public BoundingBox getDetectionBox() {

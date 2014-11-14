@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.gdx.DynamicEntities.Ability;
 import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
@@ -151,7 +152,20 @@ public class World implements Disposable {
 						box = ((DynamicEntity) entity).getBoundingBox();
 						if(box != null) {
 							corners = box.getCorners();
-							//meshLevel.meshPartBuilder.setColor(Color.GREEN);
+							Color color = new Color(Color.GREEN);
+							meshLevel.meshPartBuilder.setColor(color);
+							createWireframeBox(corners, material);
+							meshLevel.instance = new ModelInstance(meshLevel.model);
+							wireInstances.add(meshLevel.instance);
+						}
+					}
+					if(entity instanceof Ability) {
+						System.out.println("HI");
+						box = ((Ability) entity).getBoundingBox();
+						if(box != null) {
+							corners = box.getCorners();
+							Color color = new Color(Color.GREEN);
+							meshLevel.meshPartBuilder.setColor(color);
 							createWireframeBox(corners, material);
 							meshLevel.instance = new ModelInstance(meshLevel.model);
 							wireInstances.add(meshLevel.instance);
@@ -196,6 +210,16 @@ public class World implements Disposable {
 				projectile.initializeCollisionExplosionEffect();
 				enemy.takeDamage(player.getWeapon().getDamage());
 				projectile.removeProjectile();
+			}
+		}
+	}
+	
+	public void checkAbilityCollision(Ability ability) {
+		for (Enemy enemy : enemyInstances) {
+			if (ability.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
+				enemy.takeDamage(ability.getDamage());
+				if (ability.isStunAbility()) 
+					enemy.setVelocity(new Vector3(0, 0, 0));
 			}
 		}
 	}
