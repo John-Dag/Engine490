@@ -325,17 +325,8 @@ public class Player extends DynamicEntity {
 	}
 
 	public void fireWeapon() {
-		if (this.getWeapon().isParticleWeapon()) {
-			this.isFiring = true;
-			Vector3 rotation = new Vector3(0, 0, 0);
-			Vector3 scale = new Vector3(0, 0, 0);
-			
-			//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
-			Projectile projectile = new Projectile(6, true, true, this.camera.position.cpy(), 
-												   rotation, scale, this.camera.direction.cpy(), this.camera.direction.cpy(), 
-												   World.particleManager.projectilePool.obtain(), World.particleManager.rocketExplosionPool.obtain(), this.world);
-			Entity.entityInstances.add(projectile);
-		}
+		this.isFiring = true;
+		this.getWeapon().fireWeapon(world);
 	}
 	
 	public void takeDamage(int damage) {

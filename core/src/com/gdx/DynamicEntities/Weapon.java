@@ -3,6 +3,7 @@ package com.gdx.DynamicEntities;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.engine.World;
 
 public class Weapon extends DynamicEntity {
 	protected float firingDelay;
@@ -23,6 +24,10 @@ public class Weapon extends DynamicEntity {
 			  scale, velocity, acceleration);
 		this.isParticleWeapon = isParticleWeapon;
 		this.setModel(new ModelInstance(model));
+	}
+	
+	public void fireWeapon(World world) {
+		//Use @Override
 	}
 
 	public boolean isPickedup() {

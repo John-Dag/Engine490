@@ -27,6 +27,11 @@ public class Sword extends Weapon {
 		this.damage = DAMAGE;
 	}
 	
+	@Override 
+	public void fireWeapon(World world) {
+
+	}
+	
 	@Override
 	public Weapon spawn(Vector3 spawnPos) {
 		Sword sword = new Sword(false, 2, true, true, new Vector3(-1, 0, 0), 
