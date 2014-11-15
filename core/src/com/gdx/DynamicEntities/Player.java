@@ -5,12 +5,15 @@ import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.Abilities.Blizzard;
+import com.gdx.Abilities.PoisonCloud;
+import com.gdx.engine.Assets;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
@@ -35,7 +38,7 @@ public class Player extends DynamicEntity {
 	public Vector3 temp;
 	private World world;
 	private Vector3 collisionVector, movementVector, newPos, oldPos;
-	private boolean isJumping, isFiring, isCooldownActive;
+	private boolean isJumping, isFiring, isCooldownActive, isPlayerTargeting;
 	private float jumpVelocity;
 	private float currentHeightOffset;
 	private float currentMovementSpeed;
@@ -74,14 +77,15 @@ public class Player extends DynamicEntity {
 		this.currentHeightOffset = PLAYER_HEIGHT_OFFSET;
 		this.currentMovementSpeed = MOVEMENT_SPEED;
 		this.speedScalar = 1f; // 1 = default movespeed
-	}
-	
-	public boolean isCooldownActive() {
-		return isCooldownActive;
+		this.isPlayerTargeting = false;
 	}
 
-	public void setCooldownActive(boolean isCooldownActive) {
-		this.isCooldownActive = isCooldownActive;
+	public boolean isPlayerTargeting() {
+		return isPlayerTargeting;
+	}
+
+	public void setPlayerTargeting(boolean isPlayerTargeting) {
+		this.isPlayerTargeting = isPlayerTargeting;
 	}
 
 	@Override
@@ -191,12 +195,16 @@ public class Player extends DynamicEntity {
 	
 	public void input(float delta) {
 		//Lock the cursor with right mouse button
-		if (Gdx.input.isButtonPressed(Buttons.RIGHT)) {
+		if (Gdx.input.isButtonPressed(Buttons.RIGHT) && !this.isPlayerTargeting) {
 			Gdx.input.setCursorCatched(true);
 		}
-		//ESC cancels cursor lock
-		else if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) && Gdx.input.isCursorCatched()) {
-			Gdx.input.setCursorCatched(false);
+		
+		else if ((Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isButtonPressed(Buttons.RIGHT)) 
+				  && this.isPlayerTargeting) {
+			this.getAbility().setIsActive(false);
+			this.setAbility(null);
+			Gdx.input.setCursorCatched(true);
+			this.isPlayerTargeting = false;
 		}
 		
 		else if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
@@ -205,44 +213,50 @@ public class Player extends DynamicEntity {
 		else
 			mouseLeft = false;
 		
-		if (this.isMouseLeft() && this.getWeapon() != null && 
-			fireDelayTimer >= this.getWeapon().getFiringDelay()) {
-			//ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
-			fireDelayTimer = 0;
-			fireWeapon();
-		}
-		
 		movementVector.set(0,0,0);
 		
 		// camera rotation based on mouse looking
 		if (Gdx.input.isCursorCatched()) {
-				// rotate xz plane
-				camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
-				
-				// calculates up and down rotation vector
-				// weapon recoil added here
-				if (isFiring) {
-					camera.direction.y += world.getPlayer().getWeapon().getRecoil();
-					temp.set(camera.direction).crs(camera.up).nor();
-					isFiring = false;
-				}
-				else
-					temp.set(camera.direction).crs(camera.up).nor();
-				
-				Vector3 v = camera.direction;
-				float pitch = (float) ((Math.atan2( Math.sqrt(v.x*v.x + v.z*v.z),v.y) * MathUtils.radiansToDegrees));
-				
-				float pr = -Gdx.input.getDeltaY() * 0.1f; // pitch rotation
-				
-				if(pitch-pr > 165) {
-					pr = -(165 - pitch);
-				}
-				else if(pitch-pr < 15) {
-					pr = pitch - 15;
-				}
+			//ESC cancels cursor lock
+			if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+				Gdx.input.setCursorCatched(false);
+			}
+			
+			//Fire players weapon
+			if (!this.isPlayerTargeting && this.isMouseLeft() && this.getWeapon() != null && 
+				fireDelayTimer >= this.getWeapon().getFiringDelay()) {
+				//ray = player.camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+				fireDelayTimer = 0;
+				fireWeapon();
+			}
+			
+			// rotate xz plane
+			camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
+			
+			// calculates up and down rotation vector
+			// weapon recoil added here
+			if (isFiring) {
+				camera.direction.y += world.getPlayer().getWeapon().getRecoil();
+				temp.set(camera.direction).crs(camera.up).nor();
+				isFiring = false;
+			}
+			else
+				temp.set(camera.direction).crs(camera.up).nor();
+			
+			Vector3 v = camera.direction;
+			float pitch = (float) ((Math.atan2( Math.sqrt(v.x*v.x + v.z*v.z),v.y) * MathUtils.radiansToDegrees));
+			
+			float pr = -Gdx.input.getDeltaY() * 0.1f; // pitch rotation
+			
+			if(pitch-pr > 165) {
+				pr = -(165 - pitch);
+			}
+			else if(pitch-pr < 15) {
+				pr = pitch - 15;
+			}
 
-				// rotates up and down
-				camera.direction.rotate(temp, pr);
+			// rotates up and down
+			camera.direction.rotate(temp, pr);
 		}
 		
 		//Keyboard input
@@ -266,10 +280,20 @@ public class Player extends DynamicEntity {
 				jumpVelocity = JUMP_SPEED;
 			}
 		}
-		if (Gdx.input.isKeyJustPressed(Keys.E)) {
-			if (!this.isCooldownActive && this.getAbility() == null)
+		
+		//Abilities
+		if (Gdx.input.isKeyJustPressed(Keys.NUM_1)) {
+			if (!this.isCooldownActive && this.getAbility() == null) {
 				this.setAbility(new Blizzard(10, false, true, new Vector3(0, 0, 0)));
+			}
 		}
+		if (Gdx.input.isKeyJustPressed(Keys.NUM_2)) {
+			if (!this.isCooldownActive && this.getAbility() == null) {
+				this.setAbility(new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
+			}
+		}
+		
+		//Crouching
 		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
 			isCrouching = true;
 			currentHeightOffset = CROUCH_HEIGHT;
@@ -288,9 +312,7 @@ public class Player extends DynamicEntity {
 			currentHeightOffset = PLAYER_HEIGHT_OFFSET;
 			currentMovementSpeed = MOVEMENT_SPEED;
 		}
-		if (Gdx.input.isKeyJustPressed(Keys.P)) {
-			Gdx.app.exit();
-		}
+
 		// This is temporary, but useful for testing. Press 'O' if you ever get stuck.
 		if (Gdx.input.isKeyPressed(Keys.O)){
 			Vector2 tileCenter = world.getMeshLevel().getTileCenter(camera.position.x, camera.position.z);
@@ -299,12 +321,33 @@ public class Player extends DynamicEntity {
 			movVect = tileCenter.sub(camPosition);
 			camera.position.add(movVect.x * delta, 0, movVect.y * delta);
 		}
+		
+		//Exit
+		if (Gdx.input.isKeyJustPressed(Keys.P)) {
+			Gdx.app.exit();
+		}
 	}
 	
+	public float getCurrentHeightOffset() {
+		return currentHeightOffset;
+	}
+
+	public void setCurrentHeightOffset(float currentHeightOffset) {
+		this.currentHeightOffset = currentHeightOffset;
+	}
+
 	@Override
 	public BoundingBox getTransformedBoundingBox() {
 		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 0f, this.getPosition().z - 0.5f),
 			    						 new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
+	}
+	
+	public boolean isCooldownActive() {
+		return isCooldownActive;
+	}
+
+	public void setCooldownActive(boolean isCooldownActive) {
+		this.isCooldownActive = isCooldownActive;
 	}
 	
 	public float getCurrentMovementSpeed() {

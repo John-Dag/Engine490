@@ -2,6 +2,7 @@ package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
@@ -17,6 +18,7 @@ public class DynamicEntity extends Entity {
 	private Ability ability;
 	private Vector3 position, rotation, scale, velocity, acceleration, angVelocity, angAccel;
 	private ModelInstance model;
+	private Decal decal;
 	private ParticleEffect particleEffect, collisionEffect;
 	private boolean inCollision, isRendered, isAnimating;
 	private Quaternion rotationQuaternion;
@@ -84,6 +86,14 @@ public class DynamicEntity extends Entity {
 		this.angVelocity = new Vector3(0, 0, 0);
 	}
 	
+	public Decal getDecal() {
+		return decal;
+	}
+
+	public void setDecal(Decal decal) {
+		this.decal = decal;
+	}
+	
 	public Ability getAbility() {
 		return ability;
 	}
@@ -118,6 +128,10 @@ public class DynamicEntity extends Entity {
 		if (this.model != null) {
 			shadowBatch.render(this.model);
 			modelBatch.render(this.model, Render.environment);
+		}
+		
+		if (this.decal != null) {
+			decalBatch.add(this.getDecal());
 		}
 	}
 	

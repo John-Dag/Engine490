@@ -1,10 +1,6 @@
 package com.gdx.Abilities;
 
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Timer;
-import com.badlogic.gdx.utils.Timer.Task;
-import com.gdx.StaticEntities.PowerUp;
-import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
 public class Blizzard extends AOECentered {

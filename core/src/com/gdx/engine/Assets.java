@@ -41,6 +41,8 @@ public class Assets {
 	public static TextureRegion torch;
 	public static Texture weapon1;
 	public static TextureRegion weapon1Region;
+	public static Texture aoeTexture;
+	public static TextureRegion aoeTextureRegion;
 	private static ParticleEffectLoader loader;
 	private static ParticleEffectLoadParameter loadParam;
 	
@@ -65,6 +67,8 @@ public class Assets {
 		wallMat = new Material(TextureAttribute.createDiffuse(wall));
 		triangleWallMat = new Material(TextureAttribute.createDiffuse(wall));
 		stoneFloorMat = new Material(TextureAttribute.createDiffuse(stoneFloor));
+		aoeTexture = new Texture("aoecircle.png");
+		aoeTextureRegion = new TextureRegion(aoeTexture);
 		weapon1 = new Texture("weapon1.png");
 		weapon1Region = new TextureRegion(weapon1);
 		wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
@@ -89,6 +93,7 @@ public class Assets {
 	    manager.load("portalEffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketExplosionEffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("blizzard.pfx", ParticleEffect.class, loadParam);
+	    manager.load("poisonCloudEffect.pfx", ParticleEffect.class, loadParam);
 	    manager.finishLoading();
 	}
 	

@@ -16,6 +16,7 @@ public class Ability extends DynamicEntity {
 	private Ability abilityRef;
 	private boolean isStunAbility;
 	private PFXPool poolRef;
+	private boolean isTargeting, effectStarted, isCoolingDown;
 
 	public Ability() {
 		super();
@@ -27,8 +28,13 @@ public class Ability extends DynamicEntity {
 		this.duration = duration;
 		this.cooldown = cooldown;
 		this.start = 0f;
+		this.isTargeting = false;
+		this.effectStarted = false;
+		this.isCoolingDown = false;
 		abilityRef = this;
-
+	}
+	
+	public void initAbility() {
 		Timer.schedule(new Task() {
 			@Override
 			public void run() { 
@@ -36,10 +42,33 @@ public class Ability extends DynamicEntity {
 					abilityRef.setIsActive(true);
 					Entity.entityInstances.add(abilityRef);
 				}
+
 				else {
 					initCooldown();
-					World.particleManager.system.remove(abilityRef.getParticleEffect());
-					poolRef.free(abilityRef.getParticleEffect());
+					if (abilityRef.getParticleEffect() != null) {
+						World.particleManager.system.remove(abilityRef.getParticleEffect());
+						poolRef.free(abilityRef.getParticleEffect());
+					}
+					abilityRef.setIsActive(false);
+					this.cancel();
+				}
+			}
+		}, abilityRef.getStart(), abilityRef.getDuration());
+	}
+	
+	public void initTargetAbility() {
+		Timer.schedule(new Task() {
+			@Override
+			public void run() {
+				if (!abilityRef.effectStarted) {
+					abilityRef.effectStarted = true;
+				}
+				else {
+					initCooldown();
+					if (abilityRef.getParticleEffect() != null) {
+						World.particleManager.system.remove(abilityRef.getParticleEffect());
+						poolRef.free(abilityRef.getParticleEffect());
+					}
 					abilityRef.setIsActive(false);
 					this.cancel();
 				}
@@ -59,6 +88,22 @@ public class Ability extends DynamicEntity {
 				}
 			}
 		}, 0f, abilityRef.getCooldown());
+	}
+	
+	public boolean isCoolingDown() {
+		return isCoolingDown;
+	}
+
+	public void setCoolingDown(boolean isCoolingDown) {
+		this.isCoolingDown = isCoolingDown;
+	}
+
+	public boolean isTargeting() {
+		return isTargeting;
+	}
+
+	public void setTargeting(boolean isTargeting) {
+		this.isTargeting = isTargeting;
 	}
 
 	public PFXPool getPoolRef() {

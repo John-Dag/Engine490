@@ -18,6 +18,7 @@ public class ParticleManager {
 	public PFXPool bloodPool;
 	public PFXPool portalPool;
 	public PFXPool blizzardPool;
+	public PFXPool poisonPool;
 	public BillboardParticleBatch billboardBatch;
 	public PointSpriteParticleBatch pointSpriteBatch;
 	public ParticleSystem system;
@@ -28,6 +29,7 @@ public class ParticleManager {
 	public ParticleEffect rocketExplosionEffect;
 	public ParticleEffect bloodEffect;
 	public ParticleEffect portalEffect;
+	public ParticleEffect poisonEffect;
     public ParticleEffectLoadParameter loadParam;
 	public ParticleEffectLoader loader;
 	public RegularEmitter regularEmitter;
@@ -45,19 +47,21 @@ public class ParticleManager {
 		system.add(pointSpriteBatch);
 		Assets.loadParticleEffects(system);
 		bloodEffect = Assets.manager.get("bloodeffect.pfx");
+		poisonEffect = Assets.manager.get("poisonCloudEffect.pfx");
 		torchEffect = Assets.manager.get("torcheffect.pfx");
 		rocketEffect = Assets.manager.get("rocketeffect.pfx");
 		mistEffect = Assets.manager.get("mistGreenWeapon.pfx");
 		portalEffect = Assets.manager.get("portalEffect.pfx");
+		poisonPool = new PFXPool(poisonEffect);
 		blizzardEffect = Assets.manager.get("blizzard.pfx");
 		rocketExplosionEffect = Assets.manager.get("rocketExplosionEffect.pfx");
 		projectilePool = new PFXPool(rocketEffect);
+		blizzardPool = new PFXPool(blizzardEffect);
 		torchPool = new PFXPool(torchEffect);
 		mistPool = new PFXPool(mistEffect);
 		portalPool = new PFXPool(portalEffect);
 		rocketExplosionPool = new PFXPool(rocketExplosionEffect);
 		bloodPool = new PFXPool(bloodEffect);
-		blizzardPool = new PFXPool(blizzardEffect);
 	}
 	
 	public RegularEmitter getEmitter(ParticleEffect effect) {

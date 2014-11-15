@@ -2,8 +2,6 @@ package com.gdx.Abilities;
 
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Timer;
-import com.badlogic.gdx.utils.Timer.Task;
 import com.gdx.DynamicEntities.Ability;
 import com.gdx.engine.World;
 
@@ -19,6 +17,7 @@ public class AOECentered extends Ability {
 		this.setTarget(new Matrix4());
 		min = new Vector3();
 		max = new Vector3();
+		initAbility();
 	}
 	
 	@Override
