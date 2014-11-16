@@ -19,6 +19,8 @@ import com.gdx.engine.StateMachine;
 import com.gdx.engine.World;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Enemy extends DynamicEntity {
 	private int health, damage;
@@ -80,7 +82,18 @@ public class Enemy extends DynamicEntity {
             if (path.size() == 0) 
                 return;
 
-            this.getAnimation().setAnimation("Walking", -1);
+    		this.getAnimation().setAnimation("Walking", -1, 2.0f, new AnimationListener() {
+    			
+				@Override
+				public void onLoop(AnimationDesc animation) {
+
+				}
+				
+				@Override
+				public void onEnd(AnimationDesc animation) {
+					
+				}
+    		});
             Vector3 vel = new Vector3();
             int y = path.get(0) / width;
             int x = path.get(0) % width;
@@ -123,6 +136,18 @@ public class Enemy extends DynamicEntity {
             	this.getPosition().y = heightValueLvl1;
             }
             
+            String adjPos = "";
+            if ( world.getMeshLevel().getMapTile(x, y, 0).getRampDirection() != -1 || (adjPos = adjToWall((y * width) + x, world, width)) != "") {
+                if (this.getPosition().z < y + .5f && this.getPosition().z > y - .5f && (this.getRotation().x == 90 || this.getRotation().x == 270))
+                    this.getPosition().z = y + .5f;
+                if (this.getPosition().z > y + .5f && this.getPosition().z < y + 1.5f && (this.getRotation().x == 90 || this.getRotation().x == 270))
+                    this.getPosition().z = y + .5f;
+                if (this.getPosition().x < x + .5f && this.getPosition().x > x - .5f && (this.getRotation().x == 0 || this.getRotation().x == 180))
+                    this.getPosition().x = x + .5f;
+                 if (this.getPosition().x > x + .5f && this.getPosition().x < x + 1.5f && (this.getRotation().x == 0 || this.getRotation().x == 180))
+                    this.getPosition().x = x + .5f;
+            }
+            
 //            float targetHeight = world.getMeshLevel().getHeightOffset()
 //                    + world.getMeshLevel().mapHeight(
 //                    this.getPosition().x, this.getPosition().z, 1);
@@ -159,7 +184,7 @@ public class Enemy extends DynamicEntity {
 		
 		else if (this.getStateMachine().Current == this.attack){
             this.getVelocity().set(0,0,0); 
-			this.getAnimation().setAnimation("Attacking", -1, new AnimationListener() {
+			this.getAnimation().setAnimation("Attacking", -1, 2.0f, new AnimationListener() {
 			
 				@Override
 			public void onLoop(AnimationDesc animation) {
@@ -191,6 +216,26 @@ public class Enemy extends DynamicEntity {
 			});
 		}
 	}
+	
+    private String adjToWall(int tileNumber, World world, int width){
+        HashMap<String, Integer> adjTiles = new HashMap<String, Integer>();
+        int currentTileHeight = world.getMeshLevel().getMapTile(getXPos(tileNumber, width), getYPos(tileNumber, width), 0).getHeight();
+        //if (this.getRotation().x == 180 || this.getRotation().x == 270) {
+            adjTiles.put("top", tileNumber + 1);
+            adjTiles.put("bot", tileNumber - 1);
+        //}
+        //if (this.getRotation().x == 0 || this.getRotation().x == 90) {
+            adjTiles.put("right", tileNumber + width);
+            adjTiles.put("left", tileNumber - width);
+        //}
+        for (Map.Entry<String, Integer> adjTile : adjTiles.entrySet()) {
+            if (world.getMeshLevel().getMapTile(getXPos(adjTile.getValue(), width), getYPos(adjTile.getValue(), width), 0).getHeight() == -1)
+                return adjTile.getKey();
+            if (world.getMeshLevel().getMapTile(getXPos(adjTile.getValue(), width), getYPos(adjTile.getValue(), width), 0).getHeight() != currentTileHeight)
+                return adjTile.getKey();
+        }
+        return "";
+    }
 	
 	private void StateMachineUsage(Enemy enemy){
 		Condition enemyDead = new Condition() {
@@ -419,11 +464,19 @@ public class Enemy extends DynamicEntity {
 	}
 	
     private int getXPos(int tileNumber, TiledMapTileLayer layer) {
-        return tileNumber / layer.getWidth();
+    	return tileNumber / layer.getWidth();
+    }
+
+    private int getXPos(int tileNumber, int width){
+        return tileNumber / width;
     }
 
     private int getYPos (int tileNumber, TiledMapTileLayer layer) {
         return tileNumber % layer.getHeight();
+    }
+
+    private int getYPos (int tileNumber, int height) {
+        return tileNumber % height;
     }
     
     public ArrayList<Integer> shortestPath(int startLoc, int endLoc, DistanceTrackerMap distanceMap) {
