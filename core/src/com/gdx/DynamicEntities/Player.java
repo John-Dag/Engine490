@@ -210,6 +210,7 @@ public class Player extends DynamicEntity {
 		else if ((Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isButtonPressed(Buttons.RIGHT)) 
 				  && this.isPlayerTargeting) {
 			Gdx.input.setCursorCatched(true);
+			abilities.get(1).setIsActive(false);
 		}
 		
 		else if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
