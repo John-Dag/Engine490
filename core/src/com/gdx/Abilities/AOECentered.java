@@ -17,11 +17,13 @@ public class AOECentered extends Ability {
 		this.setTarget(new Matrix4());
 		min = new Vector3();
 		max = new Vector3();
-		initAbility();
 	}
 	
 	@Override
 	public void update(float delta, World world) {
+		if (!this.isRendered() && this.getParticleEffect() != null) 
+			this.initializeAbilityEffect();
+		
 		this.getTarget().idt();
 		this.getTarget().translate(world.getPlayer().getPosition());
 		this.getParticleEffect().setTransform(this.getTarget());
@@ -30,9 +32,6 @@ public class AOECentered extends Ability {
 		this.getBoundingBox().set(min.set(this.getPosition().x - this.getSize(), this.getPosition().y, this.getPosition().z  - this.getSize()),
 				  				  max.set(this.getPosition().x + this.getSize(), this.getPosition().y + this.getSize(), this.getPosition().z + this.getSize()));
 		world.checkAbilityCollision(this);
-		
-		if (!this.isRendered() && this.getParticleEffect() != null) 
-			this.initializeAbilityEffect();
 	}
 	
 	public void initializeAbilityEffect() {

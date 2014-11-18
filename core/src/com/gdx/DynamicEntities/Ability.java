@@ -1,5 +1,6 @@
 package com.gdx.DynamicEntities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -32,6 +33,13 @@ public class Ability extends DynamicEntity {
 		this.effectStarted = false;
 		this.isCoolingDown = false;
 		abilityRef = this;
+	}
+	
+	public void initTargeting() {
+		Gdx.input.setCursorCatched(false);
+		this.getDecal().rotateX(90);
+		this.setIsActive(true);
+		Entity.entityInstances.add(this);
 	}
 	
 	public void initAbility() {
@@ -80,11 +88,11 @@ public class Ability extends DynamicEntity {
 		Timer.schedule(new Task() {
 			@Override
 			public void run() { 
-				if (!World.player.isCooldownActive())
-					World.player.setCooldownActive(true);
+				if (!abilityRef.isCoolingDown) {
+					abilityRef.isCoolingDown = true;
+				}
 				else {
-					World.player.setCooldownActive(false);
-					World.player.setAbility(null);
+					abilityRef.isCoolingDown = false;
 				}
 			}
 		}, 0f, abilityRef.getCooldown());

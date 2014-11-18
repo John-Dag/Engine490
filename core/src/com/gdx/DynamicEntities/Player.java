@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
 import com.gdx.engine.Assets;
@@ -45,6 +46,7 @@ public class Player extends DynamicEntity {
 	private DistanceTrackerMap distanceMap;
 	private float fireDelayTimer;
 	private float speedScalar; //Scales the speed of the player.
+	private Array<Ability> abilities;
 	
 	public Player() {
 		super();
@@ -78,6 +80,12 @@ public class Player extends DynamicEntity {
 		this.currentMovementSpeed = MOVEMENT_SPEED;
 		this.speedScalar = 1f; // 1 = default movespeed
 		this.isPlayerTargeting = false;
+		this.abilities = new Array<Ability>();
+	}
+	
+	public void initAbilities() {
+		abilities.add(new Blizzard(10, false, true, new Vector3(0, 0, 0)));
+		abilities.add(new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
 	}
 
 	public boolean isPlayerTargeting() {
@@ -201,10 +209,7 @@ public class Player extends DynamicEntity {
 		
 		else if ((Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isButtonPressed(Buttons.RIGHT)) 
 				  && this.isPlayerTargeting) {
-			this.getAbility().setIsActive(false);
-			this.setAbility(null);
 			Gdx.input.setCursorCatched(true);
-			this.isPlayerTargeting = false;
 		}
 		
 		else if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
@@ -283,13 +288,16 @@ public class Player extends DynamicEntity {
 		
 		//Abilities
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_1)) {
-			if (!this.isCooldownActive && this.getAbility() == null) {
-				this.setAbility(new Blizzard(10, false, true, new Vector3(0, 0, 0)));
+			if (!abilities.get(0).isCoolingDown() && !this.abilities.get(0).isActive()) {
+				abilities.set(0, new Blizzard(10, false, true, new Vector3(0, 0, 0)));
+				abilities.get(0).initAbility();
 			}
 		}
+		
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_2)) {
-			if (!this.isCooldownActive && this.getAbility() == null) {
-				this.setAbility(new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
+			if (!abilities.get(1).isCoolingDown() && !this.abilities.get(1).isActive()) {
+				abilities.set(1, new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
+				abilities.get(1).initTargeting();
 			}
 		}
 		

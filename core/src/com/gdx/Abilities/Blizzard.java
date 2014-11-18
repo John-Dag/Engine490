@@ -7,7 +7,7 @@ public class Blizzard extends AOECentered {
 	private final int ABILITY_DAMAGE = 1;
 	private static final float ABILITY_DURATION = 10f;
 	private final int ABILITY_SIZE = 3;
-	private static final int ABILITY_COOLDOWN = 60;
+	private static final int ABILITY_COOLDOWN = 10;
 	
 	public Blizzard() {
 		super();

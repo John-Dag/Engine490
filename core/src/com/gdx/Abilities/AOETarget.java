@@ -35,14 +35,6 @@ public class AOETarget extends Ability {
 		max = new Vector3();
 		modelPosition = new Vector3();
 		out = new Vector3();
-		initTargeting();
-	}
-	
-	public void initTargeting() {
-		Gdx.input.setCursorCatched(false);
-		this.getDecal().rotateX(90);
-		this.setIsActive(true);
-		Entity.entityInstances.add(this);
 	}
 	
 	@Override
@@ -99,11 +91,14 @@ public class AOETarget extends Ability {
 					public void run() {
 						World.player.setPlayerTargeting(false);
 					}
-				}, 0.1f);
+				}, 0.2f);
 			}
 		}
 		
 		else {
+			if (!this.isRendered() && this.getParticleEffect() != null) 
+				this.initializeAbilityEffect();
+			
 			this.getTarget().idt();
 			this.getTarget().translate(out);
 			this.getParticleEffect().setTransform(this.getTarget());
@@ -112,9 +107,6 @@ public class AOETarget extends Ability {
 			this.getBoundingBox().set(min.set(this.getPosition().x - this.getSize(), this.getPosition().y, this.getPosition().z  - this.getSize()),
 					  				  max.set(this.getPosition().x + this.getSize(), this.getPosition().y + this.getSize(), this.getPosition().z + this.getSize()));
 			world.checkAbilityCollision(this);
-			
-			if (!this.isRendered() && this.getParticleEffect() != null) 
-				this.initializeAbilityEffect();
 		}
 	}
 	

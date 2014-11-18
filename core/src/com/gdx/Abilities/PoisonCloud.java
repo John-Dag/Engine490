@@ -8,7 +8,7 @@ public class PoisonCloud extends AOETarget {
 	private final int ABILITY_DAMAGE = 1;
 	private static final float ABILITY_DURATION = 15f;
 	private final int ABILITY_SIZE = 3;
-	private static final int ABILITY_COOLDOWN = 60;
+	private static final int ABILITY_COOLDOWN = 10;
 	private static final float ABILITY_MAX_TARGET_DISTANCE = 20f;
 	
 	public PoisonCloud() {

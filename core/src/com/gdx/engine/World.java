@@ -55,6 +55,7 @@ public class World implements Disposable {
 							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
 			// must come before meshlevel, and after player
 			particleManager = new ParticleManager(this);
+			player.initAbilities();
 			meshLevel = new MeshLevel(Assets.castle3, true);
 		}
 		
