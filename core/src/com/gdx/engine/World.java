@@ -245,7 +245,6 @@ public class World implements Disposable {
 						enemy.setVelocity(new Vector3(0, 0, 0));
 					enemy.takeDamage(ability.getDamage());
 					ability.setTicking(false);
-					System.out.println("ticked");
 				}
 			}
 		}
