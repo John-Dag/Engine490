@@ -238,11 +238,15 @@ public class World implements Disposable {
 	}
 	
 	public void checkAbilityCollision(Ability ability) {
-		for (Enemy enemy : enemyInstances) {
-			if (ability.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
-				enemy.takeDamage(ability.getDamage());
-				if (ability.isStunAbility()) 
-					enemy.setVelocity(new Vector3(0, 0, 0));
+		if (ability.isTicking()) {
+			for (Enemy enemy : enemyInstances) {
+				if (ability.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
+					if (ability.isStunAbility()) 
+						enemy.setVelocity(new Vector3(0, 0, 0));
+					enemy.takeDamage(ability.getDamage());
+					ability.setTicking(false);
+					System.out.println("ticked");
+				}
 			}
 		}
 	}

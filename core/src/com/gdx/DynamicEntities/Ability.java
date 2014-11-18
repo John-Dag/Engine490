@@ -12,12 +12,12 @@ import com.gdx.engine.World;
 
 public class Ability extends DynamicEntity {
 	private int damage, size;
-	private float duration, cooldown, start;
+	private float duration, cooldown, start, tickDuration;
 	private Matrix4 target;
 	private Ability abilityRef;
 	private boolean isStunAbility;
 	private PFXPool poolRef;
-	private boolean isTargeting, effectStarted, isCoolingDown;
+	private boolean isTargeting, effectStarted, isCoolingDown, isTicking;
 
 	public Ability() {
 		super();
@@ -32,6 +32,7 @@ public class Ability extends DynamicEntity {
 		this.isTargeting = false;
 		this.effectStarted = false;
 		this.isCoolingDown = false;
+		this.isTicking = false;
 		abilityRef = this;
 	}
 	
@@ -48,6 +49,7 @@ public class Ability extends DynamicEntity {
 			public void run() { 
 				if (!abilityRef.isActive()) {
 					abilityRef.setIsActive(true);
+					initDamageTicks();
 					Entity.entityInstances.add(abilityRef);
 				}
 
@@ -69,6 +71,7 @@ public class Ability extends DynamicEntity {
 			@Override
 			public void run() {
 				if (!abilityRef.effectStarted) {
+					initDamageTicks();
 					abilityRef.effectStarted = true;
 				}
 				else {
@@ -100,6 +103,32 @@ public class Ability extends DynamicEntity {
 	
 	public boolean isCoolingDown() {
 		return isCoolingDown;
+	}
+	
+	public void initDamageTicks() {
+		Timer.schedule(new Task() {
+			@Override
+			public void run() {
+				if (!isTicking)
+					isTicking = true;
+			}
+		}, this.getTickDuration(), this.getTickDuration());
+	}
+	
+	public float getTickDuration() {
+		return tickDuration;
+	}
+
+	public void setTickDuration(float tickDuration) {
+		this.tickDuration = tickDuration;
+	}
+
+	public boolean isTicking() {
+		return isTicking;
+	}
+
+	public void setTicking(boolean isTicking) {
+		this.isTicking = isTicking;
 	}
 
 	public void setCoolingDown(boolean isCoolingDown) {
