@@ -19,11 +19,14 @@ import com.gdx.engine.StateMachine;
 import com.gdx.engine.World;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Enemy extends DynamicEntity {
 	private int health, damage;
+	private Vector3 boundingBoxMinimum;
+	private Vector3 boundingBoxMaximum;
 	public State idle;
 	public State moving;
 	public State dead;
@@ -44,6 +47,8 @@ public class Enemy extends DynamicEntity {
 		this.isSpawned = false;
 		this.isAttacking = false;
 		this.spawnPos = position.cpy();
+		boundingBoxMinimum = new Vector3();
+		boundingBoxMaximum = new Vector3();
 		idle = new State();
 		moving = new State();
 		dead = new State();
@@ -82,18 +87,6 @@ public class Enemy extends DynamicEntity {
             if (path.size() == 0) 
                 return;
 
-    		this.getAnimation().setAnimation("Walking", -1, 2.0f, new AnimationListener() {
-    			
-				@Override
-				public void onLoop(AnimationDesc animation) {
-
-				}
-				
-				@Override
-				public void onEnd(AnimationDesc animation) {
-					
-				}
-    		});
             Vector3 vel = new Vector3();
             int y = path.get(0) / width;
             int x = path.get(0) % width;
@@ -106,6 +99,7 @@ public class Enemy extends DynamicEntity {
                 vel.x = x - thisPosition.x;
                 vel.z = y - thisPosition.y;
             }
+            
             vel.y = 0;
             vel.nor();
             vel.scl(2f);
@@ -124,6 +118,38 @@ public class Enemy extends DynamicEntity {
                     * collisionVector.x, this.getVelocity().y
                     * collisionVector.y, this.getVelocity().z
                     * collisionVector.z);
+            
+            //Check collision with other enemies
+            World.enemyInstances.sort(new Comparator<Enemy>() {
+				@Override
+				public int compare(Enemy arg0, Enemy arg1) {
+					if(arg0.getPosition().dst(World.player.getPosition()) > arg1.getPosition().dst(World.player.getPosition()))
+					return 1;
+					return -1;
+				}
+			});
+            
+            for(Enemy enemy:World.enemyInstances)
+            {
+            	if(enemy==this)
+            		continue;
+            	if(this.getPosition().dst(enemy.getPosition()) > 4)
+            			continue;
+
+            	if(this.getPosition().dst(enemy.getPosition()) < 1)
+            	{
+            		if(enemy.getPosition().dst(this.getNewPosition(delta)) < enemy.getPosition().dst(this.getPosition()))
+            		{
+            			this.getVelocity().set(0,0,0);
+            			break;
+            		}
+            	}
+            }
+            if(this.getVelocity().len() > 0)
+            	this.getAnimation().setAnimation("Walking", -1);
+            else
+            	this.getAnimation().setAnimation("Idle", -1);
+
 
             float heightValueLvl1 = world.getMeshLevel().mapHeight(
             	     this.getPosition().x, this.getPosition().z, 1);
@@ -405,18 +431,21 @@ public class Enemy extends DynamicEntity {
 	
 	@Override
 	public BoundingBox getTransformedBoundingBox() {
-		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 0f, this.getPosition().z - 0.5f),
-			    						 new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
+		boundingBoxMinimum.set(this.getPosition().x - 0.5f, this.getPosition().y - 0f, this.getPosition().z - 0.5f);
+		boundingBoxMaximum.set(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f);
+		return this.getBoundingBox().set(boundingBoxMinimum,	boundingBoxMaximum);
 	}
 	
 	public BoundingBox getTransformedEnemyDetectionBoundingBox() {
-		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 15f, this.getPosition().y - 15f, this.getPosition().z - 15f),
-			    						 new Vector3(this.getPosition().x + 15f, this.getPosition().y + 15f, this.getPosition().z + 15f));
+		boundingBoxMinimum.set(this.getPosition().x - 15f, this.getPosition().y - 15f, this.getPosition().z - 15f);
+		boundingBoxMaximum.set(this.getPosition().x + 15f, this.getPosition().y + 15f, this.getPosition().z + 15f);
+		return this.getBoundingBox().set(boundingBoxMinimum,boundingBoxMaximum);
 	}
 	
 	public BoundingBox getTransformedEnemyAttackBoundingBox() {
-		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 1f, this.getPosition().y - 0f, this.getPosition().z - 1f),
-			    						 new Vector3(this.getPosition().x + 1f, this.getPosition().y + 1f, this.getPosition().z + 1f));
+		boundingBoxMinimum.set(this.getPosition().x - 1f, this.getPosition().y - 0f, this.getPosition().z - 1f);
+		boundingBoxMaximum.set(this.getPosition().x + 1f, this.getPosition().y + 1f, this.getPosition().z + 1f);
+		return this.getBoundingBox().set(boundingBoxMinimum,boundingBoxMaximum);
 	}
 
 	public boolean isAttacking() {

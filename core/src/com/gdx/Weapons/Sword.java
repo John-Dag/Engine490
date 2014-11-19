@@ -11,7 +11,7 @@ import com.gdx.engine.Assets;
 import com.gdx.engine.World;
 
 public class Sword extends Weapon {
-	private final float FIRING_DELAY = 0.8f;
+	private final float FIRING_DELAY = 0.2f;
 	private final float PROJECTILE_SPEED = 5f;
 	private final float RECOIL = 0f;
 	private final int DAMAGE = 1;

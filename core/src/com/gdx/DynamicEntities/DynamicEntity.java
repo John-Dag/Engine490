@@ -25,6 +25,10 @@ public class DynamicEntity extends Entity {
 	private AnimationController animation;
 	private BoundingBox boundingBox;
 	private BoundingBox detectionBox;
+	private Vector3 newPosition = new Vector3();
+	private Vector3 newVelocity = new Vector3();
+	private Vector3 newRotation = new Vector3();
+	private Vector3 newAngVelocity = new Vector3();
 	
 	public DynamicEntity() {
 		super(0, false, false);
@@ -147,10 +151,16 @@ public class DynamicEntity extends Entity {
 
 	public void updatePosition(float time)
 	{
-		Vector3 timeV=new Vector3(time,time,time);
+		//Vector3 timeV=new Vector3(time,time,time);
 
-		position.add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
+		//position.add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
 		//rotation.add(new Vector3(angVelocity.add(new Vector3(angAccel).scl(timeV))).scl(timeV));
+		velocity.x+=acceleration.x*time;
+		velocity.y+=acceleration.y*time;
+		velocity.z+=acceleration.z*time;
+		position.x+=time*velocity.x;
+		position.y+=time*velocity.y;
+		position.z+=time*velocity.z;
 	}
 	
 	//Updates the animation with given time
@@ -165,16 +175,34 @@ public class DynamicEntity extends Entity {
 	//Get new position without updating current position
 	public Vector3 getNewPosition(float time)
 	{
-		Vector3 timeV=new Vector3(time,time,time);
-		Vector3 newPosition=new Vector3(position).add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
+		//Vector3 timeV=new Vector3(time,time,time);
+		//Vector3 newPosition=new Vector3(position).add(new Vector3(velocity.add(new Vector3(acceleration).scl(timeV))).scl(timeV));
+		newPosition.set(position);
+		newVelocity.set(velocity);
+		newVelocity.x+=acceleration.x*time;
+		newVelocity.y+=acceleration.y*time;
+		newVelocity.z+=acceleration.z*time;
+		newPosition.x+=time*newVelocity.x;
+		newPosition.y+=time*newVelocity.y;
+		newPosition.z+=time*newVelocity.z;
+		
 		return newPosition;
 	}
 	
 	//Get new rotation without updating current rotation
 	public Vector3 getNewRotation(float time)
 	{
-		Vector3 timeV=new Vector3(time,time,time);
-		Vector3 newRotation=new Vector3(rotation).add(new Vector3(angVelocity.add(new Vector3(angAccel).scl(timeV))).scl(timeV));
+		//Vector3 timeV=new Vector3(time,time,time);
+		//Vector3 newRotation=new Vector3(rotation).add(new Vector3(angVelocity.add(new Vector3(angAccel).scl(timeV))).scl(timeV));
+		newRotation.set(rotation);
+		newAngVelocity.set(angVelocity);
+		newAngVelocity.x+=angAccel.x*time;
+		newAngVelocity.y+=angAccel.y*time;
+		newAngVelocity.z+=angAccel.z*time;
+		newRotation.x+=time*newAngVelocity.x;
+		newRotation.y+=time*newAngVelocity.y;
+		newRotation.z+=time*newAngVelocity.z;
+		
 		return newRotation;
 	}
 	
