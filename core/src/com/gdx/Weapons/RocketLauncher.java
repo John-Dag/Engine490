@@ -14,7 +14,7 @@ public class RocketLauncher extends Weapon {
 	private final float PROJECTILE_SPEED = 5f;
 	private final float RECOIL = 0.1f;
 	private final int DAMAGE = 50;
-	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0);
+	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0), rotationVec;
 	
 	public RocketLauncher() {
 		super();
@@ -27,6 +27,7 @@ public class RocketLauncher extends Weapon {
 		this.projectileSpeed = PROJECTILE_SPEED;
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
+		rotationVec = new Vector3(World.player.camera.up.cpy());
 	}
 	
 	@Override
@@ -70,6 +71,10 @@ public class RocketLauncher extends Weapon {
 		
 		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
 			world.player.setWeapon(this);
+		}
+		
+		else {
+			this.getModel().transform.rotate(rotationVec, 180f * delta);
 		}
 	}
 }

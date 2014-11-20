@@ -45,7 +45,7 @@ public class Sword extends Weapon {
 		BoundingBox temp = new BoundingBox();
 		sword.getModel().calculateBoundingBox(temp);
 		sword.setBoundingBox(temp);
-		sword.getModel().transform.setToTranslation(spawnPos);
+		sword.getModel().transform.setToTranslation(spawnPos.x - 0.7f, spawnPos.y, spawnPos.z);
 		//sword.getModel().transform.scale(0.009f, 0.009f, 0.009f);
 		return sword;
 	}
