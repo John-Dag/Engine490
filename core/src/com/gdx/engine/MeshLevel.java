@@ -1082,9 +1082,9 @@ public class MeshLevel {
 		}
 
 		v1.setPos(p1).setNor(normal).setUV(0.0f, height);
-		v2.setPos(p2).setNor(normal).setUV(1.0f, height);
-		v3.setPos(p3).setNor(normal).setUV(1.0f, 0.0f);
-		v4.setPos(p4).setNor(normal).setUV(0.0f, 0.0f);
+		v2.setPos(p2).setNor(null).setUV(1.0f, height);
+		v3.setPos(p3).setNor(null).setUV(1.0f, 0.0f);
+		v4.setPos(p4).setNor(null).setUV(0.0f, 0.0f);
 		
 		modelBuilder.begin();
 		Node node = modelBuilder.node();

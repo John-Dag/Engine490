@@ -185,6 +185,24 @@ public class Player extends DynamicEntity {
 					movementVector.y * collisionVector.y,
 					movementVector.z * collisionVector.z);
 		}
+		
+       for(Enemy enemy:World.enemyInstances)
+       {
+       	
+       	if(oldPos.dst(enemy.getPosition()) > 4)
+       			continue;
+
+       	if(oldPos.dst(enemy.getPosition()) < 1)
+       	{
+       		if(enemy.getPosition().dst(newPos) < enemy.getPosition().dst(oldPos))
+       		{
+       			movementVector.set(0,0,0);
+       			break;
+       		}
+       	}
+       	if(isJumping & jumpVelocity < 0)
+       		jumpVelocity = 0;
+       }
 
 		this.camera.position.mulAdd(movementVector, movAmt);
 		

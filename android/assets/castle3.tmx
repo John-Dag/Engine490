@@ -203,6 +203,7 @@
   <tile id="4">
    <properties>
     <property name="filename" value="ornate2.jpg"/>
+    <property name="normal" value="ornate2_normal.jpg"/>
    </properties>
   </tile>
   <tile id="6">

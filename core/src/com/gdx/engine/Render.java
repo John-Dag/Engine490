@@ -36,7 +36,8 @@ public class Render implements Disposable {
 		position = new Vector3();
 	
 		//Changes the max number point lights in the default shader
-		shaderProvider = new DefaultShaderProvider();
+		//shaderProvider = new DefaultShaderProvider();
+		shaderProvider = new DefaultShaderProvider(Assets.vertexShader,Assets.fragmentShader);//new DefaultShaderProvider();
 		shaderProvider.config.numPointLights = 100;
 		
 		//Environment settings

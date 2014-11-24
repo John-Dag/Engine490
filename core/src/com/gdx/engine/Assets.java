@@ -2,6 +2,7 @@ package com.gdx.engine;
 
 import java.util.Map;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
@@ -17,6 +18,7 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffectLoader.ParticleEffectLoadParameter;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleSystem;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -26,7 +28,7 @@ public class Assets {
 	public static AssetManager manager;
 	public static Texture crosshair;
 	public static Texture floor;
-	public static Texture wall;
+	//public static Texture wall;
 	public static Texture stoneFloor;
 	public static Texture darkWood;
 	public static TiledMap mymap, mymap2, dungeon1, castle2, castle3;
@@ -45,6 +47,9 @@ public class Assets {
 	public static TextureRegion aoeTextureRegion;
 	private static ParticleEffectLoader loader;
 	private static ParticleEffectLoadParameter loadParam;
+	public  static String vertexShader;
+	public static String fragmentShader;
+	public static ShaderProgram shaderProgram;
 	
 	public static void loadAssets() {
 		manager = new AssetManager();
@@ -59,19 +64,22 @@ public class Assets {
 		castle2 = new TmxMapLoader().load("castle2.tmx");
 		castle3 = new TmxMapLoader().load("castle3.tmx");
 		darkWood = new Texture("darkWoodTex.png");
-		floor = new Texture("floorHighres.png");
-		wall = new Texture("wallHighres.png");
+		//floor = new Texture("floorHighRes.png");
+		//wall = new Texture("wallHighRes.png");
 		stoneFloor = new Texture("stonefloor.png");
 		modelBuilder = new ModelBuilder();
 		floorMat = new Material(TextureAttribute.createDiffuse(floor));
-		wallMat = new Material(TextureAttribute.createDiffuse(wall));
-		triangleWallMat = new Material(TextureAttribute.createDiffuse(wall));
+		//wallMat = new Material(TextureAttribute.createDiffuse(wall));
+		//wallNormal = new Texture("wall_normal.jpg");
+		//floorNormal = new Texture("floor_normal_map.jpg");//new Texture("floor_normal_map.jpg");
+		//triangleWallMat = new Material(TextureAttribute.createDiffuse(wall));
 		stoneFloorMat = new Material(TextureAttribute.createDiffuse(stoneFloor));
 		aoeTexture = new Texture("aoecircle.png");
 		aoeTextureRegion = new TextureRegion(aoeTexture);
 		weapon1 = new Texture("weapon1.png");
 		weapon1Region = new TextureRegion(weapon1);
-		wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+		//wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+		loadShaders();
 	}
 	
 	public static void loadModels() {
@@ -98,8 +106,8 @@ public class Assets {
 	}
 	
 	public static void loadMeshLevelTextures(TiledMap tiledMap,
-			MapTile[][][] levelArray, Map<Integer, Material> MapMaterials,
-			Map<String, Integer> MaterialIds) {
+		MapTile[][][] levelArray, Map<Integer, Material> MapMaterials,
+		Map<String, Integer> MaterialIds) {
 		TiledMapTile tile = null;
 		int layerNumber = 0;
 		TiledMapTileLayer currentLayer;
@@ -161,6 +169,22 @@ public class Assets {
 												TextureAttribute
 														.createDiffuse(texture));
 										MapMaterials.put(max, material);
+										if (tile.getProperties().containsKey("normal"))
+										{
+											String normal = tile.getProperties()
+													.get("normal").toString();
+											manager.load(normal, Texture.class,
+													param);
+											manager.finishLoading();
+											texture = manager.get(normal,
+													Texture.class);
+											texture.setWrap(TextureWrap.Repeat,
+													TextureWrap.Repeat);
+											material.set(TextureAttribute.createNormal(texture));
+
+										}
+										
+										
 									}
 									levelArray[i][j][layerNumber]
 											.setTextureId(MaterialIds
@@ -223,6 +247,21 @@ public class Assets {
 												TextureAttribute
 														.createDiffuse(texture));
 										MapMaterials.put(max, material);
+										if (tile.getProperties().containsKey("normal"))
+										{
+											String normal = tile.getProperties()
+													.get("normal").toString();
+											manager.load(normal, Texture.class,
+													param);
+											manager.finishLoading();
+											texture = manager.get(normal,
+													Texture.class);
+											texture.setWrap(TextureWrap.Repeat,
+													TextureWrap.Repeat);
+											material.set(TextureAttribute.createNormal(texture));
+
+										}
+										
 									}
 									levelArray[i][j][layerNumber]
 											.setWallTextureId(MaterialIds
@@ -238,6 +277,9 @@ public class Assets {
 		manager.load("wall.png", Texture.class, param);
 		//manager.load("floorHighres.png", Texture.class, param);
 		//manager.load("wallHighres.png", Texture.class, param);
+		
+		manager.load("wall_normal.jpg", Texture.class, param);
+		manager.load("floor_normal_map.jpg", Texture.class, param);
 		manager.finishLoading();
 
 		// Load default Textures and create materials
@@ -250,17 +292,27 @@ public class Assets {
 		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		Material material = new Material(
 				TextureAttribute.createDiffuse(texture));
+		texture = manager.get("floor_normal_map.jpg", Texture.class);
+		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+		material.set(TextureAttribute.createNormal(texture));
 		MapMaterials.put(-1, material);
 
 		MaterialIds.put("wall.png", -2);
 		texture = manager.get("wall.png", Texture.class);
 		//MaterialIds.put("wallHighres.png", -2);
 		//texture = manager.get("wallHighres.png", Texture.class);
+		
 		texture.setFilter(TextureFilter.MipMapLinearNearest,
 				TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		material = new Material(TextureAttribute.createDiffuse(texture));
+		texture = manager.get("wall_normal.jpg", Texture.class);
+		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+		//material.set(TextureAttribute.createBump(wallNormal));
+		material.set(TextureAttribute.createNormal(texture));
 		MapMaterials.put(-2, material);
+		
+		
 		// End loading default textures
 
 		// Here is how you can load additional textures manually
@@ -282,5 +334,12 @@ public class Assets {
 
 		// End Load Textures
 
+	}
+
+	public static void loadShaders()
+	{
+		vertexShader = Gdx.files.internal("shaders/vertex.glsl.txt").readString();
+        fragmentShader = Gdx.files.internal("shaders/fragment.glsl.txt").readString();
+        //shaderProgram = new ShaderProgram(vertexShader,fragmentShader);	
 	}
 }
