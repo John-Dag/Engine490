@@ -9,16 +9,18 @@ precision mediump float;
 #define HIGH
 #endif
 
-
 varying vec4 pos;
 
-#if defined(numPointLights) && (numPointLights > 0)
+
+#ifdef numPointLights
+#if numPointLights > 0
 struct PointLight
 {
-	vec3 color;
+  vec3 color;
 	vec3 position;
 };
 uniform PointLight u_pointLights[numPointLights];
+#endif
 #endif // numPointLights
 
 #if defined(specularTextureFlag) || defined(specularColorFlag)
@@ -145,6 +147,7 @@ void main() {
 				#else
 					float lambertFactor= max (dot (v_normal, tnormal), 0.3) ;
 				#endif
+
 				diffuse.rgb*=lambertFactor;
 		#endif
 

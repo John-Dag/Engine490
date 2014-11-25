@@ -145,8 +145,19 @@ public class Enemy extends DynamicEntity {
             		}
             	}
             }
-            if(this.getVelocity().len() > 0)
-            	this.getAnimation().setAnimation("Walking", -1);
+            if(this.getVelocity().len() > 0) {
+    			this.getAnimation().setAnimation("Walking", -1, 2.0f, new AnimationListener() {
+	    				@Override
+	    			public void onLoop(AnimationDesc animation) {
+
+	    			}
+	    				
+	    			@Override
+	    			public void onEnd(AnimationDesc animation) {
+	    				
+	    			}
+    			});
+            }
             else
             	this.getAnimation().setAnimation("Idle", -1);
 
