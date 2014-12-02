@@ -3,6 +3,9 @@ package com.gdx.engine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -31,6 +34,8 @@ public class Render implements Disposable {
 	private Model weapon = new Model();
 	private boolean loading;
 	
+	private Mesh fullScreenQuad;
+	
 	public Render(World world) {
 		this.world = world;
 		position = new Vector3();
@@ -54,6 +59,8 @@ public class Render implements Disposable {
 		loading = true;
 		decalBatch = new DecalBatch(new CameraGroupStrategy(world.getPlayer().camera));
 		world.createBoundingBoxes();
+		
+		fullScreenQuad=createFullScreenQuad();
 	}
 
 	//g3db files loaded here
@@ -75,12 +82,26 @@ public class Render implements Disposable {
 		if (loading && Assets.manager.update()) {
 			doneLoading();
 		}
+		
+		
+		FilterEffect filterEffect = world.getFilterEffect();
+		
+		if(filterEffect!=null){
+			filterEffect.getFilterEffectBuffer().begin();
+		}
+		
+		
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(MeshLevel.skyColor.r, MeshLevel.skyColor.g, MeshLevel.skyColor.b, 0);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
 		Gdx.gl.glCullFace(GL20.GL_FRONT);
+		
+		if(filterEffect!=null){
+			filterEffect.getFilterEffectBuffer().end();
+		}
+		
 		modelBatch.begin(world.getPlayer().camera);
 		renderParticles();
 		shadowLight.begin(world.getPlayer().camera.position, world.getPlayer().camera.direction);
@@ -110,10 +131,31 @@ public class Render implements Disposable {
 		
 		shadowBatch.end();
 		shadowLight.end();
+		
+		if(filterEffect!=null){
+			filterEffect.getFilterEffectBuffer().begin();
+		}
+		
 		modelBatch.end();
 		
 		//Render decals
 		decalBatch.flush();
+		
+		
+		
+		if(filterEffect!=null){
+			filterEffect.getFilterEffectBuffer().end();
+			filterEffect.getFilterEffectBuffer().getColorBufferTexture().bind(0);
+		
+			filterEffect.begin();
+			
+				fullScreenQuad.render(filterEffect.shader, GL20.GL_TRIANGLE_FAN , 0, 4);
+			filterEffect.end();
+			
+		}
+
+		filterEffect=null;
+		
 	}
 	
 	public void renderModels(ModelInstance instance) {
@@ -132,6 +174,57 @@ public class Render implements Disposable {
 	
 	public ModelBatch getModelbatch() {
 		return modelBatch;
+	}
+	
+	private Mesh createFullScreenQuad(){
+		float[] verts = new float[16];
+	    int i = 0;
+	    verts[i++] = -1.f; // x1
+	    verts[i++] = -1.f; // y1
+
+	    
+	    verts[i++] =  0.f; // u1
+	    verts[i++] =  0.f; // v1
+	    
+	    verts[i++] =  1.f; // x2
+	    verts[i++] = -1.f; // y2
+
+	    
+	    verts[i++] =  1.f; // u2
+	    verts[i++] =  0.f; // v2
+	    
+	    verts[i++] =  1.f; // x3
+	    verts[i++] =  1.f; // y3
+
+	    
+	    verts[i++] =  1.f; // u3
+	    verts[i++] =  1.f; // v3
+	    
+	    verts[i++] = -1.f; // x4
+	    verts[i++] =  1.f; // y4
+
+	    
+	    verts[i++] =  0.f; // u4
+	    verts[i++] =  1.f; // v4
+	    
+
+	    
+		
+		
+	    Mesh tmpMesh = new Mesh(true, 4, 0
+	        , new VertexAttribute(Usage.Position, 2, "a_position")
+	        , new VertexAttribute(Usage.TextureCoordinates
+	            , 2, "a_texCoord0"));
+
+	    tmpMesh.setVertices(verts);
+
+	    return tmpMesh;
+	    
+
+	    
+	    
+	    
+	    
 	}
 
 	@Override

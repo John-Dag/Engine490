@@ -34,7 +34,7 @@ public class World implements Disposable {
 	private Vector3 position;
 	private Vector3 out;
     private DistanceTrackerMap distanceMap;
-	
+    private FilterEffect filterEffect;
 	public World() {
 		boolean bspDungeon = false;
 
@@ -115,6 +115,15 @@ public class World implements Disposable {
 	
 	public void update(float delta) {
 		updateEntities(delta);
+		updateFilterEffect(this,delta);
+	}
+	
+	private void updateFilterEffect(World world, float delta) {
+		if(filterEffect!=null)
+		{
+			filterEffect.Update(world, delta);
+		}
+		
 	}
 	
 	public void initializeEntities() {
@@ -370,6 +379,20 @@ public class World implements Disposable {
 	
 	public Vector3 getOut() {
 		return out;
+	}
+	
+	public FilterEffect getFilterEffect() {
+		return filterEffect;
+	}
+
+	public void setFilterEffect(FilterEffect filterEffect) {
+		if(this.filterEffect!=null)
+		{
+			this.filterEffect.dispose();
+		}
+		this.filterEffect = filterEffect;
+		
+
 	}
 
 	@Override

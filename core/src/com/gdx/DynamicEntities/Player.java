@@ -199,9 +199,15 @@ public class Player extends DynamicEntity {
        			movementVector.set(0,0,0);
        			break;
        		}
+
        	}
-       	if(isJumping & jumpVelocity < 0)
-       		jumpVelocity = 0;
+       	if(oldPos.dst(enemy.getPosition()) < 2)
+       	{
+           	if(isJumping & jumpVelocity < 0)
+           		jumpVelocity = 0;
+       	
+       	}
+
        }
 
 		this.camera.position.mulAdd(movementVector, movAmt);
@@ -409,6 +415,8 @@ public class Player extends DynamicEntity {
 	
 	public void takeDamage(int damage) {
 		this.health -= damage;
+		
+		world.setFilterEffect(new com.gdx.FilterEffects.RedFade());
 	}
 	
 	public void respawnPlayer(Player player) {

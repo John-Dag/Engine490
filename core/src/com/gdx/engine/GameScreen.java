@@ -1,5 +1,8 @@
 package com.gdx.engine;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -14,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.gdx.FilterEffects.*;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 
@@ -33,6 +37,9 @@ public class GameScreen implements Screen {
 	private TextField consoleInputField;
 	private String consoleVal;
 	
+	private List<FilterEffect> filterEffects=new LinkedList<FilterEffect>();
+	private int currentFilter=0;
+	
 	public GameScreen(Game game) {
 		this.game = game;
 		this.world = new World();
@@ -46,6 +53,7 @@ public class GameScreen implements Screen {
 		stage = new Stage();
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
 		initializeConsoleWindow();
+		initializeFilterEffects();
 	}
 	
 	//Initializes the console window and textfield.
@@ -79,6 +87,24 @@ public class GameScreen implements Screen {
 				return true;
 			}
 		});
+	}
+	
+	public void initializeFilterEffects()
+	{
+		
+		filterEffects.add(new BlueScreenColorMultiplier());
+		filterEffects.add(new RedScreenColorMultiplier());
+		filterEffects.add(new GreenScreenColorMultiplier());
+		filterEffects.add(new Rainbow());
+		filterEffects.add(new InverseColor());
+		filterEffects.add(new Sepia());
+		filterEffects.add(new Lights());
+		filterEffects.add(new Cartoon());
+		for(FilterEffect e:filterEffects)
+		{
+			e.dispose();
+		}
+		
 	}
 	
 	//Handles commands entered from the console
@@ -163,7 +189,32 @@ public class GameScreen implements Screen {
 		else if (value.contains("exit")) {
 			Gdx.app.exit();
 		}
-		
+		else if(value.toLowerCase().contains("nofx"))
+		{
+			world.setFilterEffect(null);
+		}
+	
+	else if(value.toLowerCase().contains("fx+"))
+	{
+		if(filterEffects.size()>0){
+			currentFilter+=1;
+			currentFilter=currentFilter%filterEffects.size();
+			filterEffects.get(currentFilter).loadShaderProgram();
+			filterEffects.get(currentFilter).initializeFrameBuffer();
+			world.setFilterEffect(filterEffects.get(currentFilter));
+		}
+	}
+	else if(value.toLowerCase().contains("fx-"))
+	{
+		if(filterEffects.size()>0){
+			currentFilter-=1;
+			if(currentFilter<0)
+				currentFilter=filterEffects.size()-1;
+			filterEffects.get(currentFilter).loadShaderProgram();
+			filterEffects.get(currentFilter).initializeFrameBuffer();
+			world.setFilterEffect(filterEffects.get(currentFilter));
+		}
+	}
 		else
 			System.err.println("Unknown command");
 		
