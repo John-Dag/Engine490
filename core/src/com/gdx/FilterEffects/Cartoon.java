@@ -5,8 +5,6 @@ import com.gdx.engine.FilterEffect;
 import com.gdx.engine.World;
 
 public class Cartoon extends FilterEffect {
-
-	
 	public Cartoon()
 	{
 		effectName="cartoon";
@@ -20,5 +18,4 @@ public class Cartoon extends FilterEffect {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

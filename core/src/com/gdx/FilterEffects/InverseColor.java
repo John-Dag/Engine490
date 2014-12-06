@@ -4,9 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.gdx.engine.FilterEffect;
 import com.gdx.engine.World;
 
-public class InverseColor extends FilterEffect {
-
-	
+public class InverseColor extends FilterEffect {	
 	public InverseColor()
 	{
 		effectName="inverse";

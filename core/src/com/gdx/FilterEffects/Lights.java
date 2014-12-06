@@ -6,17 +6,16 @@ import com.gdx.engine.FilterEffect;
 import com.gdx.engine.World;
 
 public class Lights extends FilterEffect {
-
 	private Vector2 position=new Vector2();
 	private Vector2 res=new Vector2();
 	private float time=0;
+	
 	public Lights()
 	{
 		effectName="lights";
 		loadShaderProgram();
 		//setShaderParams();
 		initializeFrameBuffer();
-		
 		position.set(0,0);
 		res.set(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}

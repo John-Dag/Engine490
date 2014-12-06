@@ -67,140 +67,118 @@ public class Enemy extends DynamicEntity {
 		
 		GridPoint2 thisPosition = new GridPoint2((int)this.getPosition().x, (int)this.getPosition().z);
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
-		//TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);
+        int[] directionVals = new int[3];
+        int x; int y; int yKeep;
 		int width = world.getMeshLevel().getMapXDimension();
 		ArrayList<Integer> path;
-		
 		if (this.getStateMachine().Current == this.idle) {
 			this.getAnimation().setAnimation("Idle", -1);
             this.getVelocity().set(0,0,0);
 		}
 
 		else if (this.getStateMachine().Current == this.moving) {
-            try {
+            int playerTile = playerPosition.x + width
+                    * playerPosition.y;
+            if (world.getPlayer().camera.position.y > 7)
+                playerTile = playerTile + width * width;
+             try {
                 path = this.shortestPath(thisPosition.x + width
-                        * thisPosition.y, playerPosition.x + width
-                        * playerPosition.y, world.getDistanceMap());
+                        * thisPosition.y, playerTile, world.getDistanceMap());
             } catch (Exception ex) {
                 path = new ArrayList<Integer>();
             }
             if (path.size() == 0) 
                 return;
 
-            Vector3 vel = new Vector3();
-            int y = path.get(0) / width;
-            int x = path.get(0) % width;
-            vel.x = x - thisPosition.x;
-            vel.z = y - thisPosition.y;
-
-            if (vel.x == 0 && vel.z == 0 && path.size() > 1) {
-                y = path.get(1) / width;
-                x = path.get(1 ) % width;
-                vel.x = x - thisPosition.x;
-                vel.z = y - thisPosition.y;
-            }
-            
-            vel.y = 0;
-            vel.nor();
-            vel.scl(2f);
-            Vector2 angleVector = new Vector2(vel.z, vel.x);
-            this.getRotation().x = angleVector.angle();// +90 because
-            // model is
-            // originally 90
-            // degrees off
-            // when loaded
-            this.getVelocity().set(vel);
-            Vector3 collisionVector = world.getMeshLevel()
-                    .checkCollision(this.getPosition(),
-                            this.getNewPosition(delta), 1.6f, 1.6f,
-                            1.6f);
-            this.getVelocity().set(this.getVelocity().x
-                    * collisionVector.x, this.getVelocity().y
-                    * collisionVector.y, this.getVelocity().z
-                    * collisionVector.z);
+           //calc vel
+            directionVals = calcVel(path, delta, width, thisPosition, world);
             
             //Check collision with other enemies
+
             World.enemyInstances.sort(new Comparator<Enemy>() {
 				@Override
 				public int compare(Enemy arg0, Enemy arg1) {
 					if(arg0.getPosition().dst(World.player.getPosition()) > arg1.getPosition().dst(World.player.getPosition()))
-					return 1;
+					    return 1;
 					return -1;
 				}
 			});
-            
-            for(Enemy enemy:World.enemyInstances)
-            {
-            	if(enemy==this)
-            		continue;
-            	if(this.getPosition().dst(enemy.getPosition()) > 4)
-            			continue;
 
-            	if(this.getPosition().dst(enemy.getPosition()) < 1)
-            	{
-            		if(enemy.getPosition().dst(this.getNewPosition(delta)) < enemy.getPosition().dst(this.getPosition()))
-            		{
-            			this.getVelocity().set(0,0,0);
-            			break;
-            		}
-            	}
-            }
-            if(this.getVelocity().len() > 0) {
-    			this.getAnimation().setAnimation("Walking", -1, 2.0f, new AnimationListener() {
-	    				@Override
-	    			public void onLoop(AnimationDesc animation) {
 
-	    			}
-	    				
-	    			@Override
-	    			public void onEnd(AnimationDesc animation) {
-	    				
-	    			}
-    			});
+
+            if (enemyEnemyCollision(delta)) {
+               ArrayList<Integer> newPath = new ArrayList<Integer>();
+                newPath.add(world.getDistanceMap().getNewPath(thisPosition.x + width * thisPosition.y, playerTile, this));
+                if (newPath.get(0) == thisPosition.x + width * thisPosition.y)
+                    this.getVelocity().set(0, 0, 0);
+                else
+                    directionVals = calcVel(newPath, delta, width, thisPosition, world);
             }
+
+                //this.getVelocity().set(0, 0, 0);
+            //set tile
+            //reget vel and dir
+
+            if(this.getVelocity().len() > 0)
+            	this.getAnimation().setAnimation("Walking", -1);
             else
             	this.getAnimation().setAnimation("Idle", -1);
 
+            x = directionVals[0];
+            y = directionVals[1];
+            yKeep = directionVals[2];
 
+            Vector3 checkPos = this.getPosition();
             float heightValueLvl1 = world.getMeshLevel().mapHeight(
             	     this.getPosition().x, this.getPosition().z, 1);
             float heightValueLvl2 = 6 + world.getMeshLevel().mapHeight(
             	     this.getPosition().x, this.getPosition().z, 2);
-            if (this.getPosition().y >= 6) {
-            	this.getPosition().y = heightValueLvl2;
+            if (this.getPosition().y > 5.9) {//6?
+                checkPos.y = heightValueLvl2;
             }
-            if (this.getPosition().y < 6 + 0.5f) {
-            	this.getPosition().y = heightValueLvl1;
+            else if (this.getPosition().y < 6) {
+                checkPos.y = heightValueLvl1;
             }
-            
+            this.setPosition(checkPos);
+
+
             String adjPos = "";
-            if ( world.getMeshLevel().getMapTile(x, y, 0).getRampDirection() != -1 || (adjPos = adjToWall((y * width) + x, world, width)) != "") {
-                if (this.getPosition().z < y + .5f && this.getPosition().z > y - .5f && (this.getRotation().x == 90 || this.getRotation().x == 270))
-                    this.getPosition().z = y + .5f;
-                if (this.getPosition().z > y + .5f && this.getPosition().z < y + 1.5f && (this.getRotation().x == 90 || this.getRotation().x == 270))
-                    this.getPosition().z = y + .5f;
-                if (this.getPosition().x < x + .5f && this.getPosition().x > x - .5f && (this.getRotation().x == 0 || this.getRotation().x == 180))
-                    this.getPosition().x = x + .5f;
-                 if (this.getPosition().x > x + .5f && this.getPosition().x < x + 1.5f && (this.getRotation().x == 0 || this.getRotation().x == 180))
-                    this.getPosition().x = x + .5f;
+            int meshLevelHeight = 0;
+            if (yKeep > width * width)
+                meshLevelHeight = 1;
+            if (world.getMeshLevel().getMapTile(x, y, meshLevelHeight) != null)
+                if ( world.getMeshLevel().getMapTile(x, y, meshLevelHeight).getRampDirection() != -1 || !(adjPos = adjToWall((y * width) + x, world, width)).equals("")) {
+                    if (this.getPosition().z < y + .5f && this.getPosition().z > y - .5f && (this.getRotation().x == 90 || this.getRotation().x == 270))
+                        this.getPosition().z = y + .5f;
+                    if (this.getPosition().z > y + .5f && this.getPosition().z < y + 1.5f && (this.getRotation().x == 90 || this.getRotation().x == 270))
+                        this.getPosition().z = y + .5f;
+                    if (this.getPosition().x < x + .5f && this.getPosition().x > x - .5f && (this.getRotation().x == 0 || this.getRotation().x == 180))
+                        this.getPosition().x = x + .5f;
+                    if (this.getPosition().x > x + .5f && this.getPosition().x < x + 1.5f && (this.getRotation().x == 0 || this.getRotation().x == 180))
+                        this.getPosition().x = x + .5f;
+                }
+
+            float targetHeight = world.getMeshLevel().getHeightOffset()
+                    + world.getMeshLevel().mapHeight(
+                    this.getPosition().x, this.getPosition().z, 1);
+           /* if (this.getPosition().y >= 6)
+                targetHeight = 6
+                        + world.getMeshLevel().mapHeight(
+                        this.getPosition().x, this.getPosition().z, 2);*/
+            if (this.getPosition().y > targetHeight + 30 * delta) {
+                this.getPosition().y -= 30 * delta;
+
+            } else if (this.getPosition().y < targetHeight) {
+                this.getPosition().y = targetHeight;
+
+            } else {
+                this.getPosition().y = world.getMeshLevel()
+                        .getHeightOffset()
+                        + world.getMeshLevel().mapHeight(
+                        this.getPosition().x,
+                        this.getPosition().z, 1);
             }
-            
-//            float targetHeight = world.getMeshLevel().getHeightOffset()
-//                    + world.getMeshLevel().mapHeight(
-//                    this.getPosition().x, this.getPosition().z, 1);
-//            if (this.getPosition().y > targetHeight + 30 * delta) {
-//                this.getPosition().y -= 30 * delta;
-//
-//            } else if (this.getPosition().y < targetHeight) {
-//                this.getPosition().y = targetHeight;
-//
-//            } else {
-//                this.getPosition().y = world.getMeshLevel()
-//                        .getHeightOffset()
-//                        + world.getMeshLevel().mapHeight(
-//                        this.getPosition().x,
-//                        this.getPosition().z, 1);
-//            }
+
 		}
 		
 		else if (this.getStateMachine().Current == this.spawn) {
@@ -253,6 +231,74 @@ public class Enemy extends DynamicEntity {
 			});
 		}
 	}
+
+    private int[] calcVel(ArrayList<Integer> path, float delta, int width, GridPoint2 thisPosition, World world){
+        int[] result = new int[3];
+        Vector3 vel = new Vector3();
+        int yKeep = path.get(0) / width;
+        int y;
+        if (path.get(0) > width * width)
+            y = (path.get(0) - width * width) / width;
+        else
+            y = path.get(0) / width;
+        int x = path.get(0) % width;
+
+        vel.x = x - thisPosition.x;
+        vel.z = y - thisPosition.y;
+
+        if (vel.x == 0 && vel.z == 0 && path.size() > 1) {
+            yKeep = path.get(1) / width;
+            if (path.get(1) > width * width)
+                y = (path.get(1) - width * width) / width;
+            else
+                y = path.get(1) / width;
+            x = path.get(1) % width;
+            vel.x = x - thisPosition.x;
+            vel.z = y - thisPosition.y;
+        }
+
+        vel.y = 0;
+        vel.nor();
+        vel.scl(2f);
+        Vector2 angleVector = new Vector2(vel.z, vel.x);
+        this.getRotation().x = angleVector.angle();// +90 because
+        // model is
+        // originally 90
+        // degrees off
+        // when loaded
+        this.getVelocity().set(vel);
+        Vector3 collisionVector = world.getMeshLevel()
+                .checkCollision(this.getPosition(),
+                        this.getNewPosition(delta), 1.6f, 1.6f,
+                        1.6f);
+        this.getVelocity().set(this.getVelocity().x
+                * collisionVector.x, this.getVelocity().y
+                * collisionVector.y, this.getVelocity().z
+                * collisionVector.z);
+        result[0] = x;
+        result[1] = y;
+        result[2] = yKeep;
+        return result;
+     }
+
+    public boolean enemyEnemyCollision(float delta) {
+        for(Enemy enemy:World.enemyInstances)
+        {
+            if(enemy==this)
+                continue;
+            if(this.getPosition().dst(enemy.getPosition()) > 4)
+                continue;
+
+            if(this.getPosition().dst(enemy.getPosition()) < 1)
+            {
+                if(enemy.getPosition().dst(this.getNewPosition(delta)) < enemy.getPosition().dst(this.getPosition()))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 	
     private String adjToWall(int tileNumber, World world, int width){
         HashMap<String, Integer> adjTiles = new HashMap<String, Integer>();

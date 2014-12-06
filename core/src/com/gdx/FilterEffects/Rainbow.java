@@ -5,8 +5,6 @@ import com.gdx.engine.FilterEffect;
 import com.gdx.engine.World;
 
 public class Rainbow extends FilterEffect {
-
-	
 	public Rainbow()
 	{
 		effectName="rainbow";
@@ -20,5 +18,4 @@ public class Rainbow extends FilterEffect {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

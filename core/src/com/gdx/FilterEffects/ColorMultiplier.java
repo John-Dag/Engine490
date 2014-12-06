@@ -6,7 +6,6 @@ import com.gdx.engine.FilterEffect;
 import com.gdx.engine.World;
 
 public class ColorMultiplier extends FilterEffect {
-
 	protected Vector3 multipliers=new Vector3();
 	
 	public ColorMultiplier()

@@ -5,8 +5,6 @@ import com.gdx.engine.FilterEffect;
 import com.gdx.engine.World;
 
 public class Sepia extends FilterEffect {
-
-	
 	public Sepia()
 	{
 		effectName="sepia";
@@ -20,5 +18,4 @@ public class Sepia extends FilterEffect {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

@@ -6,9 +6,6 @@ import com.gdx.engine.FilterEffect;
 import com.gdx.engine.World;
 
 public class RedScreenColorMultiplier extends ColorMultiplier {
-
-	
-	
 	public RedScreenColorMultiplier()
 	{
 		super();
@@ -22,7 +19,4 @@ public class RedScreenColorMultiplier extends ColorMultiplier {
 		// TODO Auto-generated method stub
 		
 	}
-	
-
-
 }

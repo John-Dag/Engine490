@@ -6,11 +6,7 @@ import com.gdx.engine.FilterEffect;
 import com.gdx.engine.World;
 
 public class RedFade extends ColorMultiplier {
-
-	
-	
-	public RedFade()
-	{
+	public RedFade() {
 		super();
 		multipliers.x=3;
 		multipliers.y=0.3f;
@@ -19,11 +15,11 @@ public class RedFade extends ColorMultiplier {
 	
 	@Override
 	public void Update(World world, float delta) {
-		if(multipliers.x>1)
+		if(multipliers.x > 1)
 		{
-			multipliers.x-=0.5*2*delta;
-			multipliers.y+=0.5*0.7*delta;
-			multipliers.z+=0.5*0.7*delta;
+			multipliers.x -= 0.5 * 2 * delta;
+			multipliers.y += 0.5 * 0.7 * delta;
+			multipliers.z += 0.5 * 0.7 * delta;
 		}
 		else
 		{
@@ -31,7 +27,4 @@ public class RedFade extends ColorMultiplier {
 		}
 		
 	}
-	
-
-
 }

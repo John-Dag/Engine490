@@ -107,7 +107,11 @@ public class Player extends DynamicEntity {
 		if (newPos != oldPos && clipping) {
             distanceMap = world.getDistanceMap();
             distanceMap.resetDistances();
-            distanceMap.addDistances(( playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
+            if (camera.position.y >= 6)
+            	distanceMap.addDistances((playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y) + world.getMeshLevel().getMapXDimension() * world.getMeshLevel().getMapXDimension());
+            else
+            	distanceMap.addDistances((playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
+            // distanceMap.addDistances(( playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
             world.setDistanceMap(distanceMap);
         }
 		
