@@ -1,0 +1,34 @@
+
+uniform sampler2D u_texture;
+varying vec2 v_texCoords;
+ 
+
+ 
+uniform float time;
+uniform vec2 mouse;
+uniform vec2 resolution;
+uniform sampler2D bb;
+
+float a(vec2 c)
+{return fract(sin(dot(c.xy,vec2(12.9898,78.233)))*43758.5453);}
+
+void main(void){
+
+
+vec2 mx=mouse;
+mx.x=mouse.x+sin(time)*1.5;
+mx.y=mouse.y+cos(time)*1.5;
+float t=0.001*time;
+float pi=3.1415;
+vec2 r=resolution;
+vec2 f=gl_FragCoord.xy;
+vec4 b=texture2D(bb,(f/r))*0.84;
+vec2 p=(f-.5*r)/min(r.x,r.y);
+vec3 c=vec3(0);vec2 m=(mx-.5)*1.2;
+for(int i=0;i<111;++i){
+vec2 pos=m+vec2(.1*cos(t*2.*pi*float(i)/47.),.1*sin(t*2.*pi*float(i)/47.));
+c+=(0.002/length(p-pos*a(pos)))*vec3(1);}
+gl_FragColor=texture2D(u_texture, v_texCoords)+clamp(vec4(normalize(vec3(0.7+0.5*m,.7))*c-b.rgb,1),-0.1,1);
+
+}
+

@@ -1,0 +1,24 @@
+
+uniform sampler2D u_texture;
+varying vec2 v_texCoords;
+ 
+float toonify(in float intensity) {
+    if (intensity > 0.8)
+        return 1.0;
+    else if (intensity > 0.5)
+        return 0.8;
+    else if (intensity > 0.25)
+        return 0.3;
+    else
+        return 0.1;
+}
+ 
+void main(){
+    vec4 color = texture2D(u_texture, v_texCoords);
+    
+
+    gl_FragColor.r = dot(color, vec3(.393, .769, .189));
+	gl_FragColor.g = dot(color, vec3(.349, .686, .168));
+	gl_FragColor.b = dot(color, vec3(.272, .534, .131));
+
+}

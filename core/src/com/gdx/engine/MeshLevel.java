@@ -29,6 +29,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.EnemySpawner;
+import com.gdx.StaticEntities.HealthPot;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.Portal;
@@ -1204,6 +1205,16 @@ public class MeshLevel {
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
 						new SpeedBoost(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
+				Entity.entityInstances.add(spawn);
+			}
+			
+			else if (rectObj.getName().contains("HealthPot")) {
+				objPosition = new Vector3();
+				int height = getObjectHeight(rectObj);
+				float duration = getPowerUpDuration(rectObj);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
+									 new HealthPot(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
 				Entity.entityInstances.add(spawn);
 			}
 
