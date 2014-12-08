@@ -146,7 +146,9 @@ public class Enemy extends DynamicEntity {
             int meshLevelHeight = 0;
             if (yKeep > width * width)
                 meshLevelHeight = 1;
-            if (world.getMeshLevel().getMapTile(x, y, meshLevelHeight) != null)
+            if (world.getMeshLevel().getMapTile(x, y, meshLevelHeight) != null
+            	&& this.getPosition().x + 2 < width && this.getPosition().x - 2 > 0
+            	&& this.getPosition().z + 2 < width && this.getPosition().z - 2 > 0)
                 if ( world.getMeshLevel().getMapTile(x, y, meshLevelHeight).getRampDirection() != -1 || !(adjPos = adjToWall((y * width) + x, world, width)).equals("")) {
                     if (this.getPosition().z < y + .5f && this.getPosition().z > y - .5f && (this.getRotation().x == 90 || this.getRotation().x == 270))
                         this.getPosition().z = y + .5f;
