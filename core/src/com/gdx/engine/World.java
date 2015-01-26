@@ -44,6 +44,10 @@ public class World implements Disposable {
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
 							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
 			
+//			player = new Player(this, 100, null, 2, true, true, new Vector3(45f, 20.5f, 23f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+//					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
+//							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
+			
 			particleManager = new ParticleManager(this);
 			meshLevel = new MeshLevel(true);
 			GridPoint2 playerPos = new GridPoint2();
@@ -68,6 +72,8 @@ public class World implements Disposable {
 		out = new Vector3();
 		wireInstances = new Array<ModelInstance>();
 		isWireframeEnabled = false;
+		
+		Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
 	}
 	
 	public void enterDungeon() {
@@ -365,6 +371,7 @@ public class World implements Disposable {
 		return player;
 	}
 	
+	// these bounding boxes are for the levelMesh only
 	public Array<BoundingBox> getBoundingBoxes() {
 		return boxes;
 	}
