@@ -21,6 +21,7 @@ import com.gdx.engine.World;
 
 public class Player extends DynamicEntity {
 	public static float FOG_DISTANCE = 15f;
+	//public static float FOG_DISTANCE = 15f;
 	private static final float ROTATION_SPEED = 0.2f;
 	private static final float MOVEMENT_SPEED = 8.0f;
 	private static final float CROUCH_SPEED = 2.0f;
