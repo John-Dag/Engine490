@@ -7,46 +7,33 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Disposable;
 
 public abstract class FilterEffect implements Disposable {
-
 	protected ShaderProgram shader;
-	
 	protected String effectName;
-
-
 	protected String vertexShader;
 	protected String fragmentShader;
-	
 	private FrameBuffer filterEffectBuffer;
-	
 	public abstract void Update(World world, float delta);
 	
-	
-	public void begin(){
-		
+	public void begin() {
 		shader.begin();
 		setShaderParams();
 	}
 	
-	public void end()
-	{
+	public void end() {
 		shader.end();
 	}
 	
-	protected void loadShaderProgram()
-	{
+	protected void loadShaderProgram() {
 		vertexShader = Gdx.files.internal("shaders/filtereffects/"+effectName+".vertex.glsl.txt").readString();
         fragmentShader = Gdx.files.internal("shaders/filtereffects/"+effectName+".fragment.glsl.txt").readString();
-        shader=new ShaderProgram(vertexShader, fragmentShader);
-        
+        shader = new ShaderProgram(vertexShader, fragmentShader);
 	}
 	
-	protected void setShaderParams()
-	{
+	protected void setShaderParams() {
 		shader.setUniformi("u_texture",0);
 	}
 	
-	protected void initializeFrameBuffer()
-	{
+	protected void initializeFrameBuffer() {
 		filterEffectBuffer= new FrameBuffer( Format.RGBA8888
 			    , Gdx.graphics.getWidth()
 			    , Gdx.graphics.getHeight()
@@ -97,12 +84,10 @@ public abstract class FilterEffect implements Disposable {
 
 	public void dispose()
 	{
-		if(shader!=null)
-		{
+		if (shader!=null) {
 			shader.dispose();
 		}
-		if(filterEffectBuffer!=null)
-		{
+		if (filterEffectBuffer != null) {
 			filterEffectBuffer.dispose();
 		}
 	}
