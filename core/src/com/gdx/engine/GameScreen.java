@@ -66,11 +66,10 @@ public class GameScreen implements Screen {
 		switch (state) {
 			case Running:
 				world.update(delta);
-				renderer.RenderWorld(delta);
-				break;
 			case Paused:
 				break;
 		}
+		renderer.RenderWorld(delta);
 		
 		//UI components are rendered here
 		spriteBatch.begin();
