@@ -22,6 +22,7 @@ import com.gdx.FilterEffects.RedScreenColorMultiplier;
 import com.gdx.FilterEffects.Sepia;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
+import com.gdx.engine.GameScreen.State;
 
 public class Console {
 	public static boolean isConsoleActive;
@@ -55,6 +56,7 @@ public class Console {
 		consoleWindow.add(consoleInputField).width(consoleWindow.getWidth()).height(consoleWindow.getHeight());
 		stage.setKeyboardFocus(consoleInputField);
 		stage.addActor(consoleWindow);
+		consoleWindow.setVisible(false);
 		isConsoleActive = false;
 		
 		//Sends console commands to be parsed once the user hits enter
@@ -237,19 +239,16 @@ public class Console {
 		if (Gdx.input.isKeyJustPressed(Keys.GRAVE)) {
 			if (!isConsoleActive) {
 				isConsoleActive = true;
-				world.getPlayer().setCurrentMovementSpeed(0);
+				GameScreen.state = State.Paused;
+				consoleWindow.setVisible(true);
+				Gdx.input.setInputProcessor(stage);
 			}
-			else
+			else {
 				isConsoleActive = false;
-		}
-		
-		if (isConsoleActive && !consoleWindow.isVisible()) {
-			consoleWindow.setVisible(true);
-			Gdx.input.setInputProcessor(stage);
-		}
-		else if (!isConsoleActive && consoleWindow.isVisible()) {
-			consoleWindow.setVisible(false);
-			Gdx.input.setInputProcessor(null);
+				GameScreen.state = State.Running;
+				consoleWindow.setVisible(false);
+				Gdx.input.setInputProcessor(null);
+			}
 		}
 	}
 	

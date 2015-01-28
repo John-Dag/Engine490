@@ -23,6 +23,7 @@ import com.gdx.Weapons.Sword;
 
 public class GameScreen implements Screen {
 	public static Vector2 center;
+	public static State state;
 	private Game game;
 	private World world;
 	private Render renderer;
@@ -32,6 +33,10 @@ public class GameScreen implements Screen {
 	private Skin skin;
 	private Console console;
 	private boolean consoleActive;
+	
+	public enum State {
+		Running, Paused
+	}
 	
 	public GameScreen(Game game, boolean consoleActive) {
 		this.game = game;
@@ -47,17 +52,25 @@ public class GameScreen implements Screen {
 			console.initializeConsoleWindow();
 			console.initializeFilterEffects();
 		}
+		
 		bitmapFont = new BitmapFont();
 		bitmapFont.setScale(0.9f);
 		stage = new Stage();
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
+		state = State.Running;
 	}
 	
 	@Override
 	public void render(float delta) {	
 		//Call the main renderer
-		world.update(delta);
-		renderer.RenderWorld(delta);
+		switch (state) {
+			case Running:
+				world.update(delta);
+				renderer.RenderWorld(delta);
+				break;
+			case Paused:
+				break;
+		}
 		
 		//UI components are rendered here
 		spriteBatch.begin();
