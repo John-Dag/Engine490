@@ -6,8 +6,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.gdx.DynamicEntities.Enemy;
 
 import javax.management.BadAttributeValueExpException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Austin on 10/18/2014.
@@ -18,12 +17,15 @@ public class DistanceTrackerMap {
     //private TiledMapTileLayer layer;
     private MeshLevel meshLevel;
     //private DistanceFromPlayer playerDistanceMap[][];
-    private List<DistanceFromPlayer> distanceMap;
+    //private ArrayList<DistanceFromPlayer/*[]*/> distanceMap;
+    private DistanceFromPlayer[][] distanceMap;
+    private ArrayList<DistanceFromPlayer> tileLayer;
     private int width;
     private int height;
     private List<Integer> tilesAlreadyChecked;
-    ArrayList<DistanceFromPlayer> lookingAt;
-    ArrayList<DistanceFromPlayer> toBeLookedAt;
+    private ArrayList<DistanceFromPlayer> lookingAt;
+    private ArrayList<DistanceFromPlayer> toBeLookedAt;
+    private int defaultTileNumber;
 
     //  public DistanceTrackerMap(TiledMapTileLayer layer, int playerPos) {
     //		this.layer = layer;
@@ -38,82 +40,111 @@ public class DistanceTrackerMap {
     	this.meshLevel = meshLevel;
     	width = meshLevel.getMapXDimension();
     	height = meshLevel.getMapYDimension();
-    	distanceMap = new ArrayList<DistanceFromPlayer>(width * height);
+        int totalLayers = 2;
+        distanceMap = new DistanceFromPlayer[width * height][totalLayers];
+        defaultTileNumber = width * height + 2;
     	tilesAlreadyChecked = new ArrayList<Integer>(width * height);
+        //set default values in distance map
+        for (int fill = 0; fill < width * height - 1; fill++)
+            for (int fillTileLayers = 0; fillTileLayers < totalLayers; fillTileLayers++)
+                distanceMap[fill][fillTileLayers] = new DistanceFromPlayer(defaultTileNumber, defaultTileNumber, defaultTileNumber);
+
     	buildMap(playerPos);
     }
 
     public void addDistances(int playerPos) {
 		int pos = playerPos;
-		if (tilesAlreadyChecked.indexOf(playerPos) == -1) {//temp fix to erroring out if player goes to spot unreachable by enemy
-		    if (tilesAlreadyChecked.indexOf(playerPos + 1) != -1)
-		        pos = playerPos + 1;
-		    else if (tilesAlreadyChecked.indexOf(playerPos - 1) != -1)
-		        pos = playerPos - 1;
-		    else if (tilesAlreadyChecked.indexOf(playerPos + width) != -1)
-		        pos = playerPos + width;
-		    else if (tilesAlreadyChecked.indexOf(playerPos - width) != -1)
-	            pos = playerPos - width;
-		    else if (tilesAlreadyChecked.indexOf(playerPos + width + 1) != -1)
-		        pos = playerPos + width + 1;
-		    else if (tilesAlreadyChecked.indexOf(playerPos + width - 1) != -1)
-		        pos = playerPos + width - 1;
-		    else if (tilesAlreadyChecked.indexOf(playerPos - width + 1) != -1)
-		        pos = playerPos - width + 1;
-		    else if (tilesAlreadyChecked.indexOf(playerPos - width - 1) != -1)
-		        pos = playerPos - width - 1;
-		}
-        DistanceFromPlayer start;
-		try {
-            start = distanceMap.get(tilesAlreadyChecked.indexOf(pos));
-        }catch (Exception e){
-            return;
+        int startLayerHeight = pos / (width * height);
+        if (startLayerHeight > 0)
+            pos = pos - (startLayerHeight * width * height);
+        if (playerPos > width * width)
+            playerPos = playerPos + 1 - 1;
+        if (distanceMap[pos][startLayerHeight].getTileNumber() == -1) {//temp fix to erroring out if player goes to spot unreachable by enemy
+            if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
+                pos = pos + 1;
+            else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
+                pos = pos - 1;
+            else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
+                pos = pos + width;
+            else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
+                pos = pos - width;
+            else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
+                pos = pos + width + 1;
+            else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
+                pos = pos + width - 1;
+            else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
+                pos = pos - width + 1;
+            else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
+                pos = pos - width - 1;
+            //else
         }
-        lookingAt = new ArrayList<DistanceFromPlayer>(1);
-        toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
-        DistanceFromPlayer toCheck;
-        toBeLookedAt.add(start);
-        int distFromPlayer = 0;
-        do {
-            distFromPlayer++;
+
+            DistanceFromPlayer start;
+            //try {
+                start = distanceMap[pos][startLayerHeight];
+            //} catch (Exception e) {
+            //    return;
+            //}
             lookingAt = new ArrayList<DistanceFromPlayer>(1);
-            lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
             toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
-            for (DistanceFromPlayer distance : lookingAt) {
-                for (int index : distance.getSpotToMoveIndex()) {
-                    toCheck = distanceMap.get(index);
-                    if (toCheck.getDistFromPlayer() == -1 && distanceMap.get(index).getSpotToMoveIndex().contains(tilesAlreadyChecked.indexOf(distance.getTileNumber()))){
-                        distanceMap.get(index).setDistFromPlayer(distFromPlayer);
-                        toBeLookedAt.add(toCheck);
+            DistanceFromPlayer toCheck;
+            toBeLookedAt.add(start);
+            int distFromPlayer = 0;
+            int layerHeight;
+            do {
+                distFromPlayer++;
+                lookingAt = new ArrayList<DistanceFromPlayer>(1);
+                lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
+                toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
+                for (DistanceFromPlayer distance : lookingAt) {
+                    for (int num : distance.getSpotToMoveIndex()) {
+                        layerHeight = num / (width * height);
+                        if (layerHeight > 0)
+                            num = num - (layerHeight * width * height);
+                        toCheck = distanceMap[num][layerHeight];
+                        if (toCheck.getDistFromPlayer() == defaultTileNumber && distanceMap[num][layerHeight].getSpotToMoveIndex().contains(distance.getTileNumber())) {
+                            distanceMap[num][layerHeight].setDistFromPlayer(distFromPlayer);
+                            toBeLookedAt.add(toCheck);
+                        }
                     }
                 }
-            }
-        } while (toBeLookedAt.size() != 0);
+            } while (toBeLookedAt.size() != 0);
 
         return;
     }
 
     public void resetDistances() {
-        for (DistanceFromPlayer distance : distanceMap){
-            distance.setDistFromPlayer(-1);
+        for (DistanceFromPlayer[] distances : distanceMap){
+            for (DistanceFromPlayer dist : distances)
+            if (dist != null)
+                dist.setDistFromPlayer(defaultTileNumber);
         }
     }
 
     public ArrayList<Integer> shortestPath (int start, int finish) {
+        int layerHeight, adjLayerHeight;
         ArrayList<Integer> intPath = new ArrayList<Integer>(1);
-        DistanceFromPlayer Pos = distanceMap.get(tilesAlreadyChecked.indexOf(start));
+        //DistanceFromPlayer Pos = distanceMap.get(/*tilesAlreadyChecked.indexOf(*/start/*)*/);
+        layerHeight = start / (width * height);
+        if (layerHeight > 0)
+            start = start - (layerHeight * width * height);
+        DistanceFromPlayer Pos = distanceMap[start][layerHeight];
         DistanceFromPlayer leastDistance = new DistanceFromPlayer(-1, -1, width);//initial distance placeholder
         DistanceFromPlayer toCheck;
         leastDistance.setDistFromPlayer(width * height + 1);
         while (Pos.getTileNumber() != finish) {
             for (int adjIndex : Pos.getSpotToMoveIndex()) {
-                toCheck = distanceMap.get(adjIndex);
+                //toCheck = distanceMap.get(adjIndex);
+                adjLayerHeight = adjIndex / (width * height);
+                if (adjLayerHeight > 0)
+                    adjIndex = adjIndex - (adjLayerHeight * width * height);
+                toCheck = distanceMap[adjIndex][adjLayerHeight];
                 if (toCheck.getTileNumber() == finish) {
                     leastDistance = toCheck;
                     break;
                 }
 
-                if (leastDistance.getDistFromPlayer() > toCheck.getDistFromPlayer() && toCheck.getDistFromPlayer() != -1){
+                if (leastDistance.getDistFromPlayer() > toCheck.getDistFromPlayer() && toCheck.getDistFromPlayer() != defaultTileNumber){
                     leastDistance = toCheck;
                 }
                 if (intPath.size() == 5)//2)//temp fix to memory leak
@@ -124,36 +155,42 @@ public class DistanceTrackerMap {
             if (intPath.size() > width * width)
                 break;
         }
-        boolean test = true;
-        if (intPath.contains(1192))
-            test = false;
         return intPath;
     }
 
     private void buildMap(int playerPos) {
         DistanceFromPlayer start = new DistanceFromPlayer(playerPos, 0, width);
+        int layerHeight;
+        int adjLayerHeight;
+        int adjTilePos;
+        int tilePos;
         lookingAt = new ArrayList<DistanceFromPlayer>();
         toBeLookedAt = new ArrayList<DistanceFromPlayer>();
         toBeLookedAt.add(start);
-        tilesAlreadyChecked.add(start.getTileNumber());
-        DistanceFromPlayer adjSpot;
         ArrayList<DistanceFromPlayer> adjs;
         do {
             lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
             toBeLookedAt = new ArrayList<DistanceFromPlayer>();
             for (DistanceFromPlayer mapObject : lookingAt) {
-                if (mapObject.getTileNumber() == 1224)
-                    mapObject.setTileNumber(mapObject.getTileNumber());
+                layerHeight = mapObject.getTileNumber() / (width * height);
+                tilePos = mapObject.getTileNumber();
+                if (layerHeight > 0)
+                    tilePos = tilePos - (layerHeight * width * height);
                 adjs = new ArrayList<DistanceFromPlayer>(FindAdjLocations(mapObject));
-                for (DistanceFromPlayer ajdPos : adjs){
-                    if (!tilesAlreadyChecked.contains(ajdPos.getTileNumber())) {
-                        tilesAlreadyChecked.add(ajdPos.getTileNumber());
-                        toBeLookedAt.add(ajdPos);
+                for (DistanceFromPlayer adjPos : adjs){
+                    adjLayerHeight = adjPos.getTileNumber() / (width * height);
+                    adjTilePos = adjPos.getTileNumber();
+                    if (adjLayerHeight > 0)
+                        adjTilePos = adjPos.getTileNumber() - (adjLayerHeight * width * height);
+                    if (distanceMap[adjTilePos][adjLayerHeight].getTileNumber() == defaultTileNumber && !tilesAlreadyChecked.contains(adjPos.getTileNumber())) {
+                        tilesAlreadyChecked.add(adjPos.getTileNumber());
+                        toBeLookedAt.add(adjPos);
                     }
-                    mapObject.addSpotToMoveIndex(tilesAlreadyChecked.indexOf(ajdPos.getTileNumber()), ajdPos.getTileNumber());
+                    mapObject.addSpotToMoveIndex(adjPos.getTileNumber());
                 }
-                int tileIndex = tilesAlreadyChecked.indexOf(mapObject.getTileNumber());
-                distanceMap.add(tileIndex, mapObject);
+                //if (mapObject.getTileNumber() == 1290)
+                //    mapObject.setTileNumber(1290);
+                distanceMap[tilePos][layerHeight] = mapObject;
             }
         } while (toBeLookedAt.size() != 0);
 
@@ -285,7 +322,7 @@ public class DistanceTrackerMap {
         for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
             if ((isMoveable(spotNums, top) && isMoveable(spotNums, right))
                     && notAWall(mapObject, topLeft, currentHeight, adjDiagonalRamp, tileLayer)
-                    && getXPos(topLeft) == getXPos(top)
+                    && getXPos(topLeft) == getXPos(left)
                     && meshLevel.getMapTile(getXPos(topLeft), getYPos(topLeft), adjTileLayer).getRampDirection() == -1) {
                 if (tileLayer == 1)
                     topLeft = topLeft + width * height;
@@ -350,7 +387,12 @@ public class DistanceTrackerMap {
     }
 
     public int getNewPath(int start, int finish, Enemy enemy) {
-        DistanceFromPlayer enemyPos = distanceMap.get(tilesAlreadyChecked.indexOf(start));
+        //DistanceFromPlayer enemyPos = distanceMap.get(/*tilesAlreadyChecked.indexOf(*/start/*)*/);
+        int tilePos = start;
+        int layerHeight = start / (width * height);
+        if (layerHeight > 0)
+            tilePos = tilePos - (layerHeight * width * height);
+        DistanceFromPlayer enemyPos = distanceMap[tilePos][layerHeight];
         if (enemy.getRotation().x == 180) {//top
             if (enemyPos.getLeft() != -1)
                 return enemyPos.getLeft();
@@ -449,6 +491,7 @@ class DistanceFromPlayer {
         this.layer = layer;
         this.tileNumber = number;
         this.mapWidth = width;
+        this.distFromPlayer = width * width + 2;
     }
 
     public int getTileNumber() {
@@ -467,8 +510,8 @@ class DistanceFromPlayer {
         this.distFromPlayer = distFromPlayer;
     }
 
-    public void addSpotToMoveIndex(int spot, int adjTileNum){
-        spotsToMoveIndex.add(spot);
+    public void addSpotToMoveIndex(int adjTileNum){
+        spotsToMoveIndex.add(adjTileNum);
         if (adjTileNum + 1 == tileNumber)
             top = adjTileNum;
         else if (adjTileNum - 1 == tileNumber)

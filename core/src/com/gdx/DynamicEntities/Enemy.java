@@ -12,11 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.gdx.engine.Condition;
-import com.gdx.engine.DistanceTrackerMap;
-import com.gdx.engine.State;
-import com.gdx.engine.StateMachine;
-import com.gdx.engine.World;
+import com.gdx.engine.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -67,10 +63,21 @@ public class Enemy extends DynamicEntity {
 		
 		GridPoint2 thisPosition = new GridPoint2((int)this.getPosition().x, (int)this.getPosition().z);
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
+		int meshLevelHeight = 0;
         int[] directionVals = new int[3];
         int x; int y; int yKeep;
 		int width = world.getMeshLevel().getMapXDimension();
+		String adjPos = "";
 		ArrayList<Integer> path;
+		Vector3 checkPos = this.getPosition();
+		float heightValueLvl1 = world.getMeshLevel().mapHeight(
+				this.getPosition().x, this.getPosition().z, 1);
+		float heightValueLvl2 = 6 + world.getMeshLevel().mapHeight(
+				this.getPosition().x, this.getPosition().z, 2);
+		float targetHeight = world.getMeshLevel().getHeightOffset()
+				+ world.getMeshLevel().mapHeight(
+				this.getPosition().x, this.getPosition().z, 1);
+
 		if (this.getStateMachine().Current == this.idle) {
 			this.getAnimation().setAnimation("Idle", -1);
             this.getVelocity().set(0,0,0);
@@ -115,7 +122,7 @@ public class Enemy extends DynamicEntity {
                     directionVals = calcVel(newPath, delta, width, thisPosition, world);
             }
 
-                //this.getVelocity().set(0, 0, 0);
+			//this.getVelocity().set(0, 0, 0);
             //set tile
             //reget vel and dir
 
@@ -128,25 +135,20 @@ public class Enemy extends DynamicEntity {
             y = directionVals[1];
             yKeep = directionVals[2];
 
-            Vector3 checkPos = this.getPosition();
-            float heightValueLvl1 = world.getMeshLevel().mapHeight(
-            	     this.getPosition().x, this.getPosition().z, 1);
-            float heightValueLvl2 = 6 + world.getMeshLevel().mapHeight(
-            	     this.getPosition().x, this.getPosition().z, 2);
-            if (this.getPosition().y > 5.9) {//6?
+			if (this.getPosition().x == 7 && (int)this.getPosition().z == 8 )
+				x = x + 1 - 1;
+
+            if (this.getPosition().y >= 6) {//6?
                 checkPos.y = heightValueLvl2;
             }
             else if (this.getPosition().y < 6) {
                 checkPos.y = heightValueLvl1;
             }
             this.setPosition(checkPos);
-
-
-            String adjPos = "";
-            int meshLevelHeight = 0;
-            if (yKeep > width * width)
-                meshLevelHeight = 1;
-            if (world.getMeshLevel().getMapTile(x, y, meshLevelHeight) != null
+			//adjusts enemy position to center of tile
+			if (this.getPosition().y >= 6)
+				meshLevelHeight = (int)this.getPosition().y / 6;
+            if (x >= 0 && y >= 0 && world.getMeshLevel().getMapTile(x, y, meshLevelHeight) != null
                     && this.getPosition().x + 2 < width && this.getPosition().x - 2 > 0
                     && this.getPosition().z + 2 < width && this.getPosition().z - 2 > 0)
                 if ( world.getMeshLevel().getMapTile(x, y, meshLevelHeight).getRampDirection() != -1 || !(adjPos = adjToWall((y * width) + x, world, width)).equals("")) {
@@ -160,13 +162,11 @@ public class Enemy extends DynamicEntity {
                         this.getPosition().x = x + .5f;
                 }
 
-            float targetHeight = world.getMeshLevel().getHeightOffset()
-                    + world.getMeshLevel().mapHeight(
-                    this.getPosition().x, this.getPosition().z, 1);
-           /* if (this.getPosition().y >= 6)
+			//adjust enemy pos to 2nd layer?
+            if (this.getPosition().y >= 6)
                 targetHeight = 6
                         + world.getMeshLevel().mapHeight(
-                        this.getPosition().x, this.getPosition().z, 2);*/
+                        this.getPosition().x, this.getPosition().z, 2);
             if (this.getPosition().y > targetHeight + 30 * delta) {
                 this.getPosition().y -= 30 * delta;
 
