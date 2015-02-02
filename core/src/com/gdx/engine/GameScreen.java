@@ -6,18 +6,32 @@ import java.util.List;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.gdx.FilterEffects.*;
+import com.gdx.UI.UIConsole;
+import com.gdx.UI.UIBase;
+import com.gdx.UI.UIGrid;
+import com.gdx.UI.UIInputProcessor;
+import com.gdx.UI.UIMenu;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 
@@ -31,8 +45,11 @@ public class GameScreen implements Screen {
 	private BitmapFont bitmapFont;
 	private Stage stage;
 	private Skin skin;
-	private Console console;
+	private UIConsole console;
 	private boolean consoleActive;
+	private UIBase base;
+	private UIMenu menu;
+	private InputMultiplexer multiplexer = new InputMultiplexer();
 	
 	public enum State {
 		Running, Paused
@@ -46,18 +63,55 @@ public class GameScreen implements Screen {
 	
 		center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		spriteBatch = new SpriteBatch();
+		stage = new Stage();
 		this.consoleActive = consoleActive;
 		if (consoleActive) {
-			console = new Console(world);
+			console = new UIConsole(stage, world);
 			console.initializeConsoleWindow();
 			console.initializeFilterEffects();
+			console.addConsoleInputListener(Keys.GRAVE, 0);
 		}
-		
+
 		bitmapFont = new BitmapFont();
 		bitmapFont.setScale(0.9f);
-		stage = new Stage();
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
 		state = State.Running;
+		base = new UIBase(stage);
+		Array<TextButton> buttons = new Array<TextButton>();
+		TextButtonStyle style = new TextButtonStyle();
+		style.font = bitmapFont;
+		final TextButton button1 = new TextButton("Pause", style);
+		button1.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				if (GameScreen.state == State.Running) {
+					button1.setText("Resume");
+					GameScreen.state = State.Paused;
+				}
+				else if (GameScreen.state == State.Paused) {
+					button1.setText("Pause");
+					GameScreen.state = State.Running;
+				}
+			}
+		});
+		buttons.add(button1);
+		TextButton button2 = new TextButton("Exit", style);
+		button2.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				Gdx.app.exit();
+			}
+		});
+		buttons.add(button2);
+		menu = new UIMenu(stage, skin, buttons, "Engine 490", 0, 0);
+		menu.generateVerticalMenu(10);
+		final UIGrid grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
+		grid.generateGrid(Align.bottom, 30, 30, 5, 5, 3);
+		grid.setWindowSize(500, 500);
+		grid.addInputListener(Keys.I, 2);
+		menu.addInputListener(Keys.ESCAPE, 1);
+		//multiplexer.addProcessor(new UIInputProcessor());
+		//Gdx.input.setInputProcessor(multiplexer);
 	}
 	
 	@Override
@@ -66,6 +120,7 @@ public class GameScreen implements Screen {
 		switch (state) {
 			case Running:
 				world.update(delta);
+				break;
 			case Paused:
 				break;
 		}
@@ -77,12 +132,9 @@ public class GameScreen implements Screen {
 		renderFps();
 		renderPos();
 		renderTilePos();
+		base.render(delta);
 		renderUI();
 		spriteBatch.end();
-		if (console != null) {
-			console.getStage().act();
-			console.getStage().draw();
-		}
 	}
 	
 	public void renderFps() {
@@ -106,10 +158,6 @@ public class GameScreen implements Screen {
 	
 	public void renderUI() {
 		bitmapFont.draw(spriteBatch, "Health: " + World.player.getHealth(), 0f, 20f);
-		
-		if (console != null) {
-			console.update();
-		}
 	}
 
 	@Override

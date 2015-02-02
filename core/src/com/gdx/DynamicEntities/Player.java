@@ -14,8 +14,8 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
+import com.gdx.UI.UIConsole;
 import com.gdx.engine.Assets;
-import com.gdx.engine.Console;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
@@ -100,7 +100,7 @@ public class Player extends DynamicEntity {
 
 	@Override
 	public void update(float delta, World world) {
-		if (!Console.isConsoleActive)
+		if (!UIConsole.isConsoleActive)
 			input(delta);
 		fireDelayTimer += delta;
 		

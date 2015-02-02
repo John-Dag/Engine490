@@ -45,6 +45,7 @@ public class Assets {
 	public static TextureRegion weapon1Region;
 	public static Texture aoeTexture;
 	public static TextureRegion aoeTextureRegion;
+	public static Texture gridslot;
 	private static ParticleEffectLoader loader;
 	private static ParticleEffectLoadParameter loadParam;
 	public  static String vertexShader;
@@ -78,6 +79,7 @@ public class Assets {
 		aoeTextureRegion = new TextureRegion(aoeTexture);
 		weapon1 = new Texture("weapon1.png");
 		weapon1Region = new TextureRegion(weapon1);
+		gridslot = new Texture("gridslot.png");
 		//wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		loadShaders();
 	}
@@ -111,167 +113,154 @@ public class Assets {
 		TiledMapTile tile = null;
 		int layerNumber = 0;
 		TiledMapTileLayer currentLayer;
-
 		TextureParameter param = new TextureParameter();
 		param.minFilter = TextureFilter.Linear;
 		param.genMipMaps = true;
 
 		// This loop loads the textures from tile map, if it has texture layers
 		if (tiledMap != null) // If there is no tilemap skip this part
-			for (int k = 0; k < tiledMap.getLayers().getCount(); k++) {
-				if (tiledMap.getLayers().get(k).getName()
-						.startsWith("Texture Layer")) {
-					currentLayer = (TiledMapTileLayer) tiledMap.getLayers()
-							.get(k);
-					if (currentLayer.getName().equals("Texture Layer 1")) {
-						layerNumber = 0;
-					} else if (currentLayer.getName().equals("Texture Layer 2")) {
-						layerNumber = 1;
-					}
-
-					// on each cell
-					for (int i = 0; i < currentLayer.getWidth(); i++) {
-						for (int j = 0; j < currentLayer.getHeight(); j++) {
-							if (currentLayer.getCell(i, j) == null)
-								continue; // no texture for this cell
-							tile = currentLayer.getCell(i, j).getTile();
-							// set texture
-							if (tile.getProperties().containsKey("filename")) {
-								String filename = tile.getProperties()
-										.get("filename").toString();
-								if (filename != null) {
-
-									if (!MaterialIds.containsKey(filename)) // load
-																			// only
-																			// if
-																			// not
-																			// loaded
-																			// already
-									{
-										int max = -1;
-										for (int val : MaterialIds.values()) {
-											if (val > max)
-												max = val;
-										}
-										max++;
-										MaterialIds.put(filename, max);
-										manager.load(filename, Texture.class,
-												param);
-										manager.finishLoading();
-										Texture texture = manager.get(filename,
-												Texture.class);
-										texture.setFilter(
-												TextureFilter.MipMapLinearNearest,
-												TextureFilter.Nearest);
-										texture.setWrap(TextureWrap.Repeat,
-												TextureWrap.Repeat);
-										Material material = new Material(
-												TextureAttribute
-														.createDiffuse(texture));
-										MapMaterials.put(max, material);
-										if (tile.getProperties().containsKey("normal"))
-										{
-											String normal = tile.getProperties()
-													.get("normal").toString();
-											manager.load(normal, Texture.class,
-													param);
-											manager.finishLoading();
-											texture = manager.get(normal,
-													Texture.class);
-											texture.setWrap(TextureWrap.Repeat,
-													TextureWrap.Repeat);
-											material.set(TextureAttribute.createNormal(texture));
-
-										}
-										
-										
-									}
-									levelArray[i][j][layerNumber]
-											.setTextureId(MaterialIds
-													.get(filename));
-								}
-							}
-						}
-					}
+		for (int k = 0; k < tiledMap.getLayers().getCount(); k++) {
+			if (tiledMap.getLayers().get(k).getName()
+					.startsWith("Texture Layer")) {
+				currentLayer = (TiledMapTileLayer) tiledMap.getLayers()
+						.get(k);
+				if (currentLayer.getName().equals("Texture Layer 1")) {
+					layerNumber = 0;
+				} else if (currentLayer.getName().equals("Texture Layer 2")) {
+					layerNumber = 1;
 				}
 
-				// Load Wall Textures
-				else if (tiledMap.getLayers().get(k).getName()
-						.startsWith("Wall Texture Layer")) {
-					currentLayer = (TiledMapTileLayer) tiledMap.getLayers()
-							.get(k);
-					if (currentLayer.getName().equals("Wall Texture Layer 1")) {
-						layerNumber = 0;
-					} else if (currentLayer.getName().equals(
-							"Wall Texture Layer 2")) {
-						layerNumber = 1;
-					}
-
-					// on each cell
-					for (int i = 0; i < currentLayer.getWidth(); i++) {
-						for (int j = 0; j < currentLayer.getHeight(); j++) {
-							if (currentLayer.getCell(i, j) == null)
-								continue; // no texture for this cell
-							tile = currentLayer.getCell(i, j).getTile();
-							// set texture
-							if (tile.getProperties().containsKey("filename")) {
-								String filename = tile.getProperties()
-										.get("filename").toString();
-								if (filename != null) {
-
-									if (!MaterialIds.containsKey(filename)) // load
-																			// only
-																			// if
-																			// not
-																			// loaded
-																			// already
+				// on each cell
+				for (int i = 0; i < currentLayer.getWidth(); i++) {
+					for (int j = 0; j < currentLayer.getHeight(); j++) {
+						if (currentLayer.getCell(i, j) == null)
+							continue; // no texture for this cell
+						tile = currentLayer.getCell(i, j).getTile();
+						// set texture
+						if (tile.getProperties().containsKey("filename")) {
+							String filename = tile.getProperties()
+									.get("filename").toString();
+							if (filename != null) {
+								//Load only if not loaded already
+								if (!MaterialIds.containsKey(filename)) 
+								{
+									int max = -1;
+									for (int val : MaterialIds.values()) {
+										if (val > max)
+											max = val;
+									}
+									max++;
+									MaterialIds.put(filename, max);
+									manager.load(filename, Texture.class,
+											param);
+									manager.finishLoading();
+									Texture texture = manager.get(filename,
+											Texture.class);
+									texture.setFilter(
+											TextureFilter.MipMapLinearNearest,
+											TextureFilter.Nearest);
+									texture.setWrap(TextureWrap.Repeat,
+											TextureWrap.Repeat);
+									Material material = new Material(
+											TextureAttribute
+													.createDiffuse(texture));
+									MapMaterials.put(max, material);
+									if (tile.getProperties().containsKey("normal"))
 									{
-										int max = -1;
-										for (int val : MaterialIds.values()) {
-											if (val > max)
-												max = val;
-										}
-										max++;
-										MaterialIds.put(filename, max);
-										manager.load(filename, Texture.class,
+										String normal = tile.getProperties()
+												.get("normal").toString();
+										manager.load(normal, Texture.class,
 												param);
 										manager.finishLoading();
-										Texture texture = manager.get(filename,
+										texture = manager.get(normal,
 												Texture.class);
-										texture.setFilter(
-												TextureFilter.MipMapLinearNearest,
-												TextureFilter.Nearest);
 										texture.setWrap(TextureWrap.Repeat,
 												TextureWrap.Repeat);
-										Material material = new Material(
-												TextureAttribute
-														.createDiffuse(texture));
-										MapMaterials.put(max, material);
-										if (tile.getProperties().containsKey("normal"))
-										{
-											String normal = tile.getProperties()
-													.get("normal").toString();
-											manager.load(normal, Texture.class,
-													param);
-											manager.finishLoading();
-											texture = manager.get(normal,
-													Texture.class);
-											texture.setWrap(TextureWrap.Repeat,
-													TextureWrap.Repeat);
-											material.set(TextureAttribute.createNormal(texture));
+										material.set(TextureAttribute.createNormal(texture));
 
-										}
-										
 									}
-									levelArray[i][j][layerNumber]
-											.setWallTextureId(MaterialIds
-													.get(filename));
 								}
+								levelArray[i][j][layerNumber]
+										.setTextureId(MaterialIds
+												.get(filename));
 							}
 						}
 					}
 				}
 			}
+
+			// Load Wall Textures
+			else if (tiledMap.getLayers().get(k).getName()
+					.startsWith("Wall Texture Layer")) {
+				currentLayer = (TiledMapTileLayer) tiledMap.getLayers()
+						.get(k);
+				if (currentLayer.getName().equals("Wall Texture Layer 1")) {
+					layerNumber = 0;
+				} else if (currentLayer.getName().equals(
+						"Wall Texture Layer 2")) {
+					layerNumber = 1;
+				}
+
+				// on each cell
+				for (int i = 0; i < currentLayer.getWidth(); i++) {
+					for (int j = 0; j < currentLayer.getHeight(); j++) {
+						if (currentLayer.getCell(i, j) == null)
+							continue; // no texture for this cell
+						tile = currentLayer.getCell(i, j).getTile();
+						// set texture
+						if (tile.getProperties().containsKey("filename")) {
+							String filename = tile.getProperties()
+									.get("filename").toString();
+							if (filename != null) {
+								//Load only if not loaded already
+								if (!MaterialIds.containsKey(filename)) 
+								{
+									int max = -1;
+									for (int val : MaterialIds.values()) {
+										if (val > max)
+											max = val;
+									}
+									max++;
+									MaterialIds.put(filename, max);
+									manager.load(filename, Texture.class,
+											param);
+									manager.finishLoading();
+									Texture texture = manager.get(filename,
+											Texture.class);
+									texture.setFilter(
+											TextureFilter.MipMapLinearNearest,
+											TextureFilter.Nearest);
+									texture.setWrap(TextureWrap.Repeat,
+											TextureWrap.Repeat);
+									Material material = new Material(
+											TextureAttribute
+													.createDiffuse(texture));
+									MapMaterials.put(max, material);
+									if (tile.getProperties().containsKey("normal"))
+									{
+										String normal = tile.getProperties()
+												.get("normal").toString();
+										manager.load(normal, Texture.class,
+												param);
+										manager.finishLoading();
+										texture = manager.get(normal,
+												Texture.class);
+										texture.setWrap(TextureWrap.Repeat,
+												TextureWrap.Repeat);
+										material.set(TextureAttribute.createNormal(texture));
+
+									}
+									
+								}
+								levelArray[i][j][layerNumber]
+										.setWallTextureId(MaterialIds
+												.get(filename));
+							}
+						}
+					}
+				}
+			}
+		}
 
 		manager.load("stonefloor.png", Texture.class, param);
 		manager.load("wall.png", Texture.class, param);

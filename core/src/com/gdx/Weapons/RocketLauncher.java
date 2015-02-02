@@ -70,7 +70,7 @@ public class RocketLauncher extends Weapon {
 		}
 		
 		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
-			world.player.setWeapon(this);
+			world.getPlayer().setWeapon(this);
 		}
 		
 		else {

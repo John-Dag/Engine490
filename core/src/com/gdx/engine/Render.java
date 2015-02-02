@@ -33,7 +33,6 @@ public class Render implements Disposable {
 	private Vector3 position;
 	private Model weapon = new Model();
 	private boolean loading;
-	
 	private Mesh fullScreenQuad;
 	
 	public Render(World world) {
@@ -83,13 +82,10 @@ public class Render implements Disposable {
 			doneLoading();
 		}
 		
-		
 		FilterEffect filterEffect = world.getFilterEffect();
-		
 		if(filterEffect!=null){
 			filterEffect.getFilterEffectBuffer().begin();
 		}
-		
 		
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClearColor(MeshLevel.skyColor.r, MeshLevel.skyColor.g, MeshLevel.skyColor.b, 0);
@@ -137,25 +133,18 @@ public class Render implements Disposable {
 		}
 		
 		modelBatch.end();
-		
 		//Render decals
 		decalBatch.flush();
 		
-		
-		
-		if(filterEffect!=null){
+		if(filterEffect!=null) {
 			filterEffect.getFilterEffectBuffer().end();
 			filterEffect.getFilterEffectBuffer().getColorBufferTexture().bind(0);
-		
 			filterEffect.begin();
-			
-				fullScreenQuad.render(filterEffect.shader, GL20.GL_TRIANGLE_FAN , 0, 4);
+			fullScreenQuad.render(filterEffect.shader, GL20.GL_TRIANGLE_FAN , 0, 4);
 			filterEffect.end();
-			
 		}
-
-		filterEffect=null;
 		
+		filterEffect = null;
 	}
 	
 	public void renderModels(ModelInstance instance) {
@@ -168,48 +157,32 @@ public class Render implements Disposable {
 		return cam.frustum.boundsInFrustum(position, box.getDimensions());
 	}
 	
-	public DecalBatch getDecalbatch() {
-		return decalBatch;
-	}
-	
-	public ModelBatch getModelbatch() {
-		return modelBatch;
-	}
-	
 	private Mesh createFullScreenQuad(){
 		float[] verts = new float[16];
 	    int i = 0;
 	    verts[i++] = -1.f; // x1
 	    verts[i++] = -1.f; // y1
-
 	    
 	    verts[i++] =  0.f; // u1
 	    verts[i++] =  0.f; // v1
 	    
 	    verts[i++] =  1.f; // x2
 	    verts[i++] = -1.f; // y2
-
 	    
 	    verts[i++] =  1.f; // u2
 	    verts[i++] =  0.f; // v2
 	    
 	    verts[i++] =  1.f; // x3
 	    verts[i++] =  1.f; // y3
-
 	    
 	    verts[i++] =  1.f; // u3
 	    verts[i++] =  1.f; // v3
 	    
 	    verts[i++] = -1.f; // x4
 	    verts[i++] =  1.f; // y4
-
 	    
 	    verts[i++] =  0.f; // u4
 	    verts[i++] =  1.f; // v4
-	    
-
-	    
-		
 		
 	    Mesh tmpMesh = new Mesh(true, 4, 0
 	        , new VertexAttribute(Usage.Position, 2, "a_position")
@@ -218,13 +191,15 @@ public class Render implements Disposable {
 
 	    tmpMesh.setVertices(verts);
 
-	    return tmpMesh;
-	    
-
-	    
-	    
-	    
-	    
+	    return tmpMesh; 
+	}
+	
+	public DecalBatch getDecalbatch() {
+		return decalBatch;
+	}
+	
+	public ModelBatch getModelbatch() {
+		return modelBatch;
 	}
 
 	@Override

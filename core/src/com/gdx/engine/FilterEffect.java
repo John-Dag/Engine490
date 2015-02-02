@@ -23,7 +23,7 @@ public abstract class FilterEffect implements Disposable {
 		shader.end();
 	}
 	
-	protected void loadShaderProgram() {
+	public void loadShaderProgram() {
 		vertexShader = Gdx.files.internal("shaders/filtereffects/"+effectName+".vertex.glsl.txt").readString();
         fragmentShader = Gdx.files.internal("shaders/filtereffects/"+effectName+".fragment.glsl.txt").readString();
         shader = new ShaderProgram(vertexShader, fragmentShader);
@@ -33,7 +33,7 @@ public abstract class FilterEffect implements Disposable {
 		shader.setUniformi("u_texture",0);
 	}
 	
-	protected void initializeFrameBuffer() {
+	public void initializeFrameBuffer() {
 		filterEffectBuffer= new FrameBuffer( Format.RGBA8888
 			    , Gdx.graphics.getWidth()
 			    , Gdx.graphics.getHeight()

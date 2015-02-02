@@ -1,4 +1,4 @@
-package com.gdx.engine;
+package com.gdx.UI;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -22,14 +24,17 @@ import com.gdx.FilterEffects.RedScreenColorMultiplier;
 import com.gdx.FilterEffects.Sepia;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
+import com.gdx.engine.Assets;
+import com.gdx.engine.FilterEffect;
+import com.gdx.engine.GameScreen;
+import com.gdx.engine.World;
 import com.gdx.engine.GameScreen.State;
 
-public class Console {
+public class UIConsole extends UIBase {
 	public static boolean isConsoleActive;
 	private final int ENTER = 13;
 	private final int GRAVE = 96;
 	private BitmapFont bitmapFont;
-	private Stage stage;
 	private Skin skin;
 	private Window consoleWindow;
 	private TextField consoleInputField;
@@ -38,7 +43,8 @@ public class Console {
 	private List<FilterEffect> filterEffects = new LinkedList<FilterEffect>();
 	private int currentFilter = 0;
 	
-	public Console(World world) {
+	public UIConsole(Stage stage, World world) {
+		super(stage);
 		bitmapFont = new BitmapFont();
 		bitmapFont.setScale(0.9f);
 		stage = new Stage();
@@ -46,7 +52,10 @@ public class Console {
 		this.world = world;
 	}
 	
-	//Initializes the console window and textfield.
+	/***
+	 * Initializes the drop down console window. 
+	 */
+	
 	public void initializeConsoleWindow() {
 		consoleVal = "";
 		consoleWindow = new Window("Console", skin);
@@ -54,8 +63,7 @@ public class Console {
 		consoleWindow.setPosition(0, Gdx.graphics.getHeight());
 		consoleInputField = new TextField("", skin);
 		consoleWindow.add(consoleInputField).width(consoleWindow.getWidth()).height(consoleWindow.getHeight());
-		stage.setKeyboardFocus(consoleInputField);
-		stage.addActor(consoleWindow);
+		this.getStage().addActor(consoleWindow);
 		consoleWindow.setVisible(false);
 		isConsoleActive = false;
 		
@@ -193,6 +201,10 @@ public class Console {
 		consoleInputField.setText("");
 	}
 
+	/***
+	 * Initializes shader filter effects that can be accessed through the console (fx+, fx-).
+	 */
+	
 	public void initializeFilterEffects() {
 		filterEffects.add(new BlueScreenColorMultiplier());
 		filterEffects.add(new RedScreenColorMultiplier());
@@ -235,28 +247,38 @@ public class Console {
 		return temp;
 	}
 	
-	public void update() {
-		if (Gdx.input.isKeyJustPressed(Keys.GRAVE)) {
-			if (!isConsoleActive) {
-				isConsoleActive = true;
-				GameScreen.state = State.Paused;
-				consoleWindow.setVisible(true);
-				Gdx.input.setInputProcessor(stage);
-			}
-			else {
-				isConsoleActive = false;
-				GameScreen.state = State.Running;
-				consoleWindow.setVisible(false);
-				Gdx.input.setInputProcessor(null);
-			}
+	/***
+	 * Adds an input listener to the console. 
+	 * @param key Key used to show/hide the console. 
+	 * @param actorIndex The actor index of the console within the stage (Default is 0).
+	 */
+	
+	public void addConsoleInputListener(final int key, final int actorIndex) {
+		final Stage stage = this.getStage();
+		if (actorIndex > stage.getActors().size) {
+			System.err.println("addInputListener(): Actor index value out of range.");
+			return;
 		}
+		
+		this.getStage().addListener(new InputListener() {
+			public boolean keyDown(InputEvent event, int keyCode) {
+				if (keyCode == key && stage.getActors().get(actorIndex).isVisible()) {
+					stage.getActors().get(actorIndex).setVisible(false);
+					GameScreen.state = State.Running;
+					stage.setKeyboardFocus(null);
+				}
+				else if (keyCode == key && !stage.getActors().get(actorIndex).isVisible()) {
+					stage.getActors().get(actorIndex).setVisible(true);
+					GameScreen.state = State.Paused;
+					stage.setKeyboardFocus(consoleInputField);
+				}
+				
+				return true;
+			}
+		});
 	}
 	
 	public Window getConsoleWindow() {
 		return consoleWindow;
-	}
-	
-	public Stage getStage() {
-		return stage;
 	}
 }
