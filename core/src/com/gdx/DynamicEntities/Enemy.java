@@ -84,22 +84,26 @@ public class Enemy extends DynamicEntity {
 		}
 
 		else if (this.getStateMachine().Current == this.moving) {
-			float test = 0;
-			if ((int)this.getPosition().x == 8 && (int)this.getPosition().z <= 6 && (int)this.getPosition().y >= 5.8)
-				test = test + 1 - 1;
+			float test = 0, test2 = 0;
+			if ((int)this.getPosition().x == 8 && (int)this.getPosition().z == 6 )
+				this.setPosition(new Vector3(this.getPosition().x, this.getPosition().y, this.getPosition().z));
             int playerTile = playerPosition.x + width
                     * playerPosition.y;
-            if (world.getPlayer().camera.position.y > 7)
+			int enemyTile = thisPosition.x + width * thisPosition.y;
+			if (this.getPosition().y > 5.8)
+				enemyTile = enemyTile + width * width;
+             if (world.getPlayer().camera.position.y > 7)
                 playerTile = playerTile + width * width;
              try {
-                path = this.shortestPath(thisPosition.x + width
-                        * thisPosition.y, playerTile, world.getDistanceMap());
+                path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
             } catch (Exception ex) {
                 path = new ArrayList<Integer>();
             }
             if (path.size() == 0) 
                 return;
 
+			if ((int)this.getPosition().x == 8 && (int)this.getPosition().z == 6 )
+				this.setPosition(new Vector3(this.getPosition().x, this.getPosition().y, this.getPosition().z));
            //calc vel
             directionVals = calcVel(path, delta, width, thisPosition, world);
             
@@ -137,9 +141,6 @@ public class Enemy extends DynamicEntity {
             x = directionVals[0];
             y = directionVals[1];
             yKeep = directionVals[2];
-
-			if (this.getPosition().x == 7 && (int)this.getPosition().z == 8 )
-				x = x + 1 - 1;
 
             if (this.getPosition().y >= 5.8) {//6?
                 checkPos.y = heightValueLvl2;
