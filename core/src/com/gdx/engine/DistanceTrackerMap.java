@@ -76,7 +76,6 @@ public class DistanceTrackerMap {
                 pos = pos - width + 1;
             else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
                 pos = pos - width - 1;
-            //else
         }
 
             DistanceFromPlayer start;
