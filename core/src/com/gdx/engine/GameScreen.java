@@ -26,12 +26,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.gdx.FilterEffects.*;
 import com.gdx.UI.UIConsole;
 import com.gdx.UI.UIBase;
 import com.gdx.UI.UIGrid;
 import com.gdx.UI.UIInputProcessor;
 import com.gdx.UI.UIMenu;
+import com.gdx.UI.UIOverlay;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 
@@ -49,6 +54,7 @@ public class GameScreen implements Screen {
 	private boolean consoleActive;
 	private UIBase base;
 	private UIMenu menu;
+	private UIOverlay overlay;
 	private InputMultiplexer multiplexer = new InputMultiplexer();
 	
 	public enum State {
@@ -63,7 +69,7 @@ public class GameScreen implements Screen {
 	
 		center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		spriteBatch = new SpriteBatch();
-		stage = new Stage();
+		stage = new Stage(new ScreenViewport());
 		this.consoleActive = consoleActive;
 		if (consoleActive) {
 			console = new UIConsole(stage, world);
@@ -108,8 +114,11 @@ public class GameScreen implements Screen {
 		final UIGrid grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
 		grid.generateGrid(Align.bottom, 30, 30, 5, 5, 3);
 		grid.setWindowSize(500, 500);
-		grid.addInputListener(Keys.I, 2);
-		menu.addInputListener(Keys.ESCAPE, 1);
+		overlay = new UIOverlay(stage, bitmapFont);
+		overlay.addCrosshair(Assets.crosshair, center);
+		overlay.setCursorImage("crosshair.png", 0, 0);
+		grid.addVisibleInputListener(Keys.I, 2);
+		menu.addVisibleInputListener(Keys.ESCAPE, 1);
 		//multiplexer.addProcessor(new UIInputProcessor());
 		//Gdx.input.setInputProcessor(multiplexer);
 	}
@@ -128,7 +137,6 @@ public class GameScreen implements Screen {
 		
 		//UI components are rendered here
 		spriteBatch.begin();
-		spriteBatch.draw(Assets.crosshair, center.x - 8, center.y - 8);
 		renderFps();
 		renderPos();
 		renderTilePos();

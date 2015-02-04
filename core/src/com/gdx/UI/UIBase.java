@@ -3,6 +3,7 @@ package com.gdx.UI;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -27,8 +28,9 @@ public class UIBase implements Screen {
 	 * @param actorNumber Index of the actor that is attached to the stage
 	 */
 	
-	public void addInputListener(final int key, final int actorIndex) {
+	public void addVisibleInputListener(final int key, final int actorIndex) {
 		final Stage stage = this.getStage();
+		
 		if (actorIndex > stage.getActors().size) {
 			System.err.println("addInputListener(): Actor index value out of range.");
 			return;
@@ -36,9 +38,11 @@ public class UIBase implements Screen {
 		
 		this.getStage().addListener(new InputListener() {
 			public boolean keyDown(InputEvent event, int keyCode) {
-				if (keyCode == key && stage.getActors().get(actorIndex).isVisible() && !stage.getActors().get(0).isVisible())
+				if (keyCode == key && stage.getActors().get(actorIndex).isVisible() && 
+				    !stage.getActors().get(0).isVisible())
 					stage.getActors().get(actorIndex).setVisible(false);
-				else if (keyCode == key && !stage.getActors().get(actorIndex).isVisible() && !stage.getActors().get(0).isVisible()) {
+				else if (keyCode == key && !stage.getActors().get(actorIndex).isVisible() && 
+						 !stage.getActors().get(0).isVisible()) {
 					stage.getActors().get(actorIndex).setVisible(true);
 				}
 				
@@ -49,8 +53,7 @@ public class UIBase implements Screen {
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
-		
+		stage.getViewport().update(width, height, true);
 	}
 
 	@Override
@@ -79,8 +82,7 @@ public class UIBase implements Screen {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
+		stage.dispose();
 	}
 	
 	public Stage getStage() {
