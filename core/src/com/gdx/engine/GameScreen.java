@@ -35,6 +35,7 @@ import com.gdx.UI.UIConsole;
 import com.gdx.UI.UIBase;
 import com.gdx.UI.UIGrid;
 import com.gdx.UI.UIInputProcessor;
+import com.gdx.UI.UIMap;
 import com.gdx.UI.UIMenu;
 import com.gdx.UI.UIOverlay;
 import com.gdx.Weapons.RocketLauncher;
@@ -56,6 +57,7 @@ public class GameScreen implements Screen {
 	private UIMenu menu;
 	private UIOverlay overlay;
 	private InputMultiplexer multiplexer = new InputMultiplexer();
+	private UIMap map;
 	
 	public enum State {
 		Running, Paused
@@ -119,6 +121,8 @@ public class GameScreen implements Screen {
 		overlay.setCursorImage("crosshair.png", 0, 0);
 		grid.addVisibleInputListener(Keys.I, 2);
 		menu.addVisibleInputListener(Keys.ESCAPE, 1);
+		map = new UIMap(stage, spriteBatch);
+		map.generateMap(world.getMeshLevel().getInstances());
 		//multiplexer.addProcessor(new UIInputProcessor());
 		//Gdx.input.setInputProcessor(multiplexer);
 	}
@@ -137,12 +141,13 @@ public class GameScreen implements Screen {
 		
 		//UI components are rendered here
 		spriteBatch.begin();
-		renderFps();
-		renderPos();
-		renderTilePos();
-		base.render(delta);
-		renderUI();
+		//renderFps();
+		//renderPos();
+		//renderTilePos();
+		map.render(delta);
+		//renderUI();
 		spriteBatch.end();
+		base.render(delta);
 	}
 	
 	public void renderFps() {

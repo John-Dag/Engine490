@@ -35,6 +35,7 @@ public class World implements Disposable {
 	private Vector3 out;
     private DistanceTrackerMap distanceMap;
     private FilterEffect filterEffect;
+    
 	public World() {
 		boolean bspDungeon = false;
 
