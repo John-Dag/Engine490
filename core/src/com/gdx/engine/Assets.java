@@ -48,7 +48,7 @@ public class Assets {
 	public static Texture gridslot;
 	private static ParticleEffectLoader loader;
 	private static ParticleEffectLoadParameter loadParam;
-	public  static String vertexShader;
+	public static String vertexShader;
 	public static String fragmentShader;
 	public static ShaderProgram shaderProgram;
 	

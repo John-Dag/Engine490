@@ -49,6 +49,7 @@ public class UIGrid extends UIBase {
 	/***
 	 * Generates a grid in a scene2d window based on specified number of slots
 	 * and slot size.
+	 * @param align Alignment of the grid within a window
 	 * @param slotWidth Width of each slot
 	 * @param slotHeight Height of each slot
 	 * @param numSlotsX Number of slots to fill each row
@@ -58,7 +59,7 @@ public class UIGrid extends UIBase {
 	
 	public void generateGrid(int align, float slotWidth, float slotHeight, int numSlotsX, int numSlotsY, int padding) {
 		window.setSize(slotWidth * numSlotsX, slotHeight * numSlotsY);
-		table.align(align).align(Align.bottom);
+		table.align(align);
 		
 		//Add click listeners to each slot
 		for (int a = 0; a < numSlotsX * numSlotsY; a++) {
@@ -74,7 +75,7 @@ public class UIGrid extends UIBase {
 		//Add the slot actors to the window in a grid
 		for (int i = 0; i < numSlotsX; i++) {
 			for (int j = 0; j < numSlotsY; j++) { 
-				table.add(images.get((i * numSlotsX) + j)).pad(padding);
+				table.add(images.get((i * numSlotsX) + j)).pad(padding).size(slotWidth, slotHeight);
 			}
 
 			table.row();

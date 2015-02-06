@@ -53,11 +53,13 @@ public class GameScreen implements Screen {
 	private Skin skin;
 	private UIConsole console;
 	private boolean consoleActive;
+	private boolean mapGenerated;
 	private UIBase base;
 	private UIMenu menu;
 	private UIOverlay overlay;
 	private InputMultiplexer multiplexer = new InputMultiplexer();
 	private UIMap map;
+	
 	
 	public enum State {
 		Running, Paused
@@ -121,8 +123,8 @@ public class GameScreen implements Screen {
 		overlay.setCursorImage("crosshair.png", 0, 0);
 		grid.addVisibleInputListener(Keys.I, 2);
 		menu.addVisibleInputListener(Keys.ESCAPE, 1);
-		map = new UIMap(stage, spriteBatch);
-		map.generateMap(world.getMeshLevel().getInstances());
+		map = new UIMap(world, stage, spriteBatch, skin);
+		mapGenerated = false;
 		//multiplexer.addProcessor(new UIInputProcessor());
 		//Gdx.input.setInputProcessor(multiplexer);
 	}
@@ -138,13 +140,19 @@ public class GameScreen implements Screen {
 				break;
 		}
 		renderer.RenderWorld(delta);
-		
+		if (!mapGenerated) {
+			map.generateMap(world.getMeshLevel().getLevelArray(), world.getMeshLevel().getMapMaterials());
+			spriteBatch.begin();
+			map.render(delta);
+			spriteBatch.end();
+			mapGenerated = true;
+		}
 		//UI components are rendered here
 		spriteBatch.begin();
 		//renderFps();
 		//renderPos();
 		//renderTilePos();
-		map.render(delta);
+		//map.render(delta);
 		//renderUI();
 		spriteBatch.end();
 		base.render(delta);
