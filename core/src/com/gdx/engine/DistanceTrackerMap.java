@@ -273,8 +273,8 @@ public class DistanceTrackerMap {
         MapTile checkTile;
         TiledMapTile checkTile2;
 
-        if (mapObject.getTileNumber() == 1221)//1024 +
-            mapObject.setTileNumber(1221);//232 for height 6 issue
+        if (mapObject.getTileNumber() == 1253)//1024 +
+            mapObject.setTileNumber(1253);//232 for height 6 issue
 
         if (mapObject.getLayer() == 1){
             mapObject.setTileNumber(mapObject.getTileNumber() - width * height);//temp change to layer 2 tile pos
@@ -379,7 +379,10 @@ public class DistanceTrackerMap {
                     && getYPos(topLeft) == getYPos(tileLocation) + 1
                     && meshLevel.getMapTile(getXPos(topLeft), getYPos(topLeft), adjTileLayer).getRampDirection() == -1) {
                 if (tileLayer == 1)
-                    topLeft = topLeft + width * height;
+                    if ((top > width * width && left > width * width) || (top < width * width && left < width * width))
+                        topLeft = topLeft + width * height;
+                    else
+                        continue;
                 else {
                     if (adjTileLayer == 1) {
                         checkTile = meshLevel.getMapTile(getXPos(topLeft), getYPos(topLeft), 1);
@@ -401,7 +404,10 @@ public class DistanceTrackerMap {
                     && getYPos(tileLocation) - 1 == getYPos(botLeft)
                     && meshLevel.getMapTile(getXPos(botLeft), getYPos(botLeft), adjTileLayer).getRampDirection() == -1) {
                 if (tileLayer == 1)
-                    botLeft = botLeft + width * height;
+                    if ((bottom > width * width && left > width * width) || (bottom < width * width && left < width * width))
+                        botLeft = botLeft + width * height;
+                    else
+                        continue;
                 else {
                     if (adjTileLayer == 1) {
                         checkTile = meshLevel.getMapTile(getXPos(botLeft), getYPos(botLeft), 1);
@@ -423,9 +429,12 @@ public class DistanceTrackerMap {
                     && getYPos(botRight) == getYPos(tileLocation) - 1
                     && meshLevel.getMapTile(getXPos(botRight), getYPos(botRight), adjTileLayer).getRampDirection() == -1) {
                 if (tileLayer == 1) {
-                    botRight = botRight + width * height;
-                    if ((right > width * width && bottom < width * width) || (bottom > width * width && right < width * width))
-                        break;
+                    if ((bottom > width * width && right > width * width) || (bottom < width * width && right < width * width))
+                        botRight = botRight + width * height;
+                    else
+                        continue;
+                    //if ((right > width * width && bottom < width * width) || (bottom > width * width && right < width * width))
+                     //   break;
                 }
                 else {
                     if (adjTileLayer == 1) {
@@ -448,7 +457,10 @@ public class DistanceTrackerMap {
                     && getYPos(topRight) == getYPos(tileLocation) + 1
                     && meshLevel.getMapTile(getXPos(topRight), getYPos(topRight), adjTileLayer).getRampDirection() == -1){
                 if (tileLayer == 1)
-                    topRight = topRight + width * height;
+                    if ((top > width * width && right > width * width) || (top < width * width && right < width * width))
+                        topRight = topRight + width * height;
+                    else
+                        continue;
                 else {
                     if (adjTileLayer == 1) {
                         checkTile = meshLevel.getMapTile(getXPos(topRight), getYPos(topRight), 1);
