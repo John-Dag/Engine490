@@ -1,6 +1,5 @@
 package com.gdx.UI;
 
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
@@ -11,10 +10,7 @@ public class UIInputProcessor extends UIBase implements InputProcessor {
 	
 	@Override
 	public boolean keyDown(int keycode) {
-		switch (keycode) {
-		case Keys.I:
-			
-		}
+		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -32,7 +28,6 @@ public class UIInputProcessor extends UIBase implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

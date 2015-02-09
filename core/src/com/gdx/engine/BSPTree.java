@@ -1,7 +1,5 @@
 package com.gdx.engine;
 
-import java.util.ArrayList;
-
 public class BSPTree {
 	//private ArrayList<Room> rooms;
 	public int x1, x2, y1, y2;	// the coordinates of this space

@@ -4,8 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -59,13 +59,13 @@ public class UIConsole extends UIBase {
 	public void initializeConsoleWindow() {
 		consoleVal = "";
 		consoleWindow = new Window("Console", skin);
+		consoleWindow.setName("console");
 		consoleWindow.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() / 3);
 		consoleWindow.setPosition(0, Gdx.graphics.getHeight());
 		consoleInputField = new TextField("", skin);
 		consoleWindow.add(consoleInputField).width(consoleWindow.getWidth()).height(consoleWindow.getHeight());
 		this.getStage().addActor(consoleWindow);
 		consoleWindow.setVisible(false);
-		isConsoleActive = false;
 		
 		//Sends console commands to be parsed once the user hits enter
 		consoleInputField.setTextFieldListener(new TextFieldListener() {
@@ -202,7 +202,7 @@ public class UIConsole extends UIBase {
 	}
 
 	/***
-	 * Initializes shader filter effects that can be accessed through the console (fx+, fx-).
+	 * Initializes shader filter effects that can be accessed through the console (Use command fx+, fx-).
 	 */
 	
 	public void initializeFilterEffects() {
@@ -255,20 +255,17 @@ public class UIConsole extends UIBase {
 	
 	public void addConsoleInputListener(final int key, final int actorIndex) {
 		final Stage stage = this.getStage();
-		if (actorIndex > stage.getActors().size) {
-			System.err.println("addInputListener(): Actor index value out of range.");
-			return;
-		}
+		final Actor actor = this.getStage().getRoot().findActor("console");
+		this.getStage().setKeyboardFocus(actor);
 		
-		this.getStage().addListener(new InputListener() {
+		actor.addListener(new InputListener() {
 			public boolean keyDown(InputEvent event, int keyCode) {
-				if (keyCode == key && stage.getActors().get(actorIndex).isVisible()) {
-					stage.getActors().get(actorIndex).setVisible(false);
+				if (keyCode == key && actor.isVisible()) {
+					actor.setVisible(false);
 					GameScreen.state = State.Running;
-					stage.setKeyboardFocus(null);
 				}
-				else if (keyCode == key && !stage.getActors().get(actorIndex).isVisible()) {
-					stage.getActors().get(actorIndex).setVisible(true);
+				else if (keyCode == key && !actor.isVisible()) {
+					actor.setVisible(true);
 					GameScreen.state = State.Paused;
 					stage.setKeyboardFocus(consoleInputField);
 				}
@@ -276,6 +273,23 @@ public class UIConsole extends UIBase {
 				return true;
 			}
 		});
+	}
+	
+	@Override
+	public void show() {
+		if (!this.consoleWindow.isVisible()) {
+			this.consoleWindow.setVisible(true);
+			this.consoleInputField.setDisabled(false);
+			UIBase.uiSelected = true;
+			this.getStage().setKeyboardFocus(consoleInputField);
+			GameScreen.state = State.Paused;
+		}
+		else {
+			this.consoleWindow.setVisible(false);
+			UIBase.uiSelected = false;
+			this.consoleInputField.setDisabled(true);
+			GameScreen.state = State.Running;
+		}
 	}
 	
 	public Window getConsoleWindow() {

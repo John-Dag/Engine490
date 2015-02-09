@@ -3,7 +3,6 @@ package com.gdx.UI;
 import java.util.Map;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -14,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -34,23 +34,37 @@ public class UIMap extends UIBase {
 	private Window window;
 	private int mapWidth, mapHeight;
 	private ShapeRenderer shapeRenderer;
+	private int indicatorSize;
 	
-	public UIMap(World world, Stage stage, SpriteBatch batch, Skin skin, Color color, int mapWidth, int mapHeight) {
-		super(stage);
+	/***
+	 * Creates a map widget
+	 * @param color Color of the map indicator
+	 * @param mapLayer The map layer that will be used to generate the map
+	 */
+	
+	public UIMap(World world, Stage stage, SpriteBatch batch, Skin skin, Color color, int mapWidth, int mapHeight, int indicatorSize, int mapLayer) {
+		super(stage); 
 		mapCamera = new OrthographicCamera(Gdx.graphics.getWidth(), 
 				                           Gdx.graphics.getHeight());
 		this.batch = batch;
 		this.world = world;
-		currentLayer = (TiledMapTileLayer) world.getMeshLevel().getTiledMap().getLayers().get(0);
-		sprites = new Sprite[currentLayer.getWidth()][currentLayer.getHeight()];
+		currentLayer = (TiledMapTileLayer) world.getMeshLevel().getTiledMap().getLayers().get(mapLayer);
+		sprites = new Sprite[currentLayer.getHeight()][currentLayer.getHeight()];
 		table = new Table();
 		table.setFillParent(true);
 		window = new Window("", skin);
 		this.mapWidth = mapWidth;
 		this.mapHeight = mapHeight;
+		this.indicatorSize = indicatorSize;
 		shapeRenderer = new ShapeRenderer();
 		shapeRenderer.setColor(color);
 	}
+	
+	/***
+	 * Generates a 2D minimap from a mesh level.
+	 * @param levelArray The mesh level array that contains the Texture ids
+	 * @param MapMaterials The materials used in the mesh level
+	 */
 	
 	public void generateMap(MapTile[][][] levelArray, Map<Integer, Material> MapMaterials) {
 		for (int i = 0; i < currentLayer.getWidth(); i++) {
@@ -65,12 +79,15 @@ public class UIMap extends UIBase {
 			}
 		}
 		
-		batch.begin();
-		generateMapShot();
-		batch.end();
-		mapShot = new Image(ScreenUtils.getFrameBufferTexture(Gdx.graphics.getWidth() / 2, 
-							Gdx.graphics.getHeight() / 2, currentLayer.getWidth() * mapWidth, 
-							currentLayer.getHeight() * mapHeight));
+		try {
+			mapShot = generateMapShot();
+		}
+		catch(Exception e) {
+			System.err.println("generateMapShot(): Error generating map image");
+			System.err.println(e);
+			return;
+		}
+		
 		table.setHeight(mapShot.getHeight());
 		table.setWidth(mapShot.getWidth());
 		table.addActor(mapShot);
@@ -82,8 +99,13 @@ public class UIMap extends UIBase {
 		this.getStage().addActor(window);
 	}
 	
-	public void generateMapShot() {
+	/***
+	 * Generates a 2D map which is displayed and captured as an image. The image is then added to the map widget.
+	 */
+	
+	private Image generateMapShot() {
 		mapCamera.update();
+		batch.begin();
 		batch.setProjectionMatrix(mapCamera.combined);
 		
 		for (int i = 0; i < currentLayer.getWidth(); i++) {
@@ -91,15 +113,31 @@ public class UIMap extends UIBase {
 				batch.draw(sprites[i][j], i * mapWidth, j * mapHeight, mapWidth, mapHeight);
 			}
 		}
+		
+		batch.end();
+		
+		return new Image(ScreenUtils.getFrameBufferTexture(Gdx.graphics.getWidth() / 2, 
+						 Gdx.graphics.getHeight() / 2, currentLayer.getWidth() * mapWidth, 
+						 currentLayer.getHeight() * mapHeight));
 	}
 	
-	@Override
-	public void render(float delta) {
+	/***
+	 * Renders an indicator 
+	 * @param delta
+	 * @param position The entities position
+	 */
+	
+	public void renderIndicator(float delta, Vector3 position) {
 		mapCamera.update();
 		batch.setProjectionMatrix(mapCamera.combined);
 		shapeRenderer.begin(ShapeType.Filled);
-		shapeRenderer.circle(window.getX() + world.getPlayer().getPosition().z * mapHeight, 
-				             window.getY() + world.getPlayer().getPosition().x * mapWidth, 5);
+		shapeRenderer.circle(window.getX() + position.z * mapHeight, 
+				             window.getY() + position.x * mapWidth, indicatorSize);
 		shapeRenderer.end();
+	}
+	
+	@Override
+	public void dispose() {
+		shapeRenderer.dispose();
 	}
 }

@@ -1,45 +1,34 @@
 package com.gdx.engine;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.gdx.FilterEffects.*;
+import com.gdx.UI.UIChat;
 import com.gdx.UI.UIConsole;
 import com.gdx.UI.UIBase;
 import com.gdx.UI.UIGrid;
-import com.gdx.UI.UIInputProcessor;
 import com.gdx.UI.UIMap;
 import com.gdx.UI.UIMenu;
 import com.gdx.UI.UIOverlay;
-import com.gdx.Weapons.RocketLauncher;
-import com.gdx.Weapons.Sword;
 
 public class GameScreen implements Screen {
 	public static Vector2 center;
@@ -52,13 +41,14 @@ public class GameScreen implements Screen {
 	private Stage stage;
 	private Skin skin;
 	private UIConsole console;
-	private boolean consoleActive;
 	private UIBase base;
 	private UIMenu menu;
 	private UIOverlay overlay;
 	private InputMultiplexer multiplexer = new InputMultiplexer();
 	private UIMap map;
-	
+	private UIChat chat;
+	private UIGrid grid;
+	private WorldInputProcessor screenInputProcessor;
 	
 	public enum State {
 		Running, Paused
@@ -72,23 +62,36 @@ public class GameScreen implements Screen {
 	
 		center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		spriteBatch = new SpriteBatch();
-		stage = new Stage(new ScreenViewport());
-		this.consoleActive = consoleActive;
-		if (consoleActive) {
-			console = new UIConsole(stage, world);
-			console.initializeConsoleWindow();
-			console.initializeFilterEffects();
-			console.addConsoleInputListener(Keys.GRAVE, 0);
-		}
-
 		bitmapFont = new BitmapFont();
 		bitmapFont.setScale(0.9f);
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
 		state = State.Running;
+		
+		stage = new Stage() {
+			@Override
+			public boolean keyDown(int keyCode) {
+				if (keyCode == Keys.GRAVE) {
+					console.show();
+				}
+				
+				else if (keyCode == Keys.I && !UIBase.uiSelected) {
+					grid.show();
+				}
+				
+				return false;
+			}
+		};
+		screenInputProcessor = new WorldInputProcessor(world);
+		
+		console = new UIConsole(stage, world);
+		console.initializeConsoleWindow();
+		console.initializeFilterEffects();
+		
 		base = new UIBase(stage);
 		Array<TextButton> buttons = new Array<TextButton>();
 		TextButtonStyle style = new TextButtonStyle();
 		style.font = bitmapFont;
+		
 		final TextButton button1 = new TextButton("Pause", style);
 		button1.addListener(new ClickListener() {
 			@Override
@@ -111,21 +114,28 @@ public class GameScreen implements Screen {
 				Gdx.app.exit();
 			}
 		});
+		
 		buttons.add(button2);
 		menu = new UIMenu(stage, skin, buttons, "Engine 490", 0, 0);
 		menu.generateVerticalMenu(10);
-		final UIGrid grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
+		grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
 		grid.generateGrid(Align.bottom, 30, 30, 5, 5, 3);
-		grid.setWindowSize(500, 500);
-		overlay = new UIOverlay(stage, bitmapFont);
+		grid.setWindowSize(300, 300);
+		overlay = new UIOverlay(stage, spriteBatch, bitmapFont);
 		overlay.addCrosshair(Assets.crosshair, center);
-		overlay.setCursorImage("crosshair.png", 0, 0);
-		grid.addVisibleInputListener(Keys.I, 2);
-		menu.addVisibleInputListener(Keys.ESCAPE, 1);
-		map = new UIMap(world, stage, spriteBatch, skin, Color.BLACK, 10, 10);
+		map = new UIMap(world, stage, spriteBatch, skin, Color.BLACK, 5, 5, 3, 0);
 		map.generateMap(world.getMeshLevel().getLevelArray(), world.getMeshLevel().getMapMaterials());
-		//multiplexer.addProcessor(new UIInputProcessor());
-		//Gdx.input.setInputProcessor(multiplexer);
+		TextureRegionDrawable barTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("barRed.png"))));
+		ProgressBarStyle barStyle = new ProgressBarStyle(skin.newDrawable("white", Color.RED), barTexture);
+		ProgressBar bar = new ProgressBar(world.getPlayer().MIN_HEALTH, world.getPlayer().getHealth(), 1f, false, barStyle);
+		overlay.addProgressBarWidget(bar, true, world.getPlayer().getHealth());
+		chat = new UIChat(stage, skin, "Chat");
+		chat.addChatWidget(300, 200, 0, 30, 0.9f);
+		chat.addChatWidgetListeners();
+		
+		multiplexer.addProcessor(screenInputProcessor);
+		multiplexer.addProcessor(stage);
+		Gdx.input.setInputProcessor(multiplexer);
 	}
 	
 	@Override
@@ -142,37 +152,15 @@ public class GameScreen implements Screen {
 
 		//UI components are rendered here
 		spriteBatch.begin();
-		//renderFps();
-		//renderPos();
-		//renderTilePos();
-		//map.render(delta);
-		//renderUI();
+		overlay.renderFPS(delta, -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		overlay.renderPosition(world.getPlayer().getPosition(), delta, -Gdx.graphics.getWidth() / 2, 
+				               Gdx.graphics.getHeight() / 2 - 20f);
+		overlay.renderTilePosition(world.getPlayer().getPlayerTileCoords(), delta, 
+				                   -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 40f);
 		spriteBatch.end();
 		base.render(delta);
-		map.render(delta);
-	}
-	
-	public void renderFps() {
-		int fps = Gdx.graphics.getFramesPerSecond();
-		bitmapFont.draw(spriteBatch, "FPS: " + fps, 10f, 530f);
-		bitmapFont.draw(spriteBatch, "Rendered Models: " + Render.renderCount, 10f, 510f); 
-	}
-	
-	// TODO: need to make sure that player position always matches camera position, then apply movement to player position, not just camera -Cory
-	public void renderPos() {
-		int posX = (int)world.getPlayer().camera.position.x;
-		int posY = (int)world.getPlayer().camera.position.y;
-		int posZ = (int)world.getPlayer().camera.position.z;
-		bitmapFont.draw(spriteBatch,  "Position: " + posX + ", " + posY + ", " + posZ, 10f, 490f);
-	}
-	
-	public void renderTilePos(){
-		GridPoint2 tileIndex = world.getPlayer().getPlayerTileCoords();
-		bitmapFont.draw(spriteBatch, "Tile (" + tileIndex.x + ", " + tileIndex.y +")", 10f, 470f);
-	}
-	
-	public void renderUI() {
-		bitmapFont.draw(spriteBatch, "Health: " + World.player.getHealth(), 0f, 20f);
+		overlay.updateWidgets(delta, world.player.getHealth());
+		map.renderIndicator(delta, world.getPlayer().getPosition());
 	}
 
 	@Override
