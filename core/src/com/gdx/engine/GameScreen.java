@@ -29,6 +29,7 @@ import com.gdx.UI.UIGrid;
 import com.gdx.UI.UIMap;
 import com.gdx.UI.UIMenu;
 import com.gdx.UI.UIOverlay;
+import com.gdx.UI.UIVirtualJoystick;
 
 public class GameScreen implements Screen {
 	public static Vector2 center;
@@ -49,6 +50,7 @@ public class GameScreen implements Screen {
 	private UIChat chat;
 	private UIGrid grid;
 	private WorldInputProcessor screenInputProcessor;
+	private UIVirtualJoystick virtualJoystick;
 	
 	public enum State {
 		Running, Paused
@@ -132,6 +134,9 @@ public class GameScreen implements Screen {
 		chat = new UIChat(stage, skin, "Chat");
 		chat.addChatWidget(300, 200, 0, 30, 0.9f);
 		chat.addChatWidgetListeners();
+		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
+												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
+		virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
 		
 		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);
@@ -161,6 +166,7 @@ public class GameScreen implements Screen {
 		base.render(delta);
 		overlay.updateWidgets(delta, world.player.getHealth());
 		map.renderIndicator(delta, world.getPlayer().getPosition());
+		virtualJoystick.render(delta);
 	}
 
 	@Override

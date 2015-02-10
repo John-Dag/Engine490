@@ -46,6 +46,8 @@ public class Assets {
 	public static Texture aoeTexture;
 	public static TextureRegion aoeTextureRegion;
 	public static Texture gridslot;
+	public static Texture joystickBackground;
+	public static Texture joystickKnob;
 	private static ParticleEffectLoader loader;
 	private static ParticleEffectLoadParameter loadParam;
 	public static String vertexShader;
@@ -80,6 +82,8 @@ public class Assets {
 		weapon1 = new Texture("weapon1.png");
 		weapon1Region = new TextureRegion(weapon1);
 		gridslot = new Texture("gridslot.png");
+		joystickBackground = new Texture("joystickBackground.png");
+		joystickKnob = new Texture("joystickKnob.png");
 		//wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		loadShaders();
 	}
@@ -97,7 +101,7 @@ public class Assets {
 		loader = new ParticleEffectLoader(new InternalFileHandleResolver());
 	    manager.setLoader(ParticleEffect.class, loader);
 	    manager.load("bloodeffect.pfx", ParticleEffect.class, loadParam);
-	    manager.load("torcheffect.pfx", ParticleEffect.class, loadParam);
+	    manager.load("torcheffect2.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("mistGreenWeapon.pfx", ParticleEffect.class, loadParam);
 	    manager.load("portalEffect.pfx", ParticleEffect.class, loadParam);

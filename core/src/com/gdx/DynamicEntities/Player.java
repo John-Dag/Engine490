@@ -1,6 +1,7 @@
 package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -41,7 +42,7 @@ public class Player extends DynamicEntity {
 	private boolean mouseLocked, mouseLeft, clipping, isCrouching;
 	public Vector3 temp;
 	private World world;
-	private Vector3 collisionVector, movementVector, newPos, oldPos;
+	private Vector3 collisionVector, newPos, oldPos;
 	private boolean isJumping, isFiring, isCooldownActive, isPlayerTargeting;
 	private float jumpVelocity;
 	private float currentHeightOffset;
@@ -72,7 +73,7 @@ public class Player extends DynamicEntity {
 		this.camera.lookAt(position.x + 1, position.y, position.z + 1);
 		this.camera.near = 0.01f;
 		this.camera.far = FOG_DISTANCE;
-		this.movementVector = new Vector3(0,0,0);
+		this.getMovementVector().set(new Vector3(0, 0, 0));
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
 		this.isJumping = false;
@@ -160,12 +161,12 @@ public class Player extends DynamicEntity {
 		
 		float movAmt = (currentMovementSpeed *speedScalar) * delta;
 		if(clipping){
-			movementVector.y = 0;	// jumping is done separately from the movementVector
+			getMovementVector().y = 0;	// jumping is done separately from the getMovementVector()
 		}
-		movementVector.nor();
+		getMovementVector().nor();
 		
 		oldPos.set(this.camera.position);
-		newPos.set(oldPos.x + movementVector.x * movAmt, oldPos.y + movementVector.y * movAmt, oldPos.z + movementVector.z * movAmt);
+		newPos.set(oldPos.x + getMovementVector().x * movAmt, oldPos.y + getMovementVector().y * movAmt, oldPos.z + getMovementVector().z * movAmt);
 		
 		// This makes it so that the player falls with gravity when running off ledges
 		
@@ -186,12 +187,12 @@ public class Player extends DynamicEntity {
 			isJumping = true;
 		}
 
-		// calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the movementVector.
+		// calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the getMovementVector().
 		if (clipping){
 			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, PLAYER_SIZE, PLAYER_HEIGHT, PLAYER_SIZE);
-			movementVector.set(movementVector.x * collisionVector.x,
-					movementVector.y * collisionVector.y,
-					movementVector.z * collisionVector.z);
+			getMovementVector().set(getMovementVector().x * collisionVector.x,
+					getMovementVector().y * collisionVector.y,
+					getMovementVector().z * collisionVector.z);
 		}
 		
        for(Enemy enemy:World.enemyInstances)
@@ -204,7 +205,7 @@ public class Player extends DynamicEntity {
        	{
        		if(enemy.getPosition().dst(newPos) < enemy.getPosition().dst(oldPos))
        		{
-       			movementVector.set(0,0,0);
+       			getMovementVector().set(0,0,0);
        			break;
        		}
 
@@ -218,7 +219,7 @@ public class Player extends DynamicEntity {
 
        }
 
-		this.camera.position.mulAdd(movementVector, movAmt);
+		this.camera.position.mulAdd(getMovementVector(), movAmt);
 		
 		//world.getMeshLevel().updateHeightOffset(this.camera.position.y - currentHeightOffset);
 		
@@ -250,7 +251,8 @@ public class Player extends DynamicEntity {
 		else
 			mouseLeft = false;
 		
-		movementVector.set(0,0,0);
+		if (Gdx.app.getType() == ApplicationType.Desktop)
+			getMovementVector().set(0,0,0);
 		
 		//Keyboard input
 		if (moveForward)
@@ -322,21 +324,21 @@ public class Player extends DynamicEntity {
 	}
 	
 	public void moveForward() {
-		movementVector.add(camera.direction);
+		getMovementVector().add(camera.direction);
 	}
 	
 	public void moveBackwards() {
-		movementVector.sub(camera.direction);
+		getMovementVector().sub(camera.direction);
 	}
 	
 	public void strafeRight() {
 		temp.set(camera.direction).crs(camera.up);
-		movementVector.add(temp);
+		getMovementVector().add(temp);
 	}
 	
 	public void strafeLeft() {
 		temp.set(camera.up).crs(camera.direction);
-		movementVector.add(temp);
+		getMovementVector().add(temp);
 	}
 	
 	public void jump() {

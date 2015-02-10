@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
-public class UIBase extends Actor implements Screen {
+public class UIBase implements Screen {
 	public static boolean uiSelected = false;
 	private Stage stage;
 

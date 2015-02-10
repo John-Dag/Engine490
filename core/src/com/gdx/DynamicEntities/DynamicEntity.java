@@ -29,6 +29,7 @@ public class DynamicEntity extends Entity {
 	private Vector3 newVelocity = new Vector3();
 	private Vector3 newRotation = new Vector3();
 	private Vector3 newAngVelocity = new Vector3();
+	private Vector3 movementVector = new Vector3();
 	
 	public DynamicEntity() {
 		super(0, false, false);
@@ -218,6 +219,14 @@ public class DynamicEntity extends Entity {
 		this.model.calculateTransforms();
 	}
 	
+	public Vector3 getMovementVector() {
+		return movementVector;
+	}
+
+	public void setMovementVector(Vector3 movementVector) {
+		this.movementVector = movementVector;
+	}
+
 	public Vector3 getAngVelocity() {
 		return angVelocity;
 	}
