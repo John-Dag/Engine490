@@ -14,12 +14,8 @@ import java.util.*;
  * add adj obj to
  */
 public class DistanceTrackerMap {
-    //private TiledMapTileLayer layer;
     private MeshLevel meshLevel;
-    //private DistanceFromPlayer playerDistanceMap[][];
-    //private ArrayList<DistanceFromPlayer/*[]*/> distanceMap;
     private DistanceFromPlayer[][] distanceMap;
-    private ArrayList<DistanceFromPlayer> tileLayer;
     private int width;
     private int height;
     private List<Integer> tilesAlreadyChecked;
@@ -28,22 +24,13 @@ public class DistanceTrackerMap {
     private int defaultTileNumber;
     private int maxLayerHeight = 6;
 
-    //  public DistanceTrackerMap(TiledMapTileLayer layer, int playerPos) {
-    //		this.layer = layer;
-    //		width = layer.getWidth();
-    //		height = layer.getHeight();
-    //		distanceMap = new ArrayList<DistanceFromPlayer>(width * height);
-    //		tilesAlreadyChecked = new ArrayList<Integer>(width * height);
-    //		buildMap(playerPos);
-    //  }
-
     public DistanceTrackerMap(MeshLevel meshLevel, int playerPos) {
     	this.meshLevel = meshLevel;
     	width = meshLevel.getMapXDimension();
     	height = meshLevel.getMapYDimension();
         int totalLayers = 2;
         distanceMap = new DistanceFromPlayer[width * height][totalLayers];
-        defaultTileNumber = width * height + 2;
+        defaultTileNumber = width * height * (totalLayers + 1);
     	tilesAlreadyChecked = new ArrayList<Integer>(width * height);
         //set default values in distance map
         for (int fill = 0; fill < width * height - 1; fill++)
@@ -53,64 +40,78 @@ public class DistanceTrackerMap {
     	buildMap(playerPos);
     }
 
-    public void addDistances(int playerPos) {
-		int pos = playerPos;
-        int startLayerHeight = pos / (width * height);
-        if (startLayerHeight > 0)
-            pos = pos - (startLayerHeight * width * height);
-        if (playerPos > width * width)
-            playerPos = playerPos + 1 - 1;
+    private int unreachableSpotResolution(int pos, int startLayerHeight) {
         if (distanceMap[pos][startLayerHeight].getTileNumber() == -1) {//temp fix to erroring out if player goes to spot unreachable by enemy
             if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
-                pos = pos + 1;
+                return pos + 1;
             else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
-                pos = pos - 1;
+                return pos - 1;
             else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
-                pos = pos + width;
+                return pos + width;
             else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
-                pos = pos - width;
+                return pos - width;
             else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
-                pos = pos + width + 1;
+                return pos + width + 1;
             else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
-                pos = pos + width - 1;
+                return pos + width - 1;
             else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
-                pos = pos - width + 1;
+                return pos - width + 1;
             else if (distanceMap[pos][startLayerHeight].getTileNumber() == -1)
-                pos = pos - width - 1;
+                return pos - width - 1;
+            else
+                return pos;
         }
+        return pos;
+    }
 
-            DistanceFromPlayer start;
-            //try {
-                start = distanceMap[pos][startLayerHeight];
-            //} catch (Exception e) {
-            //    return;
-            //}
+    public void addDistances(int playerPos) {
+        //if (playerPos == )
+		int pos = playerPos;
+        int startLayerHeight = pos / (width * height);
+        DistanceFromPlayer start;
+        if (startLayerHeight > 0)
+            pos = pos - (startLayerHeight * width * height);
+        if (playerPos > width * width)//debug purposes
+            playerPos = playerPos + 1 - 1;
+        pos = unreachableSpotResolution(pos, startLayerHeight);
+
+        start = distanceMap[pos][startLayerHeight];
+        for (int checkLayer = startLayerHeight; checkLayer > -1; checkLayer--){
+            start = distanceMap[pos][checkLayer];
+            if (start.getTileNumber() != defaultTileNumber)
+                break;
+        }
+        //try {
+            //start = distanceMap[pos][startLayerHeight];
+        //} catch (Exception e) {
+        //    return;
+        //}
+        lookingAt = new ArrayList<DistanceFromPlayer>(1);
+        toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
+        DistanceFromPlayer toCheck;
+        toBeLookedAt.add(start);
+        int distFromPlayer = 0;
+        int layerHeight;
+        do {
+            distFromPlayer++;
             lookingAt = new ArrayList<DistanceFromPlayer>(1);
+            lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
             toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
-            DistanceFromPlayer toCheck;
-            toBeLookedAt.add(start);
-            int distFromPlayer = 0;
-            int layerHeight;
-            do {
-                distFromPlayer++;
-                lookingAt = new ArrayList<DistanceFromPlayer>(1);
-                lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
-                toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
-                for (DistanceFromPlayer distance : lookingAt) {
-                    if (distance.getTileNumber() == 1285)//232 for hight 6 issue
-                        distance.setTileNumber(1285);
-                    for (int num : distance.getSpotToMoveIndex()) {
-                        layerHeight = num / (width * height);
-                        if (layerHeight > 0)
-                            num = num - (layerHeight * width * height);
-                        toCheck = distanceMap[num][layerHeight];
-                        if (toCheck.getDistFromPlayer() == defaultTileNumber && distanceMap[num][layerHeight].getSpotToMoveIndex().contains(distance.getTileNumber())) {
-                            distanceMap[num][layerHeight].setDistFromPlayer(distFromPlayer);
-                            toBeLookedAt.add(toCheck);
-                        }
+            for (DistanceFromPlayer distance : lookingAt) {
+                if (distance.getTileNumber() == 1832)//debug purposes
+                    distance.setTileNumber(1832);
+                for (int num : distance.getSpotToMoveIndex()) {
+                    layerHeight = num / (width * height);
+                    if (layerHeight > 0)
+                        num = num - (layerHeight * width * height);
+                    toCheck = distanceMap[num][layerHeight];
+                    if (toCheck.getDistFromPlayer() == defaultTileNumber && distanceMap[num][layerHeight].getSpotToMoveIndex().contains(distance.getTileNumber())) {
+                        distanceMap[num][layerHeight].setDistFromPlayer(distFromPlayer);
+                        toBeLookedAt.add(toCheck);
                     }
                 }
-            } while (toBeLookedAt.size() != 0);
+            }
+        } while (toBeLookedAt.size() != 0);
 
         return;
     }
@@ -123,20 +124,25 @@ public class DistanceTrackerMap {
         }
     }
 
-    public ArrayList<Integer> shortestPath (int start, int finish) {
+    public ArrayList<Integer> shortestPath (int start, int finish) {//enemytile, playertile
         int layerHeight, adjLayerHeight;
         ArrayList<Integer> intPath = new ArrayList<Integer>(1);
         //DistanceFromPlayer Pos = distanceMap.get(/*tilesAlreadyChecked.indexOf(*/start/*)*/);
         layerHeight = start / (width * height);
         if (layerHeight > 0)
             start = start - (layerHeight * width * height);
-        DistanceFromPlayer Pos = distanceMap[start][layerHeight];
         DistanceFromPlayer leastDistance = new DistanceFromPlayer(-1, -1, width);//initial distance placeholder
         DistanceFromPlayer toCheck;
+        DistanceFromPlayer Pos = distanceMap[start][layerHeight];
+        /*for (int checkLayer = layerHeight; checkLayer > -1; checkLayer--){
+            Pos = distanceMap[start][checkLayer];
+            if (Pos.getTileNumber() != defaultTileNumber)
+                break;
+        }*/
         leastDistance.setDistFromPlayer(width * height + 1);
         while (Pos.getTileNumber() != finish) {
-            if (Pos.getTileNumber() == 1224)
-                Pos.setTileNumber(1224);
+            if (Pos.getTileNumber() == 776)//debug purposes
+                Pos.setTileNumber(776);
             for (int adjIndex : Pos.getSpotToMoveIndex()) {
                 //toCheck = distanceMap.get(adjIndex);
                 adjLayerHeight = adjIndex / (width * height);
@@ -164,10 +170,7 @@ public class DistanceTrackerMap {
 
     private void buildMap(int playerPos) {
         DistanceFromPlayer start = new DistanceFromPlayer(playerPos, 0, width);
-        int layerHeight;
-        int adjLayerHeight;
-        int adjTilePos;
-        int tilePos;
+        int layerHeight, adjLayerHeight, adjTilePos, tilePos;
         lookingAt = new ArrayList<DistanceFromPlayer>();
         toBeLookedAt = new ArrayList<DistanceFromPlayer>();
         toBeLookedAt.add(start);
@@ -176,8 +179,8 @@ public class DistanceTrackerMap {
             lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
             toBeLookedAt = new ArrayList<DistanceFromPlayer>();
             for (DistanceFromPlayer mapObject : lookingAt) {
-                if (mapObject.getTileNumber() == 1221)//1024 +
-                    mapObject.setTileNumber(1221);//232 for height 6 issue
+                if (mapObject.getTileNumber() == 776)//debug purposes
+                    mapObject.setTileNumber(776);
                 layerHeight = mapObject.getTileNumber() / (width * height);
                 tilePos = mapObject.getTileNumber();
                 if (layerHeight > 0)
@@ -194,8 +197,6 @@ public class DistanceTrackerMap {
                     }
                     mapObject.addSpotToMoveIndex(adjPos.getTileNumber());
                 }
-                //if (mapObject.getTileNumber() == 1290)
-                //    mapObject.setTileNumber(1290);
                 distanceMap[tilePos][layerHeight] = mapObject;
             }
         } while (toBeLookedAt.size() != 0);
@@ -222,7 +223,6 @@ public class DistanceTrackerMap {
     private boolean notAWall(DistanceFromPlayer currentLoc,  int adjTileNum, int currentTileHeight, int rampDirection, int adjTileLayer) {
     	if (adjTileNum == defaultTileNumber || adjTileNum >= height * width)//invalid tile
     		return false;
-
         int x = getXPos(adjTileNum);
         int y = getYPos(adjTileNum);
     	MapTile adjTile = meshLevel.getMapTile(x, y, adjTileLayer);
@@ -264,17 +264,68 @@ public class DistanceTrackerMap {
     		return true;//no ramp
     }
 
-    private ArrayList<DistanceFromPlayer> FindAdjLocations(DistanceFromPlayer mapObject) {
-        //int mapObjectNum = mapObject.getTileNumber();
-        int currentLoc = mapObject.getTileNumber();
-        int adjTileLayer = 0;
-        int currentLocHeight;
-        MapTile tile;
+    private DistanceFromPlayer checkNonDiagAdjTile(int currentAdjTile, int adjTileLayer, int currentHeight, DistanceFromPlayer mapObject, int rampDir) {
         MapTile checkTile;
-        TiledMapTile checkTile2;
+        int currentLocHeight;
+        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
+            if (notAWall(mapObject, currentAdjTile, currentHeight, rampDir, tileLayer)
+                    && !rampIsWall(mapObject, currentAdjTile, rampDir, tileLayer)) { //not a wall or wrong ramp direction
+                if (tileLayer == 1)
+                    currentAdjTile = currentAdjTile + width * height;
+                else {
+                    if (adjTileLayer == 1) {
+                        checkTile = meshLevel.getMapTile(getXPos(currentAdjTile) - (width * tileLayer), getYPos(currentAdjTile), 1);
+                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
+                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
+                            return null;
+                    }
+                }
+                return new DistanceFromPlayer(currentAdjTile, tileLayer, width);
+            }
+        return null;
+    }
 
-        if (mapObject.getTileNumber() == 1253)//1024 +
-            mapObject.setTileNumber(1253);//232 for height 6 issue
+    private DistanceFromPlayer checkDiagAdjTile( int adjTileLayer, int currentHeight, DistanceFromPlayer mapObject, ArrayList<DistanceFromPlayer> spotNums,
+                                                 int XAdjTile, int YAdjTile, int currentAdjTile, int tileLocation, int YDistFromTile){
+        int currentLocHeight;
+        MapTile checkTile;
+        int adjDiagonalRamp = -1;//comparing to ramp direction will always return false
+        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
+            if ((isMoveable(spotNums, /*top*/YAdjTile) && isMoveable(spotNums, /*left*/XAdjTile))
+                    && notAWall(mapObject, currentAdjTile, currentHeight, adjDiagonalRamp, tileLayer)
+                    && getYPos(currentAdjTile) == getYPos(tileLocation) + YDistFromTile
+                    && meshLevel.getMapTile(getXPos(currentAdjTile), getYPos(currentAdjTile), tileLayer).getRampDirection() == -1
+                    /*&& notAdjToRamp(XAdjTile, YAdjTile, tileLayer)*/
+                    ) {
+                if (tileLayer == 1)
+                    if ((YAdjTile > width * width && XAdjTile > width * width) || (YAdjTile < width * width && XAdjTile < width * width))
+                        currentAdjTile = currentAdjTile + width * height;
+                    else
+                        continue;
+                else {
+                    if (adjTileLayer == 1) {
+                        checkTile = meshLevel.getMapTile(getXPos(currentAdjTile) - (width * tileLayer), getYPos(currentAdjTile), 1);
+                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
+                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
+                            return null;
+                    }
+                }
+                return new DistanceFromPlayer(currentAdjTile, tileLayer, width);
+            }
+        return null;
+    }
+
+    private ArrayList<DistanceFromPlayer> FindAdjLocations(DistanceFromPlayer mapObject) {
+        int adjTileLayer = 0;
+        MapTile tile;
+        int tileLocation = mapObject.getTileNumber();
+        int currentHeight;
+
+        if (mapObject.getTileNumber() == 1224)//debug purposes
+            mapObject.setTileNumber(1224);
+
+        if (mapObject.getTileNumber() == 232)//debug purposes
+            mapObject.setTileNumber(232);
 
         if (mapObject.getLayer() == 1){
             mapObject.setTileNumber(mapObject.getTileNumber() - width * height);//temp change to layer 2 tile pos
@@ -284,9 +335,8 @@ public class DistanceTrackerMap {
         else//layer == 0
             tile = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), 0);
 
-        int tileLocation = mapObject.getTileNumber();
-
-        int currentHeight = tile.getHeight();
+        tileLocation = mapObject.getTileNumber();
+        currentHeight = tile.getHeight();
 
         if (currentHeight == 5) {
             adjTileLayer = 1;
@@ -294,190 +344,98 @@ public class DistanceTrackerMap {
         //calculate adj rooms
         ArrayList<DistanceFromPlayer> spotNums = new ArrayList<DistanceFromPlayer>(1);
         int bottom, top, left, right, botLeft, botRight, topLeft, topRight;
-        int adjDiagonalRamp = -1;//comparing to ramp direction will always return false
 
+        DistanceFromPlayer testVal = null;
         //left tile
         left = tileLocation - width;
-        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
-            if (notAWall(mapObject, left, currentHeight, MeshLevel.LEFT, tileLayer)
-                    && !rampIsWall(mapObject, left, MeshLevel.LEFT, tileLayer)) { //not a wall or wrong ramp direction
-                if (tileLayer == 1)
-                    left = left + width * height;
-                else {
-                    if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(left), getYPos(left), 1);
-                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            break;
-                    }
-                }
-                spotNums.add(new DistanceFromPlayer(left, tileLayer, width));
-                break;
-            }
+        testVal = checkNonDiagAdjTile(left, adjTileLayer, currentHeight, mapObject, MeshLevel.LEFT);
+        if (testVal != null) {
+            left = testVal.getTileNumber();
+            spotNums.add(testVal);
+            testVal = null;
+        }
+
         //right tile
         right = tileLocation + width;
-        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
-            if (notAWall(mapObject, right, currentHeight, MeshLevel.RIGHT, tileLayer)
-                    && !rampIsWall(mapObject, right, MeshLevel.RIGHT, tileLayer)){
-                if (tileLayer == 1)
-                    right = right + width * height;
-                else {
-                    if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(right), getYPos(right), 1);
-                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            break;
-                    }
-                }
-                spotNums.add(new DistanceFromPlayer(right, tileLayer, width));
-                break;
-            }
+        testVal = checkNonDiagAdjTile(right, adjTileLayer, currentHeight, mapObject, MeshLevel.RIGHT);
+        if (testVal != null) {
+            right = testVal.getTileNumber();
+            spotNums.add(testVal);
+            testVal = null;
+        }
+
         //bottom tile
         bottom = tileLocation - 1;
-        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
-            if (notAWall(mapObject, bottom, currentHeight, MeshLevel.DOWN, tileLayer) && getXPos(mapObject.getTileNumber()) == getXPos(bottom)
-                    && !rampIsWall(mapObject, bottom, MeshLevel.DOWN, tileLayer)) {
-                if (tileLayer == 1)
-                    bottom = bottom + width * height;
-                else {
-                    if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(bottom), getYPos(bottom), 1);
-                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            break;
-                    }
-                }
-                spotNums.add(new DistanceFromPlayer(bottom, tileLayer, width));
-                break;
-            }
+        testVal = checkNonDiagAdjTile(bottom, adjTileLayer, currentHeight, mapObject, MeshLevel.DOWN);
+        if (testVal != null) {
+            bottom = testVal.getTileNumber();
+            spotNums.add(testVal);
+            testVal = null;
+        }
 
         //top tile
         top = tileLocation + 1;
-        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
-            if (notAWall(mapObject, top, currentHeight, MeshLevel.UP, tileLayer) && getXPos(mapObject.getTileNumber()) == getXPos(top)
-                    && !rampIsWall(mapObject, top, MeshLevel.UP, tileLayer)){
-                if (tileLayer == 1)
-                    top = top + width * height;
-                else {
-                    if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(top), getYPos(top), 1);
-                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            break;
-                    }
-                }
-                spotNums.add(new DistanceFromPlayer(top, tileLayer, width));
-                break;
-            }
-
+        testVal = checkNonDiagAdjTile(top, adjTileLayer, currentHeight, mapObject, MeshLevel.UP);
+        if (testVal != null) {
+            top = testVal.getTileNumber();
+            spotNums.add(testVal);
+            testVal = null;
+        }
 
         //top left tile
         topLeft = tileLocation - width + 1;
-        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
-            if ((isMoveable(spotNums, top) && isMoveable(spotNums, left))
-                    && notAWall(mapObject, topLeft, currentHeight, adjDiagonalRamp, tileLayer)
-                    && getYPos(topLeft) == getYPos(tileLocation) + 1
-                    && meshLevel.getMapTile(getXPos(topLeft), getYPos(topLeft), adjTileLayer).getRampDirection() == -1) {
-                if (tileLayer == 1)
-                    if ((top > width * width && left > width * width) || (top < width * width && left < width * width))
-                        topLeft = topLeft + width * height;
-                    else
-                        continue;
-                else {
-                    if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(topLeft), getYPos(topLeft), 1);
-                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            break;
-                    }
-                }
-                spotNums.add(new DistanceFromPlayer(topLeft, tileLayer, width));
-                break;
-            }
-
+        testVal = checkDiagAdjTile(adjTileLayer, currentHeight, mapObject, spotNums, top, left, topLeft, tileLocation, 1);
+        if (testVal != null) {
+            topLeft = testVal.getTileNumber();
+            spotNums.add(testVal);
+            testVal = null;
+        }
 
         //bottom left tile
         botLeft = tileLocation - width - 1;
-        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
-            if ((isMoveable(spotNums, bottom) && isMoveable(spotNums, left))
-                    && notAWall(mapObject, botLeft, currentHeight, adjDiagonalRamp, tileLayer)
-                    && getYPos(tileLocation) - 1 == getYPos(botLeft)
-                    && meshLevel.getMapTile(getXPos(botLeft), getYPos(botLeft), adjTileLayer).getRampDirection() == -1) {
-                if (tileLayer == 1)
-                    if ((bottom > width * width && left > width * width) || (bottom < width * width && left < width * width))
-                        botLeft = botLeft + width * height;
-                    else
-                        continue;
-                else {
-                    if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(botLeft), getYPos(botLeft), 1);
-                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            break;
-                    }
-                }
-                spotNums.add(new DistanceFromPlayer(botLeft, tileLayer, width));
-                break;
-            }
-
+        testVal = checkDiagAdjTile(adjTileLayer, currentHeight, mapObject, spotNums, bottom, left, botLeft, tileLocation, -1);
+        if (testVal != null) {
+            botLeft = testVal.getTileNumber();
+            spotNums.add(testVal);
+            testVal = null;
+        }
 
         //bottom right tile
         botRight = tileLocation + width - 1;
-        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
-            if ((isMoveable(spotNums,bottom) && isMoveable(spotNums, right))
-                    && notAWall(mapObject, botRight, currentHeight, adjDiagonalRamp, tileLayer)
-                    && getYPos(botRight) == getYPos(tileLocation) - 1
-                    && meshLevel.getMapTile(getXPos(botRight), getYPos(botRight), adjTileLayer).getRampDirection() == -1) {
-                if (tileLayer == 1) {
-                    if ((bottom > width * width && right > width * width) || (bottom < width * width && right < width * width))
-                        botRight = botRight + width * height;
-                    else
-                        continue;
-                    //if ((right > width * width && bottom < width * width) || (bottom > width * width && right < width * width))
-                     //   break;
-                }
-                else {
-                    if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(botRight), getYPos(botRight), 1);
-                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            break;
-                    }
-                }
-                spotNums.add(new DistanceFromPlayer(botRight, tileLayer, width));
-                break;
-            }
-
+        testVal = checkDiagAdjTile(adjTileLayer, currentHeight, mapObject, spotNums, bottom, right, botRight, tileLocation, -1);
+        if (testVal != null) {
+            botRight = testVal.getTileNumber();
+            spotNums.add(testVal);
+            testVal = null;
+        }
 
         //top right tile
         topRight = tileLocation + width + 1;
-        for (int tileLayer = adjTileLayer; tileLayer > -1; tileLayer--)
-            if ((isMoveable(spotNums,top) && isMoveable(spotNums,right))
-                    && notAWall(mapObject, topRight, currentHeight, adjDiagonalRamp, tileLayer)
-                    && getYPos(topRight) == getYPos(tileLocation) + 1
-                    && meshLevel.getMapTile(getXPos(topRight), getYPos(topRight), adjTileLayer).getRampDirection() == -1){
-                if (tileLayer == 1)
-                    if ((top > width * width && right > width * width) || (top < width * width && right < width * width))
-                        topRight = topRight + width * height;
-                    else
-                        continue;
-                else {
-                    if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(topRight), getYPos(topRight), 1);
-                        currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            break;
-                    }
-                }
-                spotNums.add(new DistanceFromPlayer(topRight, tileLayer, width));
-                break;
-            }
+        testVal = checkDiagAdjTile(adjTileLayer, currentHeight, mapObject, spotNums, top, right, topRight, tileLocation, 1);
+        if (testVal != null) {
+            topRight = testVal.getTileNumber();
+            spotNums.add(testVal);
+            testVal = null;
+        }
 
         if (mapObject.getLayer() == 1)
             mapObject.setTileNumber(mapObject.getTileNumber() + width * height);
 
         return spotNums;
     }
+/*
+    private boolean notAdjToRamp(int adjXDirTileNum, int adjYDirTileNum, int tileLayer) {
+        if (tileLayer == 1)
+            tileLayer = tileLayer + 1 - 1;
+        adjXDirTileNum = adjXDirTileNum - (width * width * tileLayer);
+        adjYDirTileNum = adjYDirTileNum - (width * width * tileLayer);
+        if (meshLevel.getMapTile(getXPos(adjXDirTileNum), getYPos(adjXDirTileNum), tileLayer).getRampDirection() == -1
+                && meshLevel.getMapTile(getXPos(adjYDirTileNum), getYPos(adjYDirTileNum), tileLayer).getRampDirection() == -1)
+            return true;
+
+        return false;
+    }
+ */
 
     private boolean isMoveable( ArrayList<DistanceFromPlayer> spotNums, int locationNum ) {
         for (DistanceFromPlayer spotNum : spotNums) {
