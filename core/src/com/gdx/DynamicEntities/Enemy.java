@@ -35,7 +35,7 @@ public class Enemy extends DynamicEntity {
 	public StateMachine stateMachine;
 	public boolean isSpawned, isAttacking;
 	public Vector3 spawnPos;
-	private double changeLayerHeight = 5.9;
+	private double changeLayerHeight = 5.8;
 	private float addToChangeLH = 0.2f;
 
 	public Enemy() {
