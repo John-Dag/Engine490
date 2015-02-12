@@ -1,5 +1,7 @@
 package com.gdx.engine;
 
+import java.io.IOException;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -22,6 +24,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Network.NetClient;
+import com.gdx.Network.NetServer;
 import com.gdx.UI.UIChat;
 import com.gdx.UI.UIConsole;
 import com.gdx.UI.UIBase;
@@ -34,6 +38,7 @@ import com.gdx.UI.UIVirtualJoystick;
 public class GameScreen implements Screen {
 	public static Vector2 center;
 	public static State state;
+	public static State mode;
 	private Game game;
 	private World world;
 	private Render renderer;
@@ -44,6 +49,7 @@ public class GameScreen implements Screen {
 	private UIConsole console;
 	private UIBase base;
 	private UIMenu menu;
+	private UIMenu networkMenu;
 	private UIOverlay overlay;
 	private InputMultiplexer multiplexer = new InputMultiplexer();
 	private UIMap map;
@@ -51,11 +57,14 @@ public class GameScreen implements Screen {
 	private UIGrid grid;
 	private WorldInputProcessor screenInputProcessor;
 	private UIVirtualJoystick virtualJoystick;
+	private NetServer server;
+	private NetClient client;
+	private TextButtonStyle style;
 	
 	public enum State {
-		Running, Paused
+		Running, Paused, Server, Client
 	}
-	
+
 	public GameScreen(Game game, boolean consoleActive) {
 		this.game = game;
 		this.world = new World();
@@ -91,7 +100,7 @@ public class GameScreen implements Screen {
 		
 		base = new UIBase(stage);
 		Array<TextButton> buttons = new Array<TextButton>();
-		TextButtonStyle style = new TextButtonStyle();
+		style = new TextButtonStyle();
 		style.font = bitmapFont;
 		
 		final TextButton button1 = new TextButton("Pause", style);
@@ -141,6 +150,58 @@ public class GameScreen implements Screen {
 		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);
 		Gdx.input.setInputProcessor(multiplexer);
+		createNetworkMenu();
+	}
+	
+	public void createNetworkMenu() {
+		Array<TextButton> buttons2 = new Array<TextButton>();
+		final TextButton button3 = new TextButton("Join", style);
+		button3.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				mode = State.Client;
+				state = State.Running;
+				networkMenu.getTable().setVisible(false);
+				startClient();
+			}
+		});
+		buttons2.add(button3);
+		TextButton button4 = new TextButton("Host", style);
+		button4.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				mode = State.Server;
+				state = State.Running;
+				networkMenu.getTable().setVisible(false);
+				startServer();
+			}
+		});
+		
+		buttons2.add(button4);
+		networkMenu = new UIMenu(stage, skin, buttons2, "Network Testing", 0, 0);
+		networkMenu.generateVerticalMenu(10);
+		networkMenu.getTable().setVisible(true);
+		state = State.Paused;
+		//We need to update the world once to avoid client crash, since the renderer will still be updating
+		world.update(Gdx.graphics.getDeltaTime());
+	}
+	
+	public void startServer() {
+		try {
+			server = new NetServer(world);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void startClient() {
+		try {
+			client = new NetClient(world);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -149,6 +210,10 @@ public class GameScreen implements Screen {
 		switch (state) {
 			case Running:
 				world.update(delta);
+				if (mode == State.Server)
+					server.serverUpdate();
+				if (mode == State.Client)
+					client.clientUpdate();
 				break;
 			case Paused:
 				break;
@@ -166,7 +231,7 @@ public class GameScreen implements Screen {
 		base.render(delta);
 		overlay.updateWidgets(delta, world.player.getHealth());
 		map.renderIndicator(delta, world.getPlayer().getPosition());
-		virtualJoystick.render(delta);
+		//virtualJoystick.render(delta);
 	}
 
 	@Override

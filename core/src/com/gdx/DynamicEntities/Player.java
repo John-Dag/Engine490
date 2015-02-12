@@ -37,7 +37,7 @@ public class Player extends DynamicEntity {
 	private static final float GRAVITY = 30f;
 	public static final int MIN_HEALTH = 0;
 	public static final int MAX_HEALTH = 100;
-	private int health;
+	private int health, netId;
 	public PerspectiveCamera camera;
 	private boolean mouseLocked, mouseLeft, clipping, isCrouching;
 	public Vector3 temp;
@@ -87,6 +87,7 @@ public class Player extends DynamicEntity {
 		this.speedScalar = 1f; // 1 = default movespeed
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
+		//this.setModel(model);
 	}
 	
 	public void initAbilities() {
@@ -400,6 +401,14 @@ public class Player extends DynamicEntity {
 			    						 new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
 	}
 	
+	public int getNetId() {
+		return netId;
+	}
+
+	public void setNetId(int netId) {
+		this.netId = netId;
+	}
+
 	public boolean isCooldownActive() {
 		return isCooldownActive;
 	}

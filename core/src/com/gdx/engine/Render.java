@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Disposable;
+import com.gdx.Network.Net.playerPacket;
 
 public class Render implements Disposable {
 	public static int renderCount;
@@ -122,6 +123,13 @@ public class Render implements Disposable {
 		for (ModelInstance wireInstance : world.wireInstances) {
 			renderModels(wireInstance);
 			renderCount++;
+		}
+		
+		//Renders multiplayer (just players so far)
+		for (int i = 0; i < world.getPlayerInstances().size; i++) {
+			world.getPlayerInstances().get(i).getModel().transform.setToTranslation(world.getPlayerInstances().get(i).camera.position.cpy());
+			world.getPlayerInstances().get(i).getModel().transform.scale(0.005f, 0.005f, 0.005f);
+			renderModels(world.getPlayerInstances().get(i).getModel());
 		}
 		
 		shadowBatch.end();

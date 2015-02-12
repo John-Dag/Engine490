@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -20,6 +21,9 @@ import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Weapon;
+import com.gdx.Network.Net.playerNew;
+import com.gdx.Network.Net.playerPacket;
+import com.gdx.Weapons.RocketLauncher;
 
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
@@ -27,6 +31,7 @@ public class World implements Disposable {
 	public static Player player;
 	public static ParticleManager particleManager;
 	public static Array<Enemy> enemyInstances;
+	public Array<Player> playerInstances;
 	public Array<ModelInstance> wireInstances;
 	private MeshLevel meshLevel;
 	private Ray ray;
@@ -68,6 +73,7 @@ public class World implements Disposable {
 		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
 		Entity.entityInstances.add(player);
 		enemyInstances = new Array<Enemy>();
+		playerInstances = new Array<Player>();
 		boxes = new Array<BoundingBox>();
 		position = new Vector3();
 		out = new Vector3();
@@ -75,6 +81,21 @@ public class World implements Disposable {
 		isWireframeEnabled = false;
 		
 		Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
+	}
+	
+	public void addPlayer(playerPacket playerPacket) {
+		try {
+			Player player1 = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.manager.get("GUNFBX.g3db", Model.class)));
+			GridPoint2 playerPos = new GridPoint2();
+			playerPos.set(meshLevel.getStartingPoint());
+			player1.camera.position.set(playerPos.x + 0.5f, player.camera.position.y, playerPos.y + 0.5f);
+			player1.getModel().transform.setToTranslation(player1.getPosition());
+			playerInstances.add(player1);
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 	
 	public void enterDungeon() {
@@ -362,6 +383,14 @@ public class World implements Disposable {
 	
 	public DistanceTrackerMap getDistanceMap() {
 		return distanceMap;
+	}
+
+	public Array<Player> getPlayerInstances() {
+		return playerInstances;
+	}
+
+	public void setPlayerInstances(Array<Player> playerInstances) {
+		this.playerInstances = playerInstances;
 	}
 
 	public void setDistanceMap(DistanceTrackerMap distanceMap) {
