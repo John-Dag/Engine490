@@ -2,6 +2,7 @@ package com.gdx.Network;
 
 import java.io.IOException;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.Kryo;
@@ -15,59 +16,74 @@ import com.gdx.engine.World;
 
 public class NetServer {
 	private Server server;
-	private Array<playerPacket> players;
 	private World world;
 	
 	public NetServer(World world) throws IOException {
 		this.world = world;
-		players = new Array<playerPacket>();
 		server = new Server();
 		server.start();
 		//Log.set(Log.LEVEL_TRACE);
 		Net.register(server);
 		server.bind(54555, 54777);
 		
- 		Net.playerPacket packet = new Net.playerPacket();
-		packet.position = world.getPlayer().getPosition().cpy();
-		packet.id = 0;
-		addNewPlayer(packet);
-		
 	    server.addListener(new Listener() {
 	        public void received (Connection connection, Object object) {
+	        	//Sends packet to all players except the client. Updates position. 
 	        	if (object instanceof Net.playerPacket) {
 	        		Net.playerPacket playerPacket = (Net.playerPacket)object;
-	        		
-	        		for (int i = 0; i < players.size; i++) {
-	        			if (playerPacket.id == players.get(i).id) {
-	        				System.out.println(playerPacket.id);
-	        				players.get(i).position.set(playerPacket.position.cpy());
-	        			}
-	        		}
+	        		updatePlayers(playerPacket, connection);
+	        		server.sendToAllExceptTCP(connection.getID(), playerPacket);
 	        	}
 	        	
+	        	//Handles a packet from a new player. Sends the packet to all players 
+	        	//except the new one.
 	        	else if (object instanceof Net.playerNew) {
 	        		Net.playerNew playerNew = (Net.playerNew)object;
-	        		Net.playerPacket packet = new Net.playerPacket();
+	        		Net.playerNew packet = new Net.playerNew();
 	        		packet.position = playerNew.position;
 	        		packet.id = playerNew.id;
 	        		addNewPlayer(packet);
+	        		server.sendToAllExceptTCP(connection.getID(), playerNew);
+	        		sendAllPlayers(connection.getID());
 	        	}
 	        }
-	     });
+	    });
+	    
+	    server.addListener(new Listener() {
+	    	public void disconnected(Connection connection) {
+	    		removePlayer(connection);
+	    	}
+	    });
 	}
 	
-	public void addNewPlayer(Net.playerPacket packet) {
-		players.add(packet);
+	//Updates all clients with the player that disconnected
+	public void removePlayer(Connection connection) {
+		world.playerInstances.removeIndex(connection.getID());
+		Net.playerDisconnect disconnect = new Net.playerDisconnect();
+		disconnect.id = connection.getID();
+		server.sendToAllTCP(disconnect);
+	}
+	
+	//Updates a new player with all the players on the server
+	public void sendAllPlayers(int id) {
+		for (int i = 0; i < world.getPlayerInstances().size; i++) {
+			System.out.println(world.getPlayerInstances().size);
+			Net.playerNew packet = new Net.playerNew();
+			packet.id = world.getPlayerInstances().get(i).getNetId();
+			packet.position = world.getPlayerInstances().get(i).camera.position.cpy();
+			server.sendToTCP(id, packet);
+		}
+	}
+	
+	public void addNewPlayer(Net.playerNew packet) {
 		world.addPlayer(packet);
 	}
 	
+	public synchronized void updatePlayers(playerPacket packet, Connection connection) {
+		world.updatePlayers(packet);
+	}
+	
 	public void serverUpdate() {
-		for (int i = 0; i < world.getPlayerInstances().size; i++) {
-			if (world.getPlayerInstances().get(i).getNetId() == players.get(i).id)
-				world.getPlayerInstances().get(i).camera.position.set(players.get(i).position);
-		}
-		players.get(0).position.set(world.getPlayer().getPosition());
-
-		server.sendToAllUDP(players);
+		
 	}
 }

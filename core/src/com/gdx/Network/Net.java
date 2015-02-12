@@ -10,10 +10,10 @@ import com.gdx.DynamicEntities.Player;
 public class Net {
 	public static final int port = 54555;
 	
+	//Register all classes that will be sent over the network here
+	//Both client and server must register the same classes
 	static public void register(EndPoint endPoint) {
 		Kryo kryo = endPoint.getKryo();
-	    kryo.register(Net.request.class);
-	    kryo.register(Net.response.class);
 	    kryo.register(Vector3.class);
 	    kryo.register(playerPacket.class);
 	    kryo.register(Array.class);
@@ -21,14 +21,7 @@ public class Net {
 	    kryo.register(playerNew.class);
 	}
 	
-	public static class request {
-		public Vector3 x;
-	}
-	
-	public static class response {
-		public Vector3 x;
-	}
-	
+	//Packets
 	public static class playerPacket {
 		public Vector3 position;
 		public int id;
@@ -36,6 +29,10 @@ public class Net {
 	
 	public static class playerNew {
 		public Vector3 position;
+		public int id;
+	}
+	
+	public static class playerDisconnect {
 		public int id;
 	}
 }

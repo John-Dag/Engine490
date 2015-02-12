@@ -21,10 +21,10 @@ public class NetClient {
 	private int id;
 	
 	public NetClient() {
-		
+		super();
 	}
 	
-	public NetClient(World world) throws IOException {
+	public NetClient(final World world) throws IOException {
 		this.world = world;
 		client = new Client();
 		
@@ -36,47 +36,54 @@ public class NetClient {
 		Net.playerNew packet = new Net.playerNew();
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
-		client.sendUDP(packet);
+		client.sendTCP(packet);
 		
 	    client.addListener(new Listener() {
 	        public void received (Connection connection, Object object) {
-	           if (object instanceof Array) {
-	        	   //System.out.println("recieved packets");
-	        	   Array<Net.playerPacket> playerPackets = (Array<playerPacket>)object;
-	        	   for (int i = 0; i < playerPackets.size; i++) {
-	        		   Net.playerPacket packet = new Net.playerPacket();
-	        		   packet = (com.gdx.Network.Net.playerPacket) playerPackets.get(i);
-	        		   updatePlayers(packet);
-	        	   }
+	           if (object instanceof Net.playerPacket) {
+	        	   Net.playerPacket packetRecieved = (Net.playerPacket)object;
+	        	   Net.playerPacket packet = new Net.playerPacket();
+	        	   packet = packetRecieved;
+	        	   updatePlayers(packet, connection);
+	           }
+	           
+	           else if (object instanceof Net.playerNew) {
+	          	   Net.playerNew packetRecieved = (Net.playerNew)object;
+	        	   Net.playerNew packet = new Net.playerNew();
+	        	   packet = packetRecieved;
+	        	   addPlayer(packet);
+	           }
+	           
+	           else if (object instanceof Net.playerDisconnect) {
+	        	   Net.playerDisconnect disconnect = (Net.playerDisconnect)object;
+	        	   Net.playerDisconnect disconnectPlayer = new Net.playerDisconnect();
+	        	   disconnectPlayer = disconnect;
+	        	   removePlayer(disconnectPlayer);
 	           }
 	        }
 	     });
 	}
 	
-	public void addPlayer(playerPacket packet) {
+	//Remove the player that disconnected from the world
+	public void removePlayer(Net.playerDisconnect disconnect) {
+		world.getPlayerInstances().removeIndex(disconnect.id);
+	}
+	
+	//Adds a new player to the client representing a player on the server
+	public void addPlayer(Net.playerNew packet) {
 		world.addPlayer(packet);
 	}
 	
-	public void updatePlayers(playerPacket packet) {
-		boolean match = false;
-		for (int i = 0; i < world.playerInstances.size; i++) {
-			if (packet.id == world.playerInstances.get(i).getNetId() || packet.id == 0) {
-				System.out.println(world.playerInstances.get(i).getPosition());
-				world.playerInstances.get(i).camera.position.set(packet.position.cpy());
-				match = true;
-			}
-		}
-		
-		if (!match) {
-     	   addPlayer(packet);
-		}
+	//Updates the clients players with player positions from the server
+	public synchronized void updatePlayers(playerPacket packet, Connection connection) {
+		world.updatePlayers(packet);
 	}
 	
+	//Constantly sends client packets to the server. Need to add some kind of throttling to this.
 	public void clientUpdate() {
     	Net.playerPacket packet = new Net.playerPacket();
     	packet.position = world.getPlayer().camera.position.cpy();
     	packet.id = client.getID();
-
-		client.sendUDP(packet);
+		client.sendTCP(packet);
 	}
 }
