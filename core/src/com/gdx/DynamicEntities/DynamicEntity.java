@@ -25,6 +25,7 @@ public class DynamicEntity extends Entity {
 	private AnimationController animation;
 	private BoundingBox boundingBox;
 	private BoundingBox detectionBox;
+	private int NetId;
 	private Vector3 newPosition = new Vector3();
 	private Vector3 newVelocity = new Vector3();
 	private Vector3 newRotation = new Vector3();
@@ -91,6 +92,14 @@ public class DynamicEntity extends Entity {
 		this.angVelocity = new Vector3(0, 0, 0);
 	}
 	
+	public int getNetId() {
+		return NetId;
+	}
+
+	public void setNetId(int netId) {
+		NetId = netId;
+	}
+
 	public Decal getDecal() {
 		return decal;
 	}

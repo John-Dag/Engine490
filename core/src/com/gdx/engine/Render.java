@@ -127,10 +127,17 @@ public class Render implements Disposable {
 		
 		//Renders multiplayer (just players so far)
 		for (int i = 0; i < world.getPlayerInstances().size; i++) {
-			world.getPlayerInstances().get(i).getModel().transform.setToTranslation(world.getPlayerInstances().get(i).camera.position.cpy());
-			world.getPlayerInstances().get(i).getModel().transform.scale(0.005f, 0.005f, 0.005f);
-			renderModels(world.getPlayerInstances().get(i).getModel());
+			if (world.getPlayerInstances().get(i).getModel() != null) {
+				world.getPlayerInstances().get(i).getModel().transform.setToTranslation(world.getPlayerInstances().get(i).camera.position.cpy());
+				world.getPlayerInstances().get(i).getModel().transform.scale(0.005f, 0.005f, 0.005f);
+				renderModels(world.getPlayerInstances().get(i).getModel());
+			}
 		}
+		
+//		for (int i = 0; i < world.projectileInstances.size; i++) {
+//			world.projectileInstances.get(i).getParticleEffect().init();
+//			world.projectileInstances.get(i).getParticleEffect().update();
+//		}
 		
 		shadowBatch.end();
 		shadowLight.end();

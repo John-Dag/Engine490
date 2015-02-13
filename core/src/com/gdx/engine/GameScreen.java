@@ -198,6 +198,7 @@ public class GameScreen implements Screen {
 	public void startClient() {
 		try {
 			client = new NetClient(world);
+			world.setClient(client);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

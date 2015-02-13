@@ -12,6 +12,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
+import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Network.Net.playerPacket;
 import com.gdx.engine.World;
 
@@ -31,7 +32,7 @@ public class NetClient {
 		//Log.set(Log.LEVEL_TRACE);
 		client.start();
 	    Net.register(client);
-		client.connect(5000, "192.168.1.2", 54555, 54777);
+		client.connect(5000, "192.168.1.4", 54555, 54777);
 		
 		Net.playerNew packet = new Net.playerNew();
 		packet.position = world.getPlayer().getPosition();
@@ -60,8 +61,26 @@ public class NetClient {
 	        	   disconnectPlayer = disconnect;
 	        	   removePlayer(disconnectPlayer);
 	           }
+	           
+	           else if (object instanceof Net.projectile) {
+	        	   Net.projectile temp = (Net.projectile)object;
+	        	   Net.projectile packet = new Net.projectile();
+	        	   packet = temp;
+	        	   updateProjectiles(packet);
+	           }
+	           
+	           else if (object instanceof Net.newProjectile) {
+	        	   Net.newProjectile temp = (Net.newProjectile)object;
+	        	   Net.newProjectile packet = new Net.newProjectile();
+	        	   packet = temp;
+	        	   addServerProjectile(packet);
+	        	}
 	        }
 	     });
+	}
+	
+	public void updateProjectiles(Net.projectile packet) {
+		world.updateProjectiles(packet);
 	}
 	
 	//Remove the player that disconnected from the world
@@ -75,8 +94,19 @@ public class NetClient {
 	}
 	
 	//Updates the clients players with player positions from the server
-	public synchronized void updatePlayers(playerPacket packet, Connection connection) {
+	public void updatePlayers(playerPacket packet, Connection connection) {
 		world.updatePlayers(packet);
+	}
+	
+	public void addProjectile(Projectile projectile) {
+		Net.newProjectile packet = new Net.newProjectile();
+		packet.id = projectile.getNetId();
+		packet.position = projectile.getPosition();
+		client.sendTCP(packet);
+	}
+	
+	public void addServerProjectile(Net.newProjectile packet) {
+		world.addProjectile(packet);
 	}
 	
 	//Constantly sends client packets to the server. Need to add some kind of throttling to this.

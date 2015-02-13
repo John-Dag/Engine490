@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.esotericsoftware.kryonet.Client;
 import com.gdx.DynamicEntities.Ability;
 import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Player;
@@ -22,8 +23,10 @@ import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
+import com.gdx.Network.Net.newProjectile;
 import com.gdx.Network.Net.playerNew;
 import com.gdx.Network.Net.playerPacket;
+import com.gdx.Network.NetClient;
 import com.gdx.Weapons.RocketLauncher;
 
 public class World implements Disposable {
@@ -34,6 +37,7 @@ public class World implements Disposable {
 	public static Array<Enemy> enemyInstances;
 	public Array<Player> playerInstances;
 	public Array<ModelInstance> wireInstances;
+	public Array<Projectile> projectileInstances;
 	private MeshLevel meshLevel;
 	private Ray ray;
 	private Array<BoundingBox> boxes;
@@ -41,10 +45,12 @@ public class World implements Disposable {
 	private Vector3 out;
     private DistanceTrackerMap distanceMap;
     private FilterEffect filterEffect;
+    private NetClient client;
     
 	public World() {
 		boolean bspDungeon = false;
 		playerInstances = new Array<Player>();
+		projectileInstances = new Array<Projectile>();
 		if(bspDungeon){
 			// must come after meshlevel
 			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
@@ -63,7 +69,8 @@ public class World implements Disposable {
 		} else {
 			Assets.loadModels();
 			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
-					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.manager.get("GUNFBX.g3db", Model.class)));
+					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
+			
 			// must come before meshlevel, and after player
 			playerInstances.add(player);
 			particleManager = new ParticleManager(this);
@@ -93,6 +100,23 @@ public class World implements Disposable {
 		}
 	}
 	
+	public synchronized void updateProjectiles(Net.projectile packet) {
+		for (int i = 0; i < projectileInstances.size; i++) {
+			if (this.projectileInstances.get(i).getNetId() == packet.id) {
+				projectileInstances.get(i).getPosition().set(packet.position);
+			}
+		}
+	}
+
+	public void addProjectile(newProjectile packet) {
+		Vector3 rotation = new Vector3(0, 0, 0);
+		Vector3 scale = new Vector3(0, 0, 0);
+		Projectile projectile = new Projectile(6, true, true, packet.position, 
+				   rotation, scale, this.getPlayer().camera.direction.cpy(), this.getPlayer().camera.direction.cpy(), 
+				   World.particleManager.projectilePool.obtain(), World.particleManager.rocketExplosionPool.obtain(), this);
+		Entity.entityInstances.add(projectile);
+	}
+	
 	public void addPlayer(Net.playerNew playerPacket) {
 		try {
 			Player player1 = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
@@ -107,6 +131,10 @@ public class World implements Disposable {
 		catch (Exception e) {
 			System.err.println(e);
 		}
+	}
+	
+	public void createProjectile(Projectile projectile) {
+		client.addProjectile(projectile);
 	}
 	
 	public void enterDungeon() {
@@ -394,6 +422,14 @@ public class World implements Disposable {
 	
 	public DistanceTrackerMap getDistanceMap() {
 		return distanceMap;
+	}
+
+	public NetClient getClient() {
+		return client;
+	}
+
+	public void setClient(NetClient client) {
+		this.client = client;
 	}
 
 	public Array<Player> getPlayerInstances() {

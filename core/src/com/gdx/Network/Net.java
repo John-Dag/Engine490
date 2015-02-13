@@ -19,6 +19,9 @@ public class Net {
 	    kryo.register(Array.class);
 	    kryo.register(Object[].class);
 	    kryo.register(playerNew.class);
+	    kryo.register(projectile.class);
+	    kryo.register(newProjectile.class);
+	    kryo.register(projectile.class);
 	}
 	
 	//Packets
@@ -33,6 +36,16 @@ public class Net {
 	}
 	
 	public static class playerDisconnect {
+		public int id;
+	}
+	
+	public static class newProjectile {
+		public Vector3 position;
+		public int id;
+	}
+	
+	public static class projectile {
+		public Vector3 position;
 		public int id;
 	}
 }

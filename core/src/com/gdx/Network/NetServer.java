@@ -35,6 +35,13 @@ public class NetServer {
 	        		server.sendToAllExceptTCP(connection.getID(), playerPacket);
 	        	}
 	        	
+	        	else if (object instanceof Net.projectile) {
+	        		Net.projectile temp = (Net.projectile)object;
+	        		Net.projectile packet = new Net.projectile();
+	        		packet = temp;
+	        		server.sendToAllExceptTCP(connection.getID(), packet);
+	        	}
+	        	
 	        	//Handles a packet from a new player. Sends the packet to all players 
 	        	//except the new one.
 	        	else if (object instanceof Net.playerNew) {
@@ -45,6 +52,13 @@ public class NetServer {
 	        		addNewPlayer(packet);
 	        		server.sendToAllExceptTCP(connection.getID(), playerNew);
 	        		sendAllPlayers(connection.getID());
+	        	}
+	        	
+	        	else if (object instanceof Net.newProjectile) {
+	        		Net.newProjectile temp = (Net.newProjectile)object;
+	        		Net.newProjectile packet = new Net.newProjectile();
+	        		packet = temp;
+	        		server.sendToAllExceptTCP(connection.getID(), packet);
 	        	}
 	        }
 	    });
@@ -79,7 +93,7 @@ public class NetServer {
 		world.addPlayer(packet);
 	}
 	
-	public synchronized void updatePlayers(playerPacket packet, Connection connection) {
+	public void updatePlayers(playerPacket packet, Connection connection) {
 		world.updatePlayers(packet);
 	}
 	

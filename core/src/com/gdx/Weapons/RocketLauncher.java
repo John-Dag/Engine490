@@ -40,6 +40,8 @@ public class RocketLauncher extends Weapon {
 											   rotation, scale, world.getPlayer().camera.direction.cpy(), world.getPlayer().camera.direction.cpy(), 
 											   World.particleManager.projectilePool.obtain(), World.particleManager.rocketExplosionPool.obtain(), world);
 		Entity.entityInstances.add(projectile);
+		world.getClient().addProjectile(projectile);
+		//world.projectileInstances.add(projectile);
 	}
 	
 	@Override
