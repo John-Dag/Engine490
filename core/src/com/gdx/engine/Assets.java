@@ -31,7 +31,7 @@ public class Assets {
 	//public static Texture wall;
 	public static Texture stoneFloor;
 	public static Texture darkWood;
-	public static TiledMap mymap, mymap2, dungeon1, castle2, castle3;
+	public static TiledMap mymap, mymap2, dungeon1, castle2, castle3, castle3Multi;
 	public static ModelBuilder modelBuilder;
 	public static Material floorMat;
 	public static Material wallMat;
@@ -66,6 +66,7 @@ public class Assets {
 		mymap2 = new TmxMapLoader().load("mymap2.tmx");
 		castle2 = new TmxMapLoader().load("castle2.tmx");
 		castle3 = new TmxMapLoader().load("castle3.tmx");
+		castle3Multi = new TmxMapLoader().load("castle3Multi.tmx");
 		darkWood = new Texture("darkWoodTex.png");
 		//floor = new Texture("floorHighRes.png");
 		//wall = new Texture("wallHighRes.png");
@@ -93,6 +94,7 @@ public class Assets {
 	    manager.load("zombie_fast.g3db", Model.class);
 	    manager.load("sword2.g3db", Model.class);
 	    manager.load("FireFlower.g3db", Model.class);
+	    manager.load("GUNFBX.g3db", Model.class);
 	    manager.finishLoading();
 	}
 	

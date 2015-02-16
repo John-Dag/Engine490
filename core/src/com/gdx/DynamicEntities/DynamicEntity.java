@@ -92,46 +92,6 @@ public class DynamicEntity extends Entity {
 		this.angVelocity = new Vector3(0, 0, 0);
 	}
 	
-	public int getNetId() {
-		return NetId;
-	}
-
-	public void setNetId(int netId) {
-		NetId = netId;
-	}
-
-	public Decal getDecal() {
-		return decal;
-	}
-
-	public void setDecal(Decal decal) {
-		this.decal = decal;
-	}
-	
-	public Ability getAbility() {
-		return ability;
-	}
-
-	public void setAbility(Ability ability) {
-		this.ability = ability;
-	}
-
-	public BoundingBox getDetectionBox() {
-		return detectionBox;
-	}
-
-	public void setDetectionBox(BoundingBox detectionBox) {
-		this.detectionBox = detectionBox;
-	}
-
-	public BoundingBox getTransformedBoundingBox() {
-		return new BoundingBox(this.boundingBox).mul(this.model.transform);
-	}
-	
-	public BoundingBox getTransformedDetectionBoundingBox() {
-		return new BoundingBox(this.detectionBox).mul(this.model.transform);
-	}
-	
 	@Override
 	public void update(float delta, World world) {
 		
@@ -226,6 +186,46 @@ public class DynamicEntity extends Entity {
 		this.model.transform.rotate(rotationQuaternion.setEulerAngles(this.rotation.x, this.rotation.y, this.rotation.z));
 		this.model.transform.scale(scale.x,scale.y,scale.z);
 		this.model.calculateTransforms();
+	}
+	
+	public int getNetId() {
+		return NetId;
+	}
+
+	public void setNetId(int netId) {
+		NetId = netId;
+	}
+
+	public Decal getDecal() {
+		return decal;
+	}
+
+	public void setDecal(Decal decal) {
+		this.decal = decal;
+	}
+	
+	public Ability getAbility() {
+		return ability;
+	}
+
+	public void setAbility(Ability ability) {
+		this.ability = ability;
+	}
+
+	public BoundingBox getDetectionBox() {
+		return detectionBox;
+	}
+
+	public void setDetectionBox(BoundingBox detectionBox) {
+		this.detectionBox = detectionBox;
+	}
+
+	public BoundingBox getTransformedBoundingBox() {
+		return new BoundingBox(this.boundingBox).mul(this.model.transform);
+	}
+	
+	public BoundingBox getTransformedDetectionBoundingBox() {
+		return new BoundingBox(this.detectionBox).mul(this.model.transform);
 	}
 	
 	public Vector3 getMovementVector() {
@@ -373,5 +373,18 @@ public class DynamicEntity extends Entity {
 
 	public void setModel(ModelInstance model) {
 		this.model = model;
+	}
+
+	public DynamicEntity copy() {
+		return this;
+	}
+
+	public void reset() {
+		this.weapon = null;
+		this.position = new Vector3(0, 0, 0);
+		this.rotation = new Vector3(0, 0, 0);
+		this.scale = new Vector3(0, 0, 0);
+		this.acceleration = new Vector3(0, 0, 0);
+		this.model = null;
 	}
 }

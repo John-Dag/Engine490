@@ -26,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Network.NetClient;
 import com.gdx.Network.NetServer;
+import com.gdx.Network.NetWorld;
 import com.gdx.UI.UIChat;
 import com.gdx.UI.UIConsole;
 import com.gdx.UI.UIBase;
@@ -39,8 +40,8 @@ public class GameScreen implements Screen {
 	public static Vector2 center;
 	public static State state;
 	public static State mode;
+	public static NetClient client;
 	private Game game;
-	private World world;
 	private Render renderer;
 	private SpriteBatch spriteBatch;
 	private BitmapFont bitmapFont;
@@ -58,26 +59,26 @@ public class GameScreen implements Screen {
 	private WorldInputProcessor screenInputProcessor;
 	private UIVirtualJoystick virtualJoystick;
 	private NetServer server;
-	private NetClient client;
+	private NetWorld world;
 	private TextButtonStyle style;
+	private boolean uiGenerated = false;
+	private World offlineWorld;
 	
 	public enum State {
-		Running, Paused, Server, Client
+		Running, Paused, Server, Client, Offline
 	}
 
 	public GameScreen(Game game, boolean consoleActive) {
 		this.game = game;
-		this.world = new World();
-		this.renderer = new Render(world);
-		this.world.initializeEntities();
 	
 		center = new Vector2(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		spriteBatch = new SpriteBatch();
 		bitmapFont = new BitmapFont();
 		bitmapFont.setScale(0.9f);
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
-		state = State.Running;
-		
+		style = new TextButtonStyle();
+		style.font = bitmapFont;
+		state = State.Paused;
 		stage = new Stage() {
 			@Override
 			public boolean keyDown(int keyCode) {
@@ -92,16 +93,20 @@ public class GameScreen implements Screen {
 				return false;
 			}
 		};
+		base = new UIBase(stage);
+		Gdx.input.setInputProcessor(stage);
+		createNetworkMenu();
+	}
+	
+	public void generateUI(World world) {
 		screenInputProcessor = new WorldInputProcessor(world);
 		
 		console = new UIConsole(stage, world);
 		console.initializeConsoleWindow();
 		console.initializeFilterEffects();
 		
-		base = new UIBase(stage);
+		base.setWorld(world);
 		Array<TextButton> buttons = new Array<TextButton>();
-		style = new TextButtonStyle();
-		style.font = bitmapFont;
 		
 		final TextButton button1 = new TextButton("Pause", style);
 		button1.addListener(new ClickListener() {
@@ -150,7 +155,40 @@ public class GameScreen implements Screen {
 		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);
 		Gdx.input.setInputProcessor(multiplexer);
-		createNetworkMenu();
+		uiGenerated = true;
+	}
+	
+	public void generateMultiplayerClient() {
+		mode = State.Client;
+		this.world = new NetWorld();
+		this.renderer = new Render(world);
+		this.world.initializeEntities();
+		state = State.Running;
+		networkMenu.getTable().setVisible(false);
+		generateUI(world);
+		startClient();
+	}
+	
+	public void generateMultiplayerServer() {
+		mode = State.Server;
+		this.world = new NetWorld();
+		this.renderer = new Render(world);
+		this.world.initializeEntities();
+		state = State.Running;
+		networkMenu.getTable().setVisible(false);
+		generateUI(world);
+		startServer();
+	}
+	
+	public void generateOffline() {
+		mode = State.Offline;
+		this.offlineWorld = new World();
+		offlineWorld.loadOfflineWorld(Assets.castle3, true);
+		this.renderer = new Render(offlineWorld);
+		this.offlineWorld.initializeEntities();
+		state = State.Running;
+		networkMenu.getTable().setVisible(false);
+		generateUI(offlineWorld);
 	}
 	
 	public void createNetworkMenu() {
@@ -159,48 +197,51 @@ public class GameScreen implements Screen {
 		button3.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				mode = State.Client;
-				state = State.Running;
-				networkMenu.getTable().setVisible(false);
-				startClient();
+				generateMultiplayerClient();
 			}
 		});
+		
 		buttons2.add(button3);
 		TextButton button4 = new TextButton("Host", style);
 		button4.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				mode = State.Server;
-				state = State.Running;
-				networkMenu.getTable().setVisible(false);
-				startServer();
+				generateMultiplayerServer();
 			}
 		});
 		
 		buttons2.add(button4);
+		TextButton button5 = new TextButton("Offline", style);
+		button5.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				generateOffline();
+			}
+		});
+		
+		buttons2.add(button5);
 		networkMenu = new UIMenu(stage, skin, buttons2, "Network Testing", 0, 0);
 		networkMenu.generateVerticalMenu(10);
 		networkMenu.getTable().setVisible(true);
 		state = State.Paused;
 		//We need to update the world once to avoid client crash, since the renderer will still be updating
-		world.update(Gdx.graphics.getDeltaTime());
+		//world.update(Gdx.graphics.getDeltaTime());
 	}
 	
 	public void startServer() {
 		try {
 			server = new NetServer(world);
+			world.setServer(server);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	public void startClient() {
 		try {
-			client = new NetClient(world);
+			client = new NetClient(world, this);
 			world.setClient(client);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -210,28 +251,54 @@ public class GameScreen implements Screen {
 		//Call the main renderer
 		switch (state) {
 			case Running:
-				world.update(delta);
-				if (mode == State.Server)
+				if (mode == State.Server) {
+					world.update(delta);
 					server.serverUpdate();
-				if (mode == State.Client)
+				}
+				if (mode == State.Client) {
+					world.update(delta);
 					client.clientUpdate();
+				}
+				if (mode == State.Offline) {
+					offlineWorld.update(delta);
+				}
 				break;
 			case Paused:
 				break;
 		}
-		renderer.RenderWorld(delta);
 
-		//UI components are rendered here
-		spriteBatch.begin();
-		overlay.renderFPS(delta, -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-		overlay.renderPosition(world.getPlayer().getPosition(), delta, -Gdx.graphics.getWidth() / 2, 
-				               Gdx.graphics.getHeight() / 2 - 20f);
-		overlay.renderTilePosition(world.getPlayer().getPlayerTileCoords(), delta, 
-				                   -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 40f);
-		spriteBatch.end();
-		base.render(delta);
-		overlay.updateWidgets(delta, world.player.getHealth());
-		map.renderIndicator(delta, world.getPlayer().getPosition());
+		if (uiGenerated) {
+			renderer.RenderWorld(delta);
+	
+			//UI components are rendered here
+			if (mode == State.Offline) {
+				spriteBatch.begin();
+				overlay.renderFPS(delta, -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+				overlay.renderPosition(offlineWorld.getPlayer().getPosition(), delta, -Gdx.graphics.getWidth() / 2, 
+						               Gdx.graphics.getHeight() / 2 - 20f);
+				overlay.renderTilePosition(offlineWorld.getPlayer().getPlayerTileCoords(), delta, 
+						                   -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 40f);
+				spriteBatch.end();
+				base.render(delta);
+				overlay.updateWidgets(delta, offlineWorld.getPlayer().getHealth());
+				map.renderIndicator(delta, offlineWorld.getPlayer().getPosition());
+			}
+			
+			else if (mode == State.Server || mode == State.Client) {
+				spriteBatch.begin();
+				overlay.renderFPS(delta, -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+				overlay.renderPosition(world.getPlayer().getPosition(), delta, -Gdx.graphics.getWidth() / 2, 
+						               Gdx.graphics.getHeight() / 2 - 20f);
+				overlay.renderTilePosition(world.getPlayer().getPlayerTileCoords(), delta, 
+						                   -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 40f);
+				spriteBatch.end();
+				base.render(delta);
+				overlay.updateWidgets(delta, world.getPlayer().getHealth());
+				map.renderIndicator(delta, world.getPlayer().getPosition());
+			}
+		}
+		else
+			base.render(delta);
 		//virtualJoystick.render(delta);
 	}
 
@@ -284,5 +351,21 @@ public class GameScreen implements Screen {
 	public void resume() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public UIBase getBase() {
+		return base;
+	}
+
+	public void setBase(UIBase base) {
+		this.base = base;
+	}
+
+	public UIChat getChat() {
+		return chat;
+	}
+
+	public void setChat(UIChat chat) {
+		this.chat = chat;
 	}
 }

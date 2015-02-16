@@ -1176,17 +1176,17 @@ public class MeshLevel {
 				Entity.entityInstances.add(mist);
 			}
 
-//			else if (rectObj.getName().contains("Spawn")) {
-//				int height = getObjectHeight(rectObj);
-//				objPosition = new Vector3();
-//				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
-//				Assets.loadModels();
-//				Zombie zombie = new Zombie(9, false, true, objPosition, new Vector3(0, 0, 0), 
-//										   new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
-//										   new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
-//				EnemySpawner spawn = new EnemySpawner(objPosition, 8, true, false, false, 1f, getSpawnTime(rectObj), zombie);
-//				Entity.entityInstances.add(spawn);
-//			}
+			else if (rectObj.getName().contains("Spawn")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height, rectObj.getRectangle().getX() / 32);
+				Assets.loadModels();
+				Zombie zombie = new Zombie(9, false, true, objPosition, new Vector3(0, 0, 0), 
+										   new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+										   new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
+				EnemySpawner spawn = new EnemySpawner(objPosition, 8, true, false, false, 1f, getSpawnTime(rectObj), zombie);
+				Entity.entityInstances.add(spawn);
+			}
 			
 			else if (rectObj.getName().contains("Portal")) {
 				int height = getObjectHeight(rectObj);

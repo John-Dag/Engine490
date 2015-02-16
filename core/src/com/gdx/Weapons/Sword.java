@@ -23,7 +23,6 @@ public class Sword extends Weapon {
 			     Vector3 scale, Vector3 velocity, Vector3 acceleration, Model model) {
 		super(isParticleWeapon, id, isActive, isRenderable, position, rotation, scale, velocity, acceleration, model);
 		this.firingDelay = FIRING_DELAY;
-		this.projectileSpeed = PROJECTILE_SPEED;
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
 		this.setAnimation(new AnimationController(this.getModel()));

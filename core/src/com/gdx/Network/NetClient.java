@@ -14,78 +14,131 @@ import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Network.Net.playerPacket;
+import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 
 public class NetClient {
 	private Client client;
 	private World world;
+	private GameScreen screen;
 	private int id;
+	private Vector3 previousPlayerPos = new Vector3();
 	
 	public NetClient() {
 		super();
 	}
 	
-	public NetClient(final World world) throws IOException {
-		this.world = world;
-		client = new Client();
-		
-		//Log.set(Log.LEVEL_TRACE);
-		client.start();
-	    Net.register(client);
-		client.connect(5000, "192.168.1.4", 54555, 54777);
-		
+	public NetClient(World world, GameScreen screen) throws IOException {
+		try {
+			this.world = world;
+			this.screen = screen;
+			client = new Client();
+			Log.set(Log.LEVEL_INFO);
+			client.start();
+		    Net.register(client);
+		    connectClientToServer();
+		    createPlayerOnServer();
+		    setId(client.getID());
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
+	}
+	
+	private void connectClientToServer() {
+		try {
+			client.connect(5000, Net.serverIP, Net.tcpPort, Net.udpPort);
+			client.addListener(createDefaultListeners());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void createPlayerOnServer() {
 		Net.playerNew packet = new Net.playerNew();
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
 		client.sendTCP(packet);
-		
-	    client.addListener(new Listener() {
-	        public void received (Connection connection, Object object) {
-	           if (object instanceof Net.playerPacket) {
-	        	   Net.playerPacket packetRecieved = (Net.playerPacket)object;
-	        	   Net.playerPacket packet = new Net.playerPacket();
-	        	   packet = packetRecieved;
-	        	   updatePlayers(packet, connection);
-	           }
-	           
-	           else if (object instanceof Net.playerNew) {
-	          	   Net.playerNew packetRecieved = (Net.playerNew)object;
-	        	   Net.playerNew packet = new Net.playerNew();
-	        	   packet = packetRecieved;
-	        	   addPlayer(packet);
-	           }
-	           
-	           else if (object instanceof Net.playerDisconnect) {
-	        	   Net.playerDisconnect disconnect = (Net.playerDisconnect)object;
-	        	   Net.playerDisconnect disconnectPlayer = new Net.playerDisconnect();
-	        	   disconnectPlayer = disconnect;
-	        	   removePlayer(disconnectPlayer);
-	           }
-	           
-	           else if (object instanceof Net.projectile) {
-	        	   Net.projectile temp = (Net.projectile)object;
-	        	   Net.projectile packet = new Net.projectile();
-	        	   packet = temp;
-	        	   updateProjectiles(packet);
-	           }
-	           
-	           else if (object instanceof Net.newProjectile) {
-	        	   Net.newProjectile temp = (Net.newProjectile)object;
-	        	   Net.newProjectile packet = new Net.newProjectile();
-	        	   packet = temp;
-	        	   addServerProjectile(packet);
-	        	}
-	        }
-	     });
 	}
 	
-	public void updateProjectiles(Net.projectile packet) {
+	private Listener createDefaultListeners() {
+		Listener listener = new Listener() {
+			@Override
+			public void connected(Connection connection) {
+				serverConnect(connection);
+			}
+			
+			@Override
+			public void disconnected(Connection connection) {
+				serverDisconnect(connection);
+			}
+			
+			@Override
+			public void received(Connection connection, Object object) {
+				clientReceived(connection, object);
+			}
+		};
+		
+		return listener;
+	}
+	
+	private void serverConnect(Connection connection) {
+		Log.info("Client " + connection + " connected to " + Net.serverIP);
+	}
+	
+	private void serverDisconnect(Connection connection) {
+		Log.info("Client " + connection + " disconnected from " + Net.serverIP);
+	}
+	
+	//Handles received packets
+	private void clientReceived(Connection connection, Object object) {
+        if (object instanceof Net.playerPacket) {
+     	   Net.playerPacket packet = (Net.playerPacket)object;
+     	   updatePlayers(packet, connection);
+        }
+        
+        else if (object instanceof Net.playerNew) {
+       	   Net.playerNew packet = (Net.playerNew)object;
+     	   addPlayer(packet);
+        }
+        
+        else if (object instanceof Net.playerDisconnect) {
+     	   Net.playerDisconnect disconnect = (Net.playerDisconnect)object;
+     	   removePlayer(disconnect);
+        }
+        
+        else if (object instanceof Net.projectile) {
+     	   Net.projectile packet = (Net.projectile)object;
+     	   updateProjectiles(packet);
+        }
+        
+        else if (object instanceof Net.newProjectile) {
+        	System.out.println("test");
+     	   Net.newProjectile packet = (Net.newProjectile)object;
+     	   addServerProjectile(packet);
+     	}
+        
+        else if (object instanceof Net.chatMessage) {
+        	Net.chatMessage packet = (Net.chatMessage)object;
+        	addChatMessage(packet);
+        }
+	}
+	
+	public synchronized void updateProjectiles(Net.projectile packet) {
 		world.updateProjectiles(packet);
 	}
 	
 	//Remove the player that disconnected from the world
 	public void removePlayer(Net.playerDisconnect disconnect) {
 		world.getPlayerInstances().removeIndex(disconnect.id);
+	}
+	
+	public void addChatMessage(Net.chatMessage packet) {
+		screen.getChat().addMessage(packet);
+	}
+	
+	public void sendChatMessage(Net.chatMessage packet) {
+		client.sendTCP(packet);
 	}
 	
 	//Adds a new player to the client representing a player on the server
@@ -98,10 +151,11 @@ public class NetClient {
 		world.updatePlayers(packet);
 	}
 	
-	public void addProjectile(Projectile projectile) {
+	public synchronized void addProjectile(Projectile projectile, int id) {
 		Net.newProjectile packet = new Net.newProjectile();
-		packet.id = projectile.getNetId();
+		packet.id = id;
 		packet.position = projectile.getPosition();
+		packet.cameraPos = projectile.getVelocity();
 		client.sendTCP(packet);
 	}
 	
@@ -111,9 +165,20 @@ public class NetClient {
 	
 	//Constantly sends client packets to the server. Need to add some kind of throttling to this.
 	public void clientUpdate() {
-    	Net.playerPacket packet = new Net.playerPacket();
-    	packet.position = world.getPlayer().camera.position.cpy();
-    	packet.id = client.getID();
-		client.sendTCP(packet);
+		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping()) {
+			//System.out.println("jfdksljdsfkjfdsklj");
+	    	Net.playerPacket packet = new Net.playerPacket();
+	    	packet.position = world.getPlayer().camera.position.cpy();
+	    	packet.id = client.getID();
+			client.sendTCP(packet);
+		}
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

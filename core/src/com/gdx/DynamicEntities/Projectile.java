@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.Network.Net;
 import com.gdx.engine.Assets;
 import com.gdx.engine.World;
 
@@ -12,7 +13,9 @@ public class Projectile extends DynamicEntity {
 	private Vector3 movementVector, collisionVector, newPos, oldPos;
 	private Matrix4 target;
 	private ParticleEffect collisionEffect;
-	private boolean isCollEffectInit;
+	private float projectileSpeed;
+	private int damage;
+	private boolean isCollEffectInit, playerProjectile = false;
 	 
 	public Projectile() {
 		super();
@@ -38,11 +41,18 @@ public class Projectile extends DynamicEntity {
 		if (!this.isRendered() && this.getParticleEffect() != null) 
 			this.initializeProjectileEffect();
 
-		if (World.player.getWeapon() != null) {
+		if (world.getPlayer().getWeapon() != null || world.getServer() != null || world.getClient() != null) {
 			world.checkProjectileCollisions(this);
-			this.checkProjectileCollisions(time, world);
+			this.updateProjectilePosition(world, time);
+			this.checkCollisionMeshlevel(time, world);
+		}
+		
+		//If the client is hosting a server, send position update packets
+		if (world.getServer() != null) {
+			world.sendProjectilePositionUpdate(this);
 		}
 			
+		//Handles explosion effects. Recycles the effect once the emitter is done
 		if (World.particleManager.regularEmitter != null) {
 			World.particleManager.regularEmitter.update();
 			if (World.particleManager.regularEmitter.isComplete()) {
@@ -54,7 +64,7 @@ public class Projectile extends DynamicEntity {
 		}
 	}
 	
-	public void checkProjectileCollisions(float time, World world) {
+	private void updateProjectilePosition(World world, float time) {
 		target.idt();
 		target.translate(this.getPosition());
 		this.getParticleEffect().setTransform(target);
@@ -62,7 +72,7 @@ public class Projectile extends DynamicEntity {
 		movementVector.set(0, 0, 0);
 		movementVector.set(world.getPlayer().camera.direction);
 		movementVector.nor();
-		float moveAmt = world.getPlayer().getWeapon().getProjectileSpeed() * time;
+		float moveAmt = this.getProjectileSpeed() * time;
 		oldPos.set(this.getPosition());
 		newPos.set(oldPos.x + movementVector.x * moveAmt, oldPos.y + movementVector.y * moveAmt, 
 				   oldPos.z + movementVector.z * moveAmt);
@@ -73,7 +83,9 @@ public class Projectile extends DynamicEntity {
 					       movementVector.y * collisionVector.y,
 				           movementVector.z * collisionVector.z);
 		this.updatePosition(moveAmt);
-		
+	}
+	
+	private void checkCollisionMeshlevel(float time, World world) {
 		this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.2f, this.getPosition().y  - 0.2f, this.getPosition().z  - 0.2f),
 								  new Vector3(this.getPosition().x + 0.2f, this.getPosition().y + 0.2f, this.getPosition().z + 0.2f));
 
@@ -116,11 +128,12 @@ public class Projectile extends DynamicEntity {
 	}
 	
 	public void removeProjectile() {
+		//System.out.println(World.particleManager.getProjectilePool().peak);
 		World.particleManager.system.remove(this.getParticleEffect());
 		World.particleManager.getProjectilePool().free(this.getParticleEffect());
 		this.setIsActive(false);
 	}
-	
+
 	public Matrix4 getTarget() {
 		return target;
 	}
@@ -135,5 +148,29 @@ public class Projectile extends DynamicEntity {
 
 	public void setCollisionEffect(ParticleEffect collisionEffect) {
 		this.collisionEffect = collisionEffect;
+	}
+
+	public boolean isPlayerProjectile() {
+		return playerProjectile;
+	}
+
+	public void setPlayerProjectile(boolean playerProjectile) {
+		this.playerProjectile = playerProjectile;
+	}
+
+	public float getProjectileSpeed() {
+		return projectileSpeed;
+	}
+
+	public void setProjectileSpeed(float projectileSpeed) {
+		this.projectileSpeed = projectileSpeed;
+	}
+
+	public int getDamage() {
+		return damage;
+	}
+
+	public void setDamage(int damage) {
+		this.damage = damage;
 	}
 }

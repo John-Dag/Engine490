@@ -22,6 +22,7 @@ import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
+import com.gdx.engine.GameScreen.State;
 
 public class Player extends DynamicEntity {
 	public static float FOG_DISTANCE = 15f;
@@ -37,22 +38,17 @@ public class Player extends DynamicEntity {
 	private static final float GRAVITY = 30f;
 	public static final int MIN_HEALTH = 0;
 	public static final int MAX_HEALTH = 100;
-	private int health;
 	public PerspectiveCamera camera;
-	private boolean mouseLocked, mouseLeft, clipping, isCrouching;
 	public Vector3 temp;
 	private World world;
+	private int health;
+	private boolean mouseLocked, mouseLeft, clipping, isCrouching, isJumping, isFiring, isCooldownActive, isPlayerTargeting, 
+				    moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false, jump = false, crouch = false, 
+				    ability1 = false, ability2 = false, ESCAPE = false;
 	private Vector3 collisionVector, newPos, oldPos;
-	private boolean isJumping, isFiring, isCooldownActive, isPlayerTargeting;
-	private float jumpVelocity;
-	private float currentHeightOffset;
-	private float currentMovementSpeed;
+	private float jumpVelocity, currentMovementSpeed, currentHeightOffset, speedScalar, fireDelayTimer;
 	private DistanceTrackerMap distanceMap;
-	private float fireDelayTimer;
-	private float speedScalar; //Scales the speed of the player.
 	private Array<Ability> abilities;
-	private boolean moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false,
-								  jump = false, crouch = false, ability1 = false, ability2 = false, ESCAPE = false;
 	
 	public Player() {
 		super();
@@ -95,22 +91,14 @@ public class Player extends DynamicEntity {
 		abilities.add(new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
 	}
 
-	public boolean isPlayerTargeting() {
-		return isPlayerTargeting;
-	}
-
-	public void setPlayerTargeting(boolean isPlayerTargeting) {
-		this.isPlayerTargeting = isPlayerTargeting;
-	}
-
 	@Override
 	public void update(float delta, World world) {
-		input(delta);
+		handleInput(delta);
 		fireDelayTimer += delta;
 		
 	    //TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
-		if (newPos != oldPos && clipping) {
+		if (newPos != oldPos && clipping && GameScreen.mode == State.Offline) {
             distanceMap = world.getDistanceMap();
             distanceMap.resetDistances();
             if (camera.position.y >= 6)
@@ -236,7 +224,7 @@ public class Player extends DynamicEntity {
 		}
 	}
 	
-	public void input(float delta) {
+	public void handleInput(float delta) {
 		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT) && !this.isPlayerTargeting) {
 			Gdx.input.setCursorCatched(true);
@@ -383,9 +371,47 @@ public class Player extends DynamicEntity {
 		movVect = tileCenter.sub(camPosition);
 		camera.position.add(movVect.x * Gdx.graphics.getDeltaTime(), 0, movVect.y * Gdx.graphics.getDeltaTime());
 	}
+
+	public void fireWeapon() {
+		this.isFiring = true;
+		this.getWeapon().fireWeapon(world);
+	}
+	
+	public void takeDamage(int damage) {
+		this.health -= damage;
+		
+		world.setFilterEffect(new com.gdx.FilterEffects.RedFade());
+	}
+	
+	public void respawnPlayer(Player player) {
+		player.camera.position.set(new Vector3(2f, 1.5f, 2f));
+		player.setWeapon(new Weapon());
+		player.setHealth(MAX_HEALTH);
+	}
+	
+	// input world coordinates to get tile coords
+	public GridPoint2 getPlayerTileCoords(){
+		return getTileCoords(camera.position.x, camera.position.z);
+	}
+	
+	// This take in x and z from world coordinates and returns the tile position (tile index)
+	// Note: The coords are flipped because of Tiled Map Editor and LibGDX being slightly inconsistent there.
+	private GridPoint2 getTileCoords(float x, float z){
+		int tileX = (int)z;
+		int tileY = (int)x;
+		return new GridPoint2(tileX, tileY);
+	}
 	
 	public void exit() {
 		Gdx.app.exit();
+	}
+
+	public boolean isPlayerTargeting() {
+		return isPlayerTargeting;
+	}
+
+	public void setPlayerTargeting(boolean isPlayerTargeting) {
+		this.isPlayerTargeting = isPlayerTargeting;
 	}
 	
 	public float getCurrentHeightOffset() {
@@ -464,36 +490,6 @@ public class Player extends DynamicEntity {
 
 	public void setSpeedScalar(float speedScalar) {
 		this.speedScalar = speedScalar;
-	}
-
-	public void fireWeapon() {
-		this.isFiring = true;
-		this.getWeapon().fireWeapon(world);
-	}
-	
-	public void takeDamage(int damage) {
-		this.health -= damage;
-		
-		world.setFilterEffect(new com.gdx.FilterEffects.RedFade());
-	}
-	
-	public void respawnPlayer(Player player) {
-		player.camera.position.set(new Vector3(2f, 1.5f, 2f));
-		player.setWeapon(new Weapon());
-		player.setHealth(MAX_HEALTH);
-	}
-	
-	// input world coordinates to get tile coords
-	public GridPoint2 getPlayerTileCoords(){
-		return getTileCoords(camera.position.x, camera.position.z);
-	}
-	
-	// This take in x and z from world coordinates and returns the tile position (tile index)
-	// Note: The coords are flipped because of Tiled Map Editor and LibGDX being slightly inconsistent there.
-	private GridPoint2 getTileCoords(float x, float z){
-		int tileX = (int)z;
-		int tileY = (int)x;
-		return new GridPoint2(tileX, tileY);
 	}
 	
 	public int getHealth() {

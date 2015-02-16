@@ -5,15 +5,17 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Weapon;
+import com.gdx.Network.Net;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
+import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 
 public class RocketLauncher extends Weapon {
-	private final float FIRING_DELAY = 0.5f;
+	private final float FIRING_DELAY = 0.4f;
 	private final float PROJECTILE_SPEED = 5f;
 	private final float RECOIL = 0.1f;
-	private final int DAMAGE = 50;
+	private final int DAMAGE = 10;
 	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0), rotationVec;
 	
 	public RocketLauncher() {
@@ -39,8 +41,23 @@ public class RocketLauncher extends Weapon {
 		Projectile projectile = new Projectile(6, true, true, world.getPlayer().camera.position.cpy(), 
 											   rotation, scale, world.getPlayer().camera.direction.cpy(), world.getPlayer().camera.direction.cpy(), 
 											   World.particleManager.projectilePool.obtain(), World.particleManager.rocketExplosionPool.obtain(), world);
-		Entity.entityInstances.add(projectile);
-		world.getClient().addProjectile(projectile);
+		projectile.setProjectileSpeed(PROJECTILE_SPEED);
+		projectile.setDamage(DAMAGE);
+		projectile.setPlayerProjectile(true);
+		try {
+			if (world.getClient() != null) {
+				projectile.setNetId(world.getClient().getId() + world.getNetIdCurrent());
+				Entity.entityInstances.add(projectile);
+				world.getClient().addProjectile(projectile, world.getClient().getId() + world.getNetIdCurrent());
+				world.setNetIdCurrent(world.getNetIdCurrent() + 1);
+			}
+			else {
+				Entity.entityInstances.add(projectile);
+			}
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
 		//world.projectileInstances.add(projectile);
 	}
 	

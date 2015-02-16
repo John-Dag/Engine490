@@ -129,7 +129,6 @@ public class Render implements Disposable {
 		for (int i = 0; i < world.getPlayerInstances().size; i++) {
 			if (world.getPlayerInstances().get(i).getModel() != null) {
 				world.getPlayerInstances().get(i).getModel().transform.setToTranslation(world.getPlayerInstances().get(i).camera.position.cpy());
-				world.getPlayerInstances().get(i).getModel().transform.scale(0.005f, 0.005f, 0.005f);
 				renderModels(world.getPlayerInstances().get(i).getModel());
 			}
 		}

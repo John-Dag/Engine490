@@ -1,6 +1,7 @@
 package com.gdx.UI;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -13,10 +14,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.gdx.Network.Net;
+import com.gdx.engine.GameScreen;
+import com.gdx.engine.World;
 
 public class UIChat extends UIBase {
 	private Window window;
 	private final int ENTER = 13;
+	private final int T = 84;
 	private TextField textfield;
 	private String fieldValue;
 	private Table textAreaTable;
@@ -110,9 +115,32 @@ public class UIChat extends UIBase {
 					chatLog.append("Player: " + fieldValue + "\n");
 					textArea.setText(chatLog.toString());
 					scrollPane.setScrollPercentY(scrollPane.getScrollPercentY());
+					
+					if (GameScreen.mode == GameScreen.state.Client) {
+						sendMessage(fieldValue);
+					}
 				}
 			}
 		});
+	}
+	
+	public void sendMessage(String message) {
+		try {
+			Net.chatMessage packet = new Net.chatMessage();
+			packet.message = Net.name + ": " + fieldValue;
+			GameScreen.client.sendChatMessage(packet);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void addMessage(Net.chatMessage packet) {
+		fieldValue = textfield.getText();
+		textfield.setText("");
+		chatLog.append(packet.message + "\n");
+		textArea.setText(chatLog.toString());
+		scrollPane.setScrollPercentY(scrollPane.getScrollPercentY());
 	}
 
 	public Window getWindow() {

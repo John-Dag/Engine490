@@ -5,10 +5,14 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.gdx.Network.NetClient;
+import com.gdx.Network.NetWorld;
+import com.gdx.engine.World;
 
 public class UIBase implements Screen {
 	public static boolean uiSelected = false;
 	private Stage stage;
+	private World world;
 
 	public UIBase(Stage stage) {
 		this.stage = stage;
@@ -89,5 +93,13 @@ public class UIBase implements Screen {
 
 	public void setStage(Stage stage) {
 		this.stage = stage;
+	}
+
+	public World getWorld() {
+		return world;
+	}
+
+	public void setWorld(World world) {
+		this.world = world;
 	}
 }
