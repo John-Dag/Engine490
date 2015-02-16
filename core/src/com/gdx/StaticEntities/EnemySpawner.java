@@ -20,18 +20,20 @@ public class EnemySpawner extends StaticEntity {
 	}
 	
 	public EnemySpawner(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, float initialSpawnTime, float delayedSpawnTime, Enemy enemy) {
-		super(position, id, isActive, isRenderable, isDecalFacing);	
-		enemyRef = (Enemy)enemy;
-		
-		Timer.schedule(new Task() {
-			@Override
-			public void run() {
-				if (!enemyRef.isActive()) {
-					enemyRef = (Enemy)enemyRef.spawn();
-					Entity.entityInstances.add(enemyRef);
-					World.enemyInstances.add(enemyRef);
+		super(position, id, isActive, isRenderable, isDecalFacing);
+		if ((int)position.x == 11 && (int)position.z == 11){
+			enemyRef = (Enemy)enemy;
+			Timer.schedule(new Task() {
+				@Override
+				public void run() {
+					if (!enemyRef.isActive()) {
+						enemyRef = (Enemy)enemyRef.spawn();
+						Entity.entityInstances.add(enemyRef);
+						World.enemyInstances.add(enemyRef);
+					}
 				}
-			}
-		}, initialSpawnTime, delayedSpawnTime);
+			}, initialSpawnTime, delayedSpawnTime);
+		}
+
 	}
 }

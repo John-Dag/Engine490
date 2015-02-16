@@ -12,16 +12,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.gdx.engine.Condition;
-import com.gdx.engine.DistanceTrackerMap;
-import com.gdx.engine.State;
-import com.gdx.engine.StateMachine;
-import com.gdx.engine.World;
+import com.gdx.engine.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Enemy extends DynamicEntity {
 	private int health, damage;
@@ -35,8 +28,9 @@ public class Enemy extends DynamicEntity {
 	public StateMachine stateMachine;
 	public boolean isSpawned, isAttacking;
 	public Vector3 spawnPos;
-	private double changeLayerHeight = 5.8;
+	private double changeLayerHeight = 5.9;
 	private float addToChangeLH = 0.2f;
+	//private ArrayList<DistanceFromPlayer> patrolPath;
 
 	public Enemy() {
 		super();
@@ -106,7 +100,12 @@ public class Enemy extends DynamicEntity {
 			if (world.getPlayer().camera.position.y >= 6)// should be 6?
 				playerTile = playerTile + width * width;
              try {
-				 path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
+				 //path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
+
+				 if (Math.abs(playerPosition.x - thisPosition.x) < 2 || Math.abs(playerPosition.y - thisPosition.y) < 2)
+					 path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
+				 else
+					 path = patrolTiles(enemyTile, world);
             } catch (Exception ex) {
                 path = new ArrayList<Integer>();
             }
@@ -164,7 +163,10 @@ public class Enemy extends DynamicEntity {
                 checkPos.y = heightValueLvl1;
             }
 
-            this.setPosition(checkPos);
+            //this.setPosition(checkPos);
+
+			//world.getMeshLevel().getEnemyWayPoints();
+			//world.getMeshLevel().generatePatrolPath();
 
 			//adjusts enemy position to center of tile
 			if (this.getPosition().y >= 6)
@@ -184,15 +186,15 @@ public class Enemy extends DynamicEntity {
                 }
 
             if (this.getPosition().y >= 6)
-                targetHeight = 6
-                        + world.getMeshLevel().mapHeight(
-                        this.getPosition().x, this.getPosition().z, 2);
+                targetHeight = 6 + world.getMeshLevel().getMapTile((int)this.getPosition().x, (int)this.getPosition().z, 1).getHeight();
+                        //+ world.getMeshLevel().mapHeight(
+                        //this.getPosition().x, this.getPosition().z, 2);//get maptile
             if (this.getPosition().y > targetHeight + 30 * delta) {
                 this.getPosition().y -= 30 * delta;
 
             } else if (this.getPosition().y < targetHeight) {
-                this.getPosition().y = targetHeight;
-
+                //this.getPosition().y = targetHeight;
+				this.getPosition().y += 30 * delta;
             } else {
 				/*if (this.getPosition().y >=6)
 					this.getPosition().y = 6 + world.getMeshLevel()
@@ -643,4 +645,75 @@ public class Enemy extends DynamicEntity {
         
         return true;
     }
+
+	public ArrayList<Integer> patrolTiles(int enemyTile, World world) {
+		ArrayList<DistanceFromPlayer> patrolPathTiles = world.getMeshLevel().getPatrolPath();
+		ArrayList<Integer> patrolPathNums = new ArrayList<Integer>();
+		DistanceFromPlayer currentTile = new DistanceFromPlayer(-1, -1, -1);
+		for (DistanceFromPlayer patrolTile : patrolPathTiles)
+			if (patrolTile.getTileNumber() == enemyTile){
+				currentTile = patrolTile;
+				break;
+			}
+		if (currentTile.getTileNumber() == -1)
+			return patrolPathNums;
+
+		if (this.getRotation().x == 0)
+			patrolPathNums = findNextTile(currentTile.getLeft(), currentTile.getBottom(), currentTile.getTop(), currentTile.getRight(), patrolPathNums, currentTile, patrolPathTiles);
+		else if (this.getRotation().x == 90)
+			patrolPathNums = findNextTile(currentTile.getTop(), currentTile.getRight(), currentTile.getLeft(), currentTile.getBottom(), patrolPathNums, currentTile, patrolPathTiles);
+		else if (this.getRotation().x == 180)
+			patrolPathNums = findNextTile(currentTile.getRight(), currentTile.getTop(), currentTile.getBottom(), currentTile.getLeft(), patrolPathNums, currentTile, patrolPathTiles);
+		else if (this.getRotation().x == 270)
+			patrolPathNums = findNextTile(currentTile.getBottom(), currentTile.getLeft(), currentTile.getRight(), currentTile.getTop(), patrolPathNums, currentTile, patrolPathTiles);
+		else
+			return patrolPathNums;
+		return patrolPathNums;
+	}
+
+	public ArrayList<Integer> findNextTile(int front, int right, int left, int back, ArrayList<Integer> patrolPathNums, DistanceFromPlayer currentTile, ArrayList<DistanceFromPlayer> patrolPathTiles) {
+		int nextNum = 0;
+
+		if (front != -1)
+			patrolPathNums.add(nextNum = front);
+		/*else if (right != -1 && left != -1){
+			Random randomChoose = new Random();
+			if (randomChoose.nextInt() % 2 == 0)
+				patrolPathNums.add(nextNum = right);
+			else
+				patrolPathNums.add(nextNum = left);
+		}*/
+		else if (/*right == -1 &&*/ left != -1)
+			patrolPathNums.add(nextNum = left);
+		else if (/*left == -1 &&*/ right != -1)
+			patrolPathNums.add(nextNum = right);
+		else if (back != -1)
+			patrolPathNums.add(nextNum = back);
+		else
+			return patrolPathNums;
+
+		for (DistanceFromPlayer patrolPathTile : patrolPathTiles)
+			if (nextNum == patrolPathTile.getTileNumber()){
+				currentTile = patrolPathTile;
+				break;
+			}
+
+
+		if (patrolPathNums.size() == 2)
+			return patrolPathNums;
+		else{
+			if (this.getRotation().x == 0)
+				patrolPathNums = findNextTile(currentTile.getLeft(), currentTile.getBottom(), currentTile.getTop(), currentTile.getRight(), patrolPathNums, currentTile, patrolPathTiles);
+			else if (this.getRotation().x == 90)
+				patrolPathNums = findNextTile(currentTile.getTop(), currentTile.getRight(), currentTile.getLeft(), currentTile.getBottom(), patrolPathNums, currentTile, patrolPathTiles);
+			else if (this.getRotation().x == 180)
+				patrolPathNums = findNextTile(currentTile.getRight(), currentTile.getTop(), currentTile.getBottom(), currentTile.getLeft(), patrolPathNums, currentTile, patrolPathTiles);
+			else if (this.getRotation().x == 270)
+				patrolPathNums = findNextTile(currentTile.getBottom(), currentTile.getLeft(), currentTile.getRight(), currentTile.getTop(), patrolPathNums, currentTile, patrolPathTiles);
+			else
+				return patrolPathNums;
+		}
+			//return findNextTile(currentTile.get, right, left, back, patrolPathNums, currentTile, patrolPathTiles);
+		return patrolPathNums;
+	}
 }

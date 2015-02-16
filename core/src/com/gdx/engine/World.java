@@ -21,6 +21,8 @@ import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Weapon;
 
+import java.util.ArrayList;
+
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
     public static boolean isWireframeEnabled;
@@ -65,6 +67,7 @@ public class World implements Disposable {
 		
 		//distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
 		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+		meshLevel.generatePatrolPath();
 		Entity.entityInstances.add(player);
 		enemyInstances = new Array<Enemy>();
 		boxes = new Array<BoundingBox>();
@@ -94,6 +97,7 @@ public class World implements Disposable {
 		boxes.clear();
 		createBoundingBoxes();
 		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+		meshLevel.generatePatrolPath();
 	}
 	
 	public void loadLevel(TiledMap map) {
@@ -117,6 +121,7 @@ public class World implements Disposable {
 		boxes.clear();
 		createBoundingBoxes();
 		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+		meshLevel.generatePatrolPath();
 	}
 	
 	public void update(float delta) {
@@ -398,9 +403,9 @@ public class World implements Disposable {
 			this.filterEffect.dispose();
 		}
 		this.filterEffect = filterEffect;
-		
-
 	}
+
+
 
 	@Override
 	public void dispose() {

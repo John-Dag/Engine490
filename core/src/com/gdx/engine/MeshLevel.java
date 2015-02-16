@@ -1,8 +1,7 @@
 package com.gdx.engine;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.lang.Object;
+import java.util.*;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -18,6 +17,8 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -39,6 +40,7 @@ import com.gdx.StaticEntities.Torch;
 import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
+import org.omg.CORBA.*;
 
 // Important note to the team: (this can be confusing)
 // World coordinates have x, y, z, with +x pointing East, and +z pointing South
@@ -115,6 +117,8 @@ public class MeshLevel {
 	public Map<Integer,Material> MapMaterials=new HashMap<Integer,Material>();	//Maps texture Ids to Materials
 	public Map<String,Integer> MaterialIds=new HashMap<String,Integer>();		//Maps texture filenames to texture Ids
 	//End Texture stuff
+
+	ArrayList<DistanceFromPlayer> patrolPath = new ArrayList<DistanceFromPlayer>();
 	
 	public MeshLevel(boolean isSkySphereActive){
 		modelBuilder = new ModelBuilder();
@@ -1100,6 +1104,44 @@ public class MeshLevel {
 		instance = new ModelInstance(model);
 		instances.add(instance);
 	}
+
+	public ArrayList<int[]> getEnemyWayPoints(){
+
+		MapObjects objects = tiledMap.getLayers().get("objects").getObjects();
+		int[] posArray = new int[2];
+		ArrayList<int[]> wpPos = new ArrayList<int[]>();
+		//int wpCount = 0;
+		for (MapObject obj : objects){
+			if (obj.getName().equalsIgnoreCase("Spawn")){
+				posArray[0] = Integer.parseInt(obj.getProperties().get("X").toString());
+				posArray[1] = Integer.parseInt(obj.getProperties().get("Y").toString());
+				wpPos.add(posArray);
+				//wpCount++;
+			}
+		}
+		return wpPos;
+	}
+
+	public void generatePatrolPath(){
+		//ArrayList<DistanceFromPlayer> patrolPath = new ArrayList<DistanceFromPlayer>();
+		//TiledMapTileLayer patrolLayer = (TiledMapTileLayer) tiledMap.getLayers().get(6);//map from android assets
+		DistanceFromPlayer newTile;
+		TiledMapTileLayer patrolLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Patrol Path Tile Layer 1");
+		int tileNum = 0;
+		for (int tileX = 0; tileX < tileLayerWidth; tileX++)
+			for (int tileY = 0; tileY < tileLayerWidth; tileY++) {
+				tileNum = (tileX * tileLayerWidth) + tileY;
+				if (patrolLayer.getCell(tileX, tileY) != null){
+					newTile = new DistanceFromPlayer(tileNum, 1, tileLayerWidth);
+					for (DistanceFromPlayer partOfPath : patrolPath){
+						partOfPath.addSpotToMoveIndex(tileNum);//checks to see if tileNum is adjacent to prev. added tiles
+						newTile.addSpotToMoveIndex(partOfPath.getTileNumber());
+					}
+					patrolPath.add(newTile);
+				}
+
+			}
+	}
 	
 	//Objects are read from the "objects" layer in the tile map
 	private void initializeObjectInstances() {
@@ -1718,8 +1760,16 @@ public class MeshLevel {
 	public int getMapYDimension(){
 		return tileLayerHeight;
 	}
+
+	public ArrayList<DistanceFromPlayer> getPatrolPath(){
+		return patrolPath;
+	}
 	
 	public MapTile getMapTile(int x, int y, int z){
-		return levelArray[x][y][z];
+		try {
+			return levelArray[x][y][z];
+		}catch (Exception e) {
+			return levelArray[x][y][0];
+		}
 	}
 }
