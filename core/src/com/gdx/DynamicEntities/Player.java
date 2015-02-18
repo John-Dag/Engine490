@@ -106,13 +106,12 @@ public class Player extends DynamicEntity {
 		
 	    //TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
+		int heightPerLayer = 6;
+		int playersTilePos = playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y;
 		if (newPos != oldPos && clipping) {
             distanceMap = world.getDistanceMap();
             distanceMap.resetDistances();
-            if (camera.position.y >= 6)
-            	distanceMap.addDistances((playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y) + world.getMeshLevel().getMapXDimension() * world.getMeshLevel().getMapXDimension());
-            else
-            	distanceMap.addDistances((playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
+            distanceMap.addDistances(playersTilePos + ((int)(camera.position.y / heightPerLayer) * world.getMeshLevel().getMapXDimension() * world.getMeshLevel().getMapXDimension()));
             // distanceMap.addDistances(( playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
             world.setDistanceMap(distanceMap);
         }
