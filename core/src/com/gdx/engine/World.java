@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -14,12 +15,21 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.esotericsoftware.kryonet.Client;
 import com.gdx.DynamicEntities.Ability;
 import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Weapon;
+import com.gdx.Network.Net;
+import com.gdx.Network.NetServer;
+import com.gdx.Network.Net.newProjectile;
+import com.gdx.Network.Net.playerNew;
+import com.gdx.Network.Net.playerPacket;
+import com.gdx.Network.Net.projectile;
+import com.gdx.Network.NetClient;
+import com.gdx.Weapons.RocketLauncher;
 
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
@@ -27,7 +37,9 @@ public class World implements Disposable {
 	public static Player player;
 	public static ParticleManager particleManager;
 	public static Array<Enemy> enemyInstances;
+	public Array<Player> playerInstances;
 	public Array<ModelInstance> wireInstances;
+	public Array<Projectile> projectileInstances;
 	private MeshLevel meshLevel;
 	private Ray ray;
 	private Array<BoundingBox> boxes;
@@ -35,88 +47,84 @@ public class World implements Disposable {
 	private Vector3 out;
     private DistanceTrackerMap distanceMap;
     private FilterEffect filterEffect;
+    private NetClient client;
+    private NetServer server;
+    private int NetIdCurrent;
+	public static EntityManager entManager;
+    
 	public World() {
-		boolean bspDungeon = false;
-
-		if(bspDungeon){
-			// must come after meshlevel
-			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
-					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
-							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
-			
-//			player = new Player(this, 100, null, 2, true, true, new Vector3(45f, 20.5f, 23f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
-//					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
-//							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
-			
-			particleManager = new ParticleManager(this);
-			meshLevel = new MeshLevel(true);
-			GridPoint2 playerPos = new GridPoint2();
-			playerPos.set(meshLevel.getStartingPoint());
-			player.camera.position.set(playerPos.x + 0.5f, player.camera.position.y, playerPos.y + 0.5f);
-		} else {
-			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
-					new Vector3(0, 0, 0), new Vector3(0, 0, 0), new ModelInstance(Assets.modelBuilder.createBox(1f, 1f, 1f, 
-							Assets.floorMat, Usage.Position | Usage.Normal | Usage.TextureCoordinates)));
-			// must come before meshlevel, and after player
-			particleManager = new ParticleManager(this);
-			player.initAbilities();
-			meshLevel = new MeshLevel(Assets.castle3, true);
-		}
-		
-		//distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
-		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
-		Entity.entityInstances.add(player);
+		playerInstances = new Array<Player>();
+		projectileInstances = new Array<Projectile>();
 		enemyInstances = new Array<Enemy>();
-		boxes = new Array<BoundingBox>();
-		position = new Vector3();
-		out = new Vector3();
+		setBoxes(new Array<BoundingBox>());
+		setPosition(new Vector3());
+		setOut(new Vector3());
 		wireInstances = new Array<ModelInstance>();
 		isWireframeEnabled = false;
-		
-		Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
+		//Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
+	}
+	
+	
+	//Order matters here
+	public void loadOfflineWorld(TiledMap map, boolean skySphere) {
+		try {
+			Assets.loadModels();
+			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
+			particleManager = new ParticleManager(this);
+			player.initAbilities();
+			playerInstances.add(player);
+			Entity.entityInstances.add(player);
+			setMeshLevel(new MeshLevel(map, skySphere));
+			distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
+			entManager = new EntityManager(this);
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 	
 	public void enterDungeon() {
 		Entity.entityInstances.clear();
 		enemyInstances.clear();
-		meshLevel.getInstances().clear();
+		getMeshLevel().getInstances().clear();
 		particleManager.system.removeAll();
 		Render.environment.pointLights.removeRange(0, Render.environment.pointLights.size - 1);
-		meshLevel = new MeshLevel(true);
+		setMeshLevel(new MeshLevel(true));
 		GridPoint2 playerPos = new GridPoint2();
-		playerPos.set(meshLevel.getStartingPoint());
+		playerPos.set(getMeshLevel().getStartingPoint());
 		player.camera.position.set(playerPos.x+0.5f, player.camera.position.y, playerPos.y+0.5f);
 		player.camera.lookAt(50f, 1.5f, 50f);
 		Entity.entityInstances.add(player);
 		if (player.getWeapon() != null)
 			Entity.entityInstances.add(player.getWeapon());
 		initializeEntities();
-		boxes.clear();
+		getBoxes().clear();
 		createBoundingBoxes();
-		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+		distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
 	}
 	
 	public void loadLevel(TiledMap map) {
 		Entity.entityInstances.clear();
 		enemyInstances.clear();
-		meshLevel.getInstances().clear();
+		getMeshLevel().getInstances().clear();
 		particleManager.system.removeAll();
 		Render.environment.pointLights.removeRange(0, Render.environment.pointLights.size - 1);
 		try {
-			meshLevel = new MeshLevel(map, true);
+			setMeshLevel(new MeshLevel(map, true));
 		} catch(Exception e) {
 			System.err.println("Error loading specified map. Loading default.");
-			meshLevel = new MeshLevel(Assets.castle3, true);
+			setMeshLevel(new MeshLevel(Assets.castle3, true));
 		}
 		GridPoint2 playerPos = new GridPoint2();
-		playerPos.set(meshLevel.getStartingPoint());
+		playerPos.set(getMeshLevel().getStartingPoint());
 		player.camera.position.set(playerPos.x+0.5f, player.camera.position.y, playerPos.y+0.5f);
 		player.camera.lookAt(50f, 1.5f, 50f);
 		Entity.entityInstances.add(player);
 		initializeEntities();
-		boxes.clear();
+		getBoxes().clear();
 		createBoundingBoxes();
-		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+		distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
 	}
 	
 	public void update(float delta) {
@@ -129,7 +137,6 @@ public class World implements Disposable {
 		{
 			filterEffect.Update(world, delta);
 		}
-		
 	}
 	
 	public void initializeEntities() {
@@ -161,8 +168,8 @@ public class World implements Disposable {
 							corners = box.getCorners();
 							//meshLevel.meshPartBuilder.setColor(Color.GREEN);
 							createWireframeBox(corners, material);
-							meshLevel.instance = new ModelInstance(meshLevel.model);
-							wireInstances.add(meshLevel.instance);
+							getMeshLevel().instance = new ModelInstance(getMeshLevel().model);
+							wireInstances.add(getMeshLevel().instance);
 						}
 					}
 					if(entity instanceof Projectile) {
@@ -170,10 +177,10 @@ public class World implements Disposable {
 						if(box != null) {
 							corners = box.getCorners();
 							Color color = new Color(Color.GREEN);
-							meshLevel.meshPartBuilder.setColor(color);
+							getMeshLevel().meshPartBuilder.setColor(color);
 							createWireframeBox(corners, material);
-							meshLevel.instance = new ModelInstance(meshLevel.model);
-							wireInstances.add(meshLevel.instance);
+							getMeshLevel().instance = new ModelInstance(getMeshLevel().model);
+							wireInstances.add(getMeshLevel().instance);
 						}
 					}
 					if(entity instanceof Ability) {
@@ -181,10 +188,10 @@ public class World implements Disposable {
 						if(box != null) {
 							corners = box.getCorners();
 							Color color = new Color(Color.GREEN);
-							meshLevel.meshPartBuilder.setColor(color);
+							getMeshLevel().meshPartBuilder.setColor(color);
 							createWireframeBox(corners, material);
-							meshLevel.instance = new ModelInstance(meshLevel.model);
-							wireInstances.add(meshLevel.instance);
+							getMeshLevel().instance = new ModelInstance(getMeshLevel().model);
+							wireInstances.add(getMeshLevel().instance);
 						}
 					}
 					if(entity instanceof Weapon) {
@@ -192,10 +199,10 @@ public class World implements Disposable {
 						if(box != null) {
 							corners = box.getCorners();
 							Color color = new Color(Color.GREEN);
-							meshLevel.meshPartBuilder.setColor(color);
+							getMeshLevel().meshPartBuilder.setColor(color);
 							createWireframeBox(corners, material);
-							meshLevel.instance = new ModelInstance(meshLevel.model);
-							wireInstances.add(meshLevel.instance);
+							getMeshLevel().instance = new ModelInstance(getMeshLevel().model);
+							wireInstances.add(getMeshLevel().instance);
 						}
 					}
 					if(entity instanceof Player) {
@@ -203,10 +210,10 @@ public class World implements Disposable {
 						if(box != null) {
 							corners = box.getCorners();
 							Color color = new Color(Color.GREEN);
-							meshLevel.meshPartBuilder.setColor(color);
+							getMeshLevel().meshPartBuilder.setColor(color);
 							createWireframeBox(corners, material);
-							meshLevel.instance = new ModelInstance(meshLevel.model);
-							wireInstances.add(meshLevel.instance);
+							getMeshLevel().instance = new ModelInstance(getMeshLevel().model);
+							wireInstances.add(getMeshLevel().instance);
 						}
 					}
 				}
@@ -221,33 +228,33 @@ public class World implements Disposable {
 	}
 	
 	private ModelInstance createWireframeBox(Vector3[] corners, Material material) {
-		meshLevel.modelBuilder.begin();
-		meshLevel.meshPartBuilder = meshLevel.modelBuilder.part("boxes", 
+		getMeshLevel().modelBuilder.begin();
+		getMeshLevel().meshPartBuilder = getMeshLevel().modelBuilder.part("boxes", 
 				GL20.GL_LINES,
 				Usage.Position | Usage.Color, material);
-		meshLevel.meshPartBuilder.line(corners[0], corners[1]);
-		meshLevel.meshPartBuilder.line(corners[1], corners[2]);
-		meshLevel.meshPartBuilder.line(corners[2], corners[3]);
-		meshLevel.meshPartBuilder.line(corners[3], corners[0]);
-		meshLevel.meshPartBuilder.line(corners[4], corners[5]);
-		meshLevel.meshPartBuilder.line(corners[5], corners[6]);
-		meshLevel.meshPartBuilder.line(corners[6], corners[7]);
-		meshLevel.meshPartBuilder.line(corners[7], corners[4]);
-		meshLevel.meshPartBuilder.line(corners[0], corners[4]);
-		meshLevel.meshPartBuilder.line(corners[1], corners[5]);
-		meshLevel.meshPartBuilder.line(corners[2], corners[6]);
-		meshLevel.meshPartBuilder.line(corners[3], corners[7]);
-		meshLevel.model = meshLevel.modelBuilder.end();
-		return new ModelInstance(meshLevel.model);
+		getMeshLevel().meshPartBuilder.line(corners[0], corners[1]);
+		getMeshLevel().meshPartBuilder.line(corners[1], corners[2]);
+		getMeshLevel().meshPartBuilder.line(corners[2], corners[3]);
+		getMeshLevel().meshPartBuilder.line(corners[3], corners[0]);
+		getMeshLevel().meshPartBuilder.line(corners[4], corners[5]);
+		getMeshLevel().meshPartBuilder.line(corners[5], corners[6]);
+		getMeshLevel().meshPartBuilder.line(corners[6], corners[7]);
+		getMeshLevel().meshPartBuilder.line(corners[7], corners[4]);
+		getMeshLevel().meshPartBuilder.line(corners[0], corners[4]);
+		getMeshLevel().meshPartBuilder.line(corners[1], corners[5]);
+		getMeshLevel().meshPartBuilder.line(corners[2], corners[6]);
+		getMeshLevel().meshPartBuilder.line(corners[3], corners[7]);
+		getMeshLevel().model = getMeshLevel().modelBuilder.end();
+		return new ModelInstance(getMeshLevel().model);
 	}
 	
 	public void checkProjectileCollisions(Projectile projectile) {
 		for (Enemy enemy : enemyInstances) {
 			if (projectile.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
-				//projectile.initializeBloodEffect();
-				projectile.initializeCollisionExplosionEffect();
-				enemy.takeDamage(player.getWeapon().getDamage());
-				projectile.removeProjectile();
+				projectile.initializeBloodEffect();
+				if (!projectile.isDealtDamage())
+					enemy.takeDamage(player.getWeapon().getDamage());
+					projectile.initializeCollisionExplosionEffect();
 			}
 		}
 	}
@@ -275,78 +282,78 @@ public class World implements Disposable {
 	
 	//Bounding boxes used for frustum culling
 	public void createBoundingBoxes() {
-		int size = meshLevel.getInstances().size;
+		int size = getMeshLevel().getInstances().size;
 		
 		for (int i = 0; i < size; i++) {
 			BoundingBox box = new BoundingBox();
-			meshLevel.getInstances().get(i).calculateBoundingBox(box);
-			boxes.add(box);
+			getMeshLevel().getInstances().get(i).calculateBoundingBox(box);
+			getBoxes().add(box);
 		}
 	}
 	
 	//Temporary
-	public void rayPick() {
-
-	}
-	
-	public void rayPickLevel() {
-		int size = meshLevel.getInstances().size;
-		int result = -1;
-		float distance = -1;
-		
-		if (ray != null) {
-			for (int i = 0; i < size; i++) {
-				ModelInstance model = meshLevel.getInstances().get(i);
-				
-				model.transform.getTranslation(position);
-				position.add(boxes.get(i).getCenter());
-				float dist2 = ray.origin.dst2(position);
-				
-				if (distance >= 0f && dist2 > distance)
-					continue;
-		
-				if (Intersector.intersectRayBoundsFast(ray, boxes.get(i))) {
-					result = i;
-					distance = dist2;
-					
-					if (result > -1) {
-						Intersector.intersectRayBounds(ray, boxes.get(i), out);
-					}
-				}
-			}
-		}
-	}
-	
-	public void rayPickEntities() {
-		int size = Entity.entityInstances.size;
-		int result = -1;
-		float distance = -1;
-		Enemy enemy;
-		
-		if (ray != null) {
-			for (int i = 0; i < size; i++) {
-				Entity entity = Entity.entityInstances.get(i);
-				if (entity instanceof Enemy) {
-					enemy = (Enemy)entity;
-					enemy.getModel().transform.getTranslation(position);
-					position.add(enemy.getTransformedBoundingBox().getCenter());
-					float dist2 = ray.origin.dst2(position);
-					
-					if (distance >= 0f && dist2 > distance)
-						continue;
-			
-					if (Intersector.intersectRayBoundsFast(ray, enemy.getTransformedBoundingBox())) {
-						result = i;
-						distance = dist2;
-						
-						if (result > -1) {
-							Intersector.intersectRayBounds(ray, enemy.getTransformedBoundingBox(), out);
-						}
-					}
-				}
-			}
-		}
-	}
+//	public void rayPick() {
+//
+//	}
+//	
+//	public void rayPickLevel() {
+//		int size = getMeshLevel().getInstances().size;
+//		int result = -1;
+//		float distance = -1;
+//		
+//		if (ray != null) {
+//			for (int i = 0; i < size; i++) {
+//				ModelInstance model = getMeshLevel().getInstances().get(i);
+//				
+//				model.transform.getTranslation(getPosition());
+//				getPosition().add(getBoxes().get(i).getCenter());
+//				float dist2 = ray.origin.dst2(getPosition());
+//				
+//				if (distance >= 0f && dist2 > distance)
+//					continue;
+//		
+//				if (Intersector.intersectRayBoundsFast(ray, getBoxes().get(i))) {
+//					result = i;
+//					distance = dist2;
+//					
+//					if (result > -1) {
+//						Intersector.intersectRayBounds(ray, getBoxes().get(i), getOut());
+//					}
+//				}
+//			}
+//		}
+//	}
+//	
+//	public void rayPickEntities() {
+//		int size = Entity.entityInstances.size;
+//		int result = -1;
+//		float distance = -1;
+//		Enemy enemy;
+//		
+//		if (ray != null) {
+//			for (int i = 0; i < size; i++) {
+//				Entity entity = Entity.entityInstances.get(i);
+//				if (entity instanceof Enemy) {
+//					enemy = (Enemy)entity;
+//					enemy.getModel().transform.getTranslation(getPosition());
+//					getPosition().add(enemy.getTransformedBoundingBox().getCenter());
+//					float dist2 = ray.origin.dst2(getPosition());
+//					
+//					if (distance >= 0f && dist2 > distance)
+//						continue;
+//			
+//					if (Intersector.intersectRayBoundsFast(ray, enemy.getTransformedBoundingBox())) {
+//						result = i;
+//						distance = dist2;
+//						
+//						if (result > -1) {
+//							Intersector.intersectRayBounds(ray, enemy.getTransformedBoundingBox(), getOut());
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
 	
 	/*
 	public void setDecals() {
@@ -363,8 +370,32 @@ public class World implements Disposable {
 		return distanceMap;
 	}
 
+	public NetServer getServer() {
+		return server;
+	}
+
+	public NetClient getClient() {
+		return client;
+	}
+
+	public void setClient(NetClient client) {
+		this.client = client;
+	}
+
+	public Array<Player> getPlayerInstances() {
+		return playerInstances;
+	}
+
+	public void setPlayerInstances(Array<Player> playerInstances) {
+		this.playerInstances = playerInstances;
+	}
+
 	public void setDistanceMap(DistanceTrackerMap distanceMap) {
 		this.distanceMap = distanceMap;
+	}
+	
+	public void setPlayer(Player player) {
+		this.player = player;
 	}
 	
 	public Player getPlayer() {
@@ -373,7 +404,7 @@ public class World implements Disposable {
 	
 	// these bounding boxes are for the levelMesh only
 	public Array<BoundingBox> getBoundingBoxes() {
-		return boxes;
+		return getBoxes();
 	}
 	
 	public MeshLevel getMeshLevel() {
@@ -393,18 +424,79 @@ public class World implements Disposable {
 	}
 
 	public void setFilterEffect(FilterEffect filterEffect) {
-		if(this.filterEffect!=null)
-		{
+		if (this.filterEffect != null) {
 			this.filterEffect.dispose();
 		}
-		this.filterEffect = filterEffect;
 		
-
+		this.filterEffect = filterEffect;
 	}
 
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void setMeshLevel(MeshLevel meshLevel) {
+		this.meshLevel = meshLevel;
+	}
+
+	public Array<BoundingBox> getBoxes() {
+		return boxes;
+	}
+
+	public void setBoxes(Array<BoundingBox> boxes) {
+		this.boxes = boxes;
+	}
+
+	public Vector3 getPosition() {
+		return position;
+	}
+
+	public void setPosition(Vector3 position) {
+		this.position = position;
+	}
+
+	public void setOut(Vector3 out) {
+		this.out = out;
+	}
+
+	public void updatePlayers(playerPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void updateProjectiles(projectile packet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void addProjectile(newProjectile packet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void addPlayer(playerNew playerPacket) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setServer(NetServer server) {
+		this.server = server;
+	}
+
+	public void sendProjectilePositionUpdate(Projectile projectile) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public int getNetIdCurrent() {
+		return NetIdCurrent;
+	}
+
+
+	public void setNetIdCurrent(int netIdCurrent) {
+		NetIdCurrent = netIdCurrent;
 	}
 }

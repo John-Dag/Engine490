@@ -1,7 +1,6 @@
 package com.gdx.engine;
 
 import java.util.ArrayList;
-
 import com.badlogic.gdx.math.Vector3;
 
 // This is a room in a procedurally generated dungeon. Level modules are connected by level module connectors.

@@ -32,9 +32,6 @@ public class ParticleManager {
 	public ParticleEffect poisonEffect;
     public ParticleEffectLoadParameter loadParam;
 	public ParticleEffectLoader loader;
-	public RegularEmitter regularEmitter;
-	public ParticleEffect currentExplosionEffect;
-	public RegularEmitter currentEmitter;
 	
 	public ParticleManager(World world) {
 		this.world = world;
@@ -48,7 +45,7 @@ public class ParticleManager {
 		Assets.loadParticleEffects(system);
 		bloodEffect = Assets.manager.get("bloodeffect.pfx");
 		poisonEffect = Assets.manager.get("poisonCloudEffect.pfx");
-		torchEffect = Assets.manager.get("torcheffect.pfx");
+		torchEffect = Assets.manager.get("torcheffect2.pfx");
 		rocketEffect = Assets.manager.get("rocketeffect.pfx");
 		mistEffect = Assets.manager.get("mistGreenWeapon.pfx");
 		portalEffect = Assets.manager.get("portalEffect.pfx");
@@ -65,6 +62,8 @@ public class ParticleManager {
 	}
 	
 	public RegularEmitter getEmitter(ParticleEffect effect) {
+		if (rocketExplosionPool.peak > 10)
+			rocketExplosionPool.clear();
 		return (RegularEmitter)effect.getControllers().first().emitter;
 	}
 	

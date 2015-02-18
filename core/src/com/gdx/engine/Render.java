@@ -13,13 +13,14 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Disposable;
+import com.gdx.DynamicEntities.Player;
+import com.gdx.Network.Net.playerPacket;
 
 public class Render implements Disposable {
 	public static int renderCount;
@@ -124,6 +125,21 @@ public class Render implements Disposable {
 			renderModels(wireInstance);
 			renderCount++;
 		}
+		
+		//Renders multiplayer (just players so far)
+		for (int i = 0; i < world.getPlayerInstances().size; i++) {
+			if (world.getPlayerInstances().get(i).getModel() != null) {
+				Player player = world.getPlayerInstances().get(i);
+				player.getAnimation().update(delta);
+				player.getModel().transform.setToTranslation(player.camera.position.cpy());
+				renderModels(player.getModel());
+			}
+		}
+		
+//		for (int i = 0; i < world.projectileInstances.size; i++) {
+//			world.projectileInstances.get(i).getParticleEffect().init();
+//			world.projectileInstances.get(i).getParticleEffect().update();
+//		}
 		
 		shadowBatch.end();
 		shadowLight.end();

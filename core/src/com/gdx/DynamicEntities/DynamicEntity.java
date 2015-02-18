@@ -25,10 +25,12 @@ public class DynamicEntity extends Entity {
 	private AnimationController animation;
 	private BoundingBox boundingBox;
 	private BoundingBox detectionBox;
+	private int NetId;
 	private Vector3 newPosition = new Vector3();
 	private Vector3 newVelocity = new Vector3();
 	private Vector3 newRotation = new Vector3();
 	private Vector3 newAngVelocity = new Vector3();
+	private Vector3 movementVector = new Vector3();
 	
 	public DynamicEntity() {
 		super(0, false, false);
@@ -88,38 +90,6 @@ public class DynamicEntity extends Entity {
 		this.acceleration = acceleration;
 		this.angAccel = new Vector3(0, 0, 0);
 		this.angVelocity = new Vector3(0, 0, 0);
-	}
-	
-	public Decal getDecal() {
-		return decal;
-	}
-
-	public void setDecal(Decal decal) {
-		this.decal = decal;
-	}
-	
-	public Ability getAbility() {
-		return ability;
-	}
-
-	public void setAbility(Ability ability) {
-		this.ability = ability;
-	}
-
-	public BoundingBox getDetectionBox() {
-		return detectionBox;
-	}
-
-	public void setDetectionBox(BoundingBox detectionBox) {
-		this.detectionBox = detectionBox;
-	}
-
-	public BoundingBox getTransformedBoundingBox() {
-		return new BoundingBox(this.boundingBox).mul(this.model.transform);
-	}
-	
-	public BoundingBox getTransformedDetectionBoundingBox() {
-		return new BoundingBox(this.detectionBox).mul(this.model.transform);
 	}
 	
 	@Override
@@ -218,6 +188,54 @@ public class DynamicEntity extends Entity {
 		this.model.calculateTransforms();
 	}
 	
+	public int getNetId() {
+		return NetId;
+	}
+
+	public void setNetId(int netId) {
+		NetId = netId;
+	}
+
+	public Decal getDecal() {
+		return decal;
+	}
+
+	public void setDecal(Decal decal) {
+		this.decal = decal;
+	}
+	
+	public Ability getAbility() {
+		return ability;
+	}
+
+	public void setAbility(Ability ability) {
+		this.ability = ability;
+	}
+
+	public BoundingBox getDetectionBox() {
+		return detectionBox;
+	}
+
+	public void setDetectionBox(BoundingBox detectionBox) {
+		this.detectionBox = detectionBox;
+	}
+
+	public BoundingBox getTransformedBoundingBox() {
+		return new BoundingBox(this.boundingBox).mul(this.model.transform);
+	}
+	
+	public BoundingBox getTransformedDetectionBoundingBox() {
+		return new BoundingBox(this.detectionBox).mul(this.model.transform);
+	}
+	
+	public Vector3 getMovementVector() {
+		return movementVector;
+	}
+
+	public void setMovementVector(Vector3 movementVector) {
+		this.movementVector = movementVector;
+	}
+
 	public Vector3 getAngVelocity() {
 		return angVelocity;
 	}

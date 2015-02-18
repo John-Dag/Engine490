@@ -8,14 +8,14 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "Engine 490";
-		config.width = 1920;
-		config.height = 1080;
-		//config.width = 1920;
-		//config.height = 1080;
+		//config.width = 800;
+		//config.height = 600;
+		config.width = 1920/2;
+		config.height = 1080/2;
 		//config.vSyncEnabled = false;
 		//config.foregroundFPS = 0; 
 		//config.backgroundFPS = 0;
-		//config.resizable = false;
+		config.resizable = false;
 		//config.fullscreen = true;
 		new LwjglApplication(new Engine(), config);
 	}

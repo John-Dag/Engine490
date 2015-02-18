@@ -1,21 +1,17 @@
 package com.gdx.UI;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
-import com.gdx.engine.Assets;
 
 public class UIGrid extends UIBase {
 	private Table table;
@@ -49,6 +45,7 @@ public class UIGrid extends UIBase {
 	/***
 	 * Generates a grid in a scene2d window based on specified number of slots
 	 * and slot size.
+	 * @param align Alignment of the grid within a window
 	 * @param slotWidth Width of each slot
 	 * @param slotHeight Height of each slot
 	 * @param numSlotsX Number of slots to fill each row
@@ -58,7 +55,7 @@ public class UIGrid extends UIBase {
 	
 	public void generateGrid(int align, float slotWidth, float slotHeight, int numSlotsX, int numSlotsY, int padding) {
 		window.setSize(slotWidth * numSlotsX, slotHeight * numSlotsY);
-		table.align(align).align(Align.bottom);
+		table.align(align);
 		
 		//Add click listeners to each slot
 		for (int a = 0; a < numSlotsX * numSlotsY; a++) {
@@ -74,13 +71,21 @@ public class UIGrid extends UIBase {
 		//Add the slot actors to the window in a grid
 		for (int i = 0; i < numSlotsX; i++) {
 			for (int j = 0; j < numSlotsY; j++) { 
-				table.add(images.get((i * numSlotsX) + j)).pad(padding);
+				table.add(images.get((i * numSlotsX) + j)).pad(padding).size(slotWidth, slotHeight);
 			}
 
 			table.row();
 		}
 
 		this.getStage().addActor(window);
+	}
+	
+	@Override
+	public void show() {
+		if (!this.window.isVisible() && uiSelected == false)
+			this.window.setVisible(true);
+		else
+			this.window.setVisible(false);
 	}
 	
 	public Table getTable() {

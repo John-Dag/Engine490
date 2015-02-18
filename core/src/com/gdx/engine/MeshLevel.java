@@ -1711,6 +1711,14 @@ public class MeshLevel {
 		}
 	}
 	
+	public MapTile[][][] getLevelArray() {
+		return levelArray;
+	}
+
+	public void setLevelArray(MapTile[][][] levelArray) {
+		this.levelArray = levelArray;
+	}
+
 	public int getMapXDimension(){
 		return tileLayerWidth;
 	}
@@ -1719,6 +1727,22 @@ public class MeshLevel {
 		return tileLayerHeight;
 	}
 	
+	public Map<String, Integer> getMaterialIds() {
+		return MaterialIds;
+	}
+
+	public void setMaterialIds(Map<String, Integer> materialIds) {
+		MaterialIds = materialIds;
+	}
+
+	public Map<Integer, Material> getMapMaterials() {
+		return MapMaterials;
+	}
+
+	public void setMapMaterials(Map<Integer, Material> mapMaterials) {
+		MapMaterials = mapMaterials;
+	}
+
 	public MapTile getMapTile(int x, int y, int z){
 		return levelArray[x][y][z];
 	}
