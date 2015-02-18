@@ -44,7 +44,7 @@ public class Player extends DynamicEntity {
 	private int health;
 	private boolean mouseLocked, mouseLeft, clipping, isCrouching, isJumping, isFiring, isCooldownActive, isPlayerTargeting, 
 				    moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false, jump = false, crouch = false, 
-				    ability1 = false, ability2 = false, ESCAPE = false;
+				    ability1 = false, ability2 = false, ESCAPE = false, respawning;
 	private Vector3 collisionVector, newPos, oldPos;
 	private float jumpVelocity, currentMovementSpeed, currentHeightOffset, speedScalar, fireDelayTimer;
 	private DistanceTrackerMap distanceMap;
@@ -220,6 +220,7 @@ public class Player extends DynamicEntity {
 		this.updateInstanceTransform();
 		
 		if (this.health <= MIN_HEALTH) {
+			setRespawning(true);
 			respawnPlayer(this);
 		}
 	}
@@ -558,5 +559,13 @@ public class Player extends DynamicEntity {
 
 	public void setJumpVelocity(float jumpVelocity) {
 		this.jumpVelocity = jumpVelocity;
+	}
+
+	public boolean isRespawning() {
+		return respawning;
+	}
+
+	public void setRespawning(boolean respawning) {
+		this.respawning = respawning;
 	}
 }

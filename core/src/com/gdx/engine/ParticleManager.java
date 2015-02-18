@@ -32,9 +32,6 @@ public class ParticleManager {
 	public ParticleEffect poisonEffect;
     public ParticleEffectLoadParameter loadParam;
 	public ParticleEffectLoader loader;
-	public RegularEmitter regularEmitter;
-	public ParticleEffect currentExplosionEffect;
-	public RegularEmitter currentEmitter;
 	
 	public ParticleManager(World world) {
 		this.world = world;
@@ -65,6 +62,8 @@ public class ParticleManager {
 	}
 	
 	public RegularEmitter getEmitter(ParticleEffect effect) {
+		if (rocketExplosionPool.peak > 10)
+			rocketExplosionPool.clear();
 		return (RegularEmitter)effect.getControllers().first().emitter;
 	}
 	

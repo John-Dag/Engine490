@@ -61,6 +61,7 @@ public class NetServer {
 	
 	private void clientDisconnect(Connection connection) {
 		Log.info("Client " + connection + " disconnected from the server.");
+		removePlayer(connection);
 	}
 	
 	
@@ -104,7 +105,12 @@ public class NetServer {
 	
 	//Updates all clients with the player that disconnected
 	public void removePlayer(Connection connection) {
-		world.playerInstances.removeIndex(connection.getID());
+		for (int i = 0; i < world.playerInstances.size; i++) {
+			Player player = world.playerInstances.get(i);
+			if (player.getNetId() == connection.getID())
+				world.playerInstances.removeIndex(i);
+		}
+		
 		Net.playerDisconnect disconnect = new Net.playerDisconnect();
 		disconnect.id = connection.getID();
 		server.sendToAllTCP(disconnect);
@@ -117,7 +123,8 @@ public class NetServer {
 			Net.playerNew packet = new Net.playerNew();
 			packet.id = world.getPlayerInstances().get(i).getNetId();
 			packet.position = world.getPlayerInstances().get(i).camera.position.cpy();
-			server.sendToTCP(id, packet);
+			if (id != packet.id)
+				server.sendToTCP(id, packet);
 		}
 	}
 	

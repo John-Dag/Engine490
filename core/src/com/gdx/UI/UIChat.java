@@ -55,6 +55,7 @@ public class UIChat extends UIBase {
 		window.setColor(Color.BLUE);
 		textAreaTable.setSize(window.getWidth(), window.getHeight());
 		textfield.setSize(textAreaTable.getWidth(), 30);
+		textfield.setDisabled(true);
 		textAreaTable.addActor(textfield);
 		textArea.setSize(textAreaTable.getWidth(), textAreaTable.getHeight() - 50f);
 		textArea.setPosition(20, 30);
@@ -112,7 +113,7 @@ public class UIChat extends UIBase {
 					
 					fieldValue = textfield.getText();
 					textField.setText("");
-					chatLog.append("Player: " + fieldValue + "\n");
+					chatLog.append(Net.name + ": " + fieldValue + "\n");
 					textArea.setText(chatLog.toString());
 					scrollPane.setScrollPercentY(scrollPane.getScrollPercentY());
 					
@@ -137,10 +138,18 @@ public class UIChat extends UIBase {
 	
 	public void addMessage(Net.chatMessage packet) {
 		fieldValue = textfield.getText();
-		textfield.setText("");
 		chatLog.append(packet.message + "\n");
 		textArea.setText(chatLog.toString());
 		scrollPane.setScrollPercentY(scrollPane.getScrollPercentY());
+	}
+	
+	public void activateChatField() {
+		if (textfield.isDisabled()) {
+			textfield.setDisabled(false);
+			this.getStage().unfocusAll();
+			this.getStage().setKeyboardFocus(textfield);
+			UIBase.uiSelected = true;
+		}
 	}
 
 	public Window getWindow() {

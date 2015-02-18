@@ -374,17 +374,4 @@ public class DynamicEntity extends Entity {
 	public void setModel(ModelInstance model) {
 		this.model = model;
 	}
-
-	public DynamicEntity copy() {
-		return this;
-	}
-
-	public void reset() {
-		this.weapon = null;
-		this.position = new Vector3(0, 0, 0);
-		this.rotation = new Vector3(0, 0, 0);
-		this.scale = new Vector3(0, 0, 0);
-		this.acceleration = new Vector3(0, 0, 0);
-		this.model = null;
-	}
 }

@@ -14,6 +14,7 @@ import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Network.Net.playerPacket;
+import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 
@@ -113,7 +114,7 @@ public class NetClient {
         }
         
         else if (object instanceof Net.newProjectile) {
-        	System.out.println("test");
+        	//System.out.println("test");
      	   Net.newProjectile packet = (Net.newProjectile)object;
      	   addServerProjectile(packet);
      	}
@@ -129,8 +130,27 @@ public class NetClient {
 	}
 	
 	//Remove the player that disconnected from the world
+	//Check both the player instances, and entity instances for the player
 	public void removePlayer(Net.playerDisconnect disconnect) {
-		world.getPlayerInstances().removeIndex(disconnect.id);
+		try {
+			for (int i = 0; i < world.playerInstances.size; i++) {
+				Player player = world.playerInstances.get(i);
+				if (player.getNetId() == disconnect.id)
+					world.getPlayerInstances().removeIndex(i);
+			}
+			
+			for (int i = 0; i < Entity.entityInstances.size; i++) {
+				Entity entity = Entity.entityInstances.get(i);
+				if (entity instanceof Player) {
+					Player player = (Player)Entity.entityInstances.get(i);
+					if (player.getNetId() == disconnect.id)
+						Entity.entityInstances.removeIndex(i);
+				}
+			}
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 	
 	public void addChatMessage(Net.chatMessage packet) {
@@ -163,14 +183,16 @@ public class NetClient {
 		world.addProjectile(packet);
 	}
 	
-	//Constantly sends client packets to the server. Need to add some kind of throttling to this.
+	//Send updates to the server if the player is moving, jumping, or respawning.
 	public void clientUpdate() {
-		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping()) {
-			//System.out.println("jfdksljdsfkjfdsklj");
+		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping() || world.getPlayer().isRespawning()) {
 	    	Net.playerPacket packet = new Net.playerPacket();
 	    	packet.position = world.getPlayer().camera.position.cpy();
+	    	packet.position.y = packet.position.y - .5f;
 	    	packet.id = client.getID();
+	    	packet.direction = world.getPlayer().camera.direction.cpy();
 			client.sendTCP(packet);
+			world.getPlayer().setRespawning(false);
 		}
 	}
 

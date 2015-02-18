@@ -21,8 +21,6 @@ import com.gdx.engine.ParticleManager;
 import com.gdx.engine.World;
 
 public class NetWorld extends World {
-	//public static EntityManager entManager;
-	
 	public NetWorld() {
 		Assets.loadModels();
 		player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
@@ -33,8 +31,8 @@ public class NetWorld extends World {
 		player.initAbilities();
 		setMeshLevel(new MeshLevel(Assets.castle3Multi, true));
 		Entity.entityInstances.add(player);
-		//entManager = new EntityManager(this);
 		//distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
+		entManager = new EntityManager(this);
 	}
 
 	@Override
@@ -52,10 +50,10 @@ public class NetWorld extends World {
 		for (int i = 0; i < Entity.entityInstances.size; i++) {
 			if (Entity.entityInstances.get(i) instanceof Projectile) {
 				Projectile projectile = (Projectile)Entity.entityInstances.get(i);
-				System.out.println(" " + projectile.getNetId() + " " + packet.id);
+				//System.out.println(" " + projectile.getNetId() + " " + packet.id);
 				if (projectile.getNetId() == packet.id) {
 					projectile.getPosition().set(packet.position);
-					System.out.println(packet.position);
+					//System.out.println(packet.position);
 				}
 			}
 		}
@@ -65,11 +63,13 @@ public class NetWorld extends World {
 	public synchronized void addProjectile(newProjectile packet) {
 		Vector3 rotation = new Vector3(0, 0, 0);
 		Vector3 scale = new Vector3(0, 0, 0);
-		Projectile projectile = new Projectile(6, true, true, packet.position, 
-				   rotation, scale, packet.cameraPos,  packet.cameraPos, 
-				   World.particleManager.projectilePool.obtain(), World.particleManager.rocketExplosionPool.obtain(), this);
+		Projectile projectile = NetWorld.entManager.projectilePool.obtain();
+		projectile.reset();
 		projectile.setProjectileSpeed(5.0f);
 		projectile.setDamage(10);
+		projectile.setPosition(packet.position);
+		projectile.setVelocity(packet.cameraPos);
+		projectile.setAcceleration(packet.cameraPos);
 		projectile.setNetId(packet.id);
 		Entity.entityInstances.add(projectile);
 	}
@@ -90,9 +90,10 @@ public class NetWorld extends World {
 			player1.setAnimation(new AnimationController(player1.getModel()));
 			GridPoint2 playerPos = new GridPoint2();
 			playerPos.set(getMeshLevel().getStartingPoint());
-			player1.camera.position.set(playerPos.x + 0.5f, player.camera.position.y, playerPos.y + 0.5f);
+			player1.camera.position.set(playerPacket.position.x, playerPacket.position.y - .5f, playerPacket.position.z);
 			player1.getModel().transform.setToTranslation(player1.getPosition());
 			player1.setNetId(playerPacket.id);
+			player1.getAnimation().setAnimation("Walking", -1);
 			playerInstances.add(player1);
 		}
 		catch (Exception e) {
@@ -105,9 +106,10 @@ public class NetWorld extends World {
 		for (Entity entity : Entity.entityInstances) {
 			if (entity instanceof Player) {
 				if (projectile.getBoundingBox().intersects(entity.getTransformedBoundingBox()) && !projectile.isPlayerProjectile()) {
-					projectile.initializeCollisionExplosionEffect();
-					player.takeDamage(projectile.getDamage());
-					projectile.removeProjectile();
+					if (!projectile.isDealtDamage()) {
+						projectile.initializeCollisionExplosionEffect();
+						player.takeDamage(projectile.getDamage());
+					}
 				}
 			}
 		}

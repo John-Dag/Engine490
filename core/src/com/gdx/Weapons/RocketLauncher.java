@@ -6,9 +6,11 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
+import com.gdx.Network.NetWorld;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
+import com.gdx.engine.GameScreen.State;
 import com.gdx.engine.World;
 
 public class RocketLauncher extends Weapon {
@@ -38,27 +40,25 @@ public class RocketLauncher extends Weapon {
 		Vector3 scale = new Vector3(0, 0, 0);
 		
 		//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
-		Projectile projectile = new Projectile(6, true, true, world.getPlayer().camera.position.cpy(), 
-											   rotation, scale, world.getPlayer().camera.direction.cpy(), world.getPlayer().camera.direction.cpy(), 
-											   World.particleManager.projectilePool.obtain(), World.particleManager.rocketExplosionPool.obtain(), world);
+		Projectile projectile = NetWorld.entManager.projectilePool.obtain();
+		projectile.reset();
 		projectile.setProjectileSpeed(PROJECTILE_SPEED);
 		projectile.setDamage(DAMAGE);
 		projectile.setPlayerProjectile(true);
+		projectile.setDealtDamage(false);
+		projectile.setIsActive(true);
+		Entity.entityInstances.add(projectile);
+		
 		try {
 			if (world.getClient() != null) {
 				projectile.setNetId(world.getClient().getId() + world.getNetIdCurrent());
-				Entity.entityInstances.add(projectile);
 				world.getClient().addProjectile(projectile, world.getClient().getId() + world.getNetIdCurrent());
 				world.setNetIdCurrent(world.getNetIdCurrent() + 1);
-			}
-			else {
-				Entity.entityInstances.add(projectile);
 			}
 		}
 		catch (Exception e) {
 			System.err.println(e);
 		}
-		//world.projectileInstances.add(projectile);
 	}
 	
 	@Override

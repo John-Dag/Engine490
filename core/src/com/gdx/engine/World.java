@@ -50,6 +50,7 @@ public class World implements Disposable {
     private NetClient client;
     private NetServer server;
     private int NetIdCurrent;
+	public static EntityManager entManager;
     
 	public World() {
 		playerInstances = new Array<Player>();
@@ -60,7 +61,6 @@ public class World implements Disposable {
 		setOut(new Vector3());
 		wireInstances = new Array<ModelInstance>();
 		isWireframeEnabled = false;
-		
 		//Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
 	}
 	
@@ -77,6 +77,7 @@ public class World implements Disposable {
 			Entity.entityInstances.add(player);
 			setMeshLevel(new MeshLevel(map, skySphere));
 			distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
+			entManager = new EntityManager(this);
 		}
 		catch (Exception e) {
 			System.err.println(e);
@@ -250,10 +251,10 @@ public class World implements Disposable {
 	public void checkProjectileCollisions(Projectile projectile) {
 		for (Enemy enemy : enemyInstances) {
 			if (projectile.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
-				//projectile.initializeBloodEffect();
-				projectile.initializeCollisionExplosionEffect();
-				enemy.takeDamage(player.getWeapon().getDamage());
-				projectile.removeProjectile();
+				projectile.initializeBloodEffect();
+				if (!projectile.isDealtDamage())
+					enemy.takeDamage(player.getWeapon().getDamage());
+					projectile.initializeCollisionExplosionEffect();
 			}
 		}
 	}

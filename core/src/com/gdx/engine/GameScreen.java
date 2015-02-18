@@ -90,6 +90,10 @@ public class GameScreen implements Screen {
 					grid.show();
 				}
 				
+				else if (keyCode == Keys.ALT_LEFT) {
+					chat.activateChatField();
+				}
+				
 				return false;
 			}
 		};
@@ -150,7 +154,7 @@ public class GameScreen implements Screen {
 		chat.addChatWidgetListeners();
 		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
-		virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
+		//virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
 		
 		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);

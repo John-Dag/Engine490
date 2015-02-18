@@ -29,11 +29,13 @@ public class Net {
 	    kryo.register(projectile.class);
 	    kryo.register(chatMessage.class);
 	    kryo.register(String.class);
+	    kryo.register(playerDisconnect.class);
 	}
 	
 	//Packets
 	public static class playerPacket {
 		public Vector3 position;
+		public Vector3 direction;
 		public int id;
 	}
 	
