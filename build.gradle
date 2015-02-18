@@ -41,6 +41,7 @@ project(":desktop") {
         compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-controllers-desktop:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-controllers-platform:$gdxVersion:natives-desktop"
+		compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
     }
 }
 
@@ -65,6 +66,7 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86"
         compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-controllers-android:$gdxVersion"
+		compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
     }
 }
 
@@ -94,6 +96,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
+		compile 'com.esotericsoftware:kryonet:2.22.0-RC1'
     }
 }
 

@@ -1,6 +1,7 @@
 package com.gdx.DynamicEntities;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -14,12 +15,14 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
+import com.gdx.UI.UIBase;
 import com.gdx.UI.UIConsole;
 import com.gdx.engine.Assets;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
+import com.gdx.engine.GameScreen.State;
 
 public class Player extends DynamicEntity {
 	public static float FOG_DISTANCE = 15f;
@@ -33,21 +36,18 @@ public class Player extends DynamicEntity {
 	private static final float PLAYER_HEIGHT_OFFSET = 0.5f;
 	private static final float JUMP_SPEED = 10f;
 	private static final float GRAVITY = 30f;
-	private static final int MIN_HEALTH = 0;
-	private static final int MAX_HEALTH = 100;
-	private int health;
+	public static final int MIN_HEALTH = 0;
+	public static final int MAX_HEALTH = 100;
 	public PerspectiveCamera camera;
-	private boolean mouseLocked, mouseLeft, clipping, isCrouching;
 	public Vector3 temp;
 	private World world;
-	private Vector3 collisionVector, movementVector, newPos, oldPos;
-	private boolean isJumping, isFiring, isCooldownActive, isPlayerTargeting;
-	private float jumpVelocity;
-	private float currentHeightOffset;
-	private float currentMovementSpeed;
+	private int health;
+	private boolean mouseLocked, mouseLeft, clipping, isCrouching, isJumping, isFiring, isCooldownActive, isPlayerTargeting, 
+				    moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false, jump = false, crouch = false, 
+				    ability1 = false, ability2 = false, ESCAPE = false, respawning;
+	private Vector3 collisionVector, newPos, oldPos;
+	private float jumpVelocity, currentMovementSpeed, currentHeightOffset, speedScalar, fireDelayTimer;
 	private DistanceTrackerMap distanceMap;
-	private float fireDelayTimer;
-	private float speedScalar; //Scales the speed of the player.
 	private Array<Ability> abilities;
 	
 	public Player() {
@@ -69,7 +69,7 @@ public class Player extends DynamicEntity {
 		this.camera.lookAt(position.x + 1, position.y, position.z + 1);
 		this.camera.near = 0.01f;
 		this.camera.far = FOG_DISTANCE;
-		this.movementVector = new Vector3(0,0,0);
+		this.getMovementVector().set(new Vector3(0, 0, 0));
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
 		this.isJumping = false;
@@ -83,6 +83,7 @@ public class Player extends DynamicEntity {
 		this.speedScalar = 1f; // 1 = default movespeed
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
+		//this.setModel(model);
 	}
 	
 	public void initAbilities() {
@@ -90,28 +91,20 @@ public class Player extends DynamicEntity {
 		abilities.add(new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
 	}
 
-	public boolean isPlayerTargeting() {
-		return isPlayerTargeting;
-	}
-
-	public void setPlayerTargeting(boolean isPlayerTargeting) {
-		this.isPlayerTargeting = isPlayerTargeting;
-	}
-
 	@Override
 	public void update(float delta, World world) {
-		if (!UIConsole.isConsoleActive)
-			input(delta);
+		handleInput(delta);
 		fireDelayTimer += delta;
 		
 	    //TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
-		int heightPerLayer = 6;
-		int playersTilePos = playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y;
-		if (newPos != oldPos && clipping) {
+		if (newPos != oldPos && clipping && GameScreen.mode == State.Offline) {
             distanceMap = world.getDistanceMap();
             distanceMap.resetDistances();
-            distanceMap.addDistances(playersTilePos + ((int)(camera.position.y / heightPerLayer) * world.getMeshLevel().getMapXDimension() * world.getMeshLevel().getMapXDimension()));
+            if (camera.position.y >= 6)
+            	distanceMap.addDistances((playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y) + world.getMeshLevel().getMapXDimension() * world.getMeshLevel().getMapXDimension());
+            else
+            	distanceMap.addDistances((playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
             // distanceMap.addDistances(( playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
             world.setDistanceMap(distanceMap);
         }
@@ -157,12 +150,12 @@ public class Player extends DynamicEntity {
 		
 		float movAmt = (currentMovementSpeed *speedScalar) * delta;
 		if(clipping){
-			movementVector.y = 0;	// jumping is done separately from the movementVector
+			getMovementVector().y = 0;	// jumping is done separately from the getMovementVector()
 		}
-		movementVector.nor();
+		getMovementVector().nor();
 		
 		oldPos.set(this.camera.position);
-		newPos.set(oldPos.x + movementVector.x * movAmt, oldPos.y + movementVector.y * movAmt, oldPos.z + movementVector.z * movAmt);
+		newPos.set(oldPos.x + getMovementVector().x * movAmt, oldPos.y + getMovementVector().y * movAmt, oldPos.z + getMovementVector().z * movAmt);
 		
 		// This makes it so that the player falls with gravity when running off ledges
 		
@@ -183,12 +176,12 @@ public class Player extends DynamicEntity {
 			isJumping = true;
 		}
 
-		// calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the movementVector.
+		// calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the getMovementVector().
 		if (clipping){
 			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, PLAYER_SIZE, PLAYER_HEIGHT, PLAYER_SIZE);
-			movementVector.set(movementVector.x * collisionVector.x,
-					movementVector.y * collisionVector.y,
-					movementVector.z * collisionVector.z);
+			getMovementVector().set(getMovementVector().x * collisionVector.x,
+					getMovementVector().y * collisionVector.y,
+					getMovementVector().z * collisionVector.z);
 		}
 		
        for(Enemy enemy:World.enemyInstances)
@@ -201,7 +194,7 @@ public class Player extends DynamicEntity {
        	{
        		if(enemy.getPosition().dst(newPos) < enemy.getPosition().dst(oldPos))
        		{
-       			movementVector.set(0,0,0);
+       			getMovementVector().set(0,0,0);
        			break;
        		}
 
@@ -215,32 +208,32 @@ public class Player extends DynamicEntity {
 
        }
 
-		this.camera.position.mulAdd(movementVector, movAmt);
+		this.camera.position.mulAdd(getMovementVector(), movAmt);
 		
 		//world.getMeshLevel().updateHeightOffset(this.camera.position.y - currentHeightOffset);
 		
 		this.camera.update();
-		this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+		if (this.getModel() != null)
+			this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.getPosition().set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.updatePosition(delta);
 		this.updateInstanceTransform();
 		
 		if (this.health <= MIN_HEALTH) {
+			setRespawning(true);
 			respawnPlayer(this);
 		}
 	}
 	
-	public void input(float delta) {
+	public void handleInput(float delta) {
 		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT) && !this.isPlayerTargeting) {
 			Gdx.input.setCursorCatched(true);
 		}
 		
-		else if ((Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isButtonPressed(Buttons.RIGHT)) 
+		else if (ESCAPE || Gdx.input.isButtonPressed(Buttons.RIGHT) 
 				  && this.isPlayerTargeting) {
-			Gdx.input.setCursorCatched(true);
-			world.getPlayer().setPlayerTargeting(false);
-			abilities.get(1).setIsActive(false);
+			catchCursor();
 		}
 		
 		else if (Gdx.input.isButtonPressed(Buttons.LEFT)) {
@@ -249,7 +242,26 @@ public class Player extends DynamicEntity {
 		else
 			mouseLeft = false;
 		
-		movementVector.set(0,0,0);
+		if (Gdx.app.getType() == ApplicationType.Desktop)
+			getMovementVector().set(0,0,0);
+		
+		//Keyboard input
+		if (moveForward)
+			moveForward();
+		else if (moveBackward)
+			moveBackwards();
+		if (strafeLeft)
+			strafeLeft();
+		else if (strafeRight)
+			strafeRight();
+		if (jump)
+			jump();
+		if (crouch)
+			crouch();
+		if (ability1)
+			activateAbility1();
+		if (ability2)
+			activateAbility2();
 		
 		// camera rotation based on mouse looking
 		if (Gdx.input.isCursorCatched()) {
@@ -294,123 +306,71 @@ public class Player extends DynamicEntity {
 			// rotates up and down
 			camera.direction.rotate(temp, pr);
 		}
-		
-		//Keyboard input
-		if (Gdx.input.isKeyPressed(Keys.W)) {
-			movementVector.add(camera.direction);
-		}
-		if (Gdx.input.isKeyPressed(Keys.S)) {
-			movementVector.sub(camera.direction);
-		}
-		if (Gdx.input.isKeyPressed(Keys.D)) {
-			temp.set(camera.direction).crs(camera.up);
-			movementVector.add(temp);
-		}
-		if (Gdx.input.isKeyPressed(Keys.A)) {
-			temp.set(camera.up).crs(camera.direction);
-			movementVector.add(temp);
-		}
-		if (Gdx.input.isKeyJustPressed(Keys.SPACE)){
-			if(!isJumping){
-				isJumping = true;
-				jumpVelocity = JUMP_SPEED;
-			}
-		}
-		
-		//Abilities
-		if (Gdx.input.isKeyJustPressed(Keys.NUM_1)) {
-			if (!abilities.get(0).isCoolingDown() && !this.abilities.get(0).isActive()) {
-				abilities.set(0, new Blizzard(10, false, true, new Vector3(0, 0, 0)));
-				abilities.get(0).initAbility();
-			}
-		}
-		
-		if (Gdx.input.isKeyJustPressed(Keys.NUM_2)) {
-			if (!abilities.get(1).isCoolingDown() && !this.abilities.get(1).isActive()) {
-				abilities.set(1, new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
-				abilities.get(1).initTargeting();
-			}
-		}
-		
-		//Crouching
-		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
-			isCrouching = true;
-			currentHeightOffset = CROUCH_HEIGHT;
-			currentMovementSpeed = CROUCH_SPEED * speedScalar;
-		}
-		// to toggle clipping (commented out because distance tracker crashes it when clipping is off)
-//		if (Gdx.input.isKeyPressed(Keys.L)) {
-//			if(clipping){
-//				clipping = false;
-//			}else{
-//				clipping = true;
-//			}
-//		}
-		else {
-			isCrouching = false;
-			currentHeightOffset = PLAYER_HEIGHT_OFFSET;
-			currentMovementSpeed = MOVEMENT_SPEED;
-		}
-
-		// This is temporary, but useful for testing. Press 'O' if you ever get stuck.
-		if (Gdx.input.isKeyPressed(Keys.O)){
-			Vector2 tileCenter = world.getMeshLevel().getTileCenter(camera.position.x, camera.position.z);
-			Vector2 camPosition = new Vector2(camera.position.x, camera.position.z);
-			Vector2 movVect = new Vector2(0,0);
-			movVect = tileCenter.sub(camPosition);
-			camera.position.add(movVect.x * delta, 0, movVect.y * delta);
-		}
-		
-		//Exit
-		if (Gdx.input.isKeyJustPressed(Keys.P)) {
-			Gdx.app.exit();
+	}
+	
+	public void catchCursor() {
+		Gdx.input.setCursorCatched(true);
+		world.getPlayer().setPlayerTargeting(false);
+		abilities.get(1).setIsActive(false);
+	}
+	
+	public void moveForward() {
+		getMovementVector().add(camera.direction);
+	}
+	
+	public void moveBackwards() {
+		getMovementVector().sub(camera.direction);
+	}
+	
+	public void strafeRight() {
+		temp.set(camera.direction).crs(camera.up);
+		getMovementVector().add(temp);
+	}
+	
+	public void strafeLeft() {
+		temp.set(camera.up).crs(camera.direction);
+		getMovementVector().add(temp);
+	}
+	
+	public void jump() {
+		if(!isJumping){
+			isJumping = true;
+			jumpVelocity = JUMP_SPEED;
 		}
 	}
 	
-	public float getCurrentHeightOffset() {
-		return currentHeightOffset;
-	}
-
-	public void setCurrentHeightOffset(float currentHeightOffset) {
-		this.currentHeightOffset = currentHeightOffset;
-	}
-
-	@Override
-	public BoundingBox getTransformedBoundingBox() {
-		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 0f, this.getPosition().z - 0.5f),
-			    						 new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
+	public void activateAbility1() {
+		if (!abilities.get(0).isCoolingDown() && !this.abilities.get(0).isActive()) {
+			abilities.set(0, new Blizzard(10, false, true, new Vector3(0, 0, 0)));
+			abilities.get(0).initAbility();
+		}
 	}
 	
-	public boolean isCooldownActive() {
-		return isCooldownActive;
-	}
-
-	public void setCooldownActive(boolean isCooldownActive) {
-		this.isCooldownActive = isCooldownActive;
+	public void activateAbility2() {
+		if (!abilities.get(1).isCoolingDown() && !this.abilities.get(1).isActive()) {
+			abilities.set(1, new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
+			abilities.get(1).initTargeting();
+		}
 	}
 	
-	public float getCurrentMovementSpeed() {
-		return currentMovementSpeed;
+	public void crouch() {
+		isCrouching = true;
+		currentHeightOffset = CROUCH_HEIGHT;
+		currentMovementSpeed = CROUCH_SPEED * speedScalar;
 	}
-
-	public void setCurrentMovementSpeed(float currentMovementSpeed) {
-		this.currentMovementSpeed = currentMovementSpeed;
+	
+	public void stopCrouching() {
+		isCrouching = false;
+		currentHeightOffset = PLAYER_HEIGHT_OFFSET;
+		currentMovementSpeed = MOVEMENT_SPEED;
 	}
-
-	public boolean isClipping() {
-		return clipping;
-	}
-
-	public void setClipping(boolean clipping) {
-		this.clipping = clipping;
-	}
-
-	public float getSpeedScalar() {
-		return speedScalar;
-	}
-
-	public void setSpeedScalar(float speedScalar) {
-		this.speedScalar = speedScalar;
+	
+	public void unstickPlayer() {
+		Vector2 tileCenter = world.getMeshLevel().getTileCenter(camera.position.x, camera.position.z);
+		Vector2 camPosition = new Vector2(camera.position.x, camera.position.z);
+		Vector2 movVect = new Vector2(0,0);
+		movVect = tileCenter.sub(camPosition);
+		camera.position.add(movVect.x * Gdx.graphics.getDeltaTime(), 0, movVect.y * Gdx.graphics.getDeltaTime());
 	}
 
 	public void fireWeapon() {
@@ -443,6 +403,96 @@ public class Player extends DynamicEntity {
 		return new GridPoint2(tileX, tileY);
 	}
 	
+	public void exit() {
+		Gdx.app.exit();
+	}
+
+	public boolean isPlayerTargeting() {
+		return isPlayerTargeting;
+	}
+
+	public void setPlayerTargeting(boolean isPlayerTargeting) {
+		this.isPlayerTargeting = isPlayerTargeting;
+	}
+	
+	public float getCurrentHeightOffset() {
+		return currentHeightOffset;
+	}
+
+	public void setCurrentHeightOffset(float currentHeightOffset) {
+		this.currentHeightOffset = currentHeightOffset;
+	}
+
+	@Override
+	public BoundingBox getTransformedBoundingBox() {
+		return this.getBoundingBox().set(new Vector3(this.getPosition().x - 0.5f, this.getPosition().y - 0f, this.getPosition().z - 0.5f),
+			    						 new Vector3(this.getPosition().x + 0.5f, this.getPosition().y + 1f, this.getPosition().z + 0.5f));
+	}
+
+	public boolean isCooldownActive() {
+		return isCooldownActive;
+	}
+
+	public boolean isMoveForward() {
+		return moveForward;
+	}
+
+	public boolean isMoveBackward() {
+		return moveBackward;
+	}
+
+	public boolean isStrafeLeft() {
+		return strafeLeft;
+	}
+
+	public boolean isStrafeRight() {
+		return strafeRight;
+	}
+
+	public void setMoveForward(boolean moveForward) {
+		this.moveForward = moveForward;
+	}
+
+	public void setMoveBackward(boolean moveBackward) {
+		this.moveBackward = moveBackward;
+	}
+
+	public void setStrafeLeft(boolean strafeLeft) {
+		this.strafeLeft = strafeLeft;
+	}
+
+	public void setStrafeRight(boolean strafeRight) {
+		this.strafeRight = strafeRight;
+	}
+
+	public void setCooldownActive(boolean isCooldownActive) {
+		this.isCooldownActive = isCooldownActive;
+	}
+	
+	public float getCurrentMovementSpeed() {
+		return currentMovementSpeed;
+	}
+
+	public void setCurrentMovementSpeed(float currentMovementSpeed) {
+		this.currentMovementSpeed = currentMovementSpeed;
+	}
+
+	public boolean isClipping() {
+		return clipping;
+	}
+
+	public void setClipping(boolean clipping) {
+		this.clipping = clipping;
+	}
+
+	public float getSpeedScalar() {
+		return speedScalar;
+	}
+
+	public void setSpeedScalar(float speedScalar) {
+		this.speedScalar = speedScalar;
+	}
+	
 	public int getHealth() {
 		return health;
 	}
@@ -457,6 +507,22 @@ public class Player extends DynamicEntity {
 
 	public boolean isMouseLeft() {
 		return mouseLeft;
+	}
+
+	public boolean isJump() {
+		return jump;
+	}
+
+	public boolean isCrouch() {
+		return crouch;
+	}
+
+	public void setJump(boolean jump) {
+		this.jump = jump;
+	}
+
+	public void setCrouch(boolean crouch) {
+		this.crouch = crouch;
 	}
 
 	public boolean isCrouching() {
@@ -493,5 +559,13 @@ public class Player extends DynamicEntity {
 
 	public void setJumpVelocity(float jumpVelocity) {
 		this.jumpVelocity = jumpVelocity;
+	}
+
+	public boolean isRespawning() {
+		return respawning;
+	}
+
+	public void setRespawning(boolean respawning) {
+		this.respawning = respawning;
 	}
 }

@@ -251,7 +251,7 @@ public class World implements Disposable {
 	public void checkProjectileCollisions(Projectile projectile) {
 		for (Enemy enemy : enemyInstances) {
 			if (projectile.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
-				projectile.initializeBloodEffect();
+				//projectile.initializeBloodEffect();
 				if (!projectile.isDealtDamage())
 					enemy.takeDamage(player.getWeapon().getDamage());
 					projectile.initializeCollisionExplosionEffect();
