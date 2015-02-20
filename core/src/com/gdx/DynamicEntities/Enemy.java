@@ -30,7 +30,7 @@ public class Enemy extends DynamicEntity {
 	public Vector3 spawnPos;
 	private double changeLayerHeight = 5.9;
 	private float addToChangeLH = 0.2f;
-	private boolean agroed = false;
+	private boolean aggroed = false;
 
 	public Enemy() {
 		super();
@@ -101,11 +101,11 @@ public class Enemy extends DynamicEntity {
 				playerTile = playerTile + width * width;
              try {
 				 //path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
-				 if ((Math.abs(playerPosition.x - thisPosition.x) > 3 || Math.abs(playerPosition.y) - thisPosition.y > 3) && !agroed)
+				 if ((Math.abs(playerPosition.x - thisPosition.x) > 3 || Math.abs(playerPosition.y) - thisPosition.y > 3) && !aggroed)
 					 path = patrolTiles(enemyTile, world);
 				 else {
 					 path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
-					 agroed = true;
+					 aggroed = true;
 				 }
             } catch (Exception ex) {
                 path = new ArrayList<Integer>();
@@ -677,10 +677,9 @@ public class Enemy extends DynamicEntity {
 	}
 
 	public ArrayList<Integer> findNextTile(int front, int right, int left, int back, ArrayList<Integer> patrolPathNums, DistanceFromPlayer currentTile, ArrayList<DistanceFromPlayer> patrolPathTiles, int currentRotation) {
-		int nextNum = 0;
 		DistanceFromPlayer lastPatrolTile = new DistanceFromPlayer(-2, -2, -2);
-			if (front != -1)
-				patrolPathNums.add(nextNum = front);//rotation doesnt change
+			if (front != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), front))
+				patrolPathNums.add(front);//rotation doesnt change
 		/*else if (right != -1 && left != -1){
 			Random randomChoose = new Random();
 			if (randomChoose.nextInt() % 2 == 0) {
@@ -692,14 +691,14 @@ public class Enemy extends DynamicEntity {
 				nextDir = 'l';
 			}
 		}*/
-			else if (/*right == -1 &&*/ left != -1) {
-				patrolPathNums.add(nextNum = left);
+			else if (/*right == -1 &&*/ left != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), left)) {
+				patrolPathNums.add(left);
 				currentRotation = currentRotation + 90;
-			} else if (/*left == -1 &&*/ right != -1) {
-				patrolPathNums.add(nextNum = right);
+			} else if (/*left == -1 &&*/ right != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), right)) {
+				patrolPathNums.add(right);
 				currentRotation = currentRotation - 90;
-			} else if (back != -1) {
-				patrolPathNums.add(nextNum = back);
+			} else if (back != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), back)) {
+				patrolPathNums.add(back);
 				currentRotation = currentRotation + 180;
 			} else
 				return patrolPathNums;

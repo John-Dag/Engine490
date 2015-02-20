@@ -541,5 +541,13 @@ public class DistanceTrackerMap {
         return tileNumber % width;
     }
 
+    public boolean moveableAdjTile(int currentTileNum, int adjTileNum){
+        DistanceFromPlayer currentTile = distanceMap[currentTileNum][0];
+        for (int adjNum : currentTile.getSpotToMoveIndex())
+            if (adjNum == adjTileNum)
+                return true;
+        return false;
+    }
+
 }
 

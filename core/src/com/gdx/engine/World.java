@@ -35,7 +35,7 @@ public class World implements Disposable {
 	private Array<BoundingBox> boxes;
 	private Vector3 position;
 	private Vector3 out;
-    private DistanceTrackerMap distanceMap;
+    private static DistanceTrackerMap distanceMap;
     private FilterEffect filterEffect;
 	public World() {
 		boolean bspDungeon = false;
@@ -365,7 +365,7 @@ public class World implements Disposable {
 	}
 	*/
 	
-	public DistanceTrackerMap getDistanceMap() {
+	public static DistanceTrackerMap getDistanceMap() {
 		return distanceMap;
 	}
 
