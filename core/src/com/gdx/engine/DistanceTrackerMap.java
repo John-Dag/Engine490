@@ -295,7 +295,7 @@ public class DistanceTrackerMap {
                     && notAWall(mapObject, currentAdjTile, currentHeight, adjDiagonalRamp, tileLayer)
                     && getYPos(currentAdjTile) == getYPos(tileLocation) + YDistFromTile
                     && meshLevel.getMapTile(getXPos(currentAdjTile), getYPos(currentAdjTile), tileLayer).getRampDirection() == -1
-                    /*&& notAdjToRamp(XAdjTile, YAdjTile, tileLayer)*/
+                    && notAdjToRamp(XAdjTile, YAdjTile, tileLayer)
                     ) {
                 if (tileLayer == 1)
                     if ((YAdjTile > width * width && XAdjTile > width * width) || (YAdjTile < width * width && XAdjTile < width * width))
@@ -423,19 +423,20 @@ public class DistanceTrackerMap {
 
         return spotNums;
     }
-/*
+
     private boolean notAdjToRamp(int adjXDirTileNum, int adjYDirTileNum, int tileLayer) {
-        if (tileLayer == 1)
-            tileLayer = tileLayer + 1 - 1;
-        adjXDirTileNum = adjXDirTileNum - (width * width * tileLayer);
-        adjYDirTileNum = adjYDirTileNum - (width * width * tileLayer);
-        if (meshLevel.getMapTile(getXPos(adjXDirTileNum), getYPos(adjXDirTileNum), tileLayer).getRampDirection() == -1
-                && meshLevel.getMapTile(getXPos(adjYDirTileNum), getYPos(adjYDirTileNum), tileLayer).getRampDirection() == -1)
+        int adjXTileLayer = (int)adjXDirTileNum / (width * height);
+        int adjYTileLayer = (int)adjYDirTileNum / (width * height);
+        adjXDirTileNum = adjXDirTileNum - (width * width * adjXTileLayer);
+        adjYDirTileNum = adjYDirTileNum - (width * width * adjYTileLayer);
+        if (meshLevel.getMapTile(getXPos(adjXDirTileNum), getYPos(adjXDirTileNum), adjXTileLayer).getRampDirection() == -1
+                && meshLevel.getMapTile(getXPos(adjYDirTileNum), getYPos(adjYDirTileNum), adjYTileLayer).getRampDirection() == -1
+                && adjXDirTileNum == adjYDirTileNum)
             return true;
 
         return false;
     }
- */
+
 
     private boolean isMoveable( ArrayList<DistanceFromPlayer> spotNums, int locationNum ) {
         for (DistanceFromPlayer spotNum : spotNums) {

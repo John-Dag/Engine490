@@ -97,7 +97,8 @@ public class World implements Disposable {
 		boxes.clear();
 		createBoundingBoxes();
 		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
-		meshLevel.generatePatrolPath();
+		//chrashes here
+		//meshLevel.generatePatrolPath();
 	}
 	
 	public void loadLevel(TiledMap map) {
