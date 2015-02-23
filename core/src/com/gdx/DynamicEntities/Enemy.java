@@ -101,7 +101,7 @@ public class Enemy extends DynamicEntity {
 				playerTile = playerTile + width * width;
              try {
 				 //path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
-				 if ((Math.abs(playerPosition.x - thisPosition.x) > 3 || Math.abs(playerPosition.y) - thisPosition.y > 3) && !aggroed)
+				 if ((Math.abs(playerPosition.x - thisPosition.x) > 3 || Math.abs(playerPosition.y - thisPosition.y) > 3) && !aggroed)
 					 path = patrolTiles(enemyTile, world);
 				 else {
 					 path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
@@ -664,20 +664,30 @@ public class Enemy extends DynamicEntity {
 
 	private ArrayList<Integer> nextRotationBasedTile(ArrayList<Integer> patrolPathNums, DistanceFromPlayer currentTile, ArrayList<DistanceFromPlayer> patrolPathTiles, int rotation) {
 		if (rotation == 0)
-			patrolPathNums = findNextTile(currentTile.getLeft(), currentTile.getTop(), currentTile.getBottom(), currentTile.getRight(), patrolPathNums, currentTile, patrolPathTiles, 0);
+			patrolPathNums = findNextTile(currentTile.getLeft(), currentTile.getTop(), currentTile.getBottom(), currentTile.getRight(), currentTile.getTopLeft(), currentTile.getBotLeft(), currentTile.getTopRight(), currentTile.getBotRight(), patrolPathNums, currentTile, patrolPathTiles, 0);
 		else if (rotation == 90)
-			patrolPathNums = findNextTile(currentTile.getBottom(), currentTile.getRight(), currentTile.getLeft(), currentTile.getTop(), patrolPathNums, currentTile, patrolPathTiles, 90);
+			patrolPathNums = findNextTile(currentTile.getBottom(), currentTile.getRight(), currentTile.getLeft(), currentTile.getTop(), currentTile.getBotRight(), currentTile.getBotLeft(), currentTile.getTopRight(), currentTile.getTopLeft(), patrolPathNums, currentTile, patrolPathTiles, 90);
 		else if (rotation == 180)
-			patrolPathNums = findNextTile(currentTile.getRight(), currentTile.getTop(), currentTile.getBottom(), currentTile.getLeft(), patrolPathNums, currentTile, patrolPathTiles, 180);
+			patrolPathNums = findNextTile(currentTile.getRight(), currentTile.getTop(), currentTile.getBottom(), currentTile.getLeft(), currentTile.getTopRight(), currentTile.getBotRight(), currentTile.getTopLeft(), currentTile.getBotLeft(), patrolPathNums, currentTile, patrolPathTiles, 180);
 		else if (rotation == 270)
-			patrolPathNums = findNextTile(currentTile.getTop(), currentTile.getLeft(), currentTile.getRight(), currentTile.getBottom(), patrolPathNums, currentTile, patrolPathTiles, 270);
+			patrolPathNums = findNextTile(currentTile.getTop(), currentTile.getLeft(), currentTile.getRight(), currentTile.getBottom(), currentTile.getTopLeft(), currentTile.getTopRight(), currentTile.getBotLeft(), currentTile.getBotRight(), patrolPathNums, currentTile, patrolPathTiles, 270);
+		else if (rotation == 45)
+			patrolPathNums = findNextTile(currentTile.getBotLeft(), currentTile.getBotRight(), currentTile.getTopLeft(), currentTile.getTopRight(), currentTile.getRight(), currentTile.getTop(), currentTile.getBottom(), currentTile.getLeft(), patrolPathNums, currentTile, patrolPathTiles, 45);
+		else if (rotation == 135)
+			patrolPathNums = findNextTile(currentTile.getBotRight(), currentTile.getBotLeft(), currentTile.getTopRight(), currentTile.getTopLeft(), currentTile.getTop(), currentTile.getLeft(), currentTile.getRight(), currentTile.getBottom(), patrolPathNums, currentTile, patrolPathTiles, 135);
+		else if (rotation == 225)
+			patrolPathNums = findNextTile(currentTile.getTopRight(), currentTile.getTopLeft(), currentTile.getBotRight(), currentTile.getBotLeft(), currentTile.getLeft(), currentTile.getBottom(), currentTile.getTop(), currentTile.getRight(), patrolPathNums, currentTile, patrolPathTiles, 225);
+		else if (rotation == 315)
+			patrolPathNums = findNextTile(currentTile.getTopRight(), currentTile.getTopRight(), currentTile.getBotLeft(), currentTile.getBotRight(), currentTile.getBottom(), currentTile.getRight(), currentTile.getLeft(), currentTile.getTop(), patrolPathNums, currentTile, patrolPathTiles, 315);
 		else
 			return patrolPathNums;
 		return patrolPathNums;
 	}
 
-	public ArrayList<Integer> findNextTile(int front, int right, int left, int back, ArrayList<Integer> patrolPathNums, DistanceFromPlayer currentTile, ArrayList<DistanceFromPlayer> patrolPathTiles, int currentRotation) {
+	public ArrayList<Integer> findNextTile(int front, int right, int left, int back, int frontRight, int frontLeft, int backRight, int backLeft, ArrayList<Integer> patrolPathNums, DistanceFromPlayer currentTile, ArrayList<DistanceFromPlayer> patrolPathTiles, int currentRotation) {
 		DistanceFromPlayer lastPatrolTile = new DistanceFromPlayer(-2, -2, -2);
+		int initialRotation = currentRotation;
+		int degreesToRotate = 0;
 			if (front != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), front))
 				patrolPathNums.add(front);//rotation doesnt change
 		/*else if (right != -1 && left != -1){
@@ -693,22 +703,44 @@ public class Enemy extends DynamicEntity {
 		}*/
 			else if (/*right == -1 &&*/ left != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), left)) {
 				patrolPathNums.add(left);
-				currentRotation = currentRotation + 90;
+				degreesToRotate = 90;
+				currentRotation = currentRotation + degreesToRotate;
 			} else if (/*left == -1 &&*/ right != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), right)) {
 				patrolPathNums.add(right);
-				currentRotation = currentRotation - 90;
+				degreesToRotate = -90;
+				currentRotation = currentRotation + degreesToRotate;
+			}  else if (frontRight != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), frontRight)){
+				patrolPathNums.add(frontRight);
+				degreesToRotate = -45;
+				currentRotation = currentRotation + degreesToRotate;
+			} else if (frontLeft != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), frontLeft)){
+				patrolPathNums.add(frontLeft);
+				degreesToRotate = 45;
+				currentRotation = currentRotation + degreesToRotate;
+			} else if (backRight != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), backRight)) {
+				patrolPathNums.add(backRight);
+				degreesToRotate = -(45 + 90);
+				currentRotation = currentRotation + degreesToRotate;
+			} else if (backLeft != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), backLeft)) {
+				patrolPathNums.add(backLeft);
+				degreesToRotate = 45 + 90;
+				currentRotation = currentRotation + degreesToRotate;
 			} else if (back != -1 && World.getDistanceMap().moveableAdjTile(currentTile.getTileNumber(), back)) {
 				patrolPathNums.add(back);
-				currentRotation = currentRotation + 180;
-			} else
+				degreesToRotate = 180;
+				currentRotation = currentRotation + degreesToRotate;
+			}
+			else
 				return patrolPathNums;
 
-			if (currentRotation == 360)
+			if (currentRotation >= 360 || currentRotation < 0)
+				currentRotation = initialRotation + (degreesToRotate - 360);
+			/*if (currentRotation == 360)
 				currentRotation = 0;
 			else if (currentRotation == 450)
 				currentRotation = 90;
 			else if (currentRotation < 0)
-				currentRotation = 270;
+				currentRotation = 270;*/
 		for (DistanceFromPlayer patrolTile : patrolPathTiles)
 			if (patrolTile.getTileNumber() == patrolPathNums.get(patrolPathNums.size() - 1)) {
 				currentTile = patrolTile;

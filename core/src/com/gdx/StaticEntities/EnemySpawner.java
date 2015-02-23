@@ -21,7 +21,7 @@ public class EnemySpawner extends StaticEntity {
 	
 	public EnemySpawner(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, float initialSpawnTime, float delayedSpawnTime, Enemy enemy) {
 		super(position, id, isActive, isRenderable, isDecalFacing);
-		if ((int)position.x == 11 && (int)position.z == 11){
+//		if ((int)position.x == 2 && (int)position.z == 25){
 			enemyRef = (Enemy)enemy;
 			Timer.schedule(new Task() {
 				@Override
@@ -33,7 +33,7 @@ public class EnemySpawner extends StaticEntity {
 					}
 				}
 			}, initialSpawnTime, delayedSpawnTime);
-		}
+//		}
 
 	}
 }

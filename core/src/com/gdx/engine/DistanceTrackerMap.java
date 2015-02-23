@@ -179,8 +179,8 @@ public class DistanceTrackerMap {
             lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
             toBeLookedAt = new ArrayList<DistanceFromPlayer>();
             for (DistanceFromPlayer mapObject : lookingAt) {
-                if (mapObject.getTileNumber() == 776)//debug purposes
-                    mapObject.setTileNumber(776);
+                if (mapObject.getTileNumber() == 363)//debug purposes
+                    mapObject.setTileNumber(363);
                 layerHeight = mapObject.getTileNumber() / (width * height);
                 tilePos = mapObject.getTileNumber();
                 if (layerHeight > 0)
@@ -431,7 +431,7 @@ public class DistanceTrackerMap {
         adjYDirTileNum = adjYDirTileNum - (width * width * adjYTileLayer);
         if (meshLevel.getMapTile(getXPos(adjXDirTileNum), getYPos(adjXDirTileNum), adjXTileLayer).getRampDirection() == -1
                 && meshLevel.getMapTile(getXPos(adjYDirTileNum), getYPos(adjYDirTileNum), adjYTileLayer).getRampDirection() == -1
-                && adjXDirTileNum == adjYDirTileNum)
+                && adjXTileLayer == adjYTileLayer)
             return true;
 
         return false;

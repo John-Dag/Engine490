@@ -1126,7 +1126,12 @@ public class MeshLevel {
 		//ArrayList<DistanceFromPlayer> patrolPath = new ArrayList<DistanceFromPlayer>();
 		//TiledMapTileLayer patrolLayer = (TiledMapTileLayer) tiledMap.getLayers().get(6);//map from android assets
 		DistanceFromPlayer newTile;
-		TiledMapTileLayer patrolLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Patrol Path Tile Layer 1");
+		TiledMapTileLayer patrolLayer;
+		try {
+			patrolLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Patrol Path Tile Layer 1");
+		} catch (Exception ex) {
+			return;
+		}
 		int tileNum = 0;
 		for (int tileX = 0; tileX < tileLayerWidth; tileX++)
 			for (int tileY = 0; tileY < tileLayerWidth; tileY++) {
