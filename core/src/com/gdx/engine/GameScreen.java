@@ -34,6 +34,7 @@ import com.gdx.UI.UIGrid;
 import com.gdx.UI.UIMap;
 import com.gdx.UI.UIMenu;
 import com.gdx.UI.UIOverlay;
+import com.gdx.UI.UIForm;
 import com.gdx.UI.UIVirtualJoystick;
 
 public class GameScreen implements Screen {
@@ -58,6 +59,7 @@ public class GameScreen implements Screen {
 	private UIGrid grid;
 	private WorldInputProcessor screenInputProcessor;
 	private UIVirtualJoystick virtualJoystick;
+	private UIForm form;
 	private NetServer server;
 	private NetWorld world;
 	private TextButtonStyle style;
@@ -155,6 +157,10 @@ public class GameScreen implements Screen {
 		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		//virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
+		form = new UIForm(stage, skin, "Name/IP");
+		form.generateWindow(center.x, center.y, 150, 150);
+		form.addTextField("Name", 0, 100, 150, 25);
+		form.addTextField("IP Address", 0, 50, 150, 25);
 		
 		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);
@@ -272,6 +278,7 @@ public class GameScreen implements Screen {
 		}
 
 		if (uiGenerated) {
+			if (mode != State.Server)
 			renderer.RenderWorld(delta);
 	
 			//UI components are rendered here

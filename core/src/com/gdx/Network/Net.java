@@ -4,13 +4,11 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
-import com.gdx.DynamicEntities.DynamicEntity;
-import com.gdx.DynamicEntities.Player;
 
 public class Net {
 	public static final int tcpPort = 54555;
 	public static final int udpPort = 54777;
-	public static final String serverIP = "192.168.1.2";
+	public static final String serverIP = "172.31.160.142";
 	public static final String name = "John";
 	public static int writeBuffer = 256000;
 	public static int objectBuffer = 128000;

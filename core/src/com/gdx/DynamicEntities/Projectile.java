@@ -107,7 +107,8 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 		this.setRendered(true);
 		this.getParticleEffect().init();
 		this.getParticleEffect().start();
-		this.setBoundingBox(this.getParticleEffect().getBoundingBox());
+		if (this.getBoundingBox() != null)
+			this.setBoundingBox(this.getParticleEffect().getBoundingBox());
 		World.particleManager.system.add(this.getParticleEffect());
 	}
 	

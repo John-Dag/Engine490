@@ -2,10 +2,6 @@ package com.gdx.Network;
 
 import java.io.IOException;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
-import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
@@ -74,7 +70,7 @@ public class NetServer {
     	}
     	
     	else if (object instanceof Net.projectile) {
-    		Net.projectile packet = (Net.projectile)object;
+    		//Net.projectile packet = (Net.projectile)object;
     		//updateProjectiles(packet);
     		//server.sendToAllExceptTCP(connection.getID(), packet);
     	}
