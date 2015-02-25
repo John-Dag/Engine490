@@ -89,6 +89,7 @@ public class NetWorld extends World {
 			player1.camera.position.set(playerPacket.position.x, playerPacket.position.y - .5f, playerPacket.position.z);
 			player1.getModel().transform.setToTranslation(player1.getPosition());
 			player1.setNetId(playerPacket.id);
+			player1.setNetName(playerPacket.name);
 			player1.getAnimation().setAnimation("Walking", -1);
 			playerInstances.add(player1);
 		}

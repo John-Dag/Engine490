@@ -49,6 +49,7 @@ public class Player extends DynamicEntity {
 	private float jumpVelocity, currentMovementSpeed, currentHeightOffset, speedScalar, fireDelayTimer;
 	private DistanceTrackerMap distanceMap;
 	private Array<Ability> abilities;
+	private String netName;
 	
 	public Player() {
 		super();
@@ -567,5 +568,13 @@ public class Player extends DynamicEntity {
 
 	public void setRespawning(boolean respawning) {
 		this.respawning = respawning;
+	}
+
+	public String getNetName() {
+		return netName;
+	}
+
+	public void setNetName(String netName) {
+		this.netName = netName;
 	}
 }

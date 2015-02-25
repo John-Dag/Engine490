@@ -16,8 +16,10 @@ import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net.playerPacket;
@@ -105,7 +107,6 @@ public class Render implements Disposable {
 		shadowBatch.begin(shadowLight.getCamera());
 		
 		//Viewport culling
-		renderCount = 0;
 		for (int i = 0; i < world.getMeshLevel().getInstances().size; i++) {
 			ModelInstance instance = world.getMeshLevel().getInstances().get(i);
 			//shadowBatch.render(instance);

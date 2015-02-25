@@ -55,6 +55,7 @@ public class NetClient {
 		Net.playerNew packet = new Net.playerNew();
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
+		packet.name = Net.name;
 		client.sendTCP(packet);
 	}
 	
@@ -198,5 +199,13 @@ public class NetClient {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public Client getClient() {
+		return client;
+	}
+
+	public void setClient(Client client) {
+		this.client = client;
 	}
 }

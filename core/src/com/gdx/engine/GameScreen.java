@@ -1,6 +1,8 @@
 package com.gdx.engine;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -8,6 +10,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -24,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Network.Net;
 import com.gdx.Network.NetClient;
 import com.gdx.Network.NetServer;
 import com.gdx.Network.NetWorld;
@@ -61,10 +65,10 @@ public class GameScreen implements Screen {
 	private UIVirtualJoystick virtualJoystick;
 	private UIForm form;
 	private NetServer server;
-	private NetWorld world;
+	//private NetWorld world;
 	private TextButtonStyle style;
 	private boolean uiGenerated = false;
-	private World offlineWorld;
+	private World world;
 	
 	public enum State {
 		Running, Paused, Server, Client, Offline
@@ -157,10 +161,6 @@ public class GameScreen implements Screen {
 		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		//virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
-		form = new UIForm(stage, skin, "Name/IP");
-		form.generateWindow(center.x, center.y, 150, 150);
-		form.addTextField("Name", 0, 100, 150, 25);
-		form.addTextField("IP Address", 0, 50, 150, 25);
 		
 		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);
@@ -187,26 +187,50 @@ public class GameScreen implements Screen {
 		state = State.Running;
 		networkMenu.getTable().setVisible(false);
 		generateUI(world);
+		chat.getTextArea().setText("Hosting at " + Net.serverIP.toString());
 		startServer();
 	}
 	
 	public void generateOffline() {
 		mode = State.Offline;
-		this.offlineWorld = new World();
-		offlineWorld.loadOfflineWorld(Assets.castle3, true);
-		this.renderer = new Render(offlineWorld);
-		this.offlineWorld.initializeEntities();
+		this.world = new World();
+		world.loadOfflineWorld(Assets.castle3, true);
+		this.renderer = new Render(world);
+		this.world.initializeEntities();
 		state = State.Running;
 		networkMenu.getTable().setVisible(false);
-		generateUI(offlineWorld);
+		generateUI(world);
 	}
 	
 	public void createNetworkMenu() {
+		form = new UIForm(stage, skin, "Name/IP");
+		form.generateWindow(center.x - 70, center.y + 60, 150, 150);
+		form.addTextField("Name", 0, 100, 150, 25);
+		form.addTextField("IP Address", 0, 50, 150, 25);
+		UIBase.uiSelected = true;
+
+		form.getFields().get(0).addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				form.getFields().get(0).setText("");
+			}
+		});
+		
+		form.getFields().get(1).addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				form.getFields().get(1).setText("");
+			}
+		});
+		
 		Array<TextButton> buttons2 = new Array<TextButton>();
 		final TextButton button3 = new TextButton("Join", style);
 		button3.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
+				Net.name = form.getFields().get(0).getText();
+				Net.serverIP = form.getFields().get(1).getText();
+				form.getWindow().setVisible(false);
 				generateMultiplayerClient();
 			}
 		});
@@ -216,6 +240,13 @@ public class GameScreen implements Screen {
 		button4.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
+				Net.name = "Server";
+				try {
+					Net.serverIP = Inet4Address.getLocalHost().getHostAddress();
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				}
+				form.getWindow().setVisible(false);
 				generateMultiplayerServer();
 			}
 		});
@@ -225,6 +256,7 @@ public class GameScreen implements Screen {
 		button5.addListener(new ClickListener() {
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
+				form.getWindow().setVisible(false);
 				generateOffline();
 			}
 		});
@@ -234,8 +266,6 @@ public class GameScreen implements Screen {
 		networkMenu.generateVerticalMenu(10);
 		networkMenu.getTable().setVisible(true);
 		state = State.Paused;
-		//We need to update the world once to avoid client crash, since the renderer will still be updating
-		//world.update(Gdx.graphics.getDeltaTime());
 	}
 	
 	public void startServer() {
@@ -250,6 +280,10 @@ public class GameScreen implements Screen {
 	public void startClient() {
 		try {
 			client = new NetClient(world, this);
+			if (!client.getClient().isConnected()) {
+				System.err.println("startClient(): Failed to connect to host. Exiting");
+				Gdx.app.exit();
+			}
 			world.setClient(client);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -261,53 +295,39 @@ public class GameScreen implements Screen {
 		//Call the main renderer
 		switch (state) {
 			case Running:
+				world.update(delta);
 				if (mode == State.Server) {
-					world.update(delta);
 					server.serverUpdate();
 				}
 				if (mode == State.Client) {
-					world.update(delta);
 					client.clientUpdate();
-				}
-				if (mode == State.Offline) {
-					offlineWorld.update(delta);
 				}
 				break;
 			case Paused:
 				break;
 		}
-
-		if (uiGenerated) {
-			if (mode != State.Server)
-			renderer.RenderWorld(delta);
-	
-			//UI components are rendered here
-			if (mode == State.Offline) {
-				spriteBatch.begin();
-				overlay.renderFPS(delta, -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-				overlay.renderPosition(offlineWorld.getPlayer().getPosition(), delta, -Gdx.graphics.getWidth() / 2, 
-						               Gdx.graphics.getHeight() / 2 - 20f);
-				overlay.renderTilePosition(offlineWorld.getPlayer().getPlayerTileCoords(), delta, 
-						                   -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 40f);
-				spriteBatch.end();
-				base.render(delta);
-				overlay.updateWidgets(delta, offlineWorld.getPlayer().getHealth());
-				map.renderIndicator(delta, offlineWorld.getPlayer().getPosition());
-			}
-			
-			else if (mode == State.Server || mode == State.Client) {
-				spriteBatch.begin();
-				overlay.renderFPS(delta, -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-				overlay.renderPosition(world.getPlayer().getPosition(), delta, -Gdx.graphics.getWidth() / 2, 
-						               Gdx.graphics.getHeight() / 2 - 20f);
-				overlay.renderTilePosition(world.getPlayer().getPlayerTileCoords(), delta, 
-						                   -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 40f);
-				spriteBatch.end();
-				base.render(delta);
-				overlay.updateWidgets(delta, world.getPlayer().getHealth());
-				map.renderIndicator(delta, world.getPlayer().getPosition());
-			}
+		
+		if (mode == State.Server) {
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+			base.render(delta);
+			return;
 		}
+		if (uiGenerated) {
+			renderer.RenderWorld(delta);
+			
+			//UI components are rendered here
+			spriteBatch.begin();
+			overlay.renderFPS(delta, -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+			overlay.renderPosition(world.getPlayer().getPosition(), delta, -Gdx.graphics.getWidth() / 2, 
+					               Gdx.graphics.getHeight() / 2 - 20f);
+			overlay.renderTilePosition(world.getPlayer().getPlayerTileCoords(), delta, 
+					                   -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 40f);
+			spriteBatch.end();
+			base.render(delta);
+			overlay.updateWidgets(delta, world.getPlayer().getHealth());
+			map.renderIndicator(delta, world.getPlayer().getPosition());
+		}
+		
 		else
 			base.render(delta);
 		//virtualJoystick.render(delta);

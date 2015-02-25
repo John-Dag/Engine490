@@ -31,7 +31,6 @@ public class UIMap extends UIBase {
 	private TiledMapTileLayer currentLayer;
 	private Image mapShot;
 	private Table table;
-	private Window window;
 	private int mapWidth, mapHeight;
 	private ShapeRenderer shapeRenderer;
 	private int indicatorSize;
@@ -52,7 +51,7 @@ public class UIMap extends UIBase {
 		sprites = new Sprite[currentLayer.getHeight()][currentLayer.getHeight()];
 		table = new Table();
 		table.setFillParent(true);
-		window = new Window("", skin);
+		this.setWindow(new Window("", skin));
 		this.mapWidth = mapWidth;
 		this.mapHeight = mapHeight;
 		this.indicatorSize = indicatorSize;
@@ -91,12 +90,12 @@ public class UIMap extends UIBase {
 		table.setHeight(mapShot.getHeight());
 		table.setWidth(mapShot.getWidth());
 		table.addActor(mapShot);
-		window.setWidth(mapShot.getWidth());
-		window.setHeight(mapShot.getHeight() + 20);
-		window.add(table);
-		window.addActor(mapShot);
-		window.setPosition(Gdx.graphics.getWidth() - window.getWidth(), Gdx.graphics.getHeight() - window.getHeight());
-		this.getStage().addActor(window);
+		getWindow().setWidth(mapShot.getWidth());
+		getWindow().setHeight(mapShot.getHeight() + 20);
+		getWindow().add(table);
+		getWindow().addActor(mapShot);
+		getWindow().setPosition(Gdx.graphics.getWidth() - getWindow().getWidth(), Gdx.graphics.getHeight() - getWindow().getHeight());
+		this.getStage().addActor(getWindow());
 	}
 	
 	/***
@@ -131,8 +130,8 @@ public class UIMap extends UIBase {
 		mapCamera.update();
 		batch.setProjectionMatrix(mapCamera.combined);
 		shapeRenderer.begin(ShapeType.Filled);
-		shapeRenderer.circle(window.getX() + position.z * mapHeight, 
-				             window.getY() + position.x * mapWidth, indicatorSize);
+		shapeRenderer.circle(getWindow().getX() + position.z * mapHeight, 
+				             getWindow().getY() + position.x * mapWidth, indicatorSize);
 		shapeRenderer.end();
 	}
 	

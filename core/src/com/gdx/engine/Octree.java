@@ -1,5 +1,6 @@
 package com.gdx.engine;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -34,6 +35,8 @@ public class Octree {
 		// this is where we create the octree
 		
 		// check each modelInstance to see if it is in the octree
+		//System.out.println("Size of worldBoundingBoxes");
+		//System.out.println(world.getBoundingBoxes().size);
 		for (int i = 0; i < world.getBoundingBoxes().size; i++) {
 			if (octBox.intersects(world.getBoundingBoxes().get(i))) {
 				// populate the list of modelIndices
@@ -44,8 +47,8 @@ public class Octree {
 		// only split if octBox dimension is greater than or equal to 2
 		if ((octBox.max.x - octBox.min.x) >= 2) {
 			
-			System.out.println("Splitting octBox: min(" + octBox.min.x + "," + octBox.min.y + "," + octBox.min.z + ")"
-					+ "max(" + octBox.max.x + "," + octBox.max.y + "," + octBox.max.z + ")");
+//			System.out.println("Splitting octBox: min(" + octBox.min.x + "," + octBox.min.y + "," + octBox.min.z + ")"
+//					+ "max(" + octBox.max.x + "," + octBox.max.y + "," + octBox.max.z + ")");
 			
 			//System.out.print
 			
@@ -58,57 +61,57 @@ public class Octree {
 			minVector.set(octBox.min);
 			maxVector.set(minVector.cpy().add(xSplitVec.x, ySplitVec.y, zSplitVec.z));
 			children[index] = new Octree(this, new BoundingBox(minVector, maxVector), world);
-			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
-					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
+//			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
+//					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
 			index++;
 			
 			minVector.set(octBox.min.cpy().add(xSplitVec));
 			maxVector.set(minVector.cpy().add(xSplitVec.x, ySplitVec.y, zSplitVec.z));
 			children[index] = new Octree(this, new BoundingBox(minVector, maxVector), world);
-			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
-					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
+//			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
+//					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
 			index++;
 			
 			minVector.set(octBox.min.cpy().add(zSplitVec));
 			maxVector.set(minVector.cpy().add(xSplitVec.x, ySplitVec.y, zSplitVec.z));
 			children[index] = new Octree(this, new BoundingBox(minVector, maxVector), world);
-			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
-					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
+//			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
+//					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
 			index++;
 			
 			minVector.set(octBox.min.cpy().add(xSplitVec).add(zSplitVec));
 			maxVector.set(minVector.cpy().add(xSplitVec.x, ySplitVec.y, zSplitVec.z));
 			children[index] = new Octree(this, new BoundingBox(minVector, maxVector), world);
-			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
-					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
+//			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
+//					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
 			index++;
 			
 			minVector.set(octBox.min.cpy().add(ySplitVec));
 			maxVector.set(minVector.cpy().add(xSplitVec.x, ySplitVec.y, zSplitVec.z));
 			children[index] = new Octree(this, new BoundingBox(minVector, maxVector), world);
-			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
-					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
+//			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
+//					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
 			index++;
 			
 			minVector.set(octBox.min.cpy().add(xSplitVec).add(ySplitVec));
 			maxVector.set(minVector.cpy().add(xSplitVec.x, ySplitVec.y, zSplitVec.z));
 			children[index] = new Octree(this, new BoundingBox(minVector, maxVector), world);
-			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
-					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
+//			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
+//					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
 			index++;
 			
 			minVector.set(octBox.min.cpy().add(zSplitVec).add(ySplitVec));
 			maxVector.set(minVector.cpy().add(xSplitVec.x, ySplitVec.y, zSplitVec.z));
 			children[index] = new Octree(this, new BoundingBox(minVector, maxVector), world);
-			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
-					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
+//			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
+//					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
 			index++;
 			
 			minVector.set(octBox.min.cpy().add(xSplitVec).add(zSplitVec).add(ySplitVec));
 			maxVector.set(minVector.cpy().add(xSplitVec.x, ySplitVec.y, zSplitVec.z));
 			children[index] = new Octree(this, new BoundingBox(minVector, maxVector), world);
-			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
-					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
+//			System.out.println("New Octree, minVec: (" + minVector.x + "," + minVector.y + "," + minVector.z + "), maxVec: ("
+//					 + maxVector.x + "," + maxVector.y + "," + maxVector.z + "), nodeId: " + children[index].nodeId);
 			index++;
 		}
 	}
@@ -137,5 +140,9 @@ public class Octree {
 	
 	public Array<Integer> getModelIndices() {
 		return modelIndices;
+	}
+	
+	public BoundingBox getBoundingBox() {
+		return octBox;
 	}
 }

@@ -82,9 +82,15 @@ public class NetServer {
     		Net.playerNew packet = new Net.playerNew();
     		packet.position = playerNew.position;
     		packet.id = connection.getID();
+    		packet.name = playerNew.name;
     		addNewPlayer(packet);
     		server.sendToAllExceptTCP(connection.getID(), playerNew);
     		sendAllPlayers(connection.getID());
+    		
+    		String message = Net.serverMessage + " " + Net.serverIP + "\nActive connections: " + server.getConnections().length;
+    		sendServerMessage(message, connection);
+    		String joinedMessage = packet.name + " joined.";
+    		sendGlobalServerMessageExcept(joinedMessage, connection);
     	}
     	
     	else if (object instanceof Net.newProjectile) {
@@ -101,15 +107,21 @@ public class NetServer {
 	
 	//Updates all clients with the player that disconnected
 	public void removePlayer(Connection connection) {
+		String name = "";
+		
 		for (int i = 0; i < world.playerInstances.size; i++) {
 			Player player = world.playerInstances.get(i);
-			if (player.getNetId() == connection.getID())
+			if (player.getNetId() == connection.getID()) {
+				name = player.getNetName();
 				world.playerInstances.removeIndex(i);
+			}
 		}
 		
 		Net.playerDisconnect disconnect = new Net.playerDisconnect();
 		disconnect.id = connection.getID();
 		server.sendToAllTCP(disconnect);
+		String message = name + " disconnected.";
+		sendGlobalServerMessage(message);
 	}
 	
 	//Updates a new player with all the players on the server
@@ -119,6 +131,8 @@ public class NetServer {
 			Net.playerNew packet = new Net.playerNew();
 			packet.id = world.getPlayerInstances().get(i).getNetId();
 			packet.position = world.getPlayerInstances().get(i).camera.position.cpy();
+			packet.name = world.getPlayerInstances().get(i).getNetName();
+			
 			if (id != packet.id)
 				server.sendToTCP(id, packet);
 		}
@@ -134,6 +148,24 @@ public class NetServer {
 	
 	public void updateProjectiles(Net.projectile packet) {
 		server.sendToAllTCP(packet);
+	}
+	
+	public void sendServerMessage(String message, Connection connection) {
+		Net.chatMessage packet = new Net.chatMessage();
+		packet.message = Net.name + ": " + message;
+		server.sendToTCP(connection.getID(), packet);
+	}
+	
+	public void sendGlobalServerMessage(String message) {
+		Net.chatMessage packet = new Net.chatMessage();
+		packet.message = Net.name + ": " + message;
+		server.sendToAllTCP(packet);
+	}
+	
+	public void sendGlobalServerMessageExcept(String message, Connection connection) {
+		Net.chatMessage packet = new Net.chatMessage();
+		packet.message = Net.name + ": " + message;
+		server.sendToAllExceptTCP(connection.getID(), packet);
 	}
 	
 	public void serverUpdate() {
