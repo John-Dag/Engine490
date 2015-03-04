@@ -51,6 +51,7 @@ public class World implements Disposable {
     private NetServer server;
     private int NetIdCurrent;
 	public static EntityManager entManager;
+	public Vector3 startVector = new Vector3(2f, 1.5f, 2f);
     
 	public World() {
 		playerInstances = new Array<Player>();

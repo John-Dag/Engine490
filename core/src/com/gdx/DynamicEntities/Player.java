@@ -44,7 +44,7 @@ public class Player extends DynamicEntity {
 	private int health;
 	private boolean mouseLocked, mouseLeft, clipping, isCrouching, isJumping, isFiring, isCooldownActive, isPlayerTargeting, 
 				    moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false, jump = false, crouch = false, 
-				    ability1 = false, ability2 = false, ESCAPE = false, respawning;
+				    ability1 = false, ability2 = false, ESCAPE = false, respawning, isRotating = false;
 	private Vector3 collisionVector, newPos, oldPos;
 	private float jumpVelocity, currentMovementSpeed, currentHeightOffset, speedScalar, fireDelayTimer;
 	private DistanceTrackerMap distanceMap;
@@ -214,11 +214,11 @@ public class Player extends DynamicEntity {
 		//world.getMeshLevel().updateHeightOffset(this.camera.position.y - currentHeightOffset);
 		
 		this.camera.update();
-		if (this.getModel() != null)
-			this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+//		if (this.getModel() != null)
+//			this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.getPosition().set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.updatePosition(delta);
-		this.updateInstanceTransform();
+		//this.updateInstanceTransform();
 		
 		if (this.health <= MIN_HEALTH) {
 			setRespawning(true);
@@ -279,6 +279,11 @@ public class Player extends DynamicEntity {
 				fireWeapon();
 			}
 			
+			if (Gdx.input.getDeltaX() != 0)
+				setRotating(true);
+			else
+				setRotating(false);
+			
 			// rotate xz plane
 			camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
 			
@@ -307,6 +312,9 @@ public class Player extends DynamicEntity {
 			// rotates up and down
 			camera.direction.rotate(temp, pr);
 		}
+		
+		else
+			setRotating(false);
 	}
 	
 	public void catchCursor() {
@@ -576,5 +584,13 @@ public class Player extends DynamicEntity {
 
 	public void setNetName(String netName) {
 		this.netName = netName;
+	}
+
+	public boolean isRotating() {
+		return isRotating;
+	}
+
+	public void setRotating(boolean isRotating) {
+		this.isRotating = isRotating;
 	}
 }

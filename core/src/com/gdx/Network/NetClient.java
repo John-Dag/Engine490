@@ -19,7 +19,6 @@ public class NetClient {
 	private World world;
 	private GameScreen screen;
 	private int id;
-	private Vector3 previousPlayerPos = new Vector3();
 	
 	public NetClient() {
 		super();
@@ -73,7 +72,7 @@ public class NetClient {
 			
 			@Override
 			public void received(Connection connection, Object object) {
-				clientReceived(connection, object);
+				packetReceived(connection, object);
 			}
 		};
 		
@@ -89,10 +88,11 @@ public class NetClient {
 	}
 	
 	//Handles received packets
-	private void clientReceived(Connection connection, Object object) {
+	private void packetReceived(Connection connection, Object object) {
         if (object instanceof Net.playerPacket) {
      	   Net.playerPacket packet = (Net.playerPacket)object;
      	   updatePlayers(packet, connection);
+     	   System.out.println(packet.position);
         }
         
         else if (object instanceof Net.playerNew) {
@@ -182,7 +182,7 @@ public class NetClient {
 	
 	//Send updates to the server if the player is moving, jumping, or respawning.
 	public void clientUpdate() {
-		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping() || world.getPlayer().isRespawning()) {
+		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping() || world.getPlayer().isRespawning() || world.getPlayer().isRotating()) {
 	    	Net.playerPacket packet = new Net.playerPacket();
 	    	packet.position = world.getPlayer().camera.position.cpy();
 	    	packet.position.y = packet.position.y - .5f;

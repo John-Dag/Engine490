@@ -12,11 +12,13 @@ import com.gdx.engine.World;
 
 public class NetServer {
 	private Server server;
+	private NetStatManager netStatManager;
 	private World world;
 	
 	public NetServer(World world) throws IOException {
 		try {
 			this.world = world;
+			netStatManager = new NetStatManager();
 			server = new Server(Net.writeBuffer, Net.objectBuffer);
 			server.start();
 			Log.set(Log.LEVEL_INFO);
@@ -44,7 +46,7 @@ public class NetServer {
 			
 			@Override
 			public void received(Connection connection, Object object) {
-				clientReceived(connection, object);
+				packetReceived(connection, object);
 			}
 		};
 		
@@ -62,7 +64,7 @@ public class NetServer {
 	
 	
 	//Handles received packets
-	private void clientReceived(Connection connection, Object object) {
+	private void packetReceived(Connection connection, Object object) {
 	   	if (object instanceof Net.playerPacket) {
     		Net.playerPacket playerPacket = (Net.playerPacket)object;
     		updatePlayers(playerPacket, connection);

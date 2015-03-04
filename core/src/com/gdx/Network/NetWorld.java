@@ -19,7 +19,7 @@ import com.gdx.engine.World;
 public class NetWorld extends World {
 	public NetWorld() {
 		Assets.loadModels();
-		player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+		player = new Player(this, 100, null, 2, true, true, startVector, new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 							new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 		setPlayer(player);
 		playerInstances.add(player);
@@ -37,6 +37,7 @@ public class NetWorld extends World {
 			if (this.playerInstances.get(i).getNetId() == packet.id) {
 				//System.out.println(packet.id);
 				playerInstances.get(i).camera.position.set(packet.position);
+				playerInstances.get(i).camera.direction.set(packet.direction);
 			}
 		}
 	}

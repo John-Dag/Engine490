@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
@@ -37,6 +38,8 @@ public class Render implements Disposable {
 	private Model weapon = new Model();
 	private boolean loading;
 	private Mesh fullScreenQuad;
+	public Vector3 upVector = new Vector3(0f, 1f, 0f);
+	public Vector3 zeroVector = new Vector3(0f,0f,0f);
 	
 	public Render(World world) {
 		this.world = world;
@@ -132,7 +135,9 @@ public class Render implements Disposable {
 			if (world.getPlayerInstances().get(i).getModel() != null) {
 				Player player = world.getPlayerInstances().get(i);
 				player.getAnimation().update(delta);
+				Vector2 angleVector = new Vector2(player.camera.direction.z, player.camera.direction.x);
 				player.getModel().transform.setToTranslation(player.camera.position.cpy());
+				player.getModel().transform.rotate(upVector, angleVector.angle());
 				renderModels(player.getModel());
 			}
 		}
