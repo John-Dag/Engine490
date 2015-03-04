@@ -5,12 +5,15 @@ import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Shaders.EntityShader;
 
 public class Entity {
 	private int id;
 	private boolean isActive;
 	private boolean isRenderable;
 	public static Array<Entity> entityInstances = new Array<Entity>();
+	
+	public EntityShader shader;
 	
 	public Entity() {
 		id = 0;
@@ -81,6 +84,14 @@ public class Entity {
 	
 	public Entity spawn(Vector3 spawnPos) {
 		return new Entity();
+	}
+
+	public EntityShader getShader() {
+		return shader;
+	}
+
+	public void setShader(EntityShader shader) {
+		this.shader = shader;
 	}
 }
 

@@ -29,6 +29,7 @@ import com.gdx.Network.Net.playerNew;
 import com.gdx.Network.Net.playerPacket;
 import com.gdx.Network.Net.projectile;
 import com.gdx.Network.NetClient;
+import com.gdx.Shaders.ColorMultiplierEntityShader;
 import com.gdx.Weapons.RocketLauncher;
 
 public class World implements Disposable {
@@ -156,6 +157,8 @@ public class World implements Disposable {
 			
 			if (entity.isActive()) {
 				entity.update(delta, this);
+				if(entity.shader!=null)
+					entity.shader.time+=delta;
 				
 				//
 				if(isWireframeEnabled) {

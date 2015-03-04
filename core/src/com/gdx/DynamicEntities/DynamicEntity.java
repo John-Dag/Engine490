@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.gdx.Shaders.EntityShader;
 import com.gdx.engine.Entity;
 import com.gdx.engine.Render;
 import com.gdx.engine.World;
@@ -374,4 +375,13 @@ public class DynamicEntity extends Entity {
 	public void setModel(ModelInstance model) {
 		this.model = model;
 	}
+	
+	public void setShader(EntityShader shader) {
+		super.setShader(shader);
+		if(this.model!=null)
+		{
+			this.model.userData=shader;
+		}
+	}
+	
 }
