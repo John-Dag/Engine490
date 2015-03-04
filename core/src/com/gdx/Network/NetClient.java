@@ -92,11 +92,11 @@ public class NetClient {
         if (object instanceof Net.playerPacket) {
      	   Net.playerPacket packet = (Net.playerPacket)object;
      	   updatePlayers(packet, connection);
-     	   System.out.println(packet.position);
         }
         
         else if (object instanceof Net.playerNew) {
        	   Net.playerNew packet = (Net.playerNew)object;
+       	   screen.getStatForm().addTextField(packet.name + " " + 0 + " " + 0, 0f, 0f, 300, 50);
      	   addPlayer(packet);
         }
         
@@ -120,6 +120,16 @@ public class NetClient {
         	Net.chatMessage packet = (Net.chatMessage)object;
         	addChatMessage(packet);
         }
+	}
+	
+	public void sendKillUpdate() {
+		Net.killPacket packet = new Net.killPacket();
+		client.sendTCP(packet);
+	}
+	
+	public void sendDeathUpdate() {
+		Net.deathPacket packet = new Net.deathPacket();
+		client.sendTCP(packet);
 	}
 	
 	public synchronized void updateProjectiles(Net.projectile packet) {

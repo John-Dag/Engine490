@@ -6,6 +6,14 @@ public class NetEventManager {
 	private Array<NetEvent> events;
 	
 	public NetEventManager() {
-		events = new Array<NetEvent>();
+		setEvents(new Array<NetEvent>());
+	}
+
+	public Array<NetEvent> getEvents() {
+		return events;
+	}
+
+	public void setEvents(Array<NetEvent> events) {
+		this.events = events;
 	}
 }

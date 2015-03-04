@@ -221,6 +221,9 @@ public class Player extends DynamicEntity {
 		//this.updateInstanceTransform();
 		
 		if (this.health <= MIN_HEALTH) {
+			if (world.getClient() != null) {
+				world.getClient().sendKillUpdate();
+			}
 			setRespawning(true);
 			respawnPlayer(this);
 		}

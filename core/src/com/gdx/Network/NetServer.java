@@ -86,6 +86,7 @@ public class NetServer {
     		packet.id = connection.getID();
     		packet.name = playerNew.name;
     		addNewPlayer(packet);
+    		addNetStat(packet);
     		server.sendToAllExceptTCP(connection.getID(), playerNew);
     		sendAllPlayers(connection.getID());
     		
@@ -105,6 +106,25 @@ public class NetServer {
         	Net.chatMessage packet = (Net.chatMessage)object;
         	server.sendToAllExceptTCP(connection.getID(), packet);
         }
+	   	
+        else if (object instanceof Net.killPacket) {
+        	Net.killPacket packet = (Net.killPacket)object;
+        	updateNetStat(connection.getID());
+        	server.sendToAllExceptTCP(connection.getID(), packet);
+        }
+	}
+	
+	public void updateNetStat(int id) {
+		for (int i = 0; i < netStatManager.getStats().size; i++) {
+			if (id == netStatManager.getStats().get(i).getId()) {
+				netStatManager.getStats().get(i).setKills(netStatManager.getStats().get(i).getKills() + 1);
+			}
+		}
+	}
+	
+	public void addNetStat(Net.playerNew packet) {
+		NetStat stat = new NetStat(packet.id, packet.name);
+		netStatManager.getStats().add(stat);
 	}
 	
 	//Updates all clients with the player that disconnected
@@ -113,9 +133,15 @@ public class NetServer {
 		
 		for (int i = 0; i < world.playerInstances.size; i++) {
 			Player player = world.playerInstances.get(i);
+			NetStat stat = netStatManager.getStats().get(i);
+			
 			if (player.getNetId() == connection.getID()) {
 				name = player.getNetName();
 				world.playerInstances.removeIndex(i);
+			}
+			
+			else if (stat.getId() == connection.getID()) {
+				netStatManager.getStats().removeIndex(i);
 			}
 		}
 		

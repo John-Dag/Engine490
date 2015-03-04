@@ -29,6 +29,8 @@ public class Net {
 	    kryo.register(chatMessage.class);
 	    kryo.register(String.class);
 	    kryo.register(playerDisconnect.class);
+	    kryo.register(killPacket.class);
+	    kryo.register(deathPacket.class);
 	}
 	
 	//Packets
@@ -62,5 +64,13 @@ public class Net {
 	
 	public static class chatMessage {
 		public String message;
+	}
+	
+	public static class killPacket {
+
+	}
+	
+	public static class deathPacket {
+
 	}
 }

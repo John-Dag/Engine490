@@ -63,7 +63,7 @@ public class GameScreen implements Screen {
 	private UIGrid grid;
 	private WorldInputProcessor screenInputProcessor;
 	private UIVirtualJoystick virtualJoystick;
-	private UIForm form;
+	private UIForm form, statForm;
 	private NetServer server;
 	//private NetWorld world;
 	private TextButtonStyle style;
@@ -285,6 +285,8 @@ public class GameScreen implements Screen {
 				Gdx.app.exit();
 			}
 			world.setClient(client);
+			statForm = new UIForm(stage, skin, "Stats");
+			statForm.generateWindow(center.x, center.y, 300, 300);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -398,5 +400,13 @@ public class GameScreen implements Screen {
 
 	public void setChat(UIChat chat) {
 		this.chat = chat;
+	}
+
+	public UIForm getStatForm() {
+		return statForm;
+	}
+
+	public void setStatForm(UIForm statForm) {
+		this.statForm = statForm;
 	}
 }
