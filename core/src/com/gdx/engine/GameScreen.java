@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Inventory.TestInventory;
 import com.gdx.UI.UIChat;
 import com.gdx.UI.UIConsole;
 import com.gdx.UI.UIBase;
@@ -51,6 +52,7 @@ public class GameScreen implements Screen {
 	private UIGrid grid;
 	private WorldInputProcessor screenInputProcessor;
 	private UIVirtualJoystick virtualJoystick;
+	//private TestInventory testInv = new TestInventory();
 	
 	public enum State {
 		Running, Paused
@@ -121,6 +123,7 @@ public class GameScreen implements Screen {
 		menu = new UIMenu(stage, skin, buttons, "Engine 490", 0, 0);
 		menu.generateVerticalMenu(10);
 		grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
+		//grid.setImages(testInv.getImages());
 		grid.generateGrid(Align.bottom, 30, 30, 5, 5, 3);
 		grid.setWindowSize(300, 300);
 		overlay = new UIOverlay(stage, spriteBatch, bitmapFont);

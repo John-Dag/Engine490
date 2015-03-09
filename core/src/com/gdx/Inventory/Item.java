@@ -1,17 +1,33 @@
 package com.gdx.Inventory;
 
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+
 public class Item {
-	private String textureRegion;
+	private Image image;
+	private String name;
 	
-	public Item(String textureRegion) {
-		this.setTextureRegion(textureRegion);
+	public Item(Image image, String name) {
+		this.image = image;
+		this.name = name;
 	}
 
-	public String getTextureRegion() {
-		return textureRegion;
+	public Image getImage() {
+		return image;
 	}
 
-	public void setTextureRegion(String textureRegion) {
-		this.textureRegion = textureRegion;
+	public void setImage(Image image) {
+		this.image = image;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String toString() {
+		return name;
 	}
 }

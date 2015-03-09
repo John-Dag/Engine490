@@ -12,12 +12,16 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Inventory.Inventory;
+import com.gdx.Inventory.Slot;
+import com.gdx.Inventory.TestInventory;
 
 public class UIGrid extends UIBase {
 	private Table table;
 	private Window window;
-	private Array<Actor> images = new Array<Actor>();
+	private Array<Image> images;
 	private Texture slotTexture;
+	private TestInventory testInv = new TestInventory();
 	
 	public UIGrid(Stage stage, Skin skin, String name, Texture slotTexture) {
 		super(stage);
@@ -28,6 +32,7 @@ public class UIGrid extends UIBase {
 		window.setVisible(false);
 		window.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		this.slotTexture = slotTexture;
+		images = testInv.getImages();
 	}
 	
 	public UIGrid(Stage stage, Skin skin, Color color, String name, Texture slotTexture) {
@@ -40,6 +45,7 @@ public class UIGrid extends UIBase {
 		window.setVisible(false);
 		window.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		this.slotTexture = slotTexture;
+		images = testInv.getImages();
 	}
 	
 	/***
@@ -73,7 +79,6 @@ public class UIGrid extends UIBase {
 			for (int j = 0; j < numSlotsY; j++) { 
 				table.add(images.get((i * numSlotsX) + j)).pad(padding).size(slotWidth, slotHeight);
 			}
-
 			table.row();
 		}
 
@@ -96,7 +101,7 @@ public class UIGrid extends UIBase {
 		return window;
 	}
 
-	public Array<Actor> getImages() {
+	public Array<Image> getImages() {
 		return images;
 	}
 
@@ -112,7 +117,7 @@ public class UIGrid extends UIBase {
 		this.window = window;
 	}
 
-	public void setImages(Array<Actor> images) {
+	public void setImages(Array<Image> images) {
 		this.images = images;
 	}
 

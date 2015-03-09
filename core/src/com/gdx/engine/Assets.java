@@ -48,6 +48,8 @@ public class Assets {
 	public static Texture gridslot;
 	public static Texture joystickBackground;
 	public static Texture joystickKnob;
+	public static Texture healthPotion;
+	public static Texture manaPotion;
 	private static ParticleEffectLoader loader;
 	private static ParticleEffectLoadParameter loadParam;
 	public static String vertexShader;
@@ -84,6 +86,8 @@ public class Assets {
 		gridslot = new Texture("gridslot.png");
 		joystickBackground = new Texture("joystickBackground.png");
 		joystickKnob = new Texture("joystickKnob.png");
+		healthPotion = new Texture("Items/Item_HealthPotion.png");
+		manaPotion = new Texture("Items/mana.png");
 		//wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		loadShaders();
 	}
