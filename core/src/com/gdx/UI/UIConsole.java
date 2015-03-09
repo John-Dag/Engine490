@@ -36,7 +36,6 @@ public class UIConsole extends UIBase {
 	private final int GRAVE = 96;
 	private BitmapFont bitmapFont;
 	private Skin skin;
-	private Window consoleWindow;
 	private TextField consoleInputField;
 	private String consoleVal;
 	private World world;
@@ -58,14 +57,13 @@ public class UIConsole extends UIBase {
 	
 	public void initializeConsoleWindow() {
 		consoleVal = "";
-		consoleWindow = new Window("Console", skin);
-		consoleWindow.setName("console");
-		consoleWindow.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() / 3);
-		consoleWindow.setPosition(0, Gdx.graphics.getHeight());
+		this.setWindow(new Window("Console", skin));
+		this.getWindow().setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() / 3);
+		this.getWindow().setPosition(0, Gdx.graphics.getHeight());
 		consoleInputField = new TextField("", skin);
-		consoleWindow.add(consoleInputField).width(consoleWindow.getWidth()).height(consoleWindow.getHeight());
-		this.getStage().addActor(consoleWindow);
-		consoleWindow.setVisible(false);
+		this.getWindow().add(consoleInputField).width(this.getWindow().getWidth()).height(this.getWindow().getHeight());
+		this.getStage().addActor(this.getWindow());
+		this.getWindow().setVisible(false);
 		
 		//Sends console commands to be parsed once the user hits enter
 		consoleInputField.setTextFieldListener(new TextFieldListener() {
@@ -277,22 +275,18 @@ public class UIConsole extends UIBase {
 	
 	@Override
 	public void show() {
-		if (!this.consoleWindow.isVisible()) {
-			this.consoleWindow.setVisible(true);
+		if (!this.getWindow().isVisible()) {
+			this.getWindow().setVisible(true);
 			this.consoleInputField.setDisabled(false);
 			UIBase.uiSelected = true;
 			this.getStage().setKeyboardFocus(consoleInputField);
 			GameScreen.state = State.Paused;
 		}
 		else {
-			this.consoleWindow.setVisible(false);
+			this.getWindow().setVisible(false);
 			UIBase.uiSelected = false;
 			this.consoleInputField.setDisabled(true);
 			GameScreen.state = State.Running;
 		}
-	}
-	
-	public Window getConsoleWindow() {
-		return consoleWindow;
 	}
 }

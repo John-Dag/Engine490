@@ -23,7 +23,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.DynamicEntities.Player;
-import com.gdx.Network.Net.playerPacket;
+import com.gdx.Network.Net.PlayerPacket;
 
 public class Render implements Disposable {
 	public static int renderCount;

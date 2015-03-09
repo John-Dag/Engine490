@@ -48,6 +48,8 @@ public class Assets {
 	public static Texture gridslot;
 	public static Texture joystickBackground;
 	public static Texture joystickKnob;
+	public static Texture cursor;
+	public static TextureRegion cursorRegion;
 	private static ParticleEffectLoader loader;
 	private static ParticleEffectLoadParameter loadParam;
 	public static String vertexShader;
@@ -85,6 +87,7 @@ public class Assets {
 		gridslot = new Texture("gridslot.png");
 		joystickBackground = new Texture("joystickBackground.png");
 		joystickKnob = new Texture("joystickKnob.png");
+		cursor = new Texture("cursor.png");
 		//wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		loadShaders();
 	}
@@ -104,7 +107,7 @@ public class Assets {
 	    manager.setLoader(ParticleEffect.class, loader);
 	    manager.load("bloodeffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("torcheffect2.pfx", ParticleEffect.class, loadParam);
-	    manager.load("rocketeffect.pfx", ParticleEffect.class, loadParam);
+	    manager.load("energyball2.pfx", ParticleEffect.class, loadParam);
 	    manager.load("mistGreenWeapon.pfx", ParticleEffect.class, loadParam);
 	    manager.load("portalEffect.pfx", ParticleEffect.class, loadParam);
 	    manager.load("rocketExplosionEffect.pfx", ParticleEffect.class, loadParam);

@@ -48,15 +48,15 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 	public void update(float time, World world) {
 		if (!this.isRendered() && this.getParticleEffect() != null) 
 			this.initializeProjectileEffect();
-
-		if (world.getPlayer().getWeapon() != null || world.getServer() != null || world.getClient() != null) {
+		
+		this.updateProjectilePosition(world, time);
+		if (world.getClient() == null)
 			world.checkProjectileCollisions(this);
-			this.updateProjectilePosition(world, time);
-			this.checkCollisionMeshlevel(time, world);
-		}
+		this.checkCollisionMeshlevel(time, world);
 		
 		//If the client is hosting a server, send position update packets
 		if (world.getServer() != null) {
+			world.checkProjectileCollisions(this);
 			world.sendProjectilePositionUpdate(this);
 		}
 			
@@ -83,7 +83,7 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 		newPos.set(oldPos.x + movementVector.x * moveAmt, oldPos.y + movementVector.y * moveAmt, 
 				   oldPos.z + movementVector.z * moveAmt);
 
-		collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, 0.5f, 0.5f, 0.5f);
+		collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, 0.2f, 0.2f, 0.2f);
 
 		movementVector.set(movementVector.x * collisionVector.x,
 					       movementVector.y * collisionVector.y,
@@ -107,8 +107,9 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 		this.setRendered(true);
 		this.getParticleEffect().init();
 		this.getParticleEffect().start();
-		if (this.getBoundingBox() != null)
-			this.setBoundingBox(this.getParticleEffect().getBoundingBox());
+		if (this.getParticleEffect().getControllers().first().emitter == null)
+			return;
+		this.setBoundingBox(this.getParticleEffect().getBoundingBox());
 		World.particleManager.system.add(this.getParticleEffect());
 	}
 	
@@ -245,7 +246,7 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 		this.setDealtDamage(false);
 	}
 
-	public boolean isDealtDamage() {
+	public boolean hasDealtDamage() {
 		return dealtDamage;
 	}
 

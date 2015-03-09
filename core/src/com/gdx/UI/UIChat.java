@@ -126,7 +126,7 @@ public class UIChat extends UIBase {
 	
 	public void sendMessage(String message) {
 		try {
-			Net.chatMessage packet = new Net.chatMessage();
+			Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
 			packet.message = Net.name + ": " + fieldValue;
 			GameScreen.client.sendChatMessage(packet);
 		}
@@ -135,14 +135,15 @@ public class UIChat extends UIBase {
 		}
 	}
 	
-	public void addMessage(Net.chatMessage packet) {
+	public void addMessage(Net.ChatMessagePacket packet) {
 		fieldValue = textfield.getText();
 		chatLog.append(packet.message + "\n");
 		textArea.setText(chatLog.toString());
 		scrollPane.setScrollPercentY(scrollPane.getScrollPercentY());
 	}
 	
-	public void activateChatField() {
+	@Override
+	public void show() {
 		if (textfield.isDisabled()) {
 			textfield.setDisabled(false);
 			this.getStage().unfocusAll();

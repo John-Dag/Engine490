@@ -19,51 +19,58 @@ public class Net {
 	static public void register(EndPoint endPoint) {
 		Kryo kryo = endPoint.getKryo();
 	    kryo.register(Vector3.class);
-	    kryo.register(playerPacket.class);
+	    kryo.register(PlayerPacket.class);
 	    kryo.register(Array.class);
 	    kryo.register(Object[].class);
-	    kryo.register(playerNew.class);
-	    kryo.register(projectile.class);
-	    kryo.register(newProjectile.class);
-	    kryo.register(projectile.class);
-	    kryo.register(chatMessage.class);
+	    kryo.register(NewPlayer.class);
+	    kryo.register(ProjectilePacket.class);
+	    kryo.register(NewProjectile.class);
+	    kryo.register(ProjectilePacket.class);
+	    kryo.register(ChatMessagePacket.class);
 	    kryo.register(String.class);
-	    kryo.register(playerDisconnect.class);
+	    kryo.register(PlayerDisconnect.class);
 	    kryo.register(killPacket.class);
 	    kryo.register(deathPacket.class);
+	    kryo.register(CollisionPacket.class);
 	}
 	
 	//Packets
-	public static class playerPacket {
+	public static class PlayerPacket {
 		public Vector3 position;
 		public Vector3 direction;
 		public int id;
 	}
 	
-	public static class playerNew {
+	public static class NewPlayer {
 		public Vector3 position;
 		public String name;
 		public int id;
 	}
 	
-	public static class playerDisconnect {
+	public static class PlayerDisconnect {
 		public int id;
 	}
 	
-	public static class newProjectile {
+	public static class NewProjectile {
+		public Vector3 position;
+		public Vector3 cameraPos;
+		public int id, originID;
+	}
+	
+	public static class ProjectilePacket {
 		public Vector3 position;
 		public Vector3 cameraPos;
 		public int id;
 	}
 	
-	public static class projectile {
-		public Vector3 position;
-		public Vector3 cameraPos;
-		public int id;
-	}
-	
-	public static class chatMessage {
+	public static class ChatMessagePacket {
 		public String message;
+		public int id;
+	}
+	
+	public static class CollisionPacket {
+		public int projectileID, playerID, damage;
+		public Vector3 position;
 	}
 	
 	public static class killPacket {

@@ -25,7 +25,7 @@ public class DynamicEntity extends Entity {
 	private AnimationController animation;
 	private BoundingBox boundingBox;
 	private BoundingBox detectionBox;
-	private int NetId;
+	private int NetId, originID;
 	private Vector3 newPosition = new Vector3();
 	private Vector3 newVelocity = new Vector3();
 	private Vector3 newRotation = new Vector3();
@@ -373,5 +373,13 @@ public class DynamicEntity extends Entity {
 
 	public void setModel(ModelInstance model) {
 		this.model = model;
+	}
+
+	public int getOriginID() {
+		return originID;
+	}
+
+	public void setOriginID(int originID) {
+		this.originID = originID;
 	}
 }

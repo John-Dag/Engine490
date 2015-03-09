@@ -39,7 +39,7 @@ public class Player extends DynamicEntity {
 	public static final int MIN_HEALTH = 0;
 	public static final int MAX_HEALTH = 100;
 	public PerspectiveCamera camera;
-	public Vector3 temp;
+	public Vector3 temp, positionBeforeRecoil;
 	private World world;
 	private int health;
 	private boolean mouseLocked, mouseLeft, clipping, isCrouching, isJumping, isFiring, isCooldownActive, isPlayerTargeting, 
@@ -73,6 +73,7 @@ public class Player extends DynamicEntity {
 		this.getMovementVector().set(new Vector3(0, 0, 0));
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
+		this.positionBeforeRecoil = new Vector3(0,0,0);
 		this.isJumping = false;
 		this.clipping = true;
 		this.isCrouching = false;
@@ -292,7 +293,8 @@ public class Player extends DynamicEntity {
 			
 			// calculates up and down rotation vector
 			// weapon recoil added here
-			if (isFiring) {
+			if (isFiring && fireDelayTimer >= 0.01f) {
+				positionBeforeRecoil.set(camera.position.cpy());
 				camera.direction.y += world.getPlayer().getWeapon().getRecoil();
 				temp.set(camera.direction).crs(camera.up).nor();
 				isFiring = false;
@@ -392,7 +394,6 @@ public class Player extends DynamicEntity {
 	
 	public void takeDamage(int damage) {
 		this.health -= damage;
-		
 		world.setFilterEffect(new com.gdx.FilterEffects.RedFade());
 	}
 	

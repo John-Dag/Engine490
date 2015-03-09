@@ -54,6 +54,15 @@ public class UIBase implements Screen {
 			}
 		});
 	}
+	
+	public void setOpacity(float alpha) {
+		if (this.getWindow() == null)
+			return;
+		this.getWindow().setColor(this.getWindow().getColor().r,
+								  this.getWindow().getColor().g,
+								  this.getWindow().getColor().b,
+								  alpha);
+	}
 
 	@Override
 	public void resize(int width, int height) {
@@ -62,8 +71,12 @@ public class UIBase implements Screen {
 
 	@Override
 	public void show() {
-		// TODO Auto-generated method stub
-		
+		if (this.getWindow() == null)
+			return;
+		if (this.getWindow().isVisible())
+			this.getWindow().setVisible(false);
+		else if (!this.getWindow().isVisible() && !uiSelected)
+			this.getWindow().setVisible(true);
 	}
 
 	@Override

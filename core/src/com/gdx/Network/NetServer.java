@@ -1,13 +1,14 @@
 package com.gdx.Network;
 
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
-import com.gdx.Network.Net.playerPacket;
+import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.engine.World;
 
 public class NetServer {
@@ -65,13 +66,13 @@ public class NetServer {
 	
 	//Handles received packets
 	private void packetReceived(Connection connection, Object object) {
-	   	if (object instanceof Net.playerPacket) {
-    		Net.playerPacket playerPacket = (Net.playerPacket)object;
+	   	if (object instanceof Net.PlayerPacket) {
+    		Net.PlayerPacket playerPacket = (Net.PlayerPacket)object;
     		updatePlayers(playerPacket, connection);
-    		server.sendToAllExceptTCP(connection.getID(), playerPacket);
+    		server.sendToAllExceptUDP(connection.getID(), playerPacket);
     	}
     	
-    	else if (object instanceof Net.projectile) {
+    	else if (object instanceof Net.ProjectilePacket) {
     		//Net.projectile packet = (Net.projectile)object;
     		//updateProjectiles(packet);
     		//server.sendToAllExceptTCP(connection.getID(), packet);
@@ -79,37 +80,32 @@ public class NetServer {
     	
     	//Handles a packet from a new player. Sends the packet to all players 
     	//except the new one.
-    	else if (object instanceof Net.playerNew) {
-    		Net.playerNew playerNew = (Net.playerNew)object;
-    		Net.playerNew packet = new Net.playerNew();
+    	else if (object instanceof Net.NewPlayer) {
+    		Net.NewPlayer playerNew = (Net.NewPlayer)object;
+    		Net.NewPlayer packet = new Net.NewPlayer();
     		packet.position = playerNew.position;
     		packet.id = connection.getID();
     		packet.name = playerNew.name;
-    		addNewPlayer(packet);
-    		addNetStat(packet);
-    		server.sendToAllExceptTCP(connection.getID(), playerNew);
-    		sendAllPlayers(connection.getID());
-    		
-    		String message = Net.serverMessage + " " + Net.serverIP + "\nActive connections: " + server.getConnections().length;
-    		sendServerMessage(message, connection);
-    		String joinedMessage = packet.name + " joined.";
-    		sendGlobalServerMessageExcept(joinedMessage, connection);
+    		NetServerEvent.NewPlayer event = new NetServerEvent.NewPlayer(packet);
+    		world.getServerEventManager().addNetEvent(event);
     	}
     	
-    	else if (object instanceof Net.newProjectile) {
-    		Net.newProjectile packet = (Net.newProjectile)object;
-    		world.addProjectile(packet);
-    		server.sendToAllExceptTCP(connection.getID(), packet);
+    	else if (object instanceof Net.NewProjectile) {
+    		Net.NewProjectile packet = (Net.NewProjectile)object;
+    		NetServerEvent.NewProjectile event = new NetServerEvent.NewProjectile(packet);
+    		world.getServerEventManager().addNetEvent(event);
     	}
         
-        else if (object instanceof Net.chatMessage) {
-        	Net.chatMessage packet = (Net.chatMessage)object;
-        	server.sendToAllExceptTCP(connection.getID(), packet);
+        else if (object instanceof Net.ChatMessagePacket) {
+        	Net.ChatMessagePacket packet = (Net.ChatMessagePacket)object;
+        	packet.id = connection.getID();
+        	NetServerEvent.ChatMessage event = new NetServerEvent.ChatMessage(packet);
+        	world.getServerEventManager().addNetEvent(event);
         }
 	   	
         else if (object instanceof Net.killPacket) {
         	Net.killPacket packet = (Net.killPacket)object;
-        	updateNetStat(connection.getID());
+        	//updateNetStat(connection.getID());
         	server.sendToAllExceptTCP(connection.getID(), packet);
         }
 	}
@@ -122,9 +118,14 @@ public class NetServer {
 		}
 	}
 	
-	public void addNetStat(Net.playerNew packet) {
+	public void addNetStat(Net.NewPlayer packet) {
 		NetStat stat = new NetStat(packet.id, packet.name);
 		netStatManager.getStats().add(stat);
+	}
+	
+	public void addNewProjectile(Net.NewProjectile packet) {
+		world.addProjectile(packet);
+		server.sendToAllExceptTCP(packet.id, packet);
 	}
 	
 	//Updates all clients with the player that disconnected
@@ -133,19 +134,19 @@ public class NetServer {
 		
 		for (int i = 0; i < world.playerInstances.size; i++) {
 			Player player = world.playerInstances.get(i);
-			NetStat stat = netStatManager.getStats().get(i);
+			//NetStat stat = netStatManager.getStats().get(i);
 			
 			if (player.getNetId() == connection.getID()) {
 				name = player.getNetName();
 				world.playerInstances.removeIndex(i);
 			}
 			
-			else if (stat.getId() == connection.getID()) {
-				netStatManager.getStats().removeIndex(i);
-			}
+//			else if (stat.getId() == connection.getID()) {
+//				netStatManager.getStats().removeIndex(i);
+//			}
 		}
 		
-		Net.playerDisconnect disconnect = new Net.playerDisconnect();
+		Net.PlayerDisconnect disconnect = new Net.PlayerDisconnect();
 		disconnect.id = connection.getID();
 		server.sendToAllTCP(disconnect);
 		String message = name + " disconnected.";
@@ -156,7 +157,7 @@ public class NetServer {
 	public void sendAllPlayers(int id) {
 		for (int i = 0; i < world.getPlayerInstances().size; i++) {
 			//System.out.println(world.getPlayerInstances().size);
-			Net.playerNew packet = new Net.playerNew();
+			Net.NewPlayer packet = new Net.NewPlayer();
 			packet.id = world.getPlayerInstances().get(i).getNetId();
 			packet.position = world.getPlayerInstances().get(i).camera.position.cpy();
 			packet.name = world.getPlayerInstances().get(i).getNetName();
@@ -166,37 +167,53 @@ public class NetServer {
 		}
 	}
 	
-	public void addNewPlayer(Net.playerNew packet) {
-		world.addPlayer(packet);
+	public void sendCollisionPacket(Net.CollisionPacket packet) {
+		server.sendToTCP(packet.playerID, packet);
 	}
 	
-	public void updatePlayers(playerPacket packet, Connection connection) {
+	public void addNewPlayer(Net.NewPlayer packet) {
+		String message = Net.serverMessage + " " + Net.serverIP + "\nActive connections: " + server.getConnections().length;
+		
+		world.addPlayer(packet);
+		server.sendToAllExceptTCP(packet.id, packet);
+		sendAllPlayers(packet.id);
+		sendServerMessage(message, packet.id);
+		String joinedMessage = packet.name + " joined.";
+		sendGlobalServerMessageExcept(joinedMessage, packet.id);
+		addNetStat(packet);
+	}
+	
+	public void updatePlayers(PlayerPacket packet, Connection connection) {
 		world.updatePlayers(packet);
 	}
 	
-	public void updateProjectiles(Net.projectile packet) {
-		server.sendToAllTCP(packet);
+	public void updateProjectiles(Net.ProjectilePacket packet) {
+		server.sendToAllUDP(packet);
 	}
 	
-	public void sendServerMessage(String message, Connection connection) {
-		Net.chatMessage packet = new Net.chatMessage();
+	public void sendChatMessage(Net.ChatMessagePacket packet) {
+		server.sendToAllExceptTCP(packet.id, packet);
+	}
+	
+	public void sendServerMessage(String message, int id) {
+		Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
 		packet.message = Net.name + ": " + message;
-		server.sendToTCP(connection.getID(), packet);
+		server.sendToTCP(id, packet);
 	}
 	
 	public void sendGlobalServerMessage(String message) {
-		Net.chatMessage packet = new Net.chatMessage();
+		Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
 		packet.message = Net.name + ": " + message;
 		server.sendToAllTCP(packet);
 	}
 	
-	public void sendGlobalServerMessageExcept(String message, Connection connection) {
-		Net.chatMessage packet = new Net.chatMessage();
+	public void sendGlobalServerMessageExcept(String message, int id) {
+		Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
 		packet.message = Net.name + ": " + message;
-		server.sendToAllExceptTCP(connection.getID(), packet);
+		server.sendToAllExceptTCP(id, packet);
 	}
 	
 	public void serverUpdate() {
-		
+		world.getServerEventManager().processEvents();
 	}
 }

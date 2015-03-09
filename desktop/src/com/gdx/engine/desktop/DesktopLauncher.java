@@ -1,5 +1,7 @@
 package com.gdx.engine.desktop;
 
+import java.lang.Thread.UncaughtExceptionHandler;
+
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.gdx.engine.Engine;
@@ -17,6 +19,16 @@ public class DesktopLauncher {
 		//config.backgroundFPS = 0;
 		config.resizable = false;
 		//config.fullscreen = true;
+		
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread thread, final Throwable ex) {
+				System.err.println("NetServer: Exception has occurred. Server shutting down.");
+				ex.printStackTrace();
+				System.exit(0);
+			}
+		});
+		
 		new LwjglApplication(new Engine(), config);
 	}
 }

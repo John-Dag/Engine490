@@ -6,6 +6,8 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
+import com.gdx.Network.NetEvent;
+import com.gdx.Network.NetEvent.CreateProjectile;
 import com.gdx.Network.NetWorld;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
@@ -14,10 +16,10 @@ import com.gdx.engine.GameScreen.State;
 import com.gdx.engine.World;
 
 public class RocketLauncher extends Weapon {
-	private final float FIRING_DELAY = 0.4f;
-	private final float PROJECTILE_SPEED = 5f;
-	private final float RECOIL = 0.1f;
-	private final int DAMAGE = 10;
+	public static final float FIRING_DELAY = 0.3f;
+	public static final float PROJECTILE_SPEED = 5f;
+	private final float RECOIL = 0.08f;
+	public static final int DAMAGE = 20;
 	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0), rotationVec;
 	
 	public RocketLauncher() {
@@ -36,24 +38,22 @@ public class RocketLauncher extends Weapon {
 	
 	@Override
 	public void fireWeapon(World world) {
-		Vector3 rotation = new Vector3(0, 0, 0);
-		Vector3 scale = new Vector3(0, 0, 0);
-		
-		//position, rotation, scale, angVelocity, velocity, angAccel, acceleration, active, index, collision
-		Projectile projectile = NetWorld.entManager.projectilePool.obtain();
-		projectile.reset();
-		projectile.setProjectileSpeed(PROJECTILE_SPEED);
-		projectile.setDamage(DAMAGE);
-		projectile.setPlayerProjectile(true);
-		projectile.setDealtDamage(false);
-		projectile.setIsActive(true);
-		Entity.entityInstances.add(projectile);
-		
 		try {
 			if (world.getClient() != null) {
-				projectile.setNetId(world.getClient().getId() + world.getNetIdCurrent());
-				world.getClient().addProjectile(projectile, world.getClient().getId() + world.getNetIdCurrent());
-				world.setNetIdCurrent(world.getNetIdCurrent() + 1);
+				NetEvent.CreatePlayerProjectile event = new NetEvent.CreatePlayerProjectile();
+				event.position.set(world.getPlayer().camera.position.cpy());
+				world.getEventManager().addNetEvent(event);
+			}
+			
+			else {
+				Projectile projectile = NetWorld.entManager.projectilePool.obtain();
+				projectile.reset();
+				projectile.setProjectileSpeed(world.getPlayer().getWeapon().getProjectileSpeed());
+				projectile.setDamage(DAMAGE);
+				projectile.setPlayerProjectile(true);
+				projectile.setDealtDamage(false);
+				projectile.setIsActive(true);
+				Entity.entityInstances.add(projectile);
 			}
 		}
 		catch (Exception e) {

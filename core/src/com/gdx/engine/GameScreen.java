@@ -96,8 +96,12 @@ public class GameScreen implements Screen {
 					grid.show();
 				}
 				
-				else if (keyCode == Keys.ALT_LEFT) {
-					chat.activateChatField();
+				else if (keyCode == Keys.ALT_RIGHT) {
+					chat.show();
+				}
+				
+				else if (keyCode == Keys.K) {
+					statForm.show();
 				}
 				
 				return false;
@@ -114,6 +118,7 @@ public class GameScreen implements Screen {
 		console = new UIConsole(stage, world);
 		console.initializeConsoleWindow();
 		console.initializeFilterEffects();
+		console.setOpacity(0.5f);
 		
 		base.setWorld(world);
 		Array<TextButton> buttons = new Array<TextButton>();
@@ -147,17 +152,21 @@ public class GameScreen implements Screen {
 		grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
 		grid.generateGrid(Align.bottom, 30, 30, 5, 5, 3);
 		grid.setWindowSize(300, 300);
+		grid.setOpacity(0.5f);
 		overlay = new UIOverlay(stage, spriteBatch, bitmapFont);
 		overlay.addCrosshair(Assets.crosshair, center);
+		overlay.setCursorImage("cursor.png", 6, 3);
 		map = new UIMap(world, stage, spriteBatch, skin, Color.BLACK, 5, 5, 3, 0);
 		map.generateMap(world.getMeshLevel().getLevelArray(), world.getMeshLevel().getMapMaterials());
-		TextureRegionDrawable barTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("barRed.png"))));
+		map.setOpacity(0.5f);
+		TextureRegionDrawable barTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("barRed2.png"))));
 		ProgressBarStyle barStyle = new ProgressBarStyle(skin.newDrawable("white", Color.RED), barTexture);
 		ProgressBar bar = new ProgressBar(world.getPlayer().MIN_HEALTH, world.getPlayer().getHealth(), 1f, false, barStyle);
 		overlay.addProgressBarWidget(bar, true, world.getPlayer().getHealth());
 		chat = new UIChat(stage, skin, "Chat");
-		chat.addChatWidget(300, 200, 0, 30, 0.9f);
+		chat.addChatWidget(300, 200, Gdx.graphics.getWidth() - chat.getWindow().getWidth(), 0, 0.9f);
 		chat.addChatWidgetListeners();
+		chat.setOpacity(0.8f);
 		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		//virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
@@ -206,7 +215,7 @@ public class GameScreen implements Screen {
 		form = new UIForm(stage, skin, "Name/IP");
 		form.generateWindow(center.x - 70, center.y + 60, 150, 150);
 		form.addTextField("Name", 0, 100, 150, 25);
-		form.addTextField("IP Address", 0, 50, 150, 25);
+		form.addTextField("192.168.1.2", 0, 50, 150, 25);
 		UIBase.uiSelected = true;
 
 		form.getFields().get(0).addListener(new ClickListener() {
@@ -287,6 +296,10 @@ public class GameScreen implements Screen {
 			world.setClient(client);
 			statForm = new UIForm(stage, skin, "Stats");
 			statForm.generateWindow(center.x, center.y, 300, 300);
+			statForm.addTextField(Net.name + "                  " + 
+			                             0 + "                  " + 0, 0f, 0f, 300, 20);
+			statForm.getWindow().setVisible(false);
+			statForm.setOpacity(0.8f);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

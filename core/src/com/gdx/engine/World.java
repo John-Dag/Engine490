@@ -23,12 +23,15 @@ import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
+import com.gdx.Network.Net.CollisionPacket;
+import com.gdx.Network.NetEventManager;
 import com.gdx.Network.NetServer;
-import com.gdx.Network.Net.newProjectile;
-import com.gdx.Network.Net.playerNew;
-import com.gdx.Network.Net.playerPacket;
-import com.gdx.Network.Net.projectile;
+import com.gdx.Network.Net.NewProjectile;
+import com.gdx.Network.Net.NewPlayer;
+import com.gdx.Network.Net.PlayerPacket;
+import com.gdx.Network.Net.ProjectilePacket;
 import com.gdx.Network.NetClient;
+import com.gdx.Network.NetServerEventManager;
 import com.gdx.Weapons.RocketLauncher;
 
 public class World implements Disposable {
@@ -51,6 +54,8 @@ public class World implements Disposable {
     private NetServer server;
     private int NetIdCurrent;
 	public static EntityManager entManager;
+	private NetEventManager eventManager;
+	private NetServerEventManager serverEventManager;
 	public Vector3 startVector = new Vector3(2f, 1.5f, 2f);
     
 	public World() {
@@ -70,7 +75,7 @@ public class World implements Disposable {
 	public void loadOfflineWorld(TiledMap map, boolean skySphere) {
 		try {
 			Assets.loadModels();
-			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+			player = new Player(this, 100, null, 2, true, true, startVector, new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 			particleManager = new ParticleManager(this);
 			player.initAbilities();
@@ -253,7 +258,7 @@ public class World implements Disposable {
 		for (Enemy enemy : enemyInstances) {
 			if (projectile.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
 				//projectile.initializeBloodEffect();
-				if (!projectile.isDealtDamage())
+				if (!projectile.hasDealtDamage())
 					enemy.takeDamage(player.getWeapon().getDamage());
 					projectile.initializeCollisionExplosionEffect();
 			}
@@ -462,22 +467,22 @@ public class World implements Disposable {
 		this.out = out;
 	}
 
-	public void updatePlayers(playerPacket packet) {
+	public void updatePlayers(PlayerPacket packet) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void updateProjectiles(projectile packet) {
+	public void updateProjectiles(ProjectilePacket packet) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void addProjectile(newProjectile packet) {
+	public void addProjectile(NewProjectile packet) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void addPlayer(playerNew playerPacket) {
+	public void addPlayer(NewPlayer playerPacket) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -499,5 +504,35 @@ public class World implements Disposable {
 
 	public void setNetIdCurrent(int netIdCurrent) {
 		NetIdCurrent = netIdCurrent;
+	}
+
+
+	public NetEventManager getEventManager() {
+		return eventManager;
+	}
+
+
+	public void setEventManager(NetEventManager eventManager) {
+		this.eventManager = eventManager;
+	}
+
+
+	public NetServerEventManager getServerEventManager() {
+		return serverEventManager;
+	}
+
+
+	public void setServerEventManager(NetServerEventManager serverEventManager) {
+		this.serverEventManager = serverEventManager;
+	}
+
+	public void removeProjectile(CollisionPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void checkClientProjectileCollisions(Projectile projectile) {
+		// TODO Auto-generated method stub
+		
 	}
 }
