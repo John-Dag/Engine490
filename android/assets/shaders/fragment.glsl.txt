@@ -10,7 +10,18 @@ precision mediump float;
 #endif
 
 varying vec4 pos;
+varying vec4 wpos;
+uniform mat4 u_viewWorldTrans;
+uniform mat4 u_projViewTrans;
+uniform mat4 u_projViewWorldTrans;
+uniform mat4 u_viewTrans;
+uniform mat4 u_worldTrans;
+uniform float time;
+uniform vec2 resolution;
 
+#ifdef ColorMultiplier
+uniform vec3 u_colorMultiplier;
+#endif
 
 #ifdef numPointLights
 #if numPointLights > 0
@@ -83,6 +94,11 @@ uniform sampler2D u_shadowTexture;
 uniform float u_shadowPCFOffset;
 varying vec3 v_shadowMapUv;
 #define separateAmbientFlag
+
+
+
+
+
 
 float getShadowness(vec2 offset)
 {
@@ -202,7 +218,112 @@ void main() {
 		#endif
 	#endif //lightingFlag
 
+	//WizNerd shader start
+	#ifdef ColorMultiplier
+		//gl_FragColor =vec4(gl_FragColor.r * u_colorMultiplier.r, gl_FragColor.g * u_colorMultiplier.g, gl_FragColor.b * u_colorMultiplier.b, 1.0);
+		//gl_FragColor =vec4(gl_FragColor.r +(1-gl_FragColor.r) * u_colorMultiplier.r, gl_FragColor.g +(1-gl_FragColor.g) *u_colorMultiplier.g, gl_FragColor.b +(1-gl_FragColor.b) *u_colorMultiplier.b, 1.0);
+		//gl_FragColor.rgb = mix(gl_FragColor.rgb, u_colorMultiplier.rgb, 1.0f);
+		gl_FragColor=mix(gl_FragColor,vec4(u_colorMultiplier,1.0),.2);
+		
+	#endif
+	
+	#ifdef FireBall
+		vec4 ppos=u_projViewTrans*u_worldTrans* wpos;//u_viewTrans*u_worldTrans* wpos;//u_projViewTrans*u_worldTrans* wpos;
+		//vec4 v_color= vec4(1,1,1, 1.0);
+ 		//vec2 p =vec2(gl_FragCoord.x/(2*resolution.x)-.5,gl_FragCoord.y/(2*resolution.y)-.5);//-vec2(gl_FragCoord.x/(2*resolution.x),gl_FragCoord.y/(2*resolution.y));//ppos.xy;// ppos.xy-gl_FragCoord.xy+resolution.xy;
+		//vec2 p =vec2(gl_FragCoord.x-.2,gl_FragCoord.y-.2);
+		vec2 p=ppos.xy;//vec2(0.1-ppos.x,.1-ppos.y);//ppos.xy;
+		
+		float Color = 3.0 - (3.0*length(2.0*p));
 
+		vec3 coord = vec3(atan(p.x,p.y)/6.2832+0.5, length(p)*0.4, 0.5);
+
+		for(int i = 2; i <= 7; i++)
+		{
+		float power = pow(2.0, float(i));
+
+		vec3 uv = coord + vec3(0.,time*5.0, time*5.0);
+		float res = power*16.0;
+
+		vec3 s = vec3(1e0, 1e2, 1e4);
+		  uv *= res;
+		vec3 uv0 = floor(mod(uv, res))*s;
+		vec3 uv1 = floor(mod(uv+vec3(1.), res))*s;
+
+		vec3 f = fract(uv); f = f*f*(3.0-2.0*f);
+
+		vec4 v = vec4(uv0.x+uv0.y+uv0.z, uv1.x+uv0.y+uv0.z,
+	    uv0.x+uv1.y+uv0.z, uv1.x+uv1.y+uv0.z);
+
+		vec4 r = fract(sin(v*1e-3)*1e5);
+		float r0 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+
+		r = fract(sin((v + uv1.z - uv0.z)*1e-3)*1e5);
+		float r1 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+
+		float snoise = mix(r0, r1, f.z)*2.-1.0;
+
+    	Color += (1.5 / power) * snoise;
+		}
+
+		gl_FragColor = vec4( Color, pow(max(Color,0.),2.)*0.4, pow(max(Color,0.),3.)*0.15 , 1.0);
+		
+		//gl_FragColor=vec4(vec2(gl_FragCoord.x/(resolution.x*2),gl_FragCoord.y/(resolution.y*2)),0,1.0);
+		
+	#endif
+	
+	
+	#ifdef Fract
+		vec4 ppos=u_projViewTrans*u_worldTrans* wpos;//u_viewTrans*u_worldTrans* wpos;//u_projViewTrans*u_worldTrans* wpos;
+		//vec4 v_color= vec4(1,1,1, 1.0);
+ 		//vec2 p =vec2(gl_FragCoord.x/(2*resolution.x)-.5,gl_FragCoord.y/(2*resolution.y)-.5);//-vec2(gl_FragCoord.x/(2*resolution.x),gl_FragCoord.y/(2*resolution.y));//ppos.xy;// ppos.xy-gl_FragCoord.xy+resolution.xy;
+		//vec2 p =vec2(gl_FragCoord.x-.2,gl_FragCoord.y-.2);
+		vec2 p=gl_FragColor.xy;//vec2(0.1-ppos.x,.1-ppos.y);//ppos.xy;
+		//vec3 c = vec3((gl_FragColor.r+gl_FragColor.g+gl_FragColor.b)/3.0);
+		//vec2 p=c.xy;
+		//float Color =clamp(p.xy,.0,.1);
+		float Color = 3.0 - (3.0*length(2.0*p));
+		vec3 coord = vec3(atan(p.x,p.y)/6.2832+0.5, length(p)*0.4, 0.5);
+
+		for(int i = 2; i <= 7; i++)
+		{
+		float power = pow(2.0, float(i));
+
+		vec3 uv = coord + vec3(0.,time*2, time*2);
+		float res = power*16.0;
+
+		vec3 s = vec3(1e0, 1e2, 1e4);
+		  uv *= res;
+		vec3 uv0 = floor(mod(uv, res))*s;
+		vec3 uv1 = floor(mod(uv+vec3(1.), res))*s;
+
+		vec3 f = fract(uv); f = f*f*(3.0-2.0*f);
+
+		vec4 v = vec4(uv0.x+uv0.y+uv0.z, uv1.x+uv0.y+uv0.z,
+	    uv0.x+uv1.y+uv0.z, uv1.x+uv1.y+uv0.z);
+
+		vec4 r = fract(sin(v*1e-3)*1e5);
+		float r0 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+
+		r = fract(sin((v + uv1.z - uv0.z)*1e-3)*1e5);
+		float r1 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
+
+		float snoise = mix(r0, r1, f.z)*2.-1.0;
+
+    	Color += (1.5 / power) * snoise;
+    	
+		}
+
+		gl_FragColor = vec4( Color, pow(max(Color,0.),2.)*0.4, pow(max(Color,0.),3.)*0.15 , 1.0);
+		
+		
+	#endif
+	
+	#ifdef Rainbow
+		gl_FragColor=gl_FragColor+ vec4(gl_FragColor.x+sin(time*2), gl_FragColor.y+cos(time*2),gl_FragColor.z+cos(time*2+.5),1);
+		//gl_FragColor=vec4(1,0,0,1);
+	#endif
+	//WizNerd shader end
 
 	#ifdef fogFlag
 		gl_FragColor.rgb = mix(gl_FragColor.rgb, u_fogColor.rgb, v_fog);

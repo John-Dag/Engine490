@@ -14,6 +14,7 @@ import com.gdx.Network.Net.NewProjectile;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.Network.NetEvent.ProjectileCollision;
 import com.gdx.Weapons.RocketLauncher;
+import com.gdx.Shaders.ColorMultiplierEntityShader;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
 import com.gdx.engine.EntityManager;
@@ -102,6 +103,11 @@ public class NetWorld extends World {
 			player1.setNetId(playerPacket.id);
 			player1.setNetName(playerPacket.name);
 			player1.getAnimation().setAnimation("Walking", -1);
+			ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
+			es.multiplier.y=(float)Math.random();
+			es.multiplier.x=(float)Math.random();
+			es.multiplier.z=(float)Math.random();
+			player1.setShader(es);
 			playerInstances.add(player1);
 		}
 		catch (Exception e) {

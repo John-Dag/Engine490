@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
+import com.gdx.Shaders.EntityRainbow;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
@@ -18,6 +19,7 @@ import com.gdx.engine.World;
 public class PowerUpSpawn extends StaticEntity {
 	PowerUp powerRef = new PowerUp();
 	Color color = new Color();
+	EntityRainbow es=new EntityRainbow();
 	
 	public PowerUpSpawn() {
 		super();
@@ -32,6 +34,7 @@ public class PowerUpSpawn extends StaticEntity {
 		this.setPointLight(pointLight);
 		this.setEffect(World.particleManager.getMistPool().obtain());
 		powerRef = (PowerUp) powerUp.spawn();
+		powerRef.setShader(es);
 		Entity.entityInstances.add(powerRef);
 		
 		Timer.schedule(new Task() {
