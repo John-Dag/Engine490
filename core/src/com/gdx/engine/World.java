@@ -535,4 +535,9 @@ public class World implements Disposable {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public void createExplosionEffect(CollisionPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
 }

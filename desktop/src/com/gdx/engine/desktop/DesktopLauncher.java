@@ -23,7 +23,7 @@ public class DesktopLauncher {
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread thread, final Throwable ex) {
-				System.err.println("NetServer: Exception has occurred. Server shutting down.");
+				System.err.println("Kryonet: Exception has occurred. Shutting down.");
 				ex.printStackTrace();
 				System.exit(0);
 			}

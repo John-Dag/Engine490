@@ -55,6 +55,7 @@ public class NetClient {
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
 		packet.name = Net.name;
+		world.getPlayer().setNetId(client.getID());
 		client.sendTCP(packet);
 	}
 	
@@ -96,7 +97,8 @@ public class NetClient {
         
         else if (object instanceof Net.NewPlayer) {
        	   Net.NewPlayer packet = (Net.NewPlayer)object;
-       	   screen.getStatForm().addTextField(packet.name + "    " + 0 + "    " + 0, 
+       	   screen.getStatForm().addTextField(packet.name + "                  " + 
+       			   									   0 + "                  " + 0, 
        			                             0f, 20f * screen.getStatForm().getFields().size, 300, 20);
        	   world.getEventManager().addNetEvent(new NetEvent.CreatePlayer(packet));
         }

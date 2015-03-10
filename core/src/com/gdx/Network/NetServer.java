@@ -88,6 +88,8 @@ public class NetServer {
     		packet.name = playerNew.name;
     		NetServerEvent.NewPlayer event = new NetServerEvent.NewPlayer(packet);
     		world.getServerEventManager().addNetEvent(event);
+    		NetStat stat = new NetStat(packet.id, packet.name);
+    		netStatManager.getStats().add(stat);
     	}
     	
     	else if (object instanceof Net.NewProjectile) {
@@ -168,7 +170,7 @@ public class NetServer {
 	}
 	
 	public void sendCollisionPacket(Net.CollisionPacket packet) {
-		server.sendToTCP(packet.playerID, packet);
+		server.sendToAllTCP(packet);
 	}
 	
 	public void addNewPlayer(Net.NewPlayer packet) {

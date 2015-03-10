@@ -300,6 +300,7 @@ public class GameScreen implements Screen {
 			                             0 + "                  " + 0, 0f, 0f, 300, 20);
 			statForm.getWindow().setVisible(false);
 			statForm.setOpacity(0.8f);
+			statForm.getFields().get(0).setDisabled(true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

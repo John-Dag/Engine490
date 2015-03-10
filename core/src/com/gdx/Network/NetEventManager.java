@@ -1,5 +1,7 @@
 package com.gdx.Network;
 
+import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Network.NetEvent.ChatMessage;
@@ -26,7 +28,7 @@ public class NetEventManager {
 				if (event instanceof CreateProjectile) {
 					Projectile projectile = NetWorld.entManager.projectilePool.obtain();
 					projectile.reset();
-					projectile.setProjectileSpeed(5.0f);
+					projectile.setProjectileSpeed(20f);
 					projectile.setDamage(10);
 					projectile.setPosition(((CreateProjectile) event).packet.position);
 					projectile.setVelocity(((CreateProjectile) event).packet.cameraPos);
@@ -51,7 +53,10 @@ public class NetEventManager {
 				}
 				
 				else if (event instanceof ProjectileCollision) {
-					world.getPlayer().takeDamage(((ProjectileCollision) event).packet.damage);
+					world.createExplosionEffect(((ProjectileCollision) event).packet);
+					System.out.println("Packet: " + ((ProjectileCollision) event).packet.playerID + " " + world.getPlayer().getNetId());
+					if (((ProjectileCollision) event).packet.playerID == world.getPlayer().getNetId())
+						world.getPlayer().takeDamage(((ProjectileCollision) event).packet.damage);
 				}
 				
 				else if (event instanceof CreatePlayer) {

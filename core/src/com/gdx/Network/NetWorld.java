@@ -2,13 +2,18 @@ package com.gdx.Network;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Network.Net.NewProjectile;
 import com.gdx.Network.Net.PlayerPacket;
+import com.gdx.Network.NetEvent.ProjectileCollision;
+import com.gdx.Weapons.RocketLauncher;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
 import com.gdx.engine.EntityManager;
@@ -61,12 +66,12 @@ public class NetWorld extends World {
 	}
 
 	@Override
-	public void addProjectile(NewProjectile packet) {
+	public void addProjectile(Net.NewProjectile packet) {
 		Vector3 rotation = new Vector3(0, 0, 0);
 		Vector3 scale = new Vector3(0, 0, 0);
 		Projectile projectile = NetWorld.entManager.projectilePool.obtain();
 		projectile.reset();
-		projectile.setProjectileSpeed(5.0f);
+		projectile.setProjectileSpeed(RocketLauncher.PROJECTILE_SPEED);
 		projectile.setDamage(10);
 		projectile.setPosition(packet.position);
 		projectile.setVelocity(packet.cameraPos);
@@ -110,14 +115,29 @@ public class NetWorld extends World {
 		for (Player player : playerInstances) {
 			if (projectile.getBoundingBox().intersects(player.getTransformedBoundingBox()) && projectile.getOriginID() != player.getNetId()
 				&& !projectile.hasDealtDamage()) {
-				Net.CollisionPacket packet = new Net.CollisionPacket();
-				packet.projectileID = projectile.getNetId();
-				packet.playerID = player.getNetId();
-				packet.position = projectile.getPosition();
-				packet.damage = projectile.getDamage();
-				NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
-				this.getServerEventManager().addNetEvent(event);
-				projectile.setDealtDamage(true);
+				createCollisionEvent(projectile, player);
+			}
+		}
+	}
+	
+	public void createCollisionEvent(Projectile projectile, Player player) {
+		Net.CollisionPacket packet = new Net.CollisionPacket();
+		packet.projectileID = projectile.getNetId();
+		packet.playerID = player.getNetId();
+		packet.position = projectile.getPosition();
+		packet.damage = projectile.getDamage();
+		NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
+		this.getServerEventManager().addNetEvent(event);
+		projectile.setDealtDamage(true);
+	}
+	
+	public void createExplosionEffect(Net.CollisionPacket packet) {
+		for (int i = 0; i < Entity.entityInstances.size; i++) {
+			Entity entity = Entity.entityInstances.get(i);
+			if (entity instanceof Projectile) {
+				Projectile projectile = (Projectile)entity;
+				if (projectile.getNetId() == packet.projectileID)
+					projectile.initializeCollisionExplosionEffect();
 			}
 		}
 	}
