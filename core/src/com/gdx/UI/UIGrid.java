@@ -20,6 +20,7 @@ public class UIGrid extends UIBase {
 	private Table table;
 	private Window window;
 	private Array<Image> images;
+	private Array<Slot> slots;
 	private Texture slotTexture;
 	private TestInventory testInv = new TestInventory();
 	
@@ -33,6 +34,7 @@ public class UIGrid extends UIBase {
 		window.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		this.slotTexture = slotTexture;
 		images = testInv.getImages();
+		slots = testInv.getSlots();
 	}
 	
 	public UIGrid(Stage stage, Skin skin, Color color, String name, Texture slotTexture) {
@@ -46,6 +48,7 @@ public class UIGrid extends UIBase {
 		window.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		this.slotTexture = slotTexture;
 		images = testInv.getImages();
+		slots = testInv.getSlots();
 	}
 	
 	/***
@@ -65,11 +68,16 @@ public class UIGrid extends UIBase {
 		
 		//Add click listeners to each slot
 		for (int a = 0; a < numSlotsX * numSlotsY; a++) {
+			final int A = a;
 			images.add(new Image(slotTexture));
 			images.get(a).addListener(new ClickListener() {
 				@Override
 				public void clicked(InputEvent event, float x, float y) {
-					System.out.println(this);
+					System.out.println(slots.get(A).getItem());
+					slots.get(A).getItem().effect();
+					//slots.get(A).remove(1);
+					//System.out.println(slots);
+					//testInv.getInventory().updateImage(slots.get(A));
 				}
 			});
 		}

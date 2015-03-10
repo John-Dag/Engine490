@@ -8,6 +8,7 @@ public class Inventory {
 	private Array<Slot> slots;
 	private Array<Image> images;
 	private int size = 25;
+	private ItemList list;
 
     public Inventory() {
         slots = new Array<Slot>(size);
@@ -17,6 +18,7 @@ public class Inventory {
             images.add(new Image(Assets.gridslot));
            
         }
+        
     }
     
     public boolean store(Item item, int amount) {
@@ -53,8 +55,10 @@ public class Inventory {
    public void updateImage(Slot slot) {
         for (int i = 0; i < size; i++) {
         	if (slots.get(i).equals(slot)) {
-        		images.set(i, slot.getItem().getImage());
-        		System.out.println("TEST");
+        		if (slots.get(i) != null) 
+        			images.set(i, slot.getItem().getImage());
+        		else
+        			images.set(i, new Image(Assets.gridslot));
         	}
         }
     }

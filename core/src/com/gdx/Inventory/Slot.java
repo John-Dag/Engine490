@@ -1,5 +1,7 @@
 package com.gdx.Inventory;
 
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+
 public class Slot {
 	private Item item;
 	private int amount;

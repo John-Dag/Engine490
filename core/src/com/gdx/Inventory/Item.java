@@ -10,6 +10,10 @@ public class Item {
 		this.image = image;
 		this.name = name;
 	}
+	
+	//Override this to give items effects.
+	public void effect(){
+	}
 
 	public Image getImage() {
 		return image;
