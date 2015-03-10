@@ -9,6 +9,7 @@ import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net.PlayerPacket;
+import com.gdx.Network.Net.StatPacket;
 import com.gdx.engine.World;
 
 public class NetServer {
@@ -105,10 +106,15 @@ public class NetServer {
         	world.getServerEventManager().addNetEvent(event);
         }
 	   	
-        else if (object instanceof Net.killPacket) {
-        	Net.killPacket packet = (Net.killPacket)object;
-        	//updateNetStat(connection.getID());
-        	server.sendToAllExceptTCP(connection.getID(), packet);
+        else if (object instanceof Net.KillPacket) {
+        	Net.KillPacket packet = (Net.KillPacket)object;
+        	updateNetStat(connection.getID());
+        	Net.StatPacket statPacket = new Net.StatPacket();
+        	statPacket.kills = netStatManager.getStats().get(connection.getID()).getKills();
+        	statPacket.deaths = netStatManager.getStats().get(connection.getID()).getDeaths();
+        	statPacket.playerID = connection.getID();
+        	statPacket.name = packet.name;
+        	server.sendToAllTCP(statPacket);
         }
 	}
 	

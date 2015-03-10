@@ -29,9 +29,10 @@ public class Net {
 	    kryo.register(ChatMessagePacket.class);
 	    kryo.register(String.class);
 	    kryo.register(PlayerDisconnect.class);
-	    kryo.register(killPacket.class);
+	    kryo.register(KillPacket.class);
 	    kryo.register(deathPacket.class);
 	    kryo.register(CollisionPacket.class);
+	    kryo.register(StatPacket.class);
 	}
 	
 	//Packets
@@ -73,8 +74,13 @@ public class Net {
 		public Vector3 position;
 	}
 	
-	public static class killPacket {
-
+	public static class StatPacket {
+		public int playerID, kills, deaths;
+		public String name;
+	}
+	
+	public static class KillPacket {
+		public String name;
 	}
 	
 	public static class deathPacket {

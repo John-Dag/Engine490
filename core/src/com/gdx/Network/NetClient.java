@@ -97,9 +97,7 @@ public class NetClient {
         
         else if (object instanceof Net.NewPlayer) {
        	   Net.NewPlayer packet = (Net.NewPlayer)object;
-       	   screen.getStatForm().addTextField(packet.name + "                  " + 
-       			   									   0 + "                  " + 0, 
-       			                             0f, 20f * screen.getStatForm().getFields().size, 300, 20);
+       	   createPlayerStatField(packet);
        	   world.getEventManager().addNetEvent(new NetEvent.CreatePlayer(packet));
         }
         
@@ -127,10 +125,34 @@ public class NetClient {
         	Net.CollisionPacket packet = (Net.CollisionPacket)object;
         	world.getEventManager().addNetEvent(new NetEvent.ProjectileCollision(packet));
         }
+        
+        else if (object instanceof Net.StatPacket) {
+        	Net.StatPacket packet = (Net.StatPacket)object;
+        	updateNetStats(packet);
+        }
 	}
 	
-	public void sendKillUpdate() {
-		Net.killPacket packet = new Net.killPacket();
+	public void createPlayerStatField(Net.NewPlayer packet) {
+		NetStatField field = new NetStatField("", GameScreen.skin);
+		field.setText(packet.name + "                  " + 
+	              		     0 + "                  " + 0);
+		field.setPlayerID(packet.id);
+		screen.getStatForm().addNetStatField(field, 0, 20f * screen.getStatForm().getFields().size, 300, 20);
+	}
+	
+	public void updateNetStats(Net.StatPacket packet) {
+		for (int i = 0; i < screen.getStatForm().getFields().size; i++) {
+			NetStatField form = (NetStatField) screen.getStatForm().getFields().get(i);
+			if (form.getPlayerID() == packet.playerID) {
+				screen.getStatForm().getFields().get(i).setText(packet.name + "         " + 
+																			  packet.kills + "                " + packet.deaths);
+			}
+		}
+	}
+	
+	public void sendKillUpdate(int playerID) {
+		Net.KillPacket packet = new Net.KillPacket();
+		packet.name = Net.name;
 		client.sendTCP(packet);
 	}
 	

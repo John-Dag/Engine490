@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Network.NetStatField;
 
 public class UIForm extends UIBase {
 	private Skin skin;
@@ -44,6 +45,14 @@ public class UIForm extends UIBase {
 		catch (Exception e) {
 			System.err.println(e);
 		}
+	}
+	
+	public void addNetStatField(NetStatField field, float posX, float posY, int width, int height) {
+		field.setPosition(posX, posY);
+		field.setWidth(width);
+		field.setHeight(height);
+		fields.add(field);
+		getWindow().addActor(field);
 	}
 	
 	public Array<TextField> getFields() {

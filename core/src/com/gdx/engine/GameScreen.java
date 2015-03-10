@@ -30,6 +30,7 @@ import com.badlogic.gdx.utils.Array;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetClient;
 import com.gdx.Network.NetServer;
+import com.gdx.Network.NetStatField;
 import com.gdx.Network.NetWorld;
 import com.gdx.UI.UIChat;
 import com.gdx.UI.UIConsole;
@@ -51,7 +52,7 @@ public class GameScreen implements Screen {
 	private SpriteBatch spriteBatch;
 	private BitmapFont bitmapFont;
 	private Stage stage;
-	private Skin skin;
+	public static Skin skin;
 	private UIConsole console;
 	private UIBase base;
 	private UIMenu menu;
@@ -100,7 +101,7 @@ public class GameScreen implements Screen {
 					chat.show();
 				}
 				
-				else if (keyCode == Keys.K) {
+				else if (keyCode == Keys.K && !UIBase.uiSelected) {
 					statForm.show();
 				}
 				
@@ -296,8 +297,11 @@ public class GameScreen implements Screen {
 			world.setClient(client);
 			statForm = new UIForm(stage, skin, "Stats");
 			statForm.generateWindow(center.x, center.y, 300, 300);
-			statForm.addTextField(Net.name + "                  " + 
-			                             0 + "                  " + 0, 0f, 0f, 300, 20);
+			NetStatField field = new NetStatField("", skin);
+			field.setText(Net.name + "                  " + 
+			              0 + "                  " + 0);
+			field.setPlayerID(client.getId());
+			statForm.addNetStatField(field, 0, 0, 300, 20);
 			statForm.getWindow().setVisible(false);
 			statForm.setOpacity(0.8f);
 			statForm.getFields().get(0).setDisabled(true);
