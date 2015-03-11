@@ -58,7 +58,7 @@ public class NetEventManager {
 					if (((ProjectileCollision) event).packet.playerID == world.getPlayer().getNetId()) {
 						world.getPlayer().takeDamage(((ProjectileCollision) event).packet.damage);
 						if (world.getPlayer().getHealth() <= 0)
-							world.getClient().sendKillUpdate(((ProjectileCollision) event).packet.playerID);
+							world.getClient().sendKillUpdate(((ProjectileCollision) event).packet.playerOriginID);
 					}
 				}
 				

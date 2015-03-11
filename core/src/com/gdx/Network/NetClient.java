@@ -134,25 +134,34 @@ public class NetClient {
 	
 	public void createPlayerStatField(Net.NewPlayer packet) {
 		NetStatField field = new NetStatField("", GameScreen.skin);
-		field.setText(packet.name + "                  " + 
-	              		     0 + "                  " + 0);
+		field.setPlayerName(packet.name);
+		field.setStats(field.getPlayerName() + "                  " + 0 + "                  " + 0);
+		field.setText(field.getStats());
 		field.setPlayerID(packet.id);
 		screen.getStatForm().addNetStatField(field, 0, 20f * screen.getStatForm().getFields().size, 300, 20);
 	}
 	
 	public void updateNetStats(Net.StatPacket packet) {
 		for (int i = 0; i < screen.getStatForm().getFields().size; i++) {
-			NetStatField form = (NetStatField) screen.getStatForm().getFields().get(i);
-			if (form.getPlayerID() == packet.playerID) {
-				screen.getStatForm().getFields().get(i).setText(packet.name + "         " + 
-																			  packet.kills + "                " + packet.deaths);
+			NetStatField field = (NetStatField) screen.getStatForm().getFields().get(i);
+
+			if (field.getPlayerID() == packet.playerID) {
+				field.setStats(field.getPlayerName() + "                  " + packet.kills + "                  " + packet.deaths);
+				System.out.println(field.getText());
+				field.setText(field.getStats());
 			}
+			
+//			if (form.getPlayerID() == packet.deathID) {
+//				screen.getStatForm().getFields().get(i).setText(form.getName() + "                  " + 
+//																packet.kills + "                  " + packet.deaths);
+//			}
 		}
 	}
 	
 	public void sendKillUpdate(int playerID) {
 		Net.KillPacket packet = new Net.KillPacket();
 		packet.name = Net.name;
+		packet.id = playerID;
 		client.sendTCP(packet);
 	}
 	

@@ -299,7 +299,7 @@ public class GameScreen implements Screen {
 			statForm.generateWindow(center.x, center.y, 300, 300);
 			NetStatField field = new NetStatField("", skin);
 			field.setText(Net.name + "                  " + 
-			              0 + "                  " + 0);
+			                     0 + "                  " + 0);
 			field.setPlayerID(client.getId());
 			statForm.addNetStatField(field, 0, 0, 300, 20);
 			statForm.getWindow().setVisible(false);

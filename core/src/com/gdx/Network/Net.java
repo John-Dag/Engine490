@@ -70,17 +70,18 @@ public class Net {
 	}
 	
 	public static class CollisionPacket {
-		public int projectileID, playerID, damage;
+		public int projectileID, playerID, playerOriginID, damage;
 		public Vector3 position;
 	}
 	
 	public static class StatPacket {
-		public int playerID, kills, deaths;
+		public int playerID, deathID, kills, deaths;
 		public String name;
 	}
 	
 	public static class KillPacket {
 		public String name;
+		public int id;
 	}
 	
 	public static class deathPacket {

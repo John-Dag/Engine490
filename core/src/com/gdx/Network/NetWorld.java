@@ -124,6 +124,7 @@ public class NetWorld extends World {
 		Net.CollisionPacket packet = new Net.CollisionPacket();
 		packet.projectileID = projectile.getNetId();
 		packet.playerID = player.getNetId();
+		packet.playerOriginID = projectile.getOriginID();
 		packet.position = projectile.getPosition();
 		packet.damage = projectile.getDamage();
 		NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
