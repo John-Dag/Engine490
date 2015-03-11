@@ -108,24 +108,52 @@ public class NetServer {
 	   	
         else if (object instanceof Net.KillPacket) {
         	Net.KillPacket packet = (Net.KillPacket)object;
-        	updateNetStat(packet.id, connection.getID());
-        	Net.StatPacket statPacket = new Net.StatPacket();
-        	statPacket.kills = netStatManager.getStats().get(packet.id).getKills();
-        	statPacket.deaths = netStatManager.getStats().get(packet.id).getDeaths();
-        	statPacket.playerID = packet.id;
-        	statPacket.deathID = connection.getID();
-        	statPacket.name = packet.name;
-        	server.sendToAllTCP(statPacket);
+        	updateKillNetStat(packet.id);
+    		Net.StatPacket packetB = new Net.StatPacket();
+    		packetB.kills = netStatManager.getStats().get(packet.id).getKills();
+    		packetB.deaths = netStatManager.getStats().get(packet.id).getDeaths();
+    		packetB.name = packet.name;
+    		packetB.playerID = packet.id;
+    		server.sendToAllTCP(packetB);
+        	//sendNetStatUpdate(packet.id);
+         	//server.sendToAllTCP(packet);
+        }
+	   	
+        else if (object instanceof Net.DeathPacket) {
+        	Net.DeathPacket packet = (Net.DeathPacket)object;
+        	updateDeathNetStat(packet.id);
+    		Net.StatPacket packetB = new Net.StatPacket();
+    		packetB.kills = netStatManager.getStats().get(packet.id).getKills();
+    		packetB.deaths = netStatManager.getStats().get(packet.id).getDeaths();
+    		packetB.name = packet.name;
+    		packetB.playerID = packet.id;
+    		server.sendToAllTCP(packetB);
+        	//sendNetStatUpdate(packet.id);
+        	//server.sendToAllTCP(packet);
         }
 	}
 	
-	public void updateNetStat(int killID, int deathID) {
+//	public void sendNetStatUpdate(int id) {
+//		Net.StatPacket packet = new Net.StatPacket();
+//		packet.kills = netStatManager.getStats().get(id).getKills();
+//		packet.deaths = netStatManager.getStats().get(id).getDeaths();
+//		packet.killName = netStatManager.getStats().get(id).getName();
+//		packet.deathName = netStatManager.getStats().get(id).getName();
+//		packet.playerID = id;
+//		server.sendToAllTCP(packet);
+//	}
+	
+	public void updateKillNetStat(int id) {
 		for (int i = 0; i < netStatManager.getStats().size; i++) {
-			if (killID == netStatManager.getStats().get(i).getId()) {
+			if (id == netStatManager.getStats().get(i).getId()) {
 				netStatManager.getStats().get(i).setKills(netStatManager.getStats().get(i).getKills() + 1);
 			}
-			
-			if (deathID == netStatManager.getStats().get(i).getId()) {
+		}
+	}
+	
+	public void updateDeathNetStat(int id) {
+		for (int i = 0; i < netStatManager.getStats().size; i++) {
+			if (id == netStatManager.getStats().get(i).getId()) {
 				netStatManager.getStats().get(i).setDeaths(netStatManager.getStats().get(i).getDeaths() + 1);
 			}
 		}

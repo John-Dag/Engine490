@@ -30,7 +30,7 @@ public class Net {
 	    kryo.register(String.class);
 	    kryo.register(PlayerDisconnect.class);
 	    kryo.register(KillPacket.class);
-	    kryo.register(deathPacket.class);
+	    kryo.register(DeathPacket.class);
 	    kryo.register(CollisionPacket.class);
 	    kryo.register(StatPacket.class);
 	}
@@ -75,7 +75,7 @@ public class Net {
 	}
 	
 	public static class StatPacket {
-		public int playerID, deathID, kills, deaths;
+		public int playerID, playerDeathID, kills, deaths;
 		public String name;
 	}
 	
@@ -84,7 +84,8 @@ public class Net {
 		public int id;
 	}
 	
-	public static class deathPacket {
-
+	public static class DeathPacket {
+		public String name;
+		public int id;
 	}
 }

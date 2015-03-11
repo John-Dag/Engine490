@@ -146,15 +146,16 @@ public class NetClient {
 			NetStatField field = (NetStatField) screen.getStatForm().getFields().get(i);
 
 			if (field.getPlayerID() == packet.playerID) {
+				field.setPlayerName(packet.name);
 				field.setStats(field.getPlayerName() + "                  " + packet.kills + "                  " + packet.deaths);
-				System.out.println(field.getText());
 				field.setText(field.getStats());
 			}
 			
-//			if (form.getPlayerID() == packet.deathID) {
-//				screen.getStatForm().getFields().get(i).setText(form.getName() + "                  " + 
-//																packet.kills + "                  " + packet.deaths);
-//			}
+			else if (field.getPlayerID() == packet.playerDeathID) {
+				field.setPlayerName(packet.name);
+				screen.getStatForm().getFields().get(i).setText(field.getPlayerName() + "                  " + 
+																packet.kills + "                  " + packet.deaths);
+			}
 		}
 	}
 	
@@ -165,8 +166,10 @@ public class NetClient {
 		client.sendTCP(packet);
 	}
 	
-	public void sendDeathUpdate() {
-		Net.deathPacket packet = new Net.deathPacket();
+	public void sendDeathUpdate(int playerID) {
+		Net.DeathPacket packet = new Net.DeathPacket();
+		packet.name = Net.name;
+		packet.id = playerID;
 		client.sendTCP(packet);
 	}
 	
