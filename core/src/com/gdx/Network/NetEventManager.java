@@ -10,6 +10,7 @@ import com.gdx.Network.NetEvent.CreatePlayerProjectile;
 import com.gdx.Network.NetEvent.CreateProjectile;
 import com.gdx.Network.NetEvent.ProjectileCollision;
 import com.gdx.Network.NetEvent.RemovePlayer;
+import com.gdx.Weapons.RocketLauncher;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
@@ -29,7 +30,7 @@ public class NetEventManager {
 					Projectile projectile = NetWorld.entManager.projectilePool.obtain();
 					projectile.reset();
 					projectile.setProjectileSpeed(20f);
-					projectile.setDamage(10);
+					projectile.setDamage(RocketLauncher.DAMAGE);
 					projectile.setPosition(((CreateProjectile) event).packet.position);
 					projectile.setVelocity(((CreateProjectile) event).packet.cameraPos);
 					projectile.setAcceleration(((CreateProjectile) event).packet.cameraPos);
@@ -41,7 +42,7 @@ public class NetEventManager {
 					Projectile projectile = NetWorld.entManager.projectilePool.obtain();
 					projectile.reset();
 					projectile.setProjectileSpeed(world.getPlayer().getWeapon().getProjectileSpeed());
-					projectile.setDamage(world.getPlayer().getWeapon().getDamage());
+					projectile.setDamage(RocketLauncher.DAMAGE);
 					projectile.setPlayerProjectile(true);
 					projectile.setDealtDamage(false);
 					projectile.setIsActive(true);

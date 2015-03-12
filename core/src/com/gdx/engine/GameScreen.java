@@ -302,6 +302,7 @@ public class GameScreen implements Screen {
 			field.setText(Net.name + "                  " + 
 			                     0 + "                  " + 0);
 			field.setPlayerID(client.getId());
+			field.setColor(Color.TEAL);
 			statForm.addNetStatField(field, 0, 0, 300, 20);
 			statForm.getWindow().setVisible(false);
 			statForm.setOpacity(.5f);

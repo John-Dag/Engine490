@@ -72,7 +72,7 @@ public class NetWorld extends World {
 		Projectile projectile = NetWorld.entManager.projectilePool.obtain();
 		projectile.reset();
 		projectile.setProjectileSpeed(RocketLauncher.PROJECTILE_SPEED);
-		projectile.setDamage(10);
+		projectile.setDamage(RocketLauncher.DAMAGE);
 		projectile.setPosition(packet.position);
 		projectile.setVelocity(packet.cameraPos);
 		projectile.setAcceleration(packet.cameraPos);

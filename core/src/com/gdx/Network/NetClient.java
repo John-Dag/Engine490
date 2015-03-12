@@ -1,6 +1,8 @@
 package com.gdx.Network;
 
 import java.io.IOException;
+
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
