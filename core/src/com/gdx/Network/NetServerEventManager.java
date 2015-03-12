@@ -25,6 +25,7 @@ public class NetServerEventManager {
 				
 				else if (event instanceof NetServerEvent.NewPlayer) {
 					world.getServer().addNewPlayer(((NetServerEvent.NewPlayer) event).packet);
+		    		world.getServer().sendNetStatUpdate();
 				}
 				
 				else if (event instanceof NetServerEvent.NewProjectile) {

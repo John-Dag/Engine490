@@ -214,9 +214,9 @@ public class GameScreen implements Screen {
 	
 	public void createNetworkMenu() {
 		form = new UIForm(stage, skin, "Name/IP");
-		form.generateWindow(center.x - 70, center.y + 60, 150, 150);
+		form.generateWindow(center.x - 70, center.y + 60, 150, 150, false);
 		form.addTextField("Name", 0, 100, 150, 25);
-		form.addTextField("192.168.1.4", 0, 50, 150, 25);
+		form.addTextField("192.168.1.2", 0, 50, 150, 25);
 		UIBase.uiSelected = true;
 
 		form.getFields().get(0).addListener(new ClickListener() {
@@ -294,17 +294,17 @@ public class GameScreen implements Screen {
 				System.err.println("startClient(): Failed to connect to host. Exiting");
 				Gdx.app.exit();
 			}
+			
 			world.setClient(client);
 			statForm = new UIForm(stage, skin, "Stats");
-			statForm.generateWindow(center.x, center.y, 300, 300);
+			statForm.generateWindow(center.x  / 2, center.y + 300, 300, 40, true);
 			NetStatField field = new NetStatField("", skin);
 			field.setText(Net.name + "                  " + 
 			                     0 + "                  " + 0);
 			field.setPlayerID(client.getId());
 			statForm.addNetStatField(field, 0, 0, 300, 20);
 			statForm.getWindow().setVisible(false);
-			statForm.setOpacity(0.8f);
-			statForm.getFields().get(0).setDisabled(true);
+			statForm.setOpacity(.5f);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

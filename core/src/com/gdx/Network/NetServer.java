@@ -109,39 +109,26 @@ public class NetServer {
         else if (object instanceof Net.KillPacket) {
         	Net.KillPacket packet = (Net.KillPacket)object;
         	updateKillNetStat(packet.id);
-    		Net.StatPacket packetB = new Net.StatPacket();
-    		packetB.kills = netStatManager.getStats().get(packet.id).getKills();
-    		packetB.deaths = netStatManager.getStats().get(packet.id).getDeaths();
-    		packetB.name = packet.name;
-    		packetB.playerID = packet.id;
-    		server.sendToAllTCP(packetB);
-        	//sendNetStatUpdate(packet.id);
-         	//server.sendToAllTCP(packet);
+        	sendNetStatUpdate();
         }
 	   	
         else if (object instanceof Net.DeathPacket) {
         	Net.DeathPacket packet = (Net.DeathPacket)object;
         	updateDeathNetStat(packet.id);
-    		Net.StatPacket packetB = new Net.StatPacket();
-    		packetB.kills = netStatManager.getStats().get(packet.id).getKills();
-    		packetB.deaths = netStatManager.getStats().get(packet.id).getDeaths();
-    		packetB.name = packet.name;
-    		packetB.playerID = packet.id;
-    		server.sendToAllTCP(packetB);
-        	//sendNetStatUpdate(packet.id);
-        	//server.sendToAllTCP(packet);
+        	sendNetStatUpdate();
         }
 	}
 	
-//	public void sendNetStatUpdate(int id) {
-//		Net.StatPacket packet = new Net.StatPacket();
-//		packet.kills = netStatManager.getStats().get(id).getKills();
-//		packet.deaths = netStatManager.getStats().get(id).getDeaths();
-//		packet.killName = netStatManager.getStats().get(id).getName();
-//		packet.deathName = netStatManager.getStats().get(id).getName();
-//		packet.playerID = id;
-//		server.sendToAllTCP(packet);
-//	}
+	public void sendNetStatUpdate() {
+		for (int i = 0; i < netStatManager.getStats().size; i++) {
+			Net.StatPacket packet = new Net.StatPacket();
+			packet.kills = netStatManager.getStats().get(i).getKills();
+			packet.deaths = netStatManager.getStats().get(i).getDeaths();
+			packet.name = netStatManager.getStats().get(i).getName();
+			packet.playerID = netStatManager.getStats().get(i).getId();
+			server.sendToAllTCP(packet);
+		}
+	}
 	
 	public void updateKillNetStat(int id) {
 		for (int i = 0; i < netStatManager.getStats().size; i++) {
@@ -175,16 +162,11 @@ public class NetServer {
 		
 		for (int i = 0; i < world.playerInstances.size; i++) {
 			Player player = world.playerInstances.get(i);
-			//NetStat stat = netStatManager.getStats().get(i);
 			
 			if (player.getNetId() == connection.getID()) {
 				name = player.getNetName();
 				world.playerInstances.removeIndex(i);
 			}
-			
-//			else if (stat.getId() == connection.getID()) {
-//				netStatManager.getStats().removeIndex(i);
-//			}
 		}
 		
 		Net.PlayerDisconnect disconnect = new Net.PlayerDisconnect();

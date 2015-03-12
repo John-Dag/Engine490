@@ -80,12 +80,10 @@ public class Net {
 	}
 	
 	public static class KillPacket {
-		public String name;
 		public int id;
 	}
 	
 	public static class DeathPacket {
-		public String name;
 		public int id;
 	}
 }

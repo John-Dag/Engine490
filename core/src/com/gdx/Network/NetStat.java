@@ -5,7 +5,7 @@ public class NetStat {
 	private int id, kills, deaths;
 	
 	public NetStat(int id, String name) {
-		this.setName("");
+		this.setName(name);
 		this.setId(id);
 		this.setKills(0);
 		this.setDeaths(0);

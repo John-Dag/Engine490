@@ -10,18 +10,20 @@ import com.gdx.Network.NetStatField;
 public class UIForm extends UIBase {
 	private Skin skin;
 	private Array<TextField> fields;
+	private Array<NetStatField> statFields;
 
 	public UIForm(Stage stage, Skin skin, String name) {
 		super(stage);
 		this.setWindow(new Window(name, skin));
 		fields = new Array<TextField>();
+		setStatFields(new Array<NetStatField>());
 		this.skin = skin;
 	}
 
-	public void generateWindow(float x, float y, int width, int height) {
+	public void generateWindow(float x, float y, int width, int height, boolean moveable) {
 		getWindow().setPosition(x, y);
 		getWindow().setSize(width, height);
-		getWindow().setMovable(false);
+		getWindow().setMovable(moveable);
 		this.getStage().addActor(getWindow());
 	}
 	
@@ -51,7 +53,7 @@ public class UIForm extends UIBase {
 		field.setPosition(posX, posY);
 		field.setWidth(width);
 		field.setHeight(height);
-		fields.add(field);
+		statFields.add(field);
 		getWindow().addActor(field);
 	}
 	
@@ -61,5 +63,13 @@ public class UIForm extends UIBase {
 
 	public void setFields(Array<TextField> fields) {
 		this.fields = fields;
+	}
+
+	public Array<NetStatField> getStatFields() {
+		return statFields;
+	}
+
+	public void setStatFields(Array<NetStatField> statFields) {
+		this.statFields = statFields;
 	}
 }
