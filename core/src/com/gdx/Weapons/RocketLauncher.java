@@ -6,8 +6,8 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
-import com.gdx.Network.NetEvent;
-import com.gdx.Network.NetEvent.CreateProjectile;
+import com.gdx.Network.NetClientEvent;
+import com.gdx.Network.NetClientEvent.CreateProjectile;
 import com.gdx.Network.NetWorld;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
@@ -41,7 +41,7 @@ public class RocketLauncher extends Weapon {
 	public void fireWeapon(World world) {
 		try {
 			if (world.getClient() != null) {
-				NetEvent.CreatePlayerProjectile event = new NetEvent.CreatePlayerProjectile();
+				NetClientEvent.CreatePlayerProjectile event = new NetClientEvent.CreatePlayerProjectile();
 				event.position.set(world.getPlayer().camera.position.cpy());
 				world.getEventManager().addNetEvent(event);
 			}

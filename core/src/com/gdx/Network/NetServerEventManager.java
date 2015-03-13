@@ -15,22 +15,7 @@ public class NetServerEventManager {
 	public void processEvents() {
 		synchronized (events) {
 			for (NetServerEvent event : events) {
-				if (event instanceof NetServerEvent.ProjectileCollision) {
-					world.getServer().sendCollisionPacket(((NetServerEvent.ProjectileCollision) event).packet);
-				}
-				
-				else if (event instanceof NetServerEvent.ChatMessage) {
-					world.getServer().sendChatMessage(((NetServerEvent.ChatMessage) event).packet);
-				}
-				
-				else if (event instanceof NetServerEvent.NewPlayer) {
-					world.getServer().addNewPlayer(((NetServerEvent.NewPlayer) event).packet);
-		    		world.getServer().sendNetStatUpdate();
-				}
-				
-				else if (event instanceof NetServerEvent.NewProjectile) {
-					world.getServer().addNewProjectile(((NetServerEvent.NewProjectile) event).packet);
-				}
+				event.handleEvent(world);
 			}
 		}
 		
