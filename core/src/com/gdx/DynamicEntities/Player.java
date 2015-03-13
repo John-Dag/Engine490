@@ -23,6 +23,7 @@ import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 import com.gdx.engine.GameScreen.State;
+import com.gdx.engine.GameScreen.Mode;
 
 public class Player extends DynamicEntity {
 	public static float FOG_DISTANCE = 15f;
@@ -100,7 +101,7 @@ public class Player extends DynamicEntity {
 		
 	    //TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
-		if (newPos != oldPos && clipping && GameScreen.mode == State.Offline) {
+		if (newPos != oldPos && clipping && GameScreen.mode == Mode.Offline) {
             distanceMap = world.getDistanceMap();
             distanceMap.resetDistances();
             if (camera.position.y >= 6)

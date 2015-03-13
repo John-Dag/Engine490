@@ -18,6 +18,8 @@ import com.gdx.engine.World;
 public class PowerUpSpawn extends StaticEntity {
 	PowerUp powerRef = new PowerUp();
 	Color color = new Color();
+	private float spawnTime;
+	private PowerUpSpawn thisSpawn;
 	
 	public PowerUpSpawn() {
 		super();
@@ -27,21 +29,34 @@ public class PowerUpSpawn extends StaticEntity {
 				boolean isDecalFacing, float spawnTime, Color color, PowerUp powerUp) {
 		super(position, id, isActive, isRenderable, isDecalFacing);
 		this.color = color;
+		this.spawnTime = spawnTime;
 		PointLight pointLight = new PointLight();
 		pointLight.set(color, position, 1f);
 		this.setPointLight(pointLight);
 		this.setEffect(World.particleManager.getMistPool().obtain());
 		powerRef = (PowerUp) powerUp.spawn();
+		powerRef.setSpawner(this);
 		Entity.entityInstances.add(powerRef);
-		
+		thisSpawn = this;
+	}
+	
+	public void startTimer(float spawnTime) {
 		Timer.schedule(new Task() {
 			@Override
 			public void run() { 
-				if (!powerRef.isActive()) {
+				System.out.println("TimerTriggered");
 					powerRef = (PowerUp)powerRef.spawn();
+					powerRef.setSpawner(thisSpawn);
 					Entity.entityInstances.add(powerRef);
-				}
 			}
-		}, spawnTime, spawnTime + spawnTime);
+		}, spawnTime);
+	}
+	
+	public float getSpawnTime() {
+		return spawnTime;
+	}
+
+	public void setSpawnTime(float spawnTime) {
+		this.spawnTime = spawnTime;
 	}
 }

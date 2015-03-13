@@ -1199,21 +1199,26 @@ public class MeshLevel {
 			}
 			
 			else if (rectObj.getName().contains("SpeedBoost")) {
-				objPosition = new Vector3();
-				int height = getObjectHeight(rectObj);
-				float duration = getPowerUpDuration(rectObj);
-				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-						new SpeedBoost(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
-				Entity.entityInstances.add(spawn);
+				if(GameScreen.mode == GameScreen.mode.Server|| GameScreen.mode == GameScreen.mode.Offline) {
+					objPosition = new Vector3();
+					int height = getObjectHeight(rectObj);
+					float duration = getPowerUpDuration(rectObj);
+					float spawnTime = getSpawnTime(rectObj);
+					objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+					PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, spawnTime, getLightColor(rectObj), 
+							new SpeedBoost(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
+					//spawn.startTimer(spawnTime);
+					Entity.entityInstances.add(spawn);
+				}
 			}
 			
-			else if (rectObj.getName().contains("HealthPot")) {
+			else if (rectObj.getName().contains("HealthPot") && (GameScreen.mode == GameScreen.mode.Server|| GameScreen.mode == GameScreen.mode.Offline)) {
 				objPosition = new Vector3();
 				int height = getObjectHeight(rectObj);
 				float duration = getPowerUpDuration(rectObj);
+				float spawnTime = getSpawnTime(rectObj);
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
+				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, spawnTime, getLightColor(rectObj), 
 									 new HealthPot(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
 				Entity.entityInstances.add(spawn);
 			}

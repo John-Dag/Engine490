@@ -45,7 +45,8 @@ import com.gdx.UI.UIVirtualJoystick;
 public class GameScreen implements Screen {
 	public static Vector2 center;
 	public static State state;
-	public static State mode;
+	//public static State mode;
+	public static Mode mode;
 	public static NetClient client;
 	private Game game;
 	private Render renderer;
@@ -72,7 +73,11 @@ public class GameScreen implements Screen {
 	private World world;
 	
 	public enum State {
-		Running, Paused, Server, Client, Offline
+		Running, Paused
+	}
+	
+	public enum Mode {
+		Server, Client, Offline
 	}
 
 	public GameScreen(Game game, boolean consoleActive) {
@@ -179,7 +184,7 @@ public class GameScreen implements Screen {
 	}
 	
 	public void generateMultiplayerClient() {
-		mode = State.Client;
+		mode = Mode.Client;
 		this.world = new NetWorld();
 		this.renderer = new Render(world);
 		this.world.initializeEntities();
@@ -190,7 +195,7 @@ public class GameScreen implements Screen {
 	}
 	
 	public void generateMultiplayerServer() {
-		mode = State.Server;
+		mode = Mode.Server;
 		this.world = new NetWorld();
 		this.renderer = new Render(world);
 		this.world.initializeEntities();
@@ -202,7 +207,7 @@ public class GameScreen implements Screen {
 	}
 	
 	public void generateOffline() {
-		mode = State.Offline;
+		mode = Mode.Offline;
 		this.world = new World();
 		world.loadOfflineWorld(Assets.castle3, true);
 		this.renderer = new Render(world);
@@ -316,10 +321,10 @@ public class GameScreen implements Screen {
 		switch (state) {
 			case Running:
 				world.update(delta);
-				if (mode == State.Server) {
+				if (mode == Mode.Server) {
 					server.serverUpdate();
 				}
-				if (mode == State.Client) {
+				if (mode == Mode.Client) {
 					client.clientUpdate();
 				}
 				break;
@@ -327,7 +332,7 @@ public class GameScreen implements Screen {
 				break;
 		}
 		
-		if (mode == State.Server) {
+		if (mode == Mode.Server) {
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 			base.render(delta);
 			return;

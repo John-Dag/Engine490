@@ -4,27 +4,27 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.DynamicEntities.Projectile;
-import com.gdx.Network.NetEvent.ChatMessage;
-import com.gdx.Network.NetEvent.CreatePlayer;
-import com.gdx.Network.NetEvent.CreatePlayerProjectile;
-import com.gdx.Network.NetEvent.CreateProjectile;
-import com.gdx.Network.NetEvent.ProjectileCollision;
-import com.gdx.Network.NetEvent.RemovePlayer;
+import com.gdx.Network.NetClientEvent.ChatMessage;
+import com.gdx.Network.NetClientEvent.CreatePlayer;
+import com.gdx.Network.NetClientEvent.CreatePlayerProjectile;
+import com.gdx.Network.NetClientEvent.CreateProjectile;
+import com.gdx.Network.NetClientEvent.ProjectileCollision;
+import com.gdx.Network.NetClientEvent.RemovePlayer;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
-public class NetEventManager {
-	private Array<NetEvent> events;
+public class NetClientEventManager {
+	private Array<NetClientEvent> events;
 	private World world;
 	
-	public NetEventManager(World world) {
-		setEvents(new Array<NetEvent>());
+	public NetClientEventManager(World world) {
+		setEvents(new Array<NetClientEvent>());
 		this.world = world;
 	}
 	
 	public void processEvents() {
 		synchronized (events) {
-			for (NetEvent event : events) {
+			for (NetClientEvent event : events) {
 				if (event instanceof CreateProjectile) {
 					Projectile projectile = NetWorld.entManager.projectilePool.obtain();
 					projectile.reset();
@@ -79,17 +79,17 @@ public class NetEventManager {
 		events.clear();
 	}
 	
-	public void addNetEvent(NetEvent event) {
+	public void addNetEvent(NetClientEvent event) {
 		synchronized (events) {
 			events.add(event);
 		}
 	}
 
-	public Array<NetEvent> getEvents() {
+	public Array<NetClientEvent> getEvents() {
 		return events;
 	}
 
-	public void setEvents(Array<NetEvent> events) {
+	public void setEvents(Array<NetClientEvent> events) {
 		this.events = events;
 	}
 }

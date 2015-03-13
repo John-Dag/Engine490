@@ -30,6 +30,14 @@ public class NetServerEventManager {
 				else if (event instanceof NetServerEvent.NewProjectile) {
 					world.getServer().addNewProjectile(((NetServerEvent.NewProjectile) event).packet);
 				}
+				
+				else if (event instanceof NetServerEvent.NewPowerUp) {
+					world.getServer().addNewPowerUp(((NetServerEvent.NewPowerUp) event).packet);
+				}
+				
+				else if (event instanceof NetServerEvent.PowerUpRespawn) {
+					world.getServer().respawnPowerUp(((NetServerEvent.PowerUpRespawn) event).packet);
+				}
 			}
 		}
 		

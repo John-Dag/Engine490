@@ -12,7 +12,7 @@ import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Network.Net.NewProjectile;
 import com.gdx.Network.Net.PlayerPacket;
-import com.gdx.Network.NetEvent.ProjectileCollision;
+import com.gdx.Network.NetClientEvent.ProjectileCollision;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
@@ -34,7 +34,7 @@ public class NetWorld extends World {
 		Entity.entityInstances.add(player);
 		//distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
 		entManager = new EntityManager(this);
-		setEventManager(new NetEventManager(this));
+		setEventManager(new NetClientEventManager(this));
 		setServerEventManager(new NetServerEventManager(this));
 	}
 

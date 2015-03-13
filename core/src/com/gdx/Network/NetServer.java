@@ -136,6 +136,18 @@ public class NetServer {
 		server.sendToAllExceptTCP(packet.id, packet);
 	}
 	
+	public void addNewPowerUp(Net.NewPowerUpPacket packet) {
+		
+	}
+	
+	public void respawnPowerUp(Net.PowerUpRespawnPacket packet) {
+		
+	}
+	
+	public void consumePowerUp(Net.PowerUpConsumedPacket packet) {
+		
+	}
+	
 	//Updates all clients with the player that disconnected
 	public void removePlayer(Connection connection) {
 		String name = "";

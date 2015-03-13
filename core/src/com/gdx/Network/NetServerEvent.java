@@ -32,4 +32,28 @@ public class NetServerEvent {
 			this.packet = packet;
 		}
 	}
+	
+	public static class NewPowerUp extends NetServerEvent {
+		public Net.NewPowerUpPacket packet;
+		
+		public NewPowerUp(Net.NewPowerUpPacket packet) {
+			this.packet = packet;
+		}
+	}
+	
+	public static class PowerUpRespawn extends NetServerEvent {
+		public Net.PowerUpRespawnPacket packet;
+		
+		public PowerUpRespawn(Net.PowerUpRespawnPacket packet) {
+			this.packet = packet;
+		}
+	}
+	
+	public static class PowerUpConsumed extends NetServerEvent {
+		public Net.PowerUpConsumedPacket packet;
+		
+		public PowerUpConsumed(Net.PowerUpConsumedPacket packet) {
+			this.packet = packet;
+		}
+	}
 }

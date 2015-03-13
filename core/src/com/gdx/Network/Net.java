@@ -58,6 +58,21 @@ public class Net {
 		public int id, originID;
 	}
 	
+	public static class NewPowerUpPacket {
+		public Vector3 position;
+		public int powerUpEntityId;
+	}
+	
+	public static class PowerUpRespawnPacket {
+		public Vector3 position;
+		public int powerUpEntityId;
+	}
+	
+	public static class PowerUpConsumedPacket {
+		public int powerUpEntityId;
+		public int playerId;
+	}
+	
 	public static class ProjectilePacket {
 		public Vector3 position;
 		public Vector3 cameraPos;

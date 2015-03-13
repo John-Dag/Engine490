@@ -7,6 +7,7 @@ import com.gdx.engine.World;
 
 public class PowerUp extends StaticEntity {
 	private Vector3 rotationVec;
+	private PowerUpSpawn powerUpSpawn;
 	
 	public PowerUp () {
 		super();
@@ -23,11 +24,21 @@ public class PowerUp extends StaticEntity {
 		if (this.getModel() != null && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
 			this.setIsActive(false);
 			effect();
+			if(powerUpSpawn != null) {
+				System.out.println("Start Timer");
+				this.powerUpSpawn.startTimer(this.powerUpSpawn.getSpawnTime());
+			}else{
+				System.out.println("Spawnisnull");
+			}
 		}
 		
 		else {
 			this.getModel().transform.rotate(rotationVec, 180f * delta);
 		}
+	}
+	
+	public void setSpawner(PowerUpSpawn powerUpSpawn) {
+		this.powerUpSpawn = powerUpSpawn;
 	}
 	
 	// Override to create your own power-up effect!

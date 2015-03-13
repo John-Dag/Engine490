@@ -24,7 +24,7 @@ import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
 import com.gdx.Network.Net.CollisionPacket;
-import com.gdx.Network.NetEventManager;
+import com.gdx.Network.NetClientEventManager;
 import com.gdx.Network.NetServer;
 import com.gdx.Network.Net.NewProjectile;
 import com.gdx.Network.Net.NewPlayer;
@@ -54,7 +54,7 @@ public class World implements Disposable {
     private NetServer server;
     private int NetIdCurrent;
 	public static EntityManager entManager;
-	private NetEventManager eventManager;
+	private NetClientEventManager eventManager;
 	private NetServerEventManager serverEventManager;
 	public Vector3 startVector = new Vector3(2f, 1.5f, 2f);
     
@@ -507,12 +507,12 @@ public class World implements Disposable {
 	}
 
 
-	public NetEventManager getEventManager() {
+	public NetClientEventManager getEventManager() {
 		return eventManager;
 	}
 
 
-	public void setEventManager(NetEventManager eventManager) {
+	public void setEventManager(NetClientEventManager eventManager) {
 		this.eventManager = eventManager;
 	}
 
