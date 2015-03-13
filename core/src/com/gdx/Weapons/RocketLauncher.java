@@ -33,6 +33,7 @@ public class RocketLauncher extends Weapon {
 		this.projectileSpeed = PROJECTILE_SPEED;
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
+		this.setPickedup(false);
 		rotationVec = new Vector3(World.player.camera.up.cpy());
 	}
 	
@@ -89,11 +90,20 @@ public class RocketLauncher extends Weapon {
 		}
 		
 		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
-			world.getPlayer().setWeapon(this);
+			if (world.getPlayer().getWeapon() == null || world.getPlayer().getWeapon().getId() != this.getId()) {
+				pickupWeapon(world);
+			}
 		}
 		
 		else {
 			this.getModel().transform.rotate(rotationVec, 180f * delta);
 		}
+	}
+	
+	@Override
+	public void pickupWeapon(World world) {
+		world.getPlayer().setWeapon(this);
+		if (this.getSpawnerRef() != null)
+			this.getSpawnerRef().startSpawnTimer();
 	}
 }
