@@ -9,9 +9,12 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
@@ -86,6 +89,11 @@ public class Player extends DynamicEntity {
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
 		//this.setModel(model);
+		this.setBulletShape(new btBoxShape(new Vector3(1f, 1f, 1f)));
+		this.setBulletObject(new btCollisionObject());
+		this.getBulletObject().setCollisionShape(this.getBulletShape());
+		this.setTarget(new Matrix4());
+		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
 	}
 	
 	public void initAbilities() {

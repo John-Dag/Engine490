@@ -343,6 +343,7 @@ public class GameScreen implements Screen {
 					               Gdx.graphics.getHeight() / 2 - 20f);
 			overlay.renderTilePosition(world.getPlayer().getPlayerTileCoords(), delta, 
 					                   -Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 40f);
+			overlay.renderModelCount(-Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2 - 60f);
 			spriteBatch.end();
 			base.render(delta);
 			overlay.updateWidgets(delta, world.getPlayer().getHealth());
@@ -374,6 +375,7 @@ public class GameScreen implements Screen {
 		Assets.dungeon1.dispose();
 		Assets.floor.dispose();
 		Assets.hole.dispose();
+		this.world.dispose();
 	}
 
 	@Override

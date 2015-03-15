@@ -110,8 +110,9 @@ public class Render implements Disposable {
 		shadowBatch.begin(shadowLight.getCamera());
 		
 		//Viewport culling
+		renderCount = 0;
 		for (int i = 0; i < world.getMeshLevel().getInstances().size; i++) {
-			ModelInstance instance = world.getMeshLevel().getInstances().get(i);
+			ModelInstance instance = (ModelInstance) world.getMeshLevel().getInstances().get(i);
 			//shadowBatch.render(instance);
 			if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
 				renderModels(instance);

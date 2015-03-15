@@ -82,5 +82,9 @@ public class Entity {
 	public Entity spawn(Vector3 spawnPos) {
 		return new Entity();
 	}
+	
+	public void dispose() {
+		
+	}
 }
 

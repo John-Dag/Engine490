@@ -13,6 +13,15 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btDispatcher;
+import com.badlogic.gdx.physics.bullet.collision.btDispatcherInfo;
+import com.badlogic.gdx.physics.bullet.collision.btManifoldResult;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.esotericsoftware.kryonet.Client;
@@ -57,6 +66,8 @@ public class World implements Disposable {
 	private NetClientEventManager eventManager;
 	private NetServerEventManager serverEventManager;
 	public Vector3 startVector = new Vector3(2f, 1.5f, 2f);
+	private btCollisionConfiguration collisionConfig;
+	private btDispatcher dispatcher;
     
 	public World() {
 		playerInstances = new Array<Player>();
@@ -67,6 +78,8 @@ public class World implements Disposable {
 		setOut(new Vector3());
 		wireInstances = new Array<ModelInstance>();
 		isWireframeEnabled = false;
+		collisionConfig = new btDefaultCollisionConfiguration();
+		dispatcher = new btCollisionDispatcher(collisionConfig);
 		//Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
 	}
 	
@@ -227,6 +240,7 @@ public class World implements Disposable {
 			
 			else {
 				//System.out.println("Removed: " + size);
+				//entity.dispose();
 				entity.removeEntity(i);
 				size -= 1;
 			}
@@ -251,18 +265,19 @@ public class World implements Disposable {
 		getMeshLevel().meshPartBuilder.line(corners[2], corners[6]);
 		getMeshLevel().meshPartBuilder.line(corners[3], corners[7]);
 		getMeshLevel().model = getMeshLevel().modelBuilder.end();
+		
 		return new ModelInstance(getMeshLevel().model);
 	}
 	
-	public void checkProjectileCollisions(Projectile projectile) {
+	public boolean checkProjectileCollisions(Projectile projectile) {
+		boolean collision = false;
+		
 		for (Enemy enemy : enemyInstances) {
-			if (projectile.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
-				//projectile.initializeBloodEffect();
-				if (!projectile.hasDealtDamage())
-					enemy.takeDamage(player.getWeapon().getDamage());
-					projectile.initializeCollisionExplosionEffect();
-			}
+			collision = checkCollision(enemy.getBulletObject(), projectile.getBulletObject());
+			return collision;
 		}
+		
+		return collision;
 	}
 	
 	public void checkAbilityCollision(Ability ability) {
@@ -284,6 +299,28 @@ public class World implements Disposable {
 				enemy.takeDamage(weapon.getDamage());
 			}
 		}
+	}
+	
+	public boolean checkCollision(btCollisionObject obj0, btCollisionObject obj1) {
+		CollisionObjectWrapper co0 = new CollisionObjectWrapper(obj0);
+	    CollisionObjectWrapper co1 = new CollisionObjectWrapper(obj1);
+	     
+	    btCollisionAlgorithm algorithm = dispatcher.findAlgorithm(co0.wrapper, co1.wrapper);
+	 
+	    btDispatcherInfo info = new btDispatcherInfo();
+	    btManifoldResult result = new btManifoldResult(co0.wrapper, co1.wrapper);
+	     
+	    algorithm.processCollision(co0.wrapper, co1.wrapper, info, result);
+	 
+	    boolean r = result.getPersistentManifold().getNumContacts() > 0;
+	 
+	    dispatcher.freeCollisionAlgorithm(algorithm.getCPointer());
+	    result.dispose();
+	    info.dispose();
+	    co1.dispose();
+	    co0.dispose();
+	    
+	    return r;
 	}
 	
 	//Bounding boxes used for frustum culling
@@ -439,8 +476,8 @@ public class World implements Disposable {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
+		dispatcher.dispose();
+		collisionConfig.dispose();
 	}
 
 	public void setMeshLevel(MeshLevel meshLevel) {
@@ -537,6 +574,12 @@ public class World implements Disposable {
 	}
 
 	public void createExplosionEffect(CollisionPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void checkProjectileCollisionsServer(Projectile projectile) {
 		// TODO Auto-generated method stub
 		
 	}

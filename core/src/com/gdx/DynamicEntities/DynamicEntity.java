@@ -6,9 +6,13 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.gdx.engine.Entity;
 import com.gdx.engine.Render;
 import com.gdx.engine.World;
@@ -31,6 +35,9 @@ public class DynamicEntity extends Entity {
 	private Vector3 newRotation = new Vector3();
 	private Vector3 newAngVelocity = new Vector3();
 	private Vector3 movementVector = new Vector3();
+	private btCollisionShape bulletShape;
+	private btCollisionObject bulletObject;
+	private Matrix4 target;
 	
 	public DynamicEntity() {
 		super(0, false, false);
@@ -186,6 +193,12 @@ public class DynamicEntity extends Entity {
 		this.model.transform.rotate(rotationQuaternion.setEulerAngles(this.rotation.x, this.rotation.y, this.rotation.z));
 		this.model.transform.scale(scale.x,scale.y,scale.z);
 		this.model.calculateTransforms();
+	}
+	
+	@Override
+	public void dispose() {
+		bulletObject.dispose();
+		bulletShape.dispose();
 	}
 	
 	public int getNetId() {
@@ -381,5 +394,29 @@ public class DynamicEntity extends Entity {
 
 	public void setOriginID(int originID) {
 		this.originID = originID;
+	}
+
+	public btCollisionShape getBulletShape() {
+		return bulletShape;
+	}
+
+	public void setBulletShape(btCollisionShape entityShape) {
+		this.bulletShape = entityShape;
+	}
+
+	public btCollisionObject getBulletObject() {
+		return bulletObject;
+	}
+
+	public void setBulletObject(btCollisionObject entityObject) {
+		this.bulletObject = entityObject;
+	}
+
+	public Matrix4 getTarget() {
+		return target;
+	}
+
+	public void setTarget(Matrix4 target) {
+		this.target = target;
 	}
 }

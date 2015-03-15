@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.engine.Render;
 
 public class UIOverlay extends UIBase {
 	private Array<ProgressBar> bars;
@@ -35,7 +36,7 @@ public class UIOverlay extends UIBase {
 	public void addCrosshair(Texture crosshairTexture, Vector2 center) {
 		try {
 			Image crosshair = new Image(crosshairTexture);
-			crosshair.setPosition(center.x - crosshair.getCenterX(), center.y - crosshair.getCenterY());
+			crosshair.setPosition(center.x - (crosshair.getWidth() / 2), center.y - (crosshair.getHeight() / 2));
 			crosshair.setTouchable(Touchable.disabled);
 			this.getStage().addActor(crosshair);
 		}
@@ -98,5 +99,9 @@ public class UIOverlay extends UIBase {
 	
 	public void renderTilePosition(GridPoint2 tileIndex, float delta, float posX, float posY) {
 		bitmapFont.draw(batch,  "Tile (" + tileIndex.x + ", " + tileIndex.y +")", posX, posY);
+	}
+	
+	public void renderModelCount(float posX, float posY) {
+		bitmapFont.draw(batch, "Rendered Models: " + Render.renderCount, posX, posY);
 	}
 }

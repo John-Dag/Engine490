@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetWorld;
@@ -12,16 +15,16 @@ import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
-public class Projectile extends DynamicEntity implements Poolable, Cloneable {
+public class Projectile extends DynamicEntity implements Poolable {
 	private World world;
 	private Vector3 movementVector, collisionVector, newPos, oldPos;
-	private Matrix4 target;
 	private ParticleEffect collisionEffect;
 	private float projectileSpeed;
 	private int damage;
 	private boolean isCollEffectInit, playerProjectile = false, dealtDamage;
 	private Emitter emitter;
 	private RegularEmitter emitterReg;
+	private boolean collision = false;
 	 
 	public Projectile() {
 		super();
@@ -41,7 +44,11 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 		collisionVector = new Vector3(0, 0, 0);
 		newPos = new Vector3(0, 0, 0);
 		oldPos = new Vector3(0, 0, 0);
-		target = new Matrix4();
+		this.setBulletShape(new btBoxShape(new Vector3(0.2f, 0.2f, 0.2f)));
+		this.setBulletObject(new btCollisionObject());
+		this.getBulletObject().setCollisionShape(this.getBulletShape());
+		this.setTarget(new Matrix4());
+		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
 	}
 
 	@Override
@@ -50,13 +57,16 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 			this.initializeProjectileEffect();
 		
 		this.updateProjectilePosition(world, time);
-		if (world.getClient() == null)
-			world.checkProjectileCollisions(this);
+		if (world.getClient() == null) {
+			collision = world.checkProjectileCollisions(this);
+			if (collision)
+				this.initializeCollisionExplosionEffect();
+		}
 		this.checkCollisionMeshlevel(time, world);
 		
 		//If the client is hosting a server, send position update packets
 		if (world.getServer() != null) {
-			world.checkProjectileCollisions(this);
+			world.checkProjectileCollisionsServer(this);
 			world.sendProjectilePositionUpdate(this);
 		}
 			
@@ -71,9 +81,15 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 	}
 	
 	private void updateProjectilePosition(World world, float time) {
-		target.idt();
-		target.translate(this.getPosition());
-		this.getParticleEffect().setTransform(target);
+		if (this.getTarget() != null) {
+			this.setTarget(this.getTarget().idt());
+			this.setTarget(this.getTarget().translate(this.getPosition()));
+		}
+		
+		if (this.getParticleEffect() != null && this.getBulletObject() != null) {
+			this.getParticleEffect().setTransform(this.getTarget());
+			this.getBulletObject().setWorldTransform(this.getTarget());
+		}
 		
 		movementVector.set(0, 0, 0);
 		movementVector.set(world.getPlayer().camera.direction);
@@ -115,7 +131,7 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 	
 	public void initializeBloodEffect() {
 		ParticleEffect effect = World.particleManager.bloodPool.obtain();
-		effect.setTransform(target);
+		effect.setTransform(this.getTarget());
 		effect.init();
 		effect.start();
 		World.particleManager.system.add(effect);
@@ -130,7 +146,7 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 			this.emitter = this.collisionEffect.getControllers().first().emitter;
 			this.emitterReg = (RegularEmitter) emitter;
 			
-			this.collisionEffect.setTransform(target);
+			this.collisionEffect.setTransform(this.getTarget());
 			this.collisionEffect.init();
 			this.collisionEffect.start();
 			World.particleManager.system.add(this.collisionEffect);
@@ -147,14 +163,6 @@ public class Projectile extends DynamicEntity implements Poolable, Cloneable {
 	public void removeCollisionEffect() {
 		World.particleManager.system.remove(this.collisionEffect);
 		World.particleManager.rocketExplosionPool.free(this.collisionEffect);
-	}
-
-	public Matrix4 getTarget() {
-		return target;
-	}
-
-	public void setTarget(Matrix4 target) {
-		this.target = target;
 	}
 	
 	public ParticleEffect getCollisionEffect() {

@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Network.Net.NewProjectile;
@@ -47,6 +48,9 @@ public class NetWorld extends World {
 				playerInstances.get(i).camera.direction.set(packet.direction);
 				//Check this out later. 
 				playerInstances.get(i).setPosition(playerInstances.get(i).camera.position);
+				playerInstances.get(i).setTarget(playerInstances.get(i).getTarget().idt());
+				playerInstances.get(i).setTarget(playerInstances.get(i).getTarget().translate(playerInstances.get(i).getPosition()));
+				playerInstances.get(i).getBulletObject().setWorldTransform(playerInstances.get(i).getTarget());
 			}
 		}
 	}
@@ -110,12 +114,26 @@ public class NetWorld extends World {
 	}
 	
 	//Collisions between projectile/player are checked by the server only.
+//	@Override
+//	public void checkProjectileCollisions(Projectile projectile) {
+//		for (Player player : playerInstances) {
+//			if (projectile.getBoundingBox().intersects(player.getTransformedBoundingBox()) && projectile.getOriginID() != player.getNetId()
+//				&& !projectile.hasDealtDamage()) {
+//				createCollisionEvent(projectile, player);
+//			}
+//		}
+//	}
+	
 	@Override
-	public void checkProjectileCollisions(Projectile projectile) {
+	public void checkProjectileCollisionsServer(Projectile projectile) {
+		boolean collision = false;
+		
 		for (Player player : playerInstances) {
-			if (projectile.getBoundingBox().intersects(player.getTransformedBoundingBox()) && projectile.getOriginID() != player.getNetId()
-				&& !projectile.hasDealtDamage()) {
-				createCollisionEvent(projectile, player);
+			if (projectile.getOriginID() != player.getNetId() && !projectile.hasDealtDamage()) {
+				collision = checkCollision(player.getBulletObject(), projectile.getBulletObject());
+				
+				if (collision)
+					createCollisionEvent(projectile, player);
 			}
 		}
 	}
@@ -142,13 +160,4 @@ public class NetWorld extends World {
 			}
 		}
 	}
-	
-//	public void checkClientProjectileCollisions(Projectile projectile) {
-//		for (Player player : playerInstances) {
-//			if (projectile.getBoundingBox().intersects(player.getTransformedBoundingBox()) && projectile.getOriginID() != player.getNetId()
-//				&& !projectile.hasDealtDamage()) {
-//				projectile.initializeCollisionExplosionEffect();
-//			}
-//		}
-//	}
 }

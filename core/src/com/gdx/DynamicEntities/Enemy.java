@@ -7,11 +7,15 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.gdx.engine.Condition;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.State;
@@ -56,6 +60,11 @@ public class Enemy extends DynamicEntity {
 		attack = new State();
 		stateMachine = new StateMachine();
 		this.StateMachineUsage(this);
+		this.setBulletShape(new btBoxShape(new Vector3(1f, 1f, 1f)));
+		this.setBulletObject(new btCollisionObject());
+		this.getBulletObject().setCollisionShape(this.getBulletShape());
+		this.setTarget(new Matrix4());
+		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
 	}
 
 	@Override
@@ -64,6 +73,9 @@ public class Enemy extends DynamicEntity {
 		this.updateInstanceTransform();
 		this.getAnimation().update(delta);
 		this.stateMachine.UpdateStates(this);
+		this.setTarget(this.getTarget().idt());
+		this.setTarget(this.getTarget().translate(this.getPosition()));
+		this.getBulletObject().setWorldTransform(this.getTarget());
 		
 		GridPoint2 thisPosition = new GridPoint2((int)this.getPosition().x, (int)this.getPosition().z);
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
