@@ -14,14 +14,21 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
+import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionWorld;
+import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btDispatcher;
 import com.badlogic.gdx.physics.bullet.collision.btDispatcherInfo;
 import com.badlogic.gdx.physics.bullet.collision.btManifoldResult;
+import com.badlogic.gdx.physics.bullet.dynamics.btConstraintSolver;
+import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.esotericsoftware.kryonet.Client;
@@ -49,9 +56,15 @@ public class World implements Disposable {
 	public static Player player;
 	public static ParticleManager particleManager;
 	public static Array<Enemy> enemyInstances;
+	public static EntityManager entityManager;
+	public static ClientEventManager eventManager;
+	public static btDynamicsWorld dynamicsWorld;
+	public static short PROJECTILE_FLAG = 1<<8;
+	public static short ENEMY_FLAG = 1<<9;
 	public Array<Player> playerInstances;
 	public Array<ModelInstance> wireInstances;
 	public Array<Projectile> projectileInstances;
+	public Vector3 startVector = new Vector3(2f, 1.5f, 2f);
 	private MeshLevel meshLevel;
 	private Ray ray;
 	private Array<BoundingBox> boxes;
@@ -62,12 +75,13 @@ public class World implements Disposable {
     private NetClient client;
     private NetServer server;
     private int NetIdCurrent;
-	public static EntityManager entManager;
-	private NetClientEventManager eventManager;
+	private NetClientEventManager clientEventManager;
 	private NetServerEventManager serverEventManager;
-	public Vector3 startVector = new Vector3(2f, 1.5f, 2f);
 	private btCollisionConfiguration collisionConfig;
 	private btDispatcher dispatcher;
+	private BulletContactListener contactListener;
+	private btBroadphaseInterface broadPhase;
+	private btConstraintSolver contraintSolver;
     
 	public World() {
 		playerInstances = new Array<Player>();
@@ -81,6 +95,12 @@ public class World implements Disposable {
 		collisionConfig = new btDefaultCollisionConfiguration();
 		dispatcher = new btCollisionDispatcher(collisionConfig);
 		//Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
+		broadPhase = new btDbvtBroadphase();
+		setContactListener(new BulletContactListener());
+		setContraintSolver(new btSequentialImpulseConstraintSolver());
+		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, contraintSolver, collisionConfig);
+		dynamicsWorld.setGravity(new Vector3(0, 1f, 0));
+		eventManager = new ClientEventManager(this);
 	}
 	
 	
@@ -92,11 +112,12 @@ public class World implements Disposable {
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 			particleManager = new ParticleManager(this);
 			player.initAbilities();
-			playerInstances.add(player);
-			Entity.entityInstances.add(player);
+			setPlayer(player);
+			ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(player);
+			eventManager.addEvent(event);
 			setMeshLevel(new MeshLevel(map, skySphere));
 			distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
-			entManager = new EntityManager(this);
+			entityManager = new EntityManager(this);
 		}
 		catch (Exception e) {
 			System.err.println(e);
@@ -165,17 +186,16 @@ public class World implements Disposable {
 	}
 	
 	private void updateEntities(float delta) {
-    	int size = Entity.entityInstances.size;
-		
 		wireInstances.clear();
-		
-		for (int i = 0; i < size; i++) {
+
+		for (int i = 0; i < Entity.entityInstances.size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
 			
-			if (entity.isActive()) {
+//			if (entity.isActive()) {
+				dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 				entity.update(delta, this);
+				eventManager.processEvents();
 				
-				//
 				if(isWireframeEnabled) {
 					Material material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 					BoundingBox box;
@@ -236,14 +256,13 @@ public class World implements Disposable {
 						}
 					}
 				}
-			}
+//			}
 			
-			else {
-				//System.out.println("Removed: " + size);
-				//entity.dispose();
-				entity.removeEntity(i);
-				size -= 1;
-			}
+//			else {
+//				//System.out.println("Removed: " + size);
+//				//entity.dispose();
+//				Entity.entityInstances.removeIndex(i);
+//			}
 		}
 	}
 	
@@ -273,7 +292,7 @@ public class World implements Disposable {
 		boolean collision = false;
 		
 		for (Enemy enemy : enemyInstances) {
-			collision = checkCollision(enemy.getBulletObject(), projectile.getBulletObject());
+			//collision = checkCollision(enemy.getBulletObject(), projectile.getBulletObject());
 			return collision;
 		}
 		
@@ -544,13 +563,13 @@ public class World implements Disposable {
 	}
 
 
-	public NetClientEventManager getEventManager() {
-		return eventManager;
+	public NetClientEventManager getNetEventManager() {
+		return clientEventManager;
 	}
 
 
-	public void setEventManager(NetClientEventManager eventManager) {
-		this.eventManager = eventManager;
+	public void setNetEventManager(NetClientEventManager eventManager) {
+		this.clientEventManager = eventManager;
 	}
 
 
@@ -582,5 +601,43 @@ public class World implements Disposable {
 	public void checkProjectileCollisionsServer(Projectile projectile) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void setEventManager(ClientEventManager eventManager) {
+		this.eventManager = eventManager;
+	}
+	
+	public ClientEventManager getClientEventManager() {
+		return eventManager;
+	}
+
+
+	public BulletContactListener getContactListener() {
+		return contactListener;
+	}
+
+
+	public void setContactListener(BulletContactListener contactListener) {
+		this.contactListener = contactListener;
+	}
+
+
+	public btDynamicsWorld getDynamicsWorld() {
+		return dynamicsWorld;
+	}
+
+
+	public void setDynamicsWorld(btDynamicsWorld dynamicsWorld) {
+		this.dynamicsWorld = dynamicsWorld;
+	}
+
+
+	public btConstraintSolver getContraintSolver() {
+		return contraintSolver;
+	}
+
+
+	public void setContraintSolver(btConstraintSolver contraintSolver) {
+		this.contraintSolver = contraintSolver;
 	}
 }

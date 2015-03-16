@@ -10,13 +10,14 @@ import com.gdx.Network.NetClientEvent;
 import com.gdx.Network.NetClientEvent.CreateProjectile;
 import com.gdx.Network.NetWorld;
 import com.gdx.engine.Assets;
+import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.GameScreen.State;
 import com.gdx.engine.World;
 
 public class RocketLauncher extends Weapon {
-	public static final float FIRING_DELAY = 0.3f;
+	public static final float FIRING_DELAY = 0.1f;
 	public static final float PROJECTILE_SPEED = 15f;
 	private final float RECOIL = 0.08f;
 	public static final int DAMAGE = 20;
@@ -43,18 +44,25 @@ public class RocketLauncher extends Weapon {
 			if (world.getClient() != null) {
 				NetClientEvent.CreatePlayerProjectile event = new NetClientEvent.CreatePlayerProjectile();
 				event.position.set(world.getPlayer().camera.position.cpy());
-				world.getEventManager().addNetEvent(event);
+				world.getNetEventManager().addNetEvent(event);
 			}
 			
 			else {
-				Projectile projectile = NetWorld.entManager.projectilePool.obtain();
+				Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 				projectile.reset();
 				projectile.setProjectileSpeed(world.getPlayer().getWeapon().getProjectileSpeed());
 				projectile.setDamage(DAMAGE);
 				projectile.setPlayerProjectile(true);
 				projectile.setDealtDamage(false);
 				projectile.setIsActive(true);
-				Entity.entityInstances.add(projectile);
+				projectile.setMoving(true);
+				projectile.setInCollision(false);
+				projectile.setCollEffectInit(false);
+				projectile.getBulletObject().setContactCallbackFilter(World.ENEMY_FLAG);
+				projectile.getBulletObject().setUserValue(Entity.entityInstances.size);
+				projectile.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().crs(world.getPlayer().camera.up).cpy());
+				ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(projectile);
+				world.getClientEventManager().addEvent(event);
 			}
 		}
 		catch (Exception e) {

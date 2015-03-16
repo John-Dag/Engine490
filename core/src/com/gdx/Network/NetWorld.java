@@ -34,8 +34,8 @@ public class NetWorld extends World {
 		setMeshLevel(new MeshLevel(Assets.castle3Multi, true));
 		Entity.entityInstances.add(player);
 		//distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
-		entManager = new EntityManager(this);
-		setEventManager(new NetClientEventManager(this));
+		entityManager = new EntityManager(this);
+		setNetEventManager(new NetClientEventManager(this));
 		setServerEventManager(new NetServerEventManager(this));
 	}
 
@@ -73,7 +73,7 @@ public class NetWorld extends World {
 	public void addProjectile(Net.NewProjectile packet) {
 		Vector3 rotation = new Vector3(0, 0, 0);
 		Vector3 scale = new Vector3(0, 0, 0);
-		Projectile projectile = NetWorld.entManager.projectilePool.obtain();
+		Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 		projectile.reset();
 		projectile.setProjectileSpeed(RocketLauncher.PROJECTILE_SPEED);
 		projectile.setDamage(RocketLauncher.DAMAGE);
@@ -155,8 +155,9 @@ public class NetWorld extends World {
 			Entity entity = Entity.entityInstances.get(i);
 			if (entity instanceof Projectile) {
 				Projectile projectile = (Projectile)entity;
-				if (projectile.getNetId() == packet.projectileID)
-					projectile.initializeCollisionExplosionEffect();
+				if (projectile.getNetId() == packet.projectileID) {
+//					projectile.initializeCollisionExplosionEffect();
+				}
 			}
 		}
 	}

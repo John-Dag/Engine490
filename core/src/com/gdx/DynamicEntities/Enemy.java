@@ -16,8 +16,11 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Condition;
 import com.gdx.engine.DistanceTrackerMap;
+import com.gdx.engine.Entity;
 import com.gdx.engine.State;
 import com.gdx.engine.StateMachine;
 import com.gdx.engine.World;
@@ -65,10 +68,17 @@ public class Enemy extends DynamicEntity {
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
 		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
+		this.setMoving(true);
+		this.getBulletObject().setCollisionFlags(this.getBulletObject().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
+		this.getBulletObject().setContactCallbackFlag(World.ENEMY_FLAG);
+		this.getBulletObject().setContactCallbackFilter(0);
+		this.setInertia(new Vector3(1f, 1f, 1f));
+		this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(1f, null, this.getBulletShape(), this.getInertia()));
+		//World.dynamicsWorld.addRigidBody(this.getBulletBody());
 	}
 
 	@Override
-	public void update(float delta, World world) {
+	public void update(float delta, final World world) {
 		this.updatePosition(delta);
 		this.updateInstanceTransform();
 		this.getAnimation().update(delta);
@@ -260,6 +270,7 @@ public class Enemy extends DynamicEntity {
 		}
 		
 		else if (this.getStateMachine().Current == this.dead) {
+			final Enemy enemyRef = this;
 			this.getVelocity().set(0, 0, 0);
 			World.enemyInstances.removeValue(this, true);
 			this.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
@@ -272,7 +283,8 @@ public class Enemy extends DynamicEntity {
 					
 				@Override
 				public void onEnd(AnimationDesc animation) {
-					setIsActive(false);
+					ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(enemyRef);
+					world.getClientEventManager().addEvent(event);
 				}
 			});
 		}
@@ -549,6 +561,27 @@ public class Enemy extends DynamicEntity {
 		boundingBoxMinimum.set(this.getPosition().x - 1f, this.getPosition().y - 0f, this.getPosition().z - 1f);
 		boundingBoxMaximum.set(this.getPosition().x + 1f, this.getPosition().y + 1f, this.getPosition().z + 1f);
 		return this.getBoundingBox().set(boundingBoxMinimum,boundingBoxMaximum);
+	}
+	
+	@Override
+	public void handleCollision(int bulletId1, int bulletId2) {
+//		Projectile projectile = null;
+//		Enemy enemy = null;
+//		
+//		if (Entity.entityInstances.get(bulletId1) instanceof Projectile)
+//			projectile = (Projectile)Entity.entityInstances.get(bulletId1);
+//		else if (Entity.entityInstances.get(bulletId1) instanceof Enemy)
+//			enemy = (Enemy)Entity.entityInstances.get(bulletId1);
+//		if (Entity.entityInstances.get(bulletId2) instanceof Projectile)
+//			projectile = (Projectile)Entity.entityInstances.get(bulletId2);
+//		else if (Entity.entityInstances.get(bulletId2) instanceof Enemy)
+//			enemy = (Enemy)Entity.entityInstances.get(bulletId2);
+		
+//		if (enemy != null && projectile != null) {
+			this.takeDamage(bulletId1);
+			Entity.entityInstances.get(bulletId2).setMoving(false);
+//			projectile.setMoving(false);
+//		}
 	}
 
 	public boolean isAttacking() {

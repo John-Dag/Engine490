@@ -4,12 +4,12 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.utils.Array;
 
 public class Entity {
-	private int id;
-	private boolean isActive;
-	private boolean isRenderable;
+	private int id, index;
+	private boolean isActive, isRenderable, moving, hasCollided;
 	public static Array<Entity> entityInstances = new Array<Entity>();
 	
 	public Entity() {
@@ -22,6 +22,9 @@ public class Entity {
 		this.id = id;
 		this.isActive = isActive;
 		this.isRenderable = isRenderable;
+		this.index = entityInstances.size;
+		this.setMoving(true);
+		this.setHasCollided(false);
 	}
 	
 	public void removeEntity(int i) {
@@ -44,6 +47,10 @@ public class Entity {
 	
 	// Overridden by classes that extend Entity
 	public void render(ModelBatch modelBatch, DecalBatch decalBatch, ModelBatch shadowBatch) {
+		
+	}
+	
+	public void handleCollision(int bulletId1, int bulletId2) {
 		
 	}
 	
@@ -85,6 +92,30 @@ public class Entity {
 	
 	public void dispose() {
 		
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public boolean isMoving() {
+		return moving;
+	}
+
+	public void setMoving(boolean moving) {
+		this.moving = moving;
+	}
+
+	public boolean isHasCollided() {
+		return hasCollided;
+	}
+
+	public void setHasCollided(boolean hasCollided) {
+		this.hasCollided = hasCollided;
 	}
 }
 

@@ -1,5 +1,7 @@
 package com.gdx.DynamicEntities;
 
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
@@ -8,10 +10,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetWorld;
 import com.gdx.engine.Assets;
+import com.gdx.engine.BulletMotionState;
+import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
@@ -25,6 +30,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 	private Emitter emitter;
 	private RegularEmitter emitterReg;
 	private boolean collision = false;
+	public static Vector3 localInertia = new Vector3();
 	 
 	public Projectile() {
 		super();
@@ -49,6 +55,18 @@ public class Projectile extends DynamicEntity implements Poolable {
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
 		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
+		this.getBulletObject().setCollisionFlags(this.getBulletObject().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
+		this.getBulletObject().setContactCallbackFlag(World.PROJECTILE_FLAG);
+		this.getBulletObject().setContactCallbackFilter(World.ENEMY_FLAG);
+		this.getBulletShape().calculateLocalInertia(1f, localInertia);
+		this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(1f, null, this.getBulletShape(), localInertia));
+		//this.getBulletBody().setWorldTransform(this.calculateTarget(this.getPosition()));
+		this.setMotionState(new BulletMotionState());
+//		this.getMotionState().transform = this.getParticleEffect().getControllers().first().transform;
+		this.setBulletBody(new btRigidBody(this.getConstructionInfo()));
+		this.getBulletBody().setMotionState(this.getMotionState());
+//		this.getBulletBody().proceedToTransform(this.getParticleEffect().getControllers().first().transform);
+		World.dynamicsWorld.addRigidBody(this.getBulletBody());
 	}
 
 	@Override
@@ -58,8 +76,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 		
 		this.updateProjectilePosition(world, time);
 		if (world.getClient() == null) {
-			collision = world.checkProjectileCollisions(this);
-			if (collision)
+			if (!this.isMoving())
 				this.initializeCollisionExplosionEffect();
 		}
 		this.checkCollisionMeshlevel(time, world);
@@ -105,7 +122,9 @@ public class Projectile extends DynamicEntity implements Poolable {
 					       movementVector.y * collisionVector.y,
 				           movementVector.z * collisionVector.z);
 
-		this.updatePosition(moveAmt);
+		//this.updatePosition(moveAmt);
+		this.getParticleEffect().setTransform(this.getBulletBody().getWorldTransform());
+		System.out.println(this.getBulletBody().getWorldTransform());
 	}
 	
 	private void checkCollisionMeshlevel(float time, World world) {
@@ -156,8 +175,9 @@ public class Projectile extends DynamicEntity implements Poolable {
 	public void removeProjectile() {
 		//System.out.println(World.particleManager.getProjectilePool().peak);
 		World.particleManager.projectilePool.free(this.getParticleEffect());
-		NetWorld.entManager.projectilePool.free(this);
-		this.setIsActive(false);
+		NetWorld.entityManager.projectilePool.free(this);
+		ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(this);
+		world.getClientEventManager().addEvent(event);
 	}
 	
 	public void removeCollisionEffect() {

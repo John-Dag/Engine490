@@ -20,7 +20,7 @@ public class NetClientEvent {
 		
 		@Override
 		public void handleEvent(World world) {
-			Projectile projectile = NetWorld.entManager.projectilePool.obtain();
+			Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 			projectile.reset();
 			projectile.setProjectileSpeed(20f);
 			projectile.setDamage(RocketLauncher.DAMAGE);
@@ -41,7 +41,7 @@ public class NetClientEvent {
 		
 		@Override
 		public void handleEvent(World world) {
-			Projectile projectile = NetWorld.entManager.projectilePool.obtain();
+			Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 			projectile.reset();
 			projectile.setProjectileSpeed(world.getPlayer().getWeapon().getProjectileSpeed());
 			projectile.setDamage(RocketLauncher.DAMAGE);

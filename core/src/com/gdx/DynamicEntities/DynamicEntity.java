@@ -13,6 +13,8 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.gdx.engine.BulletMotionState;
 import com.gdx.engine.Entity;
 import com.gdx.engine.Render;
 import com.gdx.engine.World;
@@ -37,7 +39,11 @@ public class DynamicEntity extends Entity {
 	private Vector3 movementVector = new Vector3();
 	private btCollisionShape bulletShape;
 	private btCollisionObject bulletObject;
+	private btRigidBody bulletBody;
+	private btRigidBody.btRigidBodyConstructionInfo constructionInfo;
+	private BulletMotionState motionState;
 	private Matrix4 target;
+	private Vector3 inertia;
 	
 	public DynamicEntity() {
 		super(0, false, false);
@@ -197,8 +203,13 @@ public class DynamicEntity extends Entity {
 	
 	@Override
 	public void dispose() {
-		bulletObject.dispose();
+		getBulletObject().dispose();
 		bulletShape.dispose();
+	}
+	
+	public Matrix4 calculateTarget(Vector3 vector) {
+		this.getTarget().idt();
+		return this.getTarget().translate(vector);
 	}
 	
 	public int getNetId() {
@@ -404,19 +415,51 @@ public class DynamicEntity extends Entity {
 		this.bulletShape = entityShape;
 	}
 
-	public btCollisionObject getBulletObject() {
-		return bulletObject;
-	}
-
-	public void setBulletObject(btCollisionObject entityObject) {
-		this.bulletObject = entityObject;
-	}
-
 	public Matrix4 getTarget() {
 		return target;
 	}
 
 	public void setTarget(Matrix4 target) {
 		this.target = target;
+	}
+
+	public btCollisionObject getBulletObject() {
+		return bulletObject;
+	}
+
+	public void setBulletObject(btCollisionObject bulletObject) {
+		this.bulletObject = bulletObject;
+	}
+
+	public btRigidBody getBulletBody() {
+		return bulletBody;
+	}
+
+	public void setBulletBody(btRigidBody bulletBody) {
+		this.bulletBody = bulletBody;
+	}
+
+	public btRigidBody.btRigidBodyConstructionInfo getConstructionInfo() {
+		return constructionInfo;
+	}
+
+	public void setConstructionInfo(btRigidBody.btRigidBodyConstructionInfo constructionInfo) {
+		this.constructionInfo = constructionInfo;
+	}
+
+	public Vector3 getInertia() {
+		return inertia;
+	}
+
+	public void setInertia(Vector3 intertia) {
+		this.inertia = intertia;
+	}
+
+	public BulletMotionState getMotionState() {
+		return motionState;
+	}
+
+	public void setMotionState(BulletMotionState motionState) {
+		this.motionState = motionState;
 	}
 }

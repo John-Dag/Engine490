@@ -89,11 +89,11 @@ public class Player extends DynamicEntity {
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
 		//this.setModel(model);
-		this.setBulletShape(new btBoxShape(new Vector3(1f, 1f, 1f)));
-		this.setBulletObject(new btCollisionObject());
-		this.getBulletObject().setCollisionShape(this.getBulletShape());
-		this.setTarget(new Matrix4());
-		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
+//		this.setBulletShape(new btBoxShape(new Vector3(1f, 1f, 1f)));
+//		this.setBulletObject(new btCollisionObject());
+//		this.getBulletObject().setCollisionShape(this.getBulletShape());
+//		this.setTarget(new Matrix4());
+//		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
 	}
 	
 	public void initAbilities() {

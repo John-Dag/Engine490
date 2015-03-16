@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.engine.Assets;
+import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
@@ -28,8 +29,9 @@ public class EnemySpawner extends StaticEntity {
 			public void run() {
 				if (!enemyRef.isActive()) {
 					enemyRef = (Enemy)enemyRef.spawn();
-					Entity.entityInstances.add(enemyRef);
-					World.enemyInstances.add(enemyRef);
+					enemyRef.getBulletObject().setUserValue(Entity.entityInstances.size);
+					ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(enemyRef);
+					World.eventManager.addEvent(event);
 				}
 			}
 		}, initialSpawnTime, delayedSpawnTime);

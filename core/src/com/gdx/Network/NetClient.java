@@ -102,12 +102,12 @@ public class NetClient {
         else if (object instanceof Net.NewPlayer) {
        	   Net.NewPlayer packet = (Net.NewPlayer)object;
        	   createPlayerStatField(packet);
-       	   world.getEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
+       	   world.getNetEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
         }
         
         else if (object instanceof Net.PlayerDisconnect) {
      	   Net.PlayerDisconnect packet = (Net.PlayerDisconnect)object;
-     	   world.getEventManager().addNetEvent(new NetClientEvent.RemovePlayer(packet));
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.RemovePlayer(packet));
         }
         
         else if (object instanceof Net.ProjectilePacket) {
@@ -117,17 +117,17 @@ public class NetClient {
         
         else if (object instanceof Net.NewProjectile) {
      	   Net.NewProjectile packet = (Net.NewProjectile)object;
-     	   world.getEventManager().addNetEvent(new NetClientEvent.CreateProjectile(packet));
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.CreateProjectile(packet));
      	}
         
         else if (object instanceof Net.ChatMessagePacket) {
         	Net.ChatMessagePacket packet = (Net.ChatMessagePacket)object;
-        	world.getEventManager().addNetEvent(new NetClientEvent.ChatMessage(packet));
+        	world.getNetEventManager().addNetEvent(new NetClientEvent.ChatMessage(packet));
         }
         
         else if (object instanceof Net.CollisionPacket) {
         	Net.CollisionPacket packet = (Net.CollisionPacket)object;
-        	world.getEventManager().addNetEvent(new NetClientEvent.ProjectileCollision(packet));
+        	world.getNetEventManager().addNetEvent(new NetClientEvent.ProjectileCollision(packet));
         }
         
         else if (object instanceof Net.StatPacket) {
@@ -285,7 +285,7 @@ public class NetClient {
 	
 	//Send updates to the server if the player is moving, jumping, or respawning.
 	public void clientUpdate() {
-		world.getEventManager().processEvents();
+		world.getNetEventManager().processEvents();
 		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping() || 
 		    world.getPlayer().isRespawning() || world.getPlayer().isRotating()) {
 			sendPlayerUpdate();
