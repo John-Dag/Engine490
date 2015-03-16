@@ -20,6 +20,7 @@ public class TestInventory {
 	inventory.store(list.manaPotion, 1);
 	System.out.println(inventory.getSlots());
 	images = inventory.getImages();
+	System.out.println(images);
 	slots = inventory.getSlots();
 	System.out.println(images.size);
 	}

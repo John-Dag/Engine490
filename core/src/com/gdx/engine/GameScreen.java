@@ -80,8 +80,13 @@ public class GameScreen implements Screen {
 				
 				else if (keyCode == Keys.I && !UIBase.uiSelected) {
 					grid.show();
+					if (grid.getWindow().isVisible())
+						Gdx.input.setCursorCatched(false);
+					else{
+						Gdx.input.setCursorCatched(true);
+					}
 				}
-				
+		
 				return false;
 			}
 		};
