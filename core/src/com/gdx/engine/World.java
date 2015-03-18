@@ -82,6 +82,7 @@ public class World implements Disposable {
 	private BulletContactListener contactListener;
 	private btBroadphaseInterface broadPhase;
 	private btConstraintSolver contraintSolver;
+	private BulletTickCallback tickCallback;
     
 	public World() {
 		playerInstances = new Array<Player>();
@@ -99,8 +100,9 @@ public class World implements Disposable {
 		setContactListener(new BulletContactListener());
 		setContraintSolver(new btSequentialImpulseConstraintSolver());
 		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, contraintSolver, collisionConfig);
-		dynamicsWorld.setGravity(new Vector3(0, 1f, 0));
+		dynamicsWorld.setGravity(new Vector3(0, -0f, 0));
 		eventManager = new ClientEventManager(this);
+		setTickCallback(new BulletTickCallback(dynamicsWorld));
 	}
 	
 	
@@ -186,15 +188,15 @@ public class World implements Disposable {
 	}
 	
 	private void updateEntities(float delta) {
+		eventManager.processEvents();
+		dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 		wireInstances.clear();
-
+		
 		for (int i = 0; i < Entity.entityInstances.size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
 			
 //			if (entity.isActive()) {
-				dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 				entity.update(delta, this);
-				eventManager.processEvents();
 				
 				if(isWireframeEnabled) {
 					Material material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
@@ -639,5 +641,15 @@ public class World implements Disposable {
 
 	public void setContraintSolver(btConstraintSolver contraintSolver) {
 		this.contraintSolver = contraintSolver;
+	}
+
+
+	public BulletTickCallback getTickCallback() {
+		return tickCallback;
+	}
+
+
+	public void setTickCallback(BulletTickCallback tickCallback) {
+		this.tickCallback = tickCallback;
 	}
 }

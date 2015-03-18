@@ -1,5 +1,6 @@
 package com.gdx.DynamicEntities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
@@ -7,10 +8,12 @@ import com.badlogic.gdx.graphics.g3d.particles.emitters.Emitter;
 import com.badlogic.gdx.graphics.g3d.particles.emitters.RegularEmitter;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.linearmath.btTransform;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetWorld;
@@ -50,22 +53,24 @@ public class Projectile extends DynamicEntity implements Poolable {
 		collisionVector = new Vector3(0, 0, 0);
 		newPos = new Vector3(0, 0, 0);
 		oldPos = new Vector3(0, 0, 0);
+		
 		this.setBulletShape(new btBoxShape(new Vector3(0.2f, 0.2f, 0.2f)));
 		this.setBulletObject(new btCollisionObject());
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
-		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
-		this.getBulletObject().setCollisionFlags(this.getBulletObject().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-		this.getBulletObject().setContactCallbackFlag(World.PROJECTILE_FLAG);
-		this.getBulletObject().setContactCallbackFilter(World.ENEMY_FLAG);
-		this.getBulletShape().calculateLocalInertia(1f, localInertia);
-		this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(1f, null, this.getBulletShape(), localInertia));
-		//this.getBulletBody().setWorldTransform(this.calculateTarget(this.getPosition()));
+		this.getBulletShape().calculateLocalInertia(10f, localInertia);
+		
 		this.setMotionState(new BulletMotionState());
-//		this.getMotionState().transform = this.getParticleEffect().getControllers().first().transform;
+		this.getMotionState().transform = this.calculateTarget(this.getPosition());
+		this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(10f, null, this.getBulletShape(), localInertia));
 		this.setBulletBody(new btRigidBody(this.getConstructionInfo()));
 		this.getBulletBody().setMotionState(this.getMotionState());
-//		this.getBulletBody().proceedToTransform(this.getParticleEffect().getControllers().first().transform);
+		this.getBulletBody().proceedToTransform(this.calculateTarget(this.getPosition()));
+		this.getBulletBody().setCollisionFlags(this.getBulletBody().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
+		this.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().nor());
+		this.getBulletBody().activate();
+		Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		this.getBulletBody().applyCentralImpulse(ray.direction.scl(100f));
 		World.dynamicsWorld.addRigidBody(this.getBulletBody());
 	}
 
@@ -74,13 +79,14 @@ public class Projectile extends DynamicEntity implements Poolable {
 		if (!this.isRendered() && this.getParticleEffect() != null) 
 			this.initializeProjectileEffect();
 		
-		this.updateProjectilePosition(world, time);
+		//this.updateProjectilePosition(world, time);
 		if (world.getClient() == null) {
 			if (!this.isMoving())
 				this.initializeCollisionExplosionEffect();
 		}
-		this.checkCollisionMeshlevel(time, world);
-		
+		//this.checkCollisionMeshlevel(time, world);
+		this.getParticleEffect().setTransform(this.getBulletBody().getWorldTransform());
+		//System.out.println(this.getBulletBody().getWorldTransform());
 		//If the client is hosting a server, send position update packets
 		if (world.getServer() != null) {
 			world.checkProjectileCollisionsServer(this);
@@ -123,8 +129,6 @@ public class Projectile extends DynamicEntity implements Poolable {
 				           movementVector.z * collisionVector.z);
 
 		//this.updatePosition(moveAmt);
-		this.getParticleEffect().setTransform(this.getBulletBody().getWorldTransform());
-		System.out.println(this.getBulletBody().getWorldTransform());
 	}
 	
 	private void checkCollisionMeshlevel(float time, World world) {
@@ -182,6 +186,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 	
 	public void removeCollisionEffect() {
 		World.particleManager.system.remove(this.collisionEffect);
+		this.collisionEffect.reset();
 		World.particleManager.rocketExplosionPool.free(this.collisionEffect);
 	}
 	
@@ -272,6 +277,24 @@ public class Projectile extends DynamicEntity implements Poolable {
 		this.emitter = null;
 		this.emitterReg = null;
 		this.setDealtDamage(false);
+		this.setBulletShape(new btBoxShape(new Vector3(0.2f, 0.2f, 0.2f)));
+		this.setBulletObject(new btCollisionObject());
+		this.getBulletObject().setCollisionShape(this.getBulletShape());
+		this.setTarget(new Matrix4());
+		this.getBulletShape().calculateLocalInertia(10f, localInertia);
+		
+		this.setMotionState(new BulletMotionState());
+		this.getMotionState().transform = this.calculateTarget(this.getPosition());
+		this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(10f, null, this.getBulletShape(), localInertia));
+		this.setBulletBody(new btRigidBody(this.getConstructionInfo()));
+		this.getBulletBody().setMotionState(this.getMotionState());
+		this.getBulletBody().proceedToTransform(this.calculateTarget(this.getPosition()));
+		this.getBulletBody().setCollisionFlags(this.getBulletBody().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
+		this.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().nor());
+		this.getBulletBody().activate();
+		Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		this.getBulletBody().applyCentralImpulse(ray.direction.scl(100f));
+		World.dynamicsWorld.addRigidBody(this.getBulletBody());
 	}
 
 	public boolean hasDealtDamage() {

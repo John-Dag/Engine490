@@ -58,9 +58,8 @@ public class RocketLauncher extends Weapon {
 				projectile.setMoving(true);
 				projectile.setInCollision(false);
 				projectile.setCollEffectInit(false);
-				projectile.getBulletObject().setContactCallbackFilter(World.ENEMY_FLAG);
-				projectile.getBulletObject().setUserValue(Entity.entityInstances.size);
-				projectile.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().crs(world.getPlayer().camera.up).cpy());
+				projectile.getBulletBody().setContactCallbackFilter(World.ENEMY_FLAG);
+				projectile.getBulletBody().setUserValue(Entity.entityInstances.size);
 				ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(projectile);
 				world.getClientEventManager().addEvent(event);
 			}

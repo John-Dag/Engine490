@@ -1,5 +1,6 @@
 package com.gdx.DynamicEntities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
@@ -13,10 +14,13 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.gdx.engine.BulletContactListener;
+import com.gdx.engine.BulletMotionState;
 import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Condition;
 import com.gdx.engine.DistanceTrackerMap;
@@ -68,13 +72,8 @@ public class Enemy extends DynamicEntity {
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
 		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
-		this.setMoving(true);
-		this.getBulletObject().setCollisionFlags(this.getBulletObject().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
 		this.getBulletObject().setContactCallbackFlag(World.ENEMY_FLAG);
-		this.getBulletObject().setContactCallbackFilter(0);
-		this.setInertia(new Vector3(1f, 1f, 1f));
-		this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(1f, null, this.getBulletShape(), this.getInertia()));
-		//World.dynamicsWorld.addRigidBody(this.getBulletBody());
+		World.dynamicsWorld.addCollisionObject(this.getBulletObject());
 	}
 
 	@Override
@@ -563,25 +562,33 @@ public class Enemy extends DynamicEntity {
 		return this.getBoundingBox().set(boundingBoxMinimum,boundingBoxMaximum);
 	}
 	
-	@Override
-	public void handleCollision(int bulletId1, int bulletId2) {
-//		Projectile projectile = null;
-//		Enemy enemy = null;
-//		
-//		if (Entity.entityInstances.get(bulletId1) instanceof Projectile)
-//			projectile = (Projectile)Entity.entityInstances.get(bulletId1);
-//		else if (Entity.entityInstances.get(bulletId1) instanceof Enemy)
-//			enemy = (Enemy)Entity.entityInstances.get(bulletId1);
-//		if (Entity.entityInstances.get(bulletId2) instanceof Projectile)
-//			projectile = (Projectile)Entity.entityInstances.get(bulletId2);
-//		else if (Entity.entityInstances.get(bulletId2) instanceof Enemy)
-//			enemy = (Enemy)Entity.entityInstances.get(bulletId2);
+
+	public static void handleCollisionA(int bulletId1, int bulletId2) {
+		System.out.println("test");
+		if (Entity.entityInstances.get(bulletId1).isMoving() && Entity.entityInstances.get(bulletId2).isMoving()) {
+		Projectile projectile = null;
+		Enemy enemy = null;
 		
-//		if (enemy != null && projectile != null) {
-			this.takeDamage(bulletId1);
-			Entity.entityInstances.get(bulletId2).setMoving(false);
-//			projectile.setMoving(false);
-//		}
+		if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
+			projectile = (Projectile)Entity.entityInstances.get(bulletId1);
+			projectile.setMoving(false);
+		}
+		if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
+			projectile = (Projectile)Entity.entityInstances.get(bulletId2);
+			projectile.setMoving(false);
+		}
+		if (Entity.entityInstances.get(bulletId1) instanceof Enemy) {
+			enemy = (Enemy)Entity.entityInstances.get(bulletId1);
+		}
+		if (Entity.entityInstances.get(bulletId2) instanceof Enemy) {
+			enemy = (Enemy)Entity.entityInstances.get(bulletId2);
+		}
+		
+		if (enemy != null && projectile != null) {
+			enemy.takeDamage(projectile.getDamage());
+			projectile.setMoving(false);
+		}
+		}
 	}
 
 	public boolean isAttacking() {

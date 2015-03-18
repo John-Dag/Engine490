@@ -6,6 +6,7 @@ import com.gdx.engine.World;
 public class ClientEventManager {
 	private Array<ClientEvent> events;
 	private World world;
+	public static boolean updating = false;
 	
 	public ClientEventManager(World world) {
 		setEvents(new Array<ClientEvent>());
@@ -13,12 +14,14 @@ public class ClientEventManager {
 	}
 	
 	public void processEvents() {
+		updating = true;
 		for (ClientEvent event : events) {	
 			System.out.println(event);
 			event.handleEvent(world);
 		}
 		
 		events.clear();
+		updating = false;
 	}
 	
 	public void addEvent(ClientEvent event) {

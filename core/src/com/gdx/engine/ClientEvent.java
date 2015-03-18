@@ -33,11 +33,7 @@ public class ClientEvent {
 		
 		@Override
 		public void handleEvent(World world) {
-			if (bulletId1 < Entity.entityInstances.size && bulletId2 < Entity.entityInstances.size) {
-				Entity entity = Entity.entityInstances.get(bulletId1);
-				System.out.println(entity);
-				entity.handleCollision(20, bulletId2);
-			}
+			Enemy.handleCollisionA(bulletId1, bulletId2);
 		}
 	}
 	
@@ -51,6 +47,7 @@ public class ClientEvent {
 		@Override
 		public void handleEvent(World world) {
 			entity.setIsActive(false);
+			entity.dispose();
 			Entity.entityInstances.removeValue(entity, true);
 		}
 	}

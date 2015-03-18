@@ -203,8 +203,11 @@ public class DynamicEntity extends Entity {
 	
 	@Override
 	public void dispose() {
-		getBulletObject().dispose();
-		bulletShape.dispose();
+//		bulletObject.dispose();
+//		bulletBody.dispose();
+//		bulletShape.dispose();
+//		constructionInfo.dispose();
+//		motionState.dispose();
 	}
 	
 	public Matrix4 calculateTarget(Vector3 vector) {
