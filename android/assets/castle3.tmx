@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="32" height="32" tilewidth="32" tileheight="32">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" nextobjectid="36">
  <tileset firstgid="1" name="TileMapLarge" tilewidth="32" tileheight="32">
   <image source="TileMapLarge.png" width="256" height="256"/>
   <tile id="0">
@@ -227,218 +227,218 @@
    eJztV8sSwjAIZGzqoXU8+Dqo7aE+/v8T5VDGToRAHrUePOw4prAbAjS0AoBqYawWwl9f1l8j3Pibyq9xSPq+fcoeLByc/tSuR3SIOnIPkq2/zuk7xm8z+hKc959b4/R9bi1+Qhs4v7O3NiBuiDvigXhGxs/ZNUI8+8ycaPUfyvkWcTDqxta/Vkf07JgYdyl9eu6EfOfqc73AoU3kiIm/D+RSqs9S5z893xDfAO/eqwvrX+Cz1yWfrrC+FZSf0DtnjvojnCI5Ssc/V/1J2I2YQ197/1r2r/FY758c/RCndf64At9/nP8AefevVK/crEH+c88fMecXw5E7f2r1m7p/stfmb0v/pszfVjQQvvs0/PL3zzf1l8QL2nQOfw==
   </data>
  </layer>
- <objectgroup name="objects" width="32" height="32">
-  <object name="Light" x="784" y="209">
+ <objectgroup name="objects">
+  <object id="1" name="Light" x="784" y="209">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="3"/>
    </properties>
   </object>
-  <object name="Light" x="240" y="272">
+  <object id="2" name="Light" x="240" y="272">
    <properties>
     <property name="color" value="4"/>
     <property name="height" value="3"/>
    </properties>
   </object>
-  <object name="Light" x="239" y="815">
+  <object id="3" name="Light" x="239" y="815">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="3"/>
    </properties>
   </object>
-  <object name="Light" x="784" y="815">
+  <object id="4" name="Light" x="784" y="815">
    <properties>
     <property name="color" value="4"/>
     <property name="height" value="3"/>
    </properties>
   </object>
-  <object name="Light" x="505" y="506">
+  <object id="5" name="Light" x="505" y="506">
    <properties>
     <property name="color" value="3"/>
     <property name="height" value="3"/>
    </properties>
   </object>
-  <object name="Torch" x="399" y="805">
+  <object id="6" name="Torch" x="399" y="805">
    <properties>
     <property name="W" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="625" y="805">
+  <object id="7" name="Torch" x="625" y="805">
    <properties>
     <property name="W" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="623" y="262">
+  <object id="8" name="Torch" x="623" y="262">
    <properties>
     <property name="W" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="399" y="262">
+  <object id="9" name="Torch" x="399" y="262">
    <properties>
     <property name="W" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="624" y="216">
+  <object id="10" name="Torch" x="624" y="216">
    <properties>
     <property name="E" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="399" y="219">
+  <object id="11" name="Torch" x="399" y="219">
    <properties>
     <property name="E" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="625" y="762">
+  <object id="12" name="Torch" x="625" y="762">
    <properties>
     <property name="E" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="398" y="763">
+  <object id="13" name="Torch" x="398" y="763">
    <properties>
     <property name="E" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="263" y="401">
+  <object id="14" name="Torch" x="263" y="401">
    <properties>
     <property name="S" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="263" y="623">
+  <object id="15" name="Torch" x="263" y="623">
    <properties>
     <property name="S" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="805" y="401">
+  <object id="16" name="Torch" x="805" y="401">
    <properties>
     <property name="S" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="805" y="624">
+  <object id="17" name="Torch" x="805" y="624">
    <properties>
     <property name="S" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="762" y="400">
+  <object id="18" name="Torch" x="762" y="400">
    <properties>
     <property name="N" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="763" y="626">
+  <object id="19" name="Torch" x="763" y="626">
    <properties>
     <property name="N" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="218" y="401">
+  <object id="20" name="Torch" x="218" y="401">
    <properties>
     <property name="N" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Torch" x="216" y="622">
+  <object id="21" name="Torch" x="216" y="622">
    <properties>
     <property name="N" value=""/>
     <property name="color" value="1"/>
     <property name="height" value="2"/>
    </properties>
   </object>
-  <object name="Spawn" x="921" y="509">
+  <object id="22" name="Spawn" x="921" y="509">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="Rocket" x="447" y="540">
+  <object id="23" name="Rocket" x="447" y="540">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
     <property name="time" value="40"/>
    </properties>
   </object>
-  <object name="Rocket" x="175" y="945">
+  <object id="24" name="Rocket" x="175" y="945">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
     <property name="time" value="40"/>
    </properties>
   </object>
-  <object name="Spawn" x="804" y="951">
+  <object id="25" name="Spawn" x="804" y="951">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="Spawn" x="907" y="400">
+  <object id="26" name="Spawn" x="907" y="400">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="Spawn" x="651" y="673">
+  <object id="27" name="Spawn" x="651" y="673">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="Spawn" x="381" y="644">
+  <object id="28" name="Spawn" x="381" y="644">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="Spawn" x="356" y="374">
+  <object id="29" name="Spawn" x="356" y="374">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="Spawn" x="497" y="165">
+  <object id="30" name="Spawn" x="497" y="165">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="Spawn" x="700" y="347">
+  <object id="31" name="Spawn" x="700" y="347">
    <properties>
     <property name="height" value="1"/>
     <property name="time" value="1"/>
    </properties>
   </object>
-  <object name="Portal" x="79" y="817">
+  <object id="32" name="Portal" x="79" y="817">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
    </properties>
   </object>
-  <object name="SpeedBoost" x="145" y="591">
+  <object id="33" name="SpeedBoost" x="145" y="591">
    <properties>
     <property name="color" value="2"/>
     <property name="duration" value="5"/>
@@ -446,14 +446,14 @@
     <property name="time" value="40"/>
    </properties>
   </object>
-  <object name="Sword" x="552" y="540">
+  <object id="34" name="Sword" x="552" y="540">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
     <property name="time" value="40"/>
    </properties>
   </object>
-  <object name="HealthPot" x="144" y="399">
+  <object id="35" name="HealthPot" x="144" y="399">
    <properties>
     <property name="color" value="3"/>
     <property name="duration" value="0"/>
@@ -480,6 +480,11 @@
  <layer name="Wall Texture Layer 1" width="32" height="32" visible="0" opacity="0.61">
   <data encoding="base64" compression="zlib">
    eJztl1EKwCAMQ73axN7/SvvZQMLaOam2gzwoFikN6E9SSjy1q3adq3Tu/RXudzOiLw462o6m9LuIfv+MePx3Bg1CCCGE/Ifs/uMwdgjMfCHa/8/4b1H6UXrNmfwhUNbcEx7+/03bAvVX50/MnlkyzwkghA4x
+  </data>
+ </layer>
+ <layer name="Patrol Path Tile Layer 1" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJztlUEKACAIBPX/n+4agWSIbtYOSKDBqASJ9EXpp/9jPwrk3Le51YgMt+X35KLuk9qai+xod0+nM3P/Hj8Cz8xVbzQbdM8d/Jk90o/1E0J8vPDfVTAAGA4APQ==
   </data>
  </layer>
 </map>

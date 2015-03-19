@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.esotericsoftware.kryonet.Client;
+//import com.esotericsoftware.kryonet.Client;
 import com.gdx.DynamicEntities.Ability;
 import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Player;
@@ -31,6 +31,8 @@ import com.gdx.Network.Net.projectile;
 import com.gdx.Network.NetClient;
 import com.gdx.Weapons.RocketLauncher;
 
+import java.util.ArrayList;
+
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
     public static boolean isWireframeEnabled;
@@ -45,7 +47,7 @@ public class World implements Disposable {
 	private Array<BoundingBox> boxes;
 	private Vector3 position;
 	private Vector3 out;
-    private DistanceTrackerMap distanceMap;
+    private static DistanceTrackerMap distanceMap;
     private FilterEffect filterEffect;
     private NetClient client;
     private NetServer server;
@@ -78,10 +80,30 @@ public class World implements Disposable {
 			setMeshLevel(new MeshLevel(map, skySphere));
 			distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
 			entManager = new EntityManager(this);
+			meshLevel.generatePatrolPath();
 		}
 		catch (Exception e) {
 			System.err.println(e);
 		}
+		// TODO fix merge
+		/*
+<<<<<<< HEAD
+=======
+		
+		//distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
+		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+		meshLevel.generatePatrolPath();
+		Entity.entityInstances.add(player);
+		enemyInstances = new Array<Enemy>();
+		boxes = new Array<BoundingBox>();
+		position = new Vector3();
+		out = new Vector3();
+		wireInstances = new Array<ModelInstance>();
+		isWireframeEnabled = false;
+		
+		Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
+>>>>>>> enemy_lv2_bug_fixes
+*/
 	}
 	
 	public void enterDungeon() {
@@ -101,7 +123,8 @@ public class World implements Disposable {
 		initializeEntities();
 		getBoxes().clear();
 		createBoundingBoxes();
-		distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
+		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+		meshLevel.generatePatrolPath();
 	}
 	
 	public void loadLevel(TiledMap map) {
@@ -124,7 +147,8 @@ public class World implements Disposable {
 		initializeEntities();
 		getBoxes().clear();
 		createBoundingBoxes();
-		distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
+		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
+		meshLevel.generatePatrolPath();
 	}
 	
 	public void update(float delta) {
@@ -366,7 +390,7 @@ public class World implements Disposable {
 	}
 	*/
 	
-	public DistanceTrackerMap getDistanceMap() {
+	public static DistanceTrackerMap getDistanceMap() {
 		return distanceMap;
 	}
 
@@ -427,9 +451,17 @@ public class World implements Disposable {
 		if (this.filterEffect != null) {
 			this.filterEffect.dispose();
 		}
+
+		/* TODO fix merge conflict
+<<<<<<< HEAD
 		
+=======
+>>>>>>> enemy_lv2_bug_fixes
 		this.filterEffect = filterEffect;
+		*/
 	}
+
+
 
 	@Override
 	public void dispose() {

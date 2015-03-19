@@ -98,15 +98,14 @@ public class Player extends DynamicEntity {
 		
 	    //TiledMapTileLayer layer = (TiledMapTileLayer)world.getMeshLevel().getTiledMap().getLayers().get(0);//for width
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
+		int heightPerLayer = 6;
+		int playersTilePos = playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y;
+		int test = 0;
 		if (newPos != oldPos && clipping && GameScreen.mode == State.Offline) {
             distanceMap = world.getDistanceMap();
             distanceMap.resetDistances();
-            if (camera.position.y >= 6)
-            	distanceMap.addDistances((playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y) + world.getMeshLevel().getMapXDimension() * world.getMeshLevel().getMapXDimension());
-            else
-            	distanceMap.addDistances((playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
-            // distanceMap.addDistances(( playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y));
-            world.setDistanceMap(distanceMap);
+			distanceMap.addDistances(playersTilePos + ((int)(camera.position.y / heightPerLayer)
+					* world.getMeshLevel().getMapXDimension() * world.getMeshLevel().getMapXDimension()));
         }
 		
 		float heightValueLvl1 = currentHeightOffset // has to do with crouching, name change may be in order
