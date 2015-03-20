@@ -79,9 +79,10 @@ public class World implements Disposable {
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 			particleManager = new ParticleManager(this);
 			player.initAbilities();
+			player.initWeapons();
 			playerInstances.add(player);
 			Entity.entityInstances.add(player);
-			setMeshLevel(new MeshLevel(map, skySphere));
+			setMeshLevel(new MeshLevel(map, skySphere, this));
 			distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
 			entManager = new EntityManager(this);
 		}
@@ -96,7 +97,7 @@ public class World implements Disposable {
 		getMeshLevel().getInstances().clear();
 		particleManager.system.removeAll();
 		Render.environment.pointLights.removeRange(0, Render.environment.pointLights.size - 1);
-		setMeshLevel(new MeshLevel(true));
+		setMeshLevel(new MeshLevel(true, this));
 		GridPoint2 playerPos = new GridPoint2();
 		playerPos.set(getMeshLevel().getStartingPoint());
 		player.camera.position.set(playerPos.x+0.5f, player.camera.position.y, playerPos.y+0.5f);
@@ -117,10 +118,10 @@ public class World implements Disposable {
 		particleManager.system.removeAll();
 		Render.environment.pointLights.removeRange(0, Render.environment.pointLights.size - 1);
 		try {
-			setMeshLevel(new MeshLevel(map, true));
+			setMeshLevel(new MeshLevel(map, true, this));
 		} catch(Exception e) {
 			System.err.println("Error loading specified map. Loading default.");
-			setMeshLevel(new MeshLevel(Assets.castle3, true));
+			setMeshLevel(new MeshLevel(Assets.castle3, true, this));
 		}
 		GridPoint2 playerPos = new GridPoint2();
 		playerPos.set(getMeshLevel().getStartingPoint());
@@ -507,12 +508,12 @@ public class World implements Disposable {
 	}
 
 
-	public NetClientEventManager getEventManager() {
+	public NetClientEventManager getClientEventManager() {
 		return eventManager;
 	}
 
 
-	public void setEventManager(NetClientEventManager eventManager) {
+	public void setClientEventManager(NetClientEventManager eventManager) {
 		this.eventManager = eventManager;
 	}
 

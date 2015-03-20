@@ -14,20 +14,27 @@ public class HealthPot extends PowerUp{
 		
 	}
 	
-	public HealthPot(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, Model model, float duration) {
-		super(position, id, isActive, isRenderable, isDecalFacing, model, duration);
+	public HealthPot(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, Model model, float duration, powerUpTypeEnum type) {
+		super(position, id, isActive, isRenderable, isDecalFacing, model, duration, type);
 		this.model = model;
 		this.duration = duration;
+		
+		BoundingBox temp = new BoundingBox();
+		this.getModel().calculateBoundingBox(temp);
+		this.setBoundingBox(temp);
+		this.getModel().transform.setToTranslation(this.getPosition());
+		this.getModel().transform.scale(0.05f, 0.05f, 0.05f);
+		this.getModel().transform.rotate(new Vector3(1,0,0), 90);
 	}
 	
 	@Override
-	protected void effect() {
+	public void effect() {
 		World.player.setHealth(100);
 	}
 	
 	@Override
 	public PowerUp spawn() {
-		HealthPot healthPot = new HealthPot(this.getPosition().cpy(), 2, true, true, true, model, duration);
+		HealthPot healthPot = new HealthPot(this.getPosition().cpy(), 2, true, true, true, model, duration, powerUpTypeEnum.healthPot);
 		BoundingBox temp = new BoundingBox();
 		healthPot.getModel().calculateBoundingBox(temp);
 		healthPot.setBoundingBox(temp);

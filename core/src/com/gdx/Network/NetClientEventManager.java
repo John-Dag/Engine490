@@ -10,6 +10,8 @@ import com.gdx.Network.NetClientEvent.CreatePlayerProjectile;
 import com.gdx.Network.NetClientEvent.CreateProjectile;
 import com.gdx.Network.NetClientEvent.ProjectileCollision;
 import com.gdx.Network.NetClientEvent.RemovePlayer;
+import com.gdx.Network.NetClientEvent.PowerUpConsumed;
+import com.gdx.Network.NetClientEvent.WeaponPickedUp;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
@@ -72,6 +74,14 @@ public class NetClientEventManager {
 				
 				else if (event instanceof ChatMessage) {
 					world.getClient().addChatMessage(((ChatMessage) event).packet);
+				}
+				
+				else if (event instanceof PowerUpConsumed) {
+					world.getClient().sendPowerUpConsumedUpdate(((PowerUpConsumed) event).packet);
+				}
+				
+				else if (event instanceof WeaponPickedUp) {
+					world.getClient().sendWeaponPickedUpUpdate(((WeaponPickedUp) event).packet);
 				}
 			}
 		}

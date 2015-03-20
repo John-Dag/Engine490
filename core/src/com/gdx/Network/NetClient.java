@@ -9,7 +9,9 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
+import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net.PlayerPacket;
+import com.gdx.StaticEntities.PowerUp;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
@@ -98,12 +100,12 @@ public class NetClient {
         else if (object instanceof Net.NewPlayer) {
        	   Net.NewPlayer packet = (Net.NewPlayer)object;
        	   createPlayerStatField(packet);
-       	   world.getEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
+       	   world.getClientEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
         }
         
         else if (object instanceof Net.PlayerDisconnect) {
      	   Net.PlayerDisconnect packet = (Net.PlayerDisconnect)object;
-     	   world.getEventManager().addNetEvent(new NetClientEvent.RemovePlayer(packet));
+     	   world.getClientEventManager().addNetEvent(new NetClientEvent.RemovePlayer(packet));
         }
         
         else if (object instanceof Net.ProjectilePacket) {
@@ -113,23 +115,76 @@ public class NetClient {
         
         else if (object instanceof Net.NewProjectile) {
      	   Net.NewProjectile packet = (Net.NewProjectile)object;
-     	   world.getEventManager().addNetEvent(new NetClientEvent.CreateProjectile(packet));
+     	   world.getClientEventManager().addNetEvent(new NetClientEvent.CreateProjectile(packet));
      	}
         
         else if (object instanceof Net.ChatMessagePacket) {
         	Net.ChatMessagePacket packet = (Net.ChatMessagePacket)object;
-        	world.getEventManager().addNetEvent(new NetClientEvent.ChatMessage(packet));
+        	world.getClientEventManager().addNetEvent(new NetClientEvent.ChatMessage(packet));
         }
         
         else if (object instanceof Net.CollisionPacket) {
         	Net.CollisionPacket packet = (Net.CollisionPacket)object;
-        	world.getEventManager().addNetEvent(new NetClientEvent.ProjectileCollision(packet));
+        	world.getClientEventManager().addNetEvent(new NetClientEvent.ProjectileCollision(packet));
         }
         
         else if (object instanceof Net.StatPacket) {
         	Net.StatPacket packet = (Net.StatPacket)object;
         	updateNetStats(packet);
         }
+        
+        else if (object instanceof Net.PowerUpConsumedPacket) {
+        	System.out.println("Client received powerUpConsumed confirmation packet");
+        	Net.PowerUpConsumedPacket packet = (Net.PowerUpConsumedPacket)object;
+        	handlePowerUpConsumedPacket(packet);
+        }
+        
+        else if (object instanceof Net.PowerUpRespawnPacket) {
+        	System.out.println("Client received powerUpRespawn packet");
+        	Net.PowerUpRespawnPacket packet = (Net.PowerUpRespawnPacket)object;
+        	handlePowerUpRespawnPacket(packet);
+        }
+        
+        else if (object instanceof Net.WeaponPickedUpPacket) {
+        	System.out.println("Client received powerUpConsumed confirmation packet");
+        	Net.WeaponPickedUpPacket packet = (Net.WeaponPickedUpPacket)object;
+        	handleWeaponPickedUpPacket(packet);
+        }
+        
+        else if (object instanceof Net.WeaponRespawnPacket) {
+        	System.out.println("Client received powerUpRespawn packet");
+        	Net.WeaponRespawnPacket packet = (Net.WeaponRespawnPacket)object;
+        	handleWeaponRespawnPacket(packet);
+        }
+	}
+	
+	private void handlePowerUpConsumedPacket(Net.PowerUpConsumedPacket packet) {
+		// this makes the power up disappear for players who did not consume it but witnessed the event
+		PowerUp powerUp = world.getMeshLevel().getPowerUpInstances().get(packet.powerUpEntityId);
+		powerUp.setIsRenderable(false);
+		if(packet.playerId == world.getPlayer().getNetId()) {
+			powerUp.effect();
+		}
+	}
+	
+	private void handlePowerUpRespawnPacket(Net.PowerUpRespawnPacket packet) {
+		PowerUp powerUp = world.getMeshLevel().getPowerUpInstances().get(packet.powerUpEntityId);
+		powerUp.setIsRenderable(true);
+	}
+	
+	private void handleWeaponPickedUpPacket(Net.WeaponPickedUpPacket packet) {
+		// this makes the weapon disappear for players who did not consume it but witnessed the event
+		Weapon weapon = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		if(packet.playerId == world.getPlayer().getNetId()) {
+			world.getPlayer().setWeapon(weapon);
+		} else {
+			weapon.setIsRenderable(false);
+		}
+	}
+	
+	private void handleWeaponRespawnPacket(Net.WeaponRespawnPacket packet) {
+		Weapon weapon = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		weapon.setIsRenderable(true);
 	}
 	
 	public void createPlayerStatField(Net.NewPlayer packet) {
@@ -158,6 +213,14 @@ public class NetClient {
 	
 	public void sendDeathUpdate() {
 		Net.deathPacket packet = new Net.deathPacket();
+		client.sendTCP(packet);
+	}
+	
+	public void sendPowerUpConsumedUpdate(Net.PowerUpConsumedPacket packet) {
+		client.sendTCP(packet);
+	}
+	
+	public void sendWeaponPickedUpUpdate(Net.WeaponPickedUpPacket packet) {
 		client.sendTCP(packet);
 	}
 	
@@ -235,7 +298,7 @@ public class NetClient {
 	
 	//Send updates to the server if the player is moving, jumping, or respawning.
 	public void clientUpdate() {
-		world.getEventManager().processEvents();
+		world.getClientEventManager().processEvents();
 		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping() || 
 		    world.getPlayer().isRespawning() || world.getPlayer().isRotating()) {
 			sendPlayerUpdate();

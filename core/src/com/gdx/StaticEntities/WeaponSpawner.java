@@ -30,8 +30,8 @@ public class WeaponSpawner extends StaticEntity {
 		Timer.schedule(new Task() {
 			@Override
 			public void run() { 
-				if (weaponRef.isPickedup()) {
-					weaponRef = (Weapon)weaponRef.spawn(position);
+				if (!weaponRef.isRenderable()) {
+					//weaponRef = (Weapon)weaponRef.spawn(position);
 					Entity.entityInstances.add(weaponRef);
 				}
 			}

@@ -33,6 +33,12 @@ public class Net {
 	    kryo.register(deathPacket.class);
 	    kryo.register(CollisionPacket.class);
 	    kryo.register(StatPacket.class);
+	    kryo.register(PowerUpConsumedPacket.class);
+	    kryo.register(PowerUpRespawnPacket.class);
+	    kryo.register(NewPowerUpPacket.class);
+	    kryo.register(WeaponPickedUpPacket.class);
+	    kryo.register(WeaponRespawnPacket.class);
+	    kryo.register(NewWeaponPacket.class);
 	}
 	
 	//Packets
@@ -59,17 +65,31 @@ public class Net {
 	}
 	
 	public static class NewPowerUpPacket {
+		// NOTE: I think this is not necessary because the powerUpRespawn packet will be sent instead
 		public Vector3 position;
 		public int powerUpEntityId;
 	}
 	
 	public static class PowerUpRespawnPacket {
-		public Vector3 position;
 		public int powerUpEntityId;
 	}
 	
 	public static class PowerUpConsumedPacket {
 		public int powerUpEntityId;
+		public int playerId;
+	}
+	
+	public static class NewWeaponPacket {
+		public Vector3 position;
+		public int weaponEntityId;
+	}
+	
+	public static class WeaponRespawnPacket {
+		public int weaponEntityId;
+	}
+	
+	public static class WeaponPickedUpPacket {
+		public int weaponEntityId;
 		public int playerId;
 	}
 	

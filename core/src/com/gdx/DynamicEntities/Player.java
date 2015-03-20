@@ -15,8 +15,11 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
+import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.UI.UIBase;
 import com.gdx.UI.UIConsole;
+import com.gdx.Weapons.RocketLauncher;
+import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
@@ -51,6 +54,7 @@ public class Player extends DynamicEntity {
 	private DistanceTrackerMap distanceMap;
 	private Array<Ability> abilities;
 	private String netName;
+	private Array<Weapon> weapons;
 	
 	public Player() {
 		super();
@@ -86,12 +90,20 @@ public class Player extends DynamicEntity {
 		this.speedScalar = 1f; // 1 = default movespeed
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
+		this.weapons = new Array<Weapon>();
 		//this.setModel(model);
 	}
 	
 	public void initAbilities() {
 		abilities.add(new Blizzard(10, false, true, new Vector3(0, 0, 0)));
 		abilities.add(new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
+	}
+	
+	public void initWeapons() {
+		RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(Vector3.Zero);
+		weapons.add(launcher);
+		Sword sword = (Sword) new Sword().spawn(Vector3.Zero);
+		weapons.add(sword);
 	}
 
 	@Override

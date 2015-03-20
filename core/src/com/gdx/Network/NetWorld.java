@@ -30,11 +30,12 @@ public class NetWorld extends World {
 		//playerInstances.add(player);
 		particleManager = new ParticleManager(this);
 		player.initAbilities();
-		setMeshLevel(new MeshLevel(Assets.castle3Multi, true));
+		player.initWeapons();
+		setMeshLevel(new MeshLevel(Assets.castle3Multi, true, this));
 		Entity.entityInstances.add(player);
 		//distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
 		entManager = new EntityManager(this);
-		setEventManager(new NetClientEventManager(this));
+		setClientEventManager(new NetClientEventManager(this));
 		setServerEventManager(new NetServerEventManager(this));
 	}
 

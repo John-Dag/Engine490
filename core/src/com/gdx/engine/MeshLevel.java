@@ -27,16 +27,19 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.EnemySpawner;
 import com.gdx.StaticEntities.HealthPot;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.Portal;
-import com.gdx.StaticEntities.PowerUpSpawn;
+import com.gdx.StaticEntities.PowerUp;
+import com.gdx.StaticEntities.PowerUpSpawner;
 import com.gdx.StaticEntities.SpeedBoost;
 import com.gdx.StaticEntities.Torch;
 import com.gdx.StaticEntities.WeaponSpawner;
+import com.gdx.StaticEntities.PowerUp.powerUpTypeEnum;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 
@@ -46,6 +49,7 @@ import com.gdx.Weapons.Sword;
 // Many methods convert between these two coordinate systems, so its important to know which variables are in which coordinate system.
 
 public class MeshLevel {
+	private World world;
 	public static Color skyColor = Color.BLACK;
 	public static final float ROOT_PT5 = 0.70710678f;
 	public static final int NORTH = 1;
@@ -62,7 +66,7 @@ public class MeshLevel {
 	public MeshPartBuilder meshPartBuilder;
 	public ModelBuilder modelBuilder;
 	public ModelInstance instance;
-	public Model model; 
+	public Model model;
 	
 	// the length and width of one tile
 	private static final float SPOT_WIDTH = 1;
@@ -77,6 +81,8 @@ public class MeshLevel {
 	
 	private TiledMap tiledMap;
 	private Array<ModelInstance> instances;
+	private Array<PowerUp> powerUpInstances;
+	private Array<Weapon> weaponInstances;
 	private Model skySphere;
 	private int triCount = 0;
 	private boolean isSkySphereActive;
@@ -116,9 +122,12 @@ public class MeshLevel {
 	public Map<String,Integer> MaterialIds=new HashMap<String,Integer>();		//Maps texture filenames to texture Ids
 	//End Texture stuff
 	
-	public MeshLevel(boolean isSkySphereActive){
+	public MeshLevel(boolean isSkySphereActive, World world){
+		this.world = world;
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
+		powerUpInstances = new Array<PowerUp>();
+		weaponInstances = new Array<Weapon>();
 		currentLayerNumber = 0;
 		this.heightOffset = 0f;
 		combinedWalls = true;
@@ -140,9 +149,12 @@ public class MeshLevel {
 		generateLevelMesh();
 	}
 	
-	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
+	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive, World world) {
+		this.world = world;
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
+		powerUpInstances = new Array<PowerUp>();
+		weaponInstances = new Array<Weapon>();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
 		//tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
@@ -1152,6 +1164,7 @@ public class MeshLevel {
 				Sword sword = (Sword) new Sword().spawn(new Vector3(objPosition.x - 0.4f, objPosition.y, objPosition.z));
 				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
 												        sword);
+				weaponInstances.add(sword);
 				Entity.entityInstances.add(spawn);
 			}
 			
@@ -1163,6 +1176,7 @@ public class MeshLevel {
 				RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(objPosition);
 				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
 														launcher);
+				weaponInstances.add(launcher);
 				Entity.entityInstances.add(spawn);
 			}
 
@@ -1199,27 +1213,40 @@ public class MeshLevel {
 			}
 			
 			else if (rectObj.getName().contains("SpeedBoost")) {
-				if(GameScreen.mode == GameScreen.mode.Server|| GameScreen.mode == GameScreen.mode.Offline) {
-					objPosition = new Vector3();
-					int height = getObjectHeight(rectObj);
-					float duration = getPowerUpDuration(rectObj);
-					float spawnTime = getSpawnTime(rectObj);
-					objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-					PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, spawnTime, getLightColor(rectObj), 
-							new SpeedBoost(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
-					//spawn.startTimer(spawnTime);
-					Entity.entityInstances.add(spawn);
-				}
-			}
-			
-			else if (rectObj.getName().contains("HealthPot") && (GameScreen.mode == GameScreen.mode.Server|| GameScreen.mode == GameScreen.mode.Offline)) {
 				objPosition = new Vector3();
 				int height = getObjectHeight(rectObj);
 				float duration = getPowerUpDuration(rectObj);
 				float spawnTime = getSpawnTime(rectObj);
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, spawnTime, getLightColor(rectObj), 
-									 new HealthPot(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
+				//Note: Here I set is renderable to false.
+				// need to send the newPowerUp packet to the player in order to set it to true for client
+				boolean renderable = false;
+				if(GameScreen.mode == GameScreen.mode.Server) {
+					renderable = true;
+				}
+				SpeedBoost speedBoost = new SpeedBoost(objPosition, 9, true, renderable, true, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.speedBoost);
+				PowerUpSpawner spawn = new PowerUpSpawner(objPosition, 9, true, true, false, spawnTime, getLightColor(rectObj), speedBoost, world);
+				speedBoost.setSpawner(spawn);
+				powerUpInstances.add(speedBoost);
+				Entity.entityInstances.add(spawn);
+			}
+			
+			else if (rectObj.getName().contains("HealthPot")) {
+				objPosition = new Vector3();
+				int height = getObjectHeight(rectObj);
+				float duration = getPowerUpDuration(rectObj);
+				float spawnTime = getSpawnTime(rectObj);
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				//Note: Here I set is renderable to false if client, true if server.
+				// need to send the newPowerUp packet to the player in order to set it to true for client
+				boolean renderable = false;
+				if(GameScreen.mode == GameScreen.mode.Server) {
+					renderable = true;
+				}
+				HealthPot healthPot = new HealthPot(objPosition, 9, true, renderable, true, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.healthPot);
+				PowerUpSpawner spawn = new PowerUpSpawner(objPosition, 9, true, true, false, spawnTime, getLightColor(rectObj), healthPot, world);
+				healthPot.setSpawner(spawn);
+				powerUpInstances.add(healthPot);
 				Entity.entityInstances.add(spawn);
 			}
 
@@ -1750,5 +1777,13 @@ public class MeshLevel {
 
 	public MapTile getMapTile(int x, int y, int z){
 		return levelArray[x][y][z];
+	}
+
+	public Array<PowerUp> getPowerUpInstances() {
+		return powerUpInstances;
+	}
+	
+	public Array<Weapon> getWeaponInstances() {
+		return weaponInstances;
 	}
 }

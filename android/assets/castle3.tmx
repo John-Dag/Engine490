@@ -443,7 +443,7 @@
     <property name="color" value="2"/>
     <property name="duration" value="5"/>
     <property name="height" value="1"/>
-    <property name="time" value="40"/>
+    <property name="time" value="4"/>
    </properties>
   </object>
   <object name="Sword" x="552" y="540">
@@ -458,7 +458,7 @@
     <property name="color" value="3"/>
     <property name="duration" value="0"/>
     <property name="height" value="1"/>
-    <property name="time" value="40"/>
+    <property name="time" value="4"/>
    </properties>
   </object>
  </objectgroup>

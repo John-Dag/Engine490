@@ -78,4 +78,12 @@ public class NetClientEvent {
 			this.packet = packet;
 		}
 	}
+	
+	public static class WeaponPickedUp extends NetClientEvent {
+		public Net.WeaponPickedUpPacket packet;
+		
+		public WeaponPickedUp(Net.WeaponPickedUpPacket packet) {
+			this.packet = packet;
+		}
+	}
 }

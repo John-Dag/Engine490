@@ -11,6 +11,15 @@ public class Weapon extends DynamicEntity {
 	protected float recoil;
 	protected int damage;
 	private boolean isParticleWeapon, isPickedup;
+	
+	public enum weaponTypeEnum{
+		rocketLauncher, sword
+	}
+	
+	private static int weaponCount = 0;
+	private int uniqueId;
+	
+	private weaponTypeEnum weaponType;
 
 	public Weapon() {
 		super();
@@ -76,5 +85,17 @@ public class Weapon extends DynamicEntity {
 
 	public void setParticleWeapon(boolean isParticleWeapon) {
 		this.isParticleWeapon = isParticleWeapon;
+	}
+	
+	public void setWeaponType(weaponTypeEnum type) {
+		this.weaponType = type;
+	}
+	
+	public weaponTypeEnum getWeaponType() {
+		return this.weaponType;
+	}
+	
+	public int getUniqueId() {
+		return uniqueId;
 	}
 }

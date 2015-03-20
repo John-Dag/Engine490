@@ -11,45 +11,58 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
+import com.gdx.Network.Net;
+import com.gdx.Network.NetClientEvent;
+import com.gdx.Network.NetServerEvent;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
+import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 
-public class PowerUpSpawn extends StaticEntity {
-	PowerUp powerRef = new PowerUp();
+public class PowerUpSpawner extends StaticEntity {
+	PowerUp powerUpRef;
 	Color color = new Color();
 	private float spawnTime;
-	private PowerUpSpawn thisSpawn;
+	private PowerUpSpawner thisSpawn;
+	private World world;
 	
-	public PowerUpSpawn() {
+	public PowerUpSpawner() {
 		super();
 	}
 	
-	public PowerUpSpawn(Vector3 position, int id, boolean isActive, boolean isRenderable, 
-				boolean isDecalFacing, float spawnTime, Color color, PowerUp powerUp) {
+	public PowerUpSpawner(Vector3 position, int id, boolean isActive, boolean isRenderable, 
+				boolean isDecalFacing, float spawnTime, Color color, PowerUp powerUp, World world) {
 		super(position, id, isActive, isRenderable, isDecalFacing);
+		this.world = world;
 		this.color = color;
 		this.spawnTime = spawnTime;
 		PointLight pointLight = new PointLight();
 		pointLight.set(color, position, 1f);
 		this.setPointLight(pointLight);
 		this.setEffect(World.particleManager.getMistPool().obtain());
-		powerRef = (PowerUp) powerUp.spawn();
-		powerRef.setSpawner(this);
-		Entity.entityInstances.add(powerRef);
+		powerUpRef = powerUp;
+		powerUpRef.setSpawner(this);
+		Entity.entityInstances.add(powerUpRef);
 		thisSpawn = this;
 	}
 	
-	public void startTimer(float spawnTime) {
+	public void startTimer() {
+		System.out.println("Start Timer");
 		Timer.schedule(new Task() {
 			@Override
 			public void run() { 
 				System.out.println("TimerTriggered");
-					powerRef = (PowerUp)powerRef.spawn();
-					powerRef.setSpawner(thisSpawn);
-					Entity.entityInstances.add(powerRef);
+				//powerUpRef.setIsRenderable(true);
+				if(GameScreen.mode == GameScreen.mode.Server) {
+					Net.PowerUpRespawnPacket packet = new Net.PowerUpRespawnPacket();
+					packet.powerUpEntityId = powerUpRef.getUniqueId();
+					NetServerEvent.PowerUpRespawn event = new NetServerEvent.PowerUpRespawn(packet);
+					if (world != null) {
+						world.getServerEventManager().addNetEvent(event);
+					}
+				}
 			}
-		}, spawnTime);
+		}, this.spawnTime);
 	}
 	
 	public float getSpawnTime() {

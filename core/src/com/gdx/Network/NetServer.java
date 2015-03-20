@@ -10,6 +10,8 @@ import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.Network.Net.StatPacket;
+import com.gdx.StaticEntities.PowerUp;
+import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
 public class NetServer {
@@ -116,6 +118,13 @@ public class NetServer {
         	statPacket.name = packet.name;
         	server.sendToAllTCP(statPacket);
         }
+	   	
+        else if (object instanceof Net.PowerUpConsumedPacket) {
+        	System.out.println("Server received powerUpConsumedPacket");
+        	Net.PowerUpConsumedPacket packet = (Net.PowerUpConsumedPacket)object;
+        	NetServerEvent.PowerUpConsumed event = new NetServerEvent.PowerUpConsumed(packet);
+        	world.getServerEventManager().addNetEvent(event);
+        }
 	}
 	
 	public void updateNetStat(int id) {
@@ -141,11 +150,26 @@ public class NetServer {
 	}
 	
 	public void respawnPowerUp(Net.PowerUpRespawnPacket packet) {
-		
+		PowerUp powerUp = world.getMeshLevel().getPowerUpInstances().get(packet.powerUpEntityId);
+		powerUp.setIsRenderable(true);
+		server.sendToAllTCP(packet);
 	}
 	
 	public void consumePowerUp(Net.PowerUpConsumedPacket packet) {
-		
+		PowerUp powerUp = world.getMeshLevel().getPowerUpInstances().get(packet.powerUpEntityId);
+		// if powerUp is renderable
+		if(powerUp.isRenderable()){
+			// set to not renderable, set event to broadcast confirmation packet
+			powerUp.setIsRenderable(false);
+			server.sendToAllTCP(packet);
+			// set respawn timer
+			powerUp.getSpawner().startTimer();
+		} else {
+			System.out.println("POWER UP NOT RENDERABLE?!?");
+		}
+
+		// else (powerUp inactive)
+			// do nothing
 	}
 	
 	//Updates all clients with the player that disconnected
@@ -201,6 +225,16 @@ public class NetServer {
 		String joinedMessage = packet.name + " joined.";
 		sendGlobalServerMessageExcept(joinedMessage, packet.id);
 		addNetStat(packet);
+		
+		// also want to send to this player the renderable powerUps
+		Net.PowerUpRespawnPacket powerUpPacket = new Net.PowerUpRespawnPacket();
+		for(int i = 0; i < world.getMeshLevel().getPowerUpInstances().size; i++) {
+			if(world.getMeshLevel().getPowerUpInstances().get(i).isRenderable()) {
+				powerUpPacket.powerUpEntityId = i;
+				server.sendToTCP(packet.id, powerUpPacket);
+				System.out.println("Server: PowerUp packet sent.");
+			}
+		}
 	}
 	
 	public void updatePlayers(PlayerPacket packet, Connection connection) {

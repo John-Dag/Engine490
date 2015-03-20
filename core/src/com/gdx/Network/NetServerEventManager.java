@@ -38,6 +38,10 @@ public class NetServerEventManager {
 				else if (event instanceof NetServerEvent.PowerUpRespawn) {
 					world.getServer().respawnPowerUp(((NetServerEvent.PowerUpRespawn) event).packet);
 				}
+				
+				else if (event instanceof NetServerEvent.PowerUpConsumed) {
+					world.getServer().consumePowerUp(((NetServerEvent.PowerUpConsumed) event).packet);
+				}
 			}
 		}
 		
