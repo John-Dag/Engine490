@@ -192,7 +192,12 @@ public class UIConsole extends UIBase {
 				world.setFilterEffect(filterEffects.get(currentFilter));
 			}
 		}
-		
+		else if (value.toLowerCase().contains("bulletwires")) {
+			world.bulletDebugDrawEnabled=!world.bulletDebugDrawEnabled;
+		}
+		else if (value.toLowerCase().contains("levelwire")) {
+			world.bulletDebugDrawMeshLevelWiresEnabled=!world.bulletDebugDrawMeshLevelWiresEnabled;
+		}
 		else
 			System.err.println("Unknown command");
 		consoleVal = "";

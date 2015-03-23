@@ -55,7 +55,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 		oldPos = new Vector3(0, 0, 0);
 		
 		//Bullet stuff. Leaving in constructor for now. 
-		this.setBulletShape(new btBoxShape(new Vector3(0.2f, 0.2f, 0.2f)));
+		this.setBulletShape(new btBoxShape(new Vector3(0.05f, 0.05f, 0.05f)));
 		this.setBulletObject(new btCollisionObject());
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());

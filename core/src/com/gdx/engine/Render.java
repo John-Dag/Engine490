@@ -21,6 +21,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.DebugDrawer;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net.PlayerPacket;
@@ -41,6 +44,7 @@ public class Render implements Disposable {
 	public Vector3 upVector = new Vector3(0f, 1f, 0f);
 	public Vector3 zeroVector = new Vector3(0f,0f,0f);
 	
+	private DebugDrawer debugDrawer=new DebugDrawer();
 	public Render(World world) {
 		this.world = world;
 		position = new Vector3();
@@ -66,6 +70,10 @@ public class Render implements Disposable {
 		world.createBoundingBoxes();
 		
 		fullScreenQuad=createFullScreenQuad();
+		debugDrawer.setDebugMode(btIDebugDraw.DebugDrawModes.DBG_FastWireframe);
+		
+
+		world.dynamicsWorld.setDebugDrawer(debugDrawer);
 	}
 
 	//g3db files loaded here
@@ -83,6 +91,10 @@ public class Render implements Disposable {
 		modelBatch.render(World.particleManager.getSystem());
 	}
 	
+	
+	private Vector3 dst=new Vector3();
+	private Vector3 wireColor=new Vector3(1,1,1);
+	private Vector3 levelWireColor=new Vector3(0.3f,.3f,1);
 	public void RenderWorld(float delta) {
 		if (loading && Assets.manager.update()) {
 			doneLoading();
@@ -130,6 +142,7 @@ public class Render implements Disposable {
 			renderModels(wireInstance);
 			renderCount++;
 		}
+
 		
 		//Renders multiplayer (just players so far)
 		for (int i = 0; i < world.getPlayerInstances().size; i++) {
@@ -154,10 +167,33 @@ public class Render implements Disposable {
 		if(filterEffect!=null){
 			filterEffect.getFilterEffectBuffer().begin();
 		}
-		
+
 		modelBatch.end();
 		//Render decals
 		decalBatch.flush();
+		
+		if(world.bulletDebugDrawEnabled){
+		debugDrawer.begin(world.getPlayer().camera);
+		Vector3 wireColorToUse=wireColor;
+		for(int i=0;i<world.dynamicsWorld.getCollisionObjectArray().size();i++)
+		{
+			wireColorToUse=wireColor;
+			//if(!world.bulletDebugDrawMeshLevelWiresEnabled)
+			{
+				if(world.dynamicsWorld.getCollisionObjectArray().at(i).userData!=null&&(Integer)world.dynamicsWorld.getCollisionObjectArray().at(i).userData==1)
+					if(!world.bulletDebugDrawMeshLevelWiresEnabled)
+						continue;
+					else
+						wireColorToUse=levelWireColor;
+			}
+			world.dynamicsWorld.getCollisionObjectArray().at(i).getWorldTransform().getTranslation(dst);
+			
+			if(dst.dst(world.player.getPosition())>10)
+					continue;
+			world.dynamicsWorld.debugDrawObject(world.dynamicsWorld.getCollisionObjectArray().at(i).getWorldTransform(), world.dynamicsWorld.getCollisionObjectArray().at(i).getCollisionShape(),wireColorToUse);
+		}
+		debugDrawer.end();
+		}
 		
 		if(filterEffect!=null) {
 			filterEffect.getFilterEffectBuffer().end();
