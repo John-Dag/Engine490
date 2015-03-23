@@ -29,7 +29,7 @@ public class EnemySpawner extends StaticEntity {
 			public void run() {
 				if (!enemyRef.isActive()) {
 					enemyRef = (Enemy)enemyRef.spawn();
-					enemyRef.getBulletObject().setUserValue(Entity.entityInstances.size);
+					//World.enemyInstances.add(enemyRef);
 					ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(enemyRef);
 					World.eventManager.addEvent(event);
 				}

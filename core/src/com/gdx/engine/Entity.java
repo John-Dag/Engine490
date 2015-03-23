@@ -54,6 +54,10 @@ public class Entity {
 		
 	}
 	
+	public void decrementBulletIndex() {
+		
+	}
+	
 	public int getId() {
 		return this.id;
 	}

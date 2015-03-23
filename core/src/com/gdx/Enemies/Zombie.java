@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.engine.Assets;
+import com.gdx.engine.World;
 
 public class Zombie extends Enemy {
 	public static final int MAX_HEALTH = 100;

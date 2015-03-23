@@ -15,17 +15,15 @@ public class BulletContactListener extends ContactListener {
 	
 	@Override
 	public void onContactStarted(int userValue0, boolean match0, int userValue1, boolean match1) {
-		if (!ClientEventManager.updating && userValue0 < Entity.entityInstances.size && userValue1 < Entity.entityInstances.size) {
+		if (userValue0 < Entity.entityInstances.size && userValue1 < Entity.entityInstances.size) {
 			if (match0) {
 				DynamicEntity entity = (DynamicEntity) Entity.entityInstances.get(userValue0);
-				entity.getBulletObject().setContactCallbackFilter(0);
 				ClientEvent.ProjectileCollision event = new ClientEvent.ProjectileCollision(userValue0, userValue1);
 				World.eventManager.addEvent(event);
 			}
 			
 			if (match1) {
 				DynamicEntity entity = (DynamicEntity) Entity.entityInstances.get(userValue1);
-				entity.getBulletBody().setContactCallbackFilter(0);
 				ClientEvent.ProjectileCollision event = new ClientEvent.ProjectileCollision(userValue0, userValue1);
 				World.eventManager.addEvent(event);
 			}

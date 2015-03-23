@@ -19,12 +19,15 @@ import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.gdx.Network.Net;
+import com.gdx.Network.NetServerEvent;
 import com.gdx.engine.BulletContactListener;
 import com.gdx.engine.BulletMotionState;
 import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Condition;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
+import com.gdx.engine.GameScreen;
 import com.gdx.engine.State;
 import com.gdx.engine.StateMachine;
 import com.gdx.engine.World;
@@ -67,13 +70,12 @@ public class Enemy extends DynamicEntity {
 		attack = new State();
 		stateMachine = new StateMachine();
 		this.StateMachineUsage(this);
-		this.setBulletShape(new btBoxShape(new Vector3(1f, 1f, 1f)));
+		this.setBulletShape(new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)));
 		this.setBulletObject(new btCollisionObject());
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
 		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
 		this.getBulletObject().setContactCallbackFlag(World.ENEMY_FLAG);
-		World.dynamicsWorld.addCollisionObject(this.getBulletObject());
 	}
 
 	@Override
@@ -270,11 +272,12 @@ public class Enemy extends DynamicEntity {
 		
 		else if (this.getStateMachine().Current == this.dead) {
 			final Enemy enemyRef = this;
-			this.getVelocity().set(0, 0, 0);
-			World.enemyInstances.removeValue(this, true);
+			enemyRef.getBulletObject().setContactCallbackFilter(0);
+			enemyRef.getVelocity().set(0, 0, 0);
+			World.enemyInstances.removeValue(enemyRef, true);
 			this.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
 					
-					@Override
+				@Override
 				public void onLoop(AnimationDesc animation) {
 						// TODO Auto-generated method stub
 						
@@ -529,17 +532,11 @@ public class Enemy extends DynamicEntity {
 		World.player.takeDamage(this.getDamage());
 	}
 	
-	public Enemy copyEnemy() {
-		Enemy enemy = new Enemy(this.getId(), this.isActive(), this.isRenderable(), this.getPosition().cpy(), this.getRotation().cpy(),
-			     				this.getScale().cpy(), this.getVelocity().cpy(), this.getAcceleration().cpy(), this.getModel());
-		enemy.initializeEnemy();
-		return enemy;
-	}
-	
 	public void initializeEnemy() {
 		this.setAnimation(new AnimationController(this.getModel()));
 		this.getStateMachine().Current = this.spawn;
 		this.setInCollision(true);
+		this.getBulletObject().setCollisionFlags(World.ENEMY_FLAG);
 		this.setIsActive(true);
 	}
 	
@@ -564,30 +561,55 @@ public class Enemy extends DynamicEntity {
 	
 
 	public static void handleCollisionA(int bulletId1, int bulletId2) {
-		System.out.println("test");
-		if (Entity.entityInstances.get(bulletId1).isMoving() && Entity.entityInstances.get(bulletId2).isMoving()) {
 		Projectile projectile = null;
 		Enemy enemy = null;
+		Player player = null;
 		
-		if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
-			projectile = (Projectile)Entity.entityInstances.get(bulletId1);
-			projectile.setMoving(false);
-		}
-		if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
-			projectile = (Projectile)Entity.entityInstances.get(bulletId2);
-			projectile.setMoving(false);
-		}
-		if (Entity.entityInstances.get(bulletId1) instanceof Enemy) {
-			enemy = (Enemy)Entity.entityInstances.get(bulletId1);
-		}
-		if (Entity.entityInstances.get(bulletId2) instanceof Enemy) {
-			enemy = (Enemy)Entity.entityInstances.get(bulletId2);
-		}
-		
-		if (enemy != null && projectile != null) {
-			enemy.takeDamage(projectile.getDamage());
-			projectile.setMoving(false);
-		}
+		if (bulletId1 < Entity.entityInstances.size && bulletId2 < Entity.entityInstances.size) {
+			if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId1);
+				projectile.getBulletBody().setContactCallbackFilter(0);
+				projectile.setMoving(false);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId2);
+				projectile.getBulletBody().setContactCallbackFilter(0);
+				projectile.setMoving(false);
+			}
+			
+			if (Entity.entityInstances.get(bulletId1) instanceof Enemy) {
+				enemy = (Enemy)Entity.entityInstances.get(bulletId1);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Enemy) {
+				enemy = (Enemy)Entity.entityInstances.get(bulletId2);
+			}
+			
+			if (Entity.entityInstances.get(bulletId1) instanceof Player) {
+				player = (Player)Entity.entityInstances.get(bulletId1);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Player) {
+				player = (Player)Entity.entityInstances.get(bulletId2);
+			}
+			
+			if (enemy != null && projectile != null) {
+				enemy.takeDamage(projectile.getDamage());
+				projectile.setMoving(false);
+			}
+			
+			else if (player != null && projectile != null) {
+				System.out.println("collided");
+				if (GameScreen.mode == GameScreen.State.Server) {
+					Net.CollisionPacket packet = new Net.CollisionPacket();
+					packet.playerOriginID = projectile.getOriginID();
+					packet.playerID = projectile.getNetId();
+					packet.damage = projectile.getDamage();
+					NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
+					World.serverEventManager.addNetEvent(event);
+				}
+			}
 		}
 	}
 

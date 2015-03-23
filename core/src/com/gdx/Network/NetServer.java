@@ -153,7 +153,7 @@ public class NetServer {
 	
 	public void addNewProjectile(Net.NewProjectile packet) {
 		world.addProjectile(packet);
-		server.sendToAllExceptTCP(packet.id, packet);
+		server.sendToAllExceptTCP(packet.originID, packet);
 	}
 	
 	//Updates all clients with the player that disconnected

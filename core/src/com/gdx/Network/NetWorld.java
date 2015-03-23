@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
@@ -71,18 +72,21 @@ public class NetWorld extends World {
 
 	@Override
 	public void addProjectile(Net.NewProjectile packet) {
-		Vector3 rotation = new Vector3(0, 0, 0);
-		Vector3 scale = new Vector3(0, 0, 0);
+		System.out.println("added projectile");
 		Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 		projectile.reset();
-		projectile.setProjectileSpeed(RocketLauncher.PROJECTILE_SPEED);
+		projectile.setProjectileSpeed(20f);
 		projectile.setDamage(RocketLauncher.DAMAGE);
 		projectile.setPosition(packet.position);
 		projectile.setVelocity(packet.cameraPos);
 		projectile.setAcceleration(packet.cameraPos);
 		projectile.setNetId(packet.id);
-		projectile.setOriginID(packet.originID);
+		//projectile.getMotionState().transform = projectile.calculateTarget(packet.cameraPos);
+		projectile.getBulletBody().setWorldTransform(projectile.calculateTarget(packet.cameraPos));
+		Ray ray = new Ray(packet.rayOrigin, packet.rayDirection);
+		projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(300f));
 		Entity.entityInstances.add(projectile);
+		World.dynamicsWorld.addRigidBody(projectile.getBulletBody());
 	}
 	
 	@Override

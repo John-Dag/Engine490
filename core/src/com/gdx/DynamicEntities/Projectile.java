@@ -32,8 +32,8 @@ public class Projectile extends DynamicEntity implements Poolable {
 	private boolean isCollEffectInit, playerProjectile = false, dealtDamage;
 	private Emitter emitter;
 	private RegularEmitter emitterReg;
-	private boolean collision = false;
 	public static Vector3 localInertia = new Vector3();
+	public float timer = 0;
 	 
 	public Projectile() {
 		super();
@@ -54,6 +54,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 		newPos = new Vector3(0, 0, 0);
 		oldPos = new Vector3(0, 0, 0);
 		
+		//Bullet stuff. Leaving in constructor for now. 
 		this.setBulletShape(new btBoxShape(new Vector3(0.2f, 0.2f, 0.2f)));
 		this.setBulletObject(new btCollisionObject());
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
@@ -65,32 +66,52 @@ public class Projectile extends DynamicEntity implements Poolable {
 		this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(10f, null, this.getBulletShape(), localInertia));
 		this.setBulletBody(new btRigidBody(this.getConstructionInfo()));
 		this.getBulletBody().setMotionState(this.getMotionState());
-		this.getBulletBody().proceedToTransform(this.calculateTarget(this.getPosition()));
+		//this.getBulletBody().proceedToTransform(this.calculateTarget(this.getPosition()));
 		this.getBulletBody().setCollisionFlags(this.getBulletBody().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-		this.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().nor());
+		//this.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().nor());
 		this.getBulletBody().activate();
 		Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-		this.getBulletBody().applyCentralImpulse(ray.direction.scl(100f));
-		World.dynamicsWorld.addRigidBody(this.getBulletBody());
+		this.getBulletBody().applyCentralImpulse(ray.direction.scl(300f));
+		this.getConstructionInfo().dispose();
 	}
 
 	@Override
 	public void update(float time, World world) {
+		timer += time;
+		
 		if (!this.isRendered() && this.getParticleEffect() != null) 
 			this.initializeProjectileEffect();
 		
 		//this.updateProjectilePosition(world, time);
 		if (world.getClient() == null) {
-			if (!this.isMoving())
-				this.initializeCollisionExplosionEffect();
+			if (!this.isMoving() && !this.isInCollision()) {
+				Explosion explosion = World.entityManager.explosionPool.obtain();
+				explosion.setTarget(this.getTarget());
+				explosion.initialize();
+				this.removeProjectile();
+				ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(explosion);
+				World.eventManager.addEvent(event);
+				this.setInCollision(true);
+			}	
+			
+			else if (this.timer >= 3.0f) {
+				Explosion explosion = World.entityManager.explosionPool.obtain();
+				explosion.setTarget(this.getTarget());
+				explosion.initialize();
+				this.removeProjectile();
+				ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(explosion);
+				World.eventManager.addEvent(event);
+				this.setInCollision(true);
+			}
 		}
+		
 		//this.checkCollisionMeshlevel(time, world);
 		this.getParticleEffect().setTransform(this.getBulletBody().getWorldTransform());
 		//System.out.println(this.getBulletBody().getWorldTransform());
 		//If the client is hosting a server, send position update packets
 		if (world.getServer() != null) {
-			world.checkProjectileCollisionsServer(this);
-			world.sendProjectilePositionUpdate(this);
+			//world.checkProjectileCollisionsServer(this);
+			//world.sendProjectilePositionUpdate(this);
 		}
 			
 		//Handles explosion effects. Recycles the effect once the emitter is done
@@ -178,6 +199,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 	
 	public void removeProjectile() {
 		//System.out.println(World.particleManager.getProjectilePool().peak);
+		World.particleManager.system.remove(this.getParticleEffect());
 		World.particleManager.projectilePool.free(this.getParticleEffect());
 		NetWorld.entityManager.projectilePool.free(this);
 		ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(this);
@@ -288,13 +310,12 @@ public class Projectile extends DynamicEntity implements Poolable {
 		this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(10f, null, this.getBulletShape(), localInertia));
 		this.setBulletBody(new btRigidBody(this.getConstructionInfo()));
 		this.getBulletBody().setMotionState(this.getMotionState());
-		this.getBulletBody().proceedToTransform(this.calculateTarget(this.getPosition()));
+		//this.getBulletBody().proceedToTransform(this.calculateTarget(this.getPosition()));
 		this.getBulletBody().setCollisionFlags(this.getBulletBody().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-		this.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().nor());
-		this.getBulletBody().activate();
-		Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-		this.getBulletBody().applyCentralImpulse(ray.direction.scl(100f));
-		World.dynamicsWorld.addRigidBody(this.getBulletBody());
+		//this.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().nor());
+		//this.getBulletBody().setContactCallbackFilter(World.PLAYER_FLAG);
+		this.timer = 0;
+		this.getConstructionInfo().dispose();
 	}
 
 	public boolean hasDealtDamage() {

@@ -39,15 +39,15 @@ public class Explosion extends DynamicEntity {
 		
 	@Override
 	public void update(float delta, World world) {
-//		if (this.emitterReg != null) {
-//			this.emitterReg.update();
-//			if (this.emitterReg.isComplete()) {
-//				World.particleManager.system.remove(this.getParticleEffect());
-//				World.particleManager.rocketExplosionPool.free(this.getParticleEffect());
-//				ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(this);
-//				World.eventManager.addEvent(event);
-//			}
-//		}
+		if (this.emitterReg != null) {
+			this.emitterReg.update();
+			if (this.emitterReg.isComplete()) {
+				World.particleManager.system.remove(this.getParticleEffect());
+				World.particleManager.rocketExplosionPool.free(this.getParticleEffect());
+				ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(this);
+				World.eventManager.addEvent(event);
+			}
+		}
 	}
 
 	public Explosion copy() {

@@ -14,6 +14,7 @@ import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody.btRigidBodyConstructionInfo;
 import com.gdx.engine.BulletMotionState;
 import com.gdx.engine.Entity;
 import com.gdx.engine.Render;
@@ -37,10 +38,10 @@ public class DynamicEntity extends Entity {
 	private Vector3 newRotation = new Vector3();
 	private Vector3 newAngVelocity = new Vector3();
 	private Vector3 movementVector = new Vector3();
-	private btCollisionShape bulletShape;
+	private btCollisionShape bulletShape = null;
 	private btCollisionObject bulletObject;
 	private btRigidBody bulletBody;
-	private btRigidBody.btRigidBodyConstructionInfo constructionInfo;
+	private btRigidBodyConstructionInfo constructionInfo = null;
 	private BulletMotionState motionState;
 	private Matrix4 target;
 	private Vector3 inertia;
@@ -203,11 +204,43 @@ public class DynamicEntity extends Entity {
 	
 	@Override
 	public void dispose() {
-//		bulletObject.dispose();
-//		bulletBody.dispose();
-//		bulletShape.dispose();
-//		constructionInfo.dispose();
-//		motionState.dispose();
+		//Removes all bullet references. Important to call this dispose method before removing an entity.
+		//The gc will cause stuttering if they aren't removed. 
+		if (this.getBulletBody() != null) {
+			World.dynamicsWorld.removeRigidBody(this.getBulletBody());
+			bulletBody.dispose();
+		}
+		
+		if (this.getBulletObject() != null) {
+			World.dynamicsWorld.removeCollisionObject(this.getBulletObject());
+			bulletObject.dispose();
+		}
+		
+		if (this.getMotionState() != null) {
+			motionState.dispose();
+		}
+		
+		if (this.constructionInfo != null) {
+			constructionInfo.dispose();
+		}
+		
+		if (this.bulletShape != null) {
+			bulletShape.dispose();
+		}
+		
+		bulletBody = null;
+		bulletObject = null;
+		motionState = null;
+		constructionInfo = null;
+		bulletShape = null;
+	}
+	
+	@Override
+	public void decrementBulletIndex() {
+		if (this.getBulletBody() != null)
+			this.bulletBody.setUserValue(this.bulletBody.getUserValue() - 1);
+		else if (this.getBulletObject() != null)
+			this.bulletObject.setUserValue(this.bulletObject.getUserValue() - 1);
 	}
 	
 	public Matrix4 calculateTarget(Vector3 vector) {

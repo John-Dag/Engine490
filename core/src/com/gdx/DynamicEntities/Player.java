@@ -88,12 +88,12 @@ public class Player extends DynamicEntity {
 		this.speedScalar = 1f; // 1 = default movespeed
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
-		//this.setModel(model);
-//		this.setBulletShape(new btBoxShape(new Vector3(1f, 1f, 1f)));
-//		this.setBulletObject(new btCollisionObject());
-//		this.getBulletObject().setCollisionShape(this.getBulletShape());
-//		this.setTarget(new Matrix4());
-//		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
+		this.setBulletShape(new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)));
+		this.setBulletObject(new btCollisionObject());
+		this.getBulletObject().setCollisionShape(this.getBulletShape());
+		this.setTarget(new Matrix4());
+		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
+		this.getBulletObject().setContactCallbackFlag(World.PLAYER_FLAG);
 	}
 	
 	public void initAbilities() {
@@ -194,29 +194,29 @@ public class Player extends DynamicEntity {
 					getMovementVector().z * collisionVector.z);
 		}
 		
-       for(Enemy enemy:World.enemyInstances)
-       {
-       	
-       	if(oldPos.dst(enemy.getPosition()) > 4)
-       			continue;
-
-       	if(oldPos.dst(enemy.getPosition()) < 1)
-       	{
-       		if(enemy.getPosition().dst(newPos) < enemy.getPosition().dst(oldPos))
-       		{
-       			getMovementVector().set(0,0,0);
-       			break;
-       		}
-
-       	}
-       	if(oldPos.dst(enemy.getPosition()) < 2)
-       	{
-           	if(isJumping & jumpVelocity < 0)
-           		jumpVelocity = 0;
-       	
-       	}
-
-       }
+//       for(Enemy enemy:World.enemyInstances)
+//       {
+//       	
+//       	if(oldPos.dst(enemy.getPosition()) > 4)
+//       			continue;
+//
+//       	if(oldPos.dst(enemy.getPosition()) < 1)
+//       	{
+//       		if(enemy.getPosition().dst(newPos) < enemy.getPosition().dst(oldPos))
+//       		{
+//       			getMovementVector().set(0,0,0);
+//       			break;
+//       		}
+//
+//       	}
+//       	if(oldPos.dst(enemy.getPosition()) < 2)
+//       	{
+//           	if(isJumping & jumpVelocity < 0)
+//           		jumpVelocity = 0;
+//       	
+//       	}
+//
+//       }
 
 		this.camera.position.mulAdd(getMovementVector(), movAmt);
 		

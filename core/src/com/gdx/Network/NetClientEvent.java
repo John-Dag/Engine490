@@ -1,6 +1,8 @@
 package com.gdx.Network;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.engine.Entity;
@@ -28,7 +30,12 @@ public class NetClientEvent {
 			projectile.setVelocity(packet.cameraPos);
 			projectile.setAcceleration(packet.cameraPos);
 			projectile.setNetId(packet.id);
+			//projectile.getMotionState().transform = projectile.calculateTarget(packet.cameraPos);
+			projectile.getBulletBody().setWorldTransform(projectile.calculateTarget(packet.cameraPos));
+			Ray ray = new Ray(packet.rayOrigin, packet.rayDirection);
+			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(200f));
 			Entity.entityInstances.add(projectile);
+			World.dynamicsWorld.addRigidBody(projectile.getBulletBody());
 		}
 	}
 	
@@ -49,7 +56,11 @@ public class NetClientEvent {
 			projectile.setDealtDamage(false);
 			projectile.setIsActive(true);
 			projectile.setPosition(position);
+			projectile.getBulletBody().activate();
+			Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(300f));
 			Entity.entityInstances.add(projectile);
+			World.dynamicsWorld.addRigidBody(projectile.getBulletBody());
 			projectile.setNetId(world.getClient().getId() + world.getNetIdCurrent());
 			world.getClient().sendProjectile(projectile, world.getClient().getId() + world.getNetIdCurrent());
 			world.setNetIdCurrent(world.getNetIdCurrent() + 1);

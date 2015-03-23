@@ -1,8 +1,10 @@
 package com.gdx.Weapons;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
 import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
@@ -59,7 +61,9 @@ public class RocketLauncher extends Weapon {
 				projectile.setInCollision(false);
 				projectile.setCollEffectInit(false);
 				projectile.getBulletBody().setContactCallbackFilter(World.ENEMY_FLAG);
-				projectile.getBulletBody().setUserValue(Entity.entityInstances.size);
+				projectile.getBulletBody().activate();
+				Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+				projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(200f));
 				ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(projectile);
 				world.getClientEventManager().addEvent(event);
 			}

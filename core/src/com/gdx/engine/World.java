@@ -61,6 +61,7 @@ public class World implements Disposable {
 	public static btDynamicsWorld dynamicsWorld;
 	public static short PROJECTILE_FLAG = 1<<8;
 	public static short ENEMY_FLAG = 1<<9;
+	public static short PLAYER_FLAG = 1<<10;
 	public Array<Player> playerInstances;
 	public Array<ModelInstance> wireInstances;
 	public Array<Projectile> projectileInstances;
@@ -76,12 +77,12 @@ public class World implements Disposable {
     private NetServer server;
     private int NetIdCurrent;
 	private NetClientEventManager clientEventManager;
-	private NetServerEventManager serverEventManager;
+	public static NetServerEventManager serverEventManager;
 	private btCollisionConfiguration collisionConfig;
 	private btDispatcher dispatcher;
 	private BulletContactListener contactListener;
 	private btBroadphaseInterface broadPhase;
-	private btConstraintSolver contraintSolver;
+	private btConstraintSolver constraintSolver;
 	private BulletTickCallback tickCallback;
     
 	public World() {
@@ -99,7 +100,7 @@ public class World implements Disposable {
 		broadPhase = new btDbvtBroadphase();
 		setContactListener(new BulletContactListener());
 		setContraintSolver(new btSequentialImpulseConstraintSolver());
-		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, contraintSolver, collisionConfig);
+		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, constraintSolver, collisionConfig);
 		dynamicsWorld.setGravity(new Vector3(0, -0f, 0));
 		eventManager = new ClientEventManager(this);
 		setTickCallback(new BulletTickCallback(dynamicsWorld));
@@ -188,14 +189,14 @@ public class World implements Disposable {
 	}
 	
 	private void updateEntities(float delta) {
+		dynamicsWorld.stepSimulation(delta, 5, 1f/120f);
 		eventManager.processEvents();
-		dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 		wireInstances.clear();
 		
 		for (int i = 0; i < Entity.entityInstances.size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
 			
-//			if (entity.isActive()) {
+			if (entity.isActive()) {
 				entity.update(delta, this);
 				
 				if(isWireframeEnabled) {
@@ -264,7 +265,7 @@ public class World implements Disposable {
 //				//System.out.println("Removed: " + size);
 //				//entity.dispose();
 //				Entity.entityInstances.removeIndex(i);
-//			}
+			}
 		}
 	}
 	
@@ -498,6 +499,10 @@ public class World implements Disposable {
 	@Override
 	public void dispose() {
 		dispatcher.dispose();
+		dynamicsWorld.dispose();
+		broadPhase.dispose();
+		dispatcher.dispose();
+		constraintSolver.dispose();
 		collisionConfig.dispose();
 	}
 
@@ -635,12 +640,12 @@ public class World implements Disposable {
 
 
 	public btConstraintSolver getContraintSolver() {
-		return contraintSolver;
+		return constraintSolver;
 	}
 
 
 	public void setContraintSolver(btConstraintSolver contraintSolver) {
-		this.contraintSolver = contraintSolver;
+		this.constraintSolver = contraintSolver;
 	}
 
 

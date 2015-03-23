@@ -53,14 +53,12 @@ public class Net {
 	}
 	
 	public static class NewProjectile {
-		public Vector3 position;
-		public Vector3 cameraPos;
+		public Vector3 position, cameraPos, cameraDir, rayOrigin, rayDirection;
 		public int id, originID;
 	}
 	
 	public static class ProjectilePacket {
-		public Vector3 position;
-		public Vector3 cameraPos;
+		public Vector3 position, cameraPos, cameraDir;
 		public int id;
 	}
 	

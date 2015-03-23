@@ -2,7 +2,9 @@ package com.gdx.Network;
 
 import java.io.IOException;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
@@ -250,7 +252,10 @@ public class NetClient {
 		Net.NewProjectile packet = new Net.NewProjectile();
 		packet.id = id;
 		packet.position = projectile.getPosition();
-		packet.cameraPos = projectile.getVelocity();
+		Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		packet.rayDirection = ray.direction;
+		packet.rayOrigin = ray.origin;
+		packet.cameraPos = projectile.getPosition();
 		packet.originID = this.getId();
 		client.sendTCP(packet);
 	}

@@ -10,7 +10,7 @@ public class Engine extends Game {
 	@Override
 	public void create () {
 		Assets.loadAssets();
-		Bullet.init(true);
+		Bullet.init();
 		setScreen(gameScreen = new GameScreen(this, true));
 	}
 
