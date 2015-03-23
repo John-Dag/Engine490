@@ -54,11 +54,11 @@ public class Projectile extends DynamicEntity implements Poolable {
 		newPos = new Vector3(0, 0, 0);
 		oldPos = new Vector3(0, 0, 0);
 		
-		this.setBulletShape(new btBoxShape(new Vector3(0.2f, 0.2f, 0.2f)));
+		this.setBulletShape(new btBoxShape(new Vector3(0.1f, 0.1f, 0.1f)));
 		this.setBulletObject(new btCollisionObject());
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
-		this.getBulletShape().calculateLocalInertia(10f, localInertia);
+		this.getBulletShape().calculateLocalInertia(100000000f, localInertia);
 		
 		this.setMotionState(new BulletMotionState());
 		this.getMotionState().transform = this.calculateTarget(this.getPosition());
@@ -70,7 +70,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 		this.getBulletBody().setLinearVelocity(world.getPlayer().camera.direction.cpy().nor());
 		this.getBulletBody().activate();
 		Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-		this.getBulletBody().applyCentralImpulse(ray.direction.scl(100f));
+		this.getBulletBody().applyCentralImpulse(ray.direction.scl(1f));
 		World.dynamicsWorld.addRigidBody(this.getBulletBody());
 	}
 

@@ -13,6 +13,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.DebugDrawer;
 import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
 import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
@@ -29,6 +30,7 @@ import com.badlogic.gdx.physics.bullet.dynamics.btConstraintSolver;
 import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
+import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.esotericsoftware.kryonet.Client;
@@ -53,6 +55,8 @@ import com.gdx.Weapons.RocketLauncher;
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
     public static boolean isWireframeEnabled;
+	public boolean bulletDebugDrawEnabled=false;
+	public boolean bulletDebugDrawMeshLevelWiresEnabled=true;
 	public static Player player;
 	public static ParticleManager particleManager;
 	public static Array<Enemy> enemyInstances;
@@ -101,6 +105,8 @@ public class World implements Disposable {
 		setContraintSolver(new btSequentialImpulseConstraintSolver());
 		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, contraintSolver, collisionConfig);
 		dynamicsWorld.setGravity(new Vector3(0, -0f, 0));
+
+
 		eventManager = new ClientEventManager(this);
 		setTickCallback(new BulletTickCallback(dynamicsWorld));
 	}

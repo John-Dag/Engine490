@@ -24,8 +24,15 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btStaticPlaneShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.EnemySpawner;
@@ -116,6 +123,12 @@ public class MeshLevel {
 	public Map<String,Integer> MaterialIds=new HashMap<String,Integer>();		//Maps texture filenames to texture Ids
 	//End Texture stuff
 	
+	//Bullet physics stuff
+	public btCollisionShape unitBoxShape;
+	public btCollisionShape unitFloorTileShape;
+	public Array<btCollisionObject> bulletObjects;
+	//
+	
 	public MeshLevel(boolean isSkySphereActive){
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
@@ -137,7 +150,10 @@ public class MeshLevel {
 		initializeLevelArray();
 		generateBSPDungeonArray();
 		Assets.loadMeshLevelTextures(tiledMap, levelArray, MapMaterials, MaterialIds);
+		initializeBulletPhysics();
 		generateLevelMesh();
+		bindBulletPhysics();
+		
 	}
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
@@ -173,7 +189,10 @@ public class MeshLevel {
 		}
 		generateLevelArray();
 		Assets.loadMeshLevelTextures(tiledMap, levelArray, MapMaterials, MaterialIds);
+		initializeBulletPhysics();
 		generateLevelMesh();
+		bindBulletPhysics();
+		
 	}
 	
 	// print levelArray
@@ -203,6 +222,71 @@ public class MeshLevel {
 				levelArray[i][j][1].setRampDirection(-1);
 			}
 		}
+	}
+	
+	private void initializeBulletPhysics()
+	{
+		unitBoxShape=new btBoxShape(new Vector3(.5f, .5f, .5f));
+		unitFloorTileShape=new btBoxShape(new Vector3(.5f, 0.01f, .5f));
+		bulletObjects=new Array<btCollisionObject>(); 
+	}
+	
+	private void bindBulletPhysics()
+	{
+		for(btCollisionObject bulletObject:bulletObjects)
+		{
+			//World.dynamicsWorld.addRigidBody((btRigidBody)bulletObject);
+			World.dynamicsWorld.addCollisionObject(bulletObject);
+		}
+		System.out.println(bulletObjects.size + "level bullet objects added to dynamic sim");
+	}
+	
+	private btCollisionObject addBoxObject()
+	{
+		//Vector3 inertia=new Vector3();
+		//bulletShape.calculateLocalInertia(0, inertia);
+		//btCollisionObject btObj=new btRigidBody(0,new BulletMotionState(),bulletShape,inertia);
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(unitBoxShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		//btObj.activate();
+		return btObj;
+	}
+	
+	private btCollisionObject addBoxObject(float dx,float dy, float dz)
+	{
+		//Vector3 inertia=new Vector3();
+		//bulletShape.calculateLocalInertia(0, inertia);
+		//btCollisionObject btObj=new btRigidBody(0,new BulletMotionState(),bulletShape,inertia);
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(new btBoxShape(new Vector3(dx,dy,dz)));
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		//btObj.activate();
+		return btObj;
+	}
+	
+	private btCollisionObject addFloorObject()
+	{
+	
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(unitFloorTileShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		return btObj;
+	}
+	
+	
+	private btCollisionObject addPlane()
+	{
+		btCollisionObject btObj=new btCollisionObject();
+		btCollisionShape btShape=new btStaticPlaneShape(new Vector3(0,1,0),1f);
+		btObj.setCollisionShape(btShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		//btObj.activate();
+		return btObj;
 	}
 	
 	private void createDungeonRoom(int x1, int x2, int y1, int y2) {
@@ -459,7 +543,7 @@ public class MeshLevel {
 			instance.transform.setToTranslation(tileLayerHeight/2, 0, tileLayerWidth/2);
 			instances.add(instance);
 		}
-		
+		//addPlane();
 		//modelBuilder.begin();
 
 		MapTile tile1 = null;
@@ -508,6 +592,7 @@ public class MeshLevel {
 						model = modelBuilder.end();
 						instance = new ModelInstance(model);
 						instances.add(instance);
+						addFloorObject().setWorldTransform(new Matrix4().idt().translate(node.translation).translate(.5f, 0, .5f));
 					}
 
 					// make the floor tiles
@@ -540,7 +625,7 @@ public class MeshLevel {
 							model = modelBuilder.end();
 							instance = new ModelInstance(model);
 							instances.add(instance);
-
+							addFloorObject().setWorldTransform(new Matrix4().idt().translate(node.translation).translate(.5f, 0, .5f));
 
 						}
 						else if (k == 0 && currentTile.getHeight() == 5 && tile2.getHeight() != -1) {
@@ -560,6 +645,8 @@ public class MeshLevel {
 							model = modelBuilder.end();
 							instance = new ModelInstance(model);
 							instances.add(instance);
+							//addBoxObject().setWorldTransform(new Matrix4().idt().translate(node.translation));
+							addFloorObject().setWorldTransform(new Matrix4().idt().translate(node.translation).translate(.5f, 0, .5f));
 						}
 					}
 					//				Node node = modelBuilder.node();
@@ -1030,6 +1117,7 @@ public class MeshLevel {
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 		instances.add(instance);
+		//addBoxObject().setWorldTransform(new Matrix4().idt().translate(node.translation));
 	}
 	
 	private void genCombinedWall(float cellj, float celli, float bottom, float top, int direction){
@@ -1099,6 +1187,7 @@ public class MeshLevel {
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 		instances.add(instance);
+		//addBoxObject(0.5f,height/2,0.5f).setWorldTransform(new Matrix4().idt().translate(node.translation).translate(0f, 0f, 0f));
 	}
 	
 	//Objects are read from the "objects" layer in the tile map

@@ -203,6 +203,10 @@ public class DynamicEntity extends Entity {
 	
 	@Override
 	public void dispose() {
+		
+		
+		
+		
 //		bulletObject.dispose();
 //		bulletBody.dispose();
 //		bulletShape.dispose();

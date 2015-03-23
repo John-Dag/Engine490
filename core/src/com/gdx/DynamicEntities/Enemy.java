@@ -67,7 +67,7 @@ public class Enemy extends DynamicEntity {
 		attack = new State();
 		stateMachine = new StateMachine();
 		this.StateMachineUsage(this);
-		this.setBulletShape(new btBoxShape(new Vector3(1f, 1f, 1f)));
+		this.setBulletShape(new btBoxShape(new Vector3(.5f, .5f, .5f)));
 		this.setBulletObject(new btCollisionObject());
 		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
@@ -83,7 +83,7 @@ public class Enemy extends DynamicEntity {
 		this.getAnimation().update(delta);
 		this.stateMachine.UpdateStates(this);
 		this.setTarget(this.getTarget().idt());
-		this.setTarget(this.getTarget().translate(this.getPosition()));
+		this.setTarget(this.getTarget().translate(this.getPosition()).translate(0, .5f, 0));
 		this.getBulletObject().setWorldTransform(this.getTarget());
 		
 		GridPoint2 thisPosition = new GridPoint2((int)this.getPosition().x, (int)this.getPosition().z);
