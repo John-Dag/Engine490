@@ -130,7 +130,7 @@ public class GameScreen implements Screen {
 		grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
 		//grid.setImages(testInv.getImages());
 		grid.generateGrid(Align.bottom, 30, 30, 5, 5, 3);
-		grid.setWindowSize(300, 300);
+		grid.setWindowSize(200, 200);
 		overlay = new UIOverlay(stage, spriteBatch, bitmapFont);
 		overlay.addCrosshair(Assets.crosshair, center);
 		map = new UIMap(world, stage, spriteBatch, skin, Color.BLACK, 5, 5, 3, 0);
