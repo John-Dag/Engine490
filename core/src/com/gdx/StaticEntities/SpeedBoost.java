@@ -19,8 +19,8 @@ public class SpeedBoost extends PowerUp {
 		duration = 10;
 	}
 	
-	public SpeedBoost(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, Model model, float duration, powerUpTypeEnum type) {
-		super(position, id , isActive, isRenderable, isDecalFacing, model, duration, type);
+	public SpeedBoost(Vector3 position, int id, boolean isActive, boolean isRenderable, Model model, float duration, powerUpTypeEnum type) {
+		super(position, id , isActive, isRenderable, model, duration, type);
 		this.duration = duration;
 		this.model = model;
 		
@@ -46,7 +46,7 @@ public class SpeedBoost extends PowerUp {
 	// Need to change model to some sort of power-up.
 	@Override
 	public PowerUp spawn() {
-		SpeedBoost speedBoost = new SpeedBoost(this.getPosition().cpy(), 2, true, true, true, model, duration, powerUpTypeEnum.speedBoost);
+		SpeedBoost speedBoost = new SpeedBoost(this.getPosition().cpy(), 2, true, true, model, duration, powerUpTypeEnum.speedBoost);
 		BoundingBox temp = new BoundingBox();
 		speedBoost.getModel().calculateBoundingBox(temp);
 		speedBoost.setBoundingBox(temp);

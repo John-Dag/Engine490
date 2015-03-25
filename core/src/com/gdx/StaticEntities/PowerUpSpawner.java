@@ -52,7 +52,6 @@ public class PowerUpSpawner extends StaticEntity {
 			@Override
 			public void run() { 
 				System.out.println("TimerTriggered");
-				//powerUpRef.setIsRenderable(true);
 				if(GameScreen.mode == GameScreen.mode.Server) {
 					Net.PowerUpRespawnPacket packet = new Net.PowerUpRespawnPacket();
 					packet.powerUpEntityId = powerUpRef.getUniqueId();

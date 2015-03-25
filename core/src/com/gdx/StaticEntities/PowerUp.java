@@ -11,7 +11,7 @@ import com.gdx.engine.World;
 public class PowerUp extends StaticEntity {
 	private Vector3 rotationVec;
 	private PowerUpSpawner powerUpSpawner;
-	public enum powerUpTypeEnum{
+	public enum powerUpTypeEnum {
 		healthPot, speedBoost
 	}
 	
@@ -20,16 +20,14 @@ public class PowerUp extends StaticEntity {
 	
 	private powerUpTypeEnum powerUpType;
 	
-	public PowerUp () {
+	public PowerUp() {
 		super();
 	}
 	
-	public PowerUp (Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, Model model, float duration, powerUpTypeEnum type) {
+	public PowerUp(Vector3 position, int id, boolean isActive, boolean isRenderable, Model model, float duration, powerUpTypeEnum type) {
 		super(position, id, isActive, isRenderable, false);
 		uniqueId = powerUpCount;
-		System.out.println(powerUpCount);
 		powerUpCount++;
-		System.out.println(powerUpCount);
 		
 		this.setModel(new ModelInstance(model));
 		this.setPowerUpType(type);
@@ -40,19 +38,16 @@ public class PowerUp extends StaticEntity {
 	public void update(float delta, World world) {
 		if (this.getModel() != null && this.isRenderable() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
 			if (GameScreen.mode == GameScreen.mode.Offline){
-				//this.setIsActive(false);
 				this.setIsRenderable(false);
 				effect();
 				if(powerUpSpawner != null) {
 
-					System.out.println("Start Timer");
 					this.powerUpSpawner.startTimer();
 
 				}else{
-					System.out.println("Spawnisnull");
+					System.out.println("Power Up Spawner is null");
 				}
 			} else {
-				//this.setIsActive(false);
 				this.setIsRenderable(false);
 				System.out.println("Send PowerUpConsumed message to server");
 				if (world.getClient() != null) {

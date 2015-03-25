@@ -12,6 +12,7 @@ import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.StaticEntities.PowerUp;
+import com.gdx.StaticEntities.WeaponSpawn;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
@@ -174,17 +175,15 @@ public class NetClient {
 	
 	private void handleWeaponPickedUpPacket(Net.WeaponPickedUpPacket packet) {
 		// this makes the weapon disappear for players who did not consume it but witnessed the event
-		Weapon weapon = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		WeaponSpawn weaponSpawn = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
 		if(packet.playerId == world.getPlayer().getNetId()) {
-			world.getPlayer().setWeapon(weapon);
-		} else {
-			weapon.setIsRenderable(false);
-		}
+			weaponSpawn.effect();
+		} 
 	}
 	
 	private void handleWeaponRespawnPacket(Net.WeaponRespawnPacket packet) {
-		Weapon weapon = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
-		weapon.setIsRenderable(true);
+		WeaponSpawn weaponSpawn = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		weaponSpawn.setIsRenderable(true);
 	}
 	
 	public void createPlayerStatField(Net.NewPlayer packet) {

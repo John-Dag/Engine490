@@ -1,5 +1,7 @@
 package com.gdx.Network;
 
+import com.gdx.Network.Net.WeaponPickedUpPacket;
+
 public class NetServerEvent {
 	public static class ProjectileCollision extends NetServerEvent {
 		public Net.CollisionPacket packet;
@@ -53,6 +55,30 @@ public class NetServerEvent {
 		public Net.PowerUpConsumedPacket packet;
 		
 		public PowerUpConsumed(Net.PowerUpConsumedPacket packet) {
+			this.packet = packet;
+		}
+	}
+	
+	public static class NewWeapon extends NetServerEvent {
+		public Net.NewWeaponPacket packet;
+		
+		public NewWeapon(Net.NewWeaponPacket packet) {
+			this.packet = packet;
+		}
+	}
+	
+	public static class WeaponRespawn extends NetServerEvent {
+		public Net.WeaponRespawnPacket packet;
+		
+		public WeaponRespawn(Net.WeaponRespawnPacket packet) {
+			this.packet = packet;
+		}
+	}
+	
+	public static class WeaponPickedUp extends NetServerEvent {
+		public WeaponPickedUpPacket packet;
+		
+		public WeaponPickedUp(Net.WeaponPickedUpPacket packet) {
 			this.packet = packet;
 		}
 	}

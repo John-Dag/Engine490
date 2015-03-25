@@ -221,8 +221,8 @@ public class GameScreen implements Screen {
 		form = new UIForm(stage, skin, "Name/IP");
 		form.generateWindow(center.x - 70, center.y + 60, 150, 150);
 		form.addTextField("Name", 0, 100, 150, 25);
-		//form.addTextField("192.168.0.2", 0, 50, 150, 25);
-		form.addTextField("172.31.160.204", 0, 50, 150, 25);
+		//form.addTextField("192.168.0.6", 0, 50, 150, 25);
+		form.addTextField("172.31.160.118", 0, 50, 150, 25);
 		UIBase.uiSelected = true;
 
 		form.getFields().get(0).addListener(new ClickListener() {

@@ -42,6 +42,14 @@ public class NetServerEventManager {
 				else if (event instanceof NetServerEvent.PowerUpConsumed) {
 					world.getServer().consumePowerUp(((NetServerEvent.PowerUpConsumed) event).packet);
 				}
+				
+				else if (event instanceof NetServerEvent.WeaponPickedUp) {
+					world.getServer().weaponPickedUp(((NetServerEvent.WeaponPickedUp) event).packet);
+				}
+				
+				else if (event instanceof NetServerEvent.WeaponRespawn) {
+					world.getServer().respawnWeapon(((NetServerEvent.WeaponRespawn) event).packet);
+				}
 			}
 		}
 		

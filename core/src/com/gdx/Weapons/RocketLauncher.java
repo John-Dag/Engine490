@@ -20,7 +20,7 @@ public class RocketLauncher extends Weapon {
 	public static final float FIRING_DELAY = 0.3f;
 	public static final float PROJECTILE_SPEED = 15f;
 	private final float RECOIL = 0.08f;
-	public static final int DAMAGE = 20;
+	public static final int DAMAGE = 100;
 	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0), rotationVec;
 	
 	public RocketLauncher() {
@@ -93,8 +93,8 @@ public class RocketLauncher extends Weapon {
 			if (GameScreen.mode == GameScreen.mode.Offline){
 				world.getPlayer().setWeapon(this);
 			} else {
-				//this.setPickedup(true);
-				//this.setIsRenderable(false);
+//				this.setPickedup(true);
+//				this.setIsRenderable(false);
 				System.out.println("Send rocketObtain message to server");
 				if (world.getClient() != null) {
 					Net.WeaponPickedUpPacket packet = new Net.WeaponPickedUpPacket();
@@ -106,9 +106,9 @@ public class RocketLauncher extends Weapon {
 			}
 		}
 		
-		else {
-			this.getModel().transform.rotate(rotationVec, 180f * delta);
-		}
+//		else {
+//			this.getModel().transform.rotate(rotationVec, 180f * delta);
+//		}
 	}
 }
 

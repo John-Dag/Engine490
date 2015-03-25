@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
+import com.gdx.StaticEntities.WeaponSpawn;
 import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.UI.UIBase;
 import com.gdx.UI.UIConsole;
@@ -104,6 +105,9 @@ public class Player extends DynamicEntity {
 		weapons.add(launcher);
 		Sword sword = (Sword) new Sword().spawn(Vector3.Zero);
 		weapons.add(sword);
+		//this.setWeapon(weapons.get(0));
+		//sword.setPickedup(true);
+		this.setWeapon(launcher);
 	}
 
 	@Override
@@ -524,6 +528,10 @@ public class Player extends DynamicEntity {
 
 	public void setHealth(int health) {
 		this.health = health;
+	}
+	
+	public void obtainWeapon(WeaponSpawn.weaponSpawnTypeEnum type) {
+		// TODO: this is where we toggle whether a certain weapon is usable by the player or not
 	}
 	
 	public boolean isMouseLocked() {

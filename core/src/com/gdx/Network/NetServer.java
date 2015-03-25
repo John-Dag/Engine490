@@ -11,6 +11,7 @@ import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.Network.Net.StatPacket;
 import com.gdx.StaticEntities.PowerUp;
+import com.gdx.StaticEntities.WeaponSpawn;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
@@ -125,6 +126,13 @@ public class NetServer {
         	NetServerEvent.PowerUpConsumed event = new NetServerEvent.PowerUpConsumed(packet);
         	world.getServerEventManager().addNetEvent(event);
         }
+	   	
+        else if (object instanceof Net.WeaponPickedUpPacket) {
+        	System.out.println("Server received weaponPickedUpPacket");
+        	Net.WeaponPickedUpPacket packet = (Net.WeaponPickedUpPacket)object;
+        	NetServerEvent.WeaponPickedUp event = new NetServerEvent.WeaponPickedUp(packet);
+        	world.getServerEventManager().addNetEvent(event);
+        }
 	}
 	
 	public void updateNetStat(int id) {
@@ -170,6 +178,26 @@ public class NetServer {
 
 		// else (powerUp inactive)
 			// do nothing
+	}
+	
+	public void respawnWeapon(Net.WeaponRespawnPacket packet) {
+		WeaponSpawn weaponSpawn = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		weaponSpawn.setIsRenderable(true);
+		server.sendToAllTCP(packet);
+	}
+	
+	public void weaponPickedUp(Net.WeaponPickedUpPacket packet) {
+		WeaponSpawn weaponSpawn = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		// if weaponSpawn is renderable
+		if(weaponSpawn.isRenderable()){
+			// set to not renderable, set event to broadcast confirmation packet
+			weaponSpawn.setIsRenderable(false);
+			server.sendToAllTCP(packet);
+			// set respawn timer
+			weaponSpawn.getSpawner().startTimer();
+		} else {
+			System.out.println("WEAPONSPAWN NOT RENDERABLE?!?");
+		}
 	}
 	
 	//Updates all clients with the player that disconnected
@@ -233,6 +261,16 @@ public class NetServer {
 				powerUpPacket.powerUpEntityId = i;
 				server.sendToTCP(packet.id, powerUpPacket);
 				System.out.println("Server: PowerUp packet sent.");
+			}
+		}
+		
+		// also want to send to this player the renderable weaponSpawns
+		Net.WeaponRespawnPacket weaponPacket = new Net.WeaponRespawnPacket();
+		for(int i = 0; i < world.getMeshLevel().getWeaponInstances().size; i++) {
+			if(world.getMeshLevel().getWeaponInstances().get(i).isRenderable()){
+				weaponPacket.weaponEntityId = i;
+				server.sendToTCP(packet.id, weaponPacket);
+				System.out.println("Server: Weapon packet sent.");
 			}
 		}
 	}
