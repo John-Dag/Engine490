@@ -1,5 +1,6 @@
 package com.gdx.engine;
 
+import java.nio.FloatBuffer;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,8 +34,10 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btBvhTriangleMeshShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
 import com.badlogic.gdx.physics.bullet.collision.btStaticPlaneShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
@@ -131,6 +134,10 @@ public class MeshLevel {
 	//Bullet physics stuff
 	public btCollisionShape unitBoxShape;
 	public btCollisionShape unitFloorTileShape;
+	public btConvexHullShape bulletUnitRampShapeUp;
+	public btConvexHullShape bulletUnitRampShapeDown;
+	public btConvexHullShape bulletUnitRampShapeLeft;
+	public btConvexHullShape bulletUnitRampShapeRight;
 	public Array<btCollisionObject> bulletObjects;
 	//
 	
@@ -232,7 +239,38 @@ public class MeshLevel {
 	private void initializeBulletPhysics()
 	{
 		unitBoxShape=new btBoxShape(new Vector3(.5f, .5f, .5f));
-		unitFloorTileShape=new btBoxShape(new Vector3(.5f, 0.01f, .5f));
+		//unitFloorTileShape=new btBoxShape(new Vector3(.5f, 0.01f, .5f));
+		unitFloorTileShape=new btConvexHullShape();
+		((btConvexHullShape)unitFloorTileShape).addPoint(new Vector3(-.5f, 0, -.5f));
+		((btConvexHullShape)unitFloorTileShape).addPoint(new Vector3(-.5f, 0, .5f));
+		((btConvexHullShape)unitFloorTileShape).addPoint(new Vector3(.5f, 0,  .5f));
+		((btConvexHullShape)unitFloorTileShape).addPoint(new Vector3(.5f, 0, -.5f));
+		
+		bulletUnitRampShapeUp=new btConvexHullShape();
+		bulletUnitRampShapeUp.addPoint(new Vector3(0,0,1));
+		bulletUnitRampShapeUp.addPoint(new Vector3(1,1,1));
+		bulletUnitRampShapeUp.addPoint(new Vector3(1,1,0));
+		bulletUnitRampShapeUp.addPoint(new Vector3(0,0,0));
+		
+
+			bulletUnitRampShapeDown=new btConvexHullShape();
+			bulletUnitRampShapeDown.addPoint(new Vector3(0,1,1));
+			bulletUnitRampShapeDown.addPoint(new Vector3(1,0,1));
+			bulletUnitRampShapeDown.addPoint(new Vector3(1,0,0));
+			bulletUnitRampShapeDown.addPoint(new Vector3(0,1,0));
+			
+			bulletUnitRampShapeLeft=new btConvexHullShape();
+			bulletUnitRampShapeLeft.addPoint(new Vector3(0,0,1));
+			bulletUnitRampShapeLeft.addPoint(new Vector3(1,0,1));
+			bulletUnitRampShapeLeft.addPoint(new Vector3(1,1,0));
+			bulletUnitRampShapeLeft.addPoint(new Vector3(0,1,0));
+			
+			bulletUnitRampShapeRight=new btConvexHullShape();
+			bulletUnitRampShapeRight.addPoint(new Vector3(0,1,1));
+			bulletUnitRampShapeRight.addPoint(new Vector3(1,1,1));
+			bulletUnitRampShapeRight.addPoint(new Vector3(1,0,0));
+			bulletUnitRampShapeRight.addPoint(new Vector3(0,0,0));
+		
 		bulletObjects=new Array<btCollisionObject>(); 
 	}
 	
@@ -244,6 +282,7 @@ public class MeshLevel {
 			World.dynamicsWorld.addCollisionObject(bulletObject);
 		}
 		System.out.println(bulletObjects.size + "level bullet objects added to dynamic sim");
+		bulletObjects.clear();
 	}
 	
 	private btCollisionObject addBoxObject()
@@ -277,6 +316,26 @@ public class MeshLevel {
 	
 		btCollisionObject btObj=new btCollisionObject();
 		btObj.setCollisionShape(unitFloorTileShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		return btObj;
+	}
+	
+	private btCollisionObject addRampBulletShape()
+	{
+	
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(unitFloorTileShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		return btObj;
+	}
+	
+	private btCollisionObject addCustomShapeObject(btCollisionShape shape)
+	{
+	
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(shape);
 		bulletObjects.add(btObj);
 		btObj.userData=1;
 		return btObj;
@@ -614,15 +673,19 @@ public class MeshLevel {
 
 							if (currentTile.getRampDirection() == UP)	{ // -x direction
 								meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
+								addCustomShapeObject(bulletUnitRampShapeUp).setWorldTransform(new Matrix4().idt().translate(node.translation));
 							}	
 							else if (currentTile.getRampDirection() == DOWN) { // +x direction
 								meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
+								addCustomShapeObject(bulletUnitRampShapeDown).setWorldTransform(new Matrix4().idt().translate(node.translation));
 							}	
 							else if (currentTile.getRampDirection() == LEFT) { // +z direction
 								meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
+								addCustomShapeObject(bulletUnitRampShapeLeft).setWorldTransform(new Matrix4().idt().translate(node.translation));
 							}	
 							else if (currentTile.getRampDirection() == RIGHT)	{ // -z direction
 								meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
+								addCustomShapeObject(bulletUnitRampShapeRight).setWorldTransform(new Matrix4().idt().translate(node.translation));
 							}	
 							else {
 								System.err.println("generateLevel(): Direction not recognized");
@@ -630,7 +693,7 @@ public class MeshLevel {
 							model = modelBuilder.end();
 							instance = new ModelInstance(model);
 							instances.add(instance);
-							addFloorObject().setWorldTransform(new Matrix4().idt().translate(node.translation).translate(.5f, 0, .5f));
+							
 
 						}
 						else if (k == 0 && currentTile.getHeight() == 5 && tile2.getHeight() != -1) {
@@ -1213,6 +1276,13 @@ public class MeshLevel {
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 		instances.add(instance);
+		
+		btConvexHullShape chshape=new btConvexHullShape();
+		chshape.addPoint(v1.position);
+		chshape.addPoint(v2.position);
+		chshape.addPoint(v3.position);
+
+		addCustomShapeObject(chshape).setWorldTransform(new Matrix4().idt().translate(node.translation));
 	}
 	
 	// TODO: genWall
@@ -1278,7 +1348,13 @@ public class MeshLevel {
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 		instances.add(instance);
-		//addBoxObject().setWorldTransform(new Matrix4().idt().translate(node.translation));
+		btConvexHullShape chshape=new btConvexHullShape();
+		chshape.addPoint(v1.position);
+		chshape.addPoint(v2.position);
+		chshape.addPoint(v3.position);
+		chshape.addPoint(v4.position);
+
+		addCustomShapeObject(chshape).setWorldTransform(new Matrix4().idt().translate(node.translation));
 	}
 	
 	private void genCombinedWall(float cellj, float celli, float bottom, float top, int direction){
@@ -1348,7 +1424,13 @@ public class MeshLevel {
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 		instances.add(instance);
-		//addBoxObject(0.5f,height/2,0.5f).setWorldTransform(new Matrix4().idt().translate(node.translation).translate(0f, 0f, 0f));
+		btConvexHullShape chshape=new btConvexHullShape();
+		chshape.addPoint(v1.position);
+		chshape.addPoint(v2.position);
+		chshape.addPoint(v3.position);
+		chshape.addPoint(v4.position);
+
+		addCustomShapeObject(chshape).setWorldTransform(new Matrix4().idt().translate(node.translation));
 	}
 	
 	//Objects are read from the "objects" layer in the tile map
