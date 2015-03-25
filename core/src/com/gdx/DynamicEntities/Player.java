@@ -94,6 +94,7 @@ public class Player extends DynamicEntity {
 		this.setTarget(new Matrix4());
 		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
 		this.getBulletObject().setContactCallbackFlag(World.PLAYER_FLAG);
+		World.dynamicsWorld.addCollisionObject(this.getBulletObject());
 	}
 	
 	public void initAbilities() {
@@ -327,6 +328,9 @@ public class Player extends DynamicEntity {
 		
 		else
 			setRotating(false);
+		
+		this.setTarget(this.getTarget().idt());
+		this.getBulletObject().setWorldTransform(this.getTarget());
 	}
 	
 	public void catchCursor() {
