@@ -16,6 +16,7 @@ import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody.btRigidBodyConstructionInfo;
 import com.gdx.engine.BulletMotionState;
+import com.gdx.Shaders.EntityShader;
 import com.gdx.engine.Entity;
 import com.gdx.engine.Render;
 import com.gdx.engine.World;
@@ -498,4 +499,13 @@ public class DynamicEntity extends Entity {
 	public void setMotionState(BulletMotionState motionState) {
 		this.motionState = motionState;
 	}
+	
+	public void setShader(EntityShader shader) {
+		super.setShader(shader);
+		if(this.model!=null)
+		{
+			this.model.userData=shader;
+		}
+	}
+	
 }
