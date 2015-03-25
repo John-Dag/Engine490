@@ -40,6 +40,7 @@ public class PowerUpSpawn extends StaticEntity {
 		this.spawnTime = spawnTime;
 		powerRef = (PowerUp) powerUp.spawn();
 		powerRef.setSpawnRef(this);
+		powerRef.setShader(es);
 		spawnRef = this;
 		Entity.entityInstances.add(powerRef);
 	}

@@ -30,6 +30,7 @@ import com.gdx.Shaders.LavaShader;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
+import com.gdx.engine.Entity;
 import com.gdx.engine.FilterEffect;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
@@ -205,42 +206,42 @@ public class UIConsole extends UIBase {
 		}
 		else if (value.toLowerCase().contains("efx1")) {
 			LavaShader shdr=new LavaShader();
-			for(Enemy e:world.enemyInstances)
+			for(Entity e:Entity.entityInstances)
 			{
+				if(e instanceof Enemy||e instanceof Player)
 				e.setShader(shdr);
 			}
-			for(Player e:world.playerInstances)
-			{
-				e.setShader(shdr);
-			}
+//			for(Player e:world.playerInstances)
+//			{
+//				e.setShader(shdr);
+//			}
 		}
 		else if (value.toLowerCase().contains("efx0")) {
 			
-			for(Enemy e:world.enemyInstances)
-			{		
+			for(Entity e:Entity.entityInstances)
+			{
+				if(e instanceof Enemy||e instanceof Player){
 				ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
 							es.multiplier.y=(float)Math.random();
 							es.multiplier.x=(float)Math.random();
 							es.multiplier.z=(float)Math.random();
 				e.setShader(es);
+				}
 			}
-			for(Player e:world.playerInstances)
-			{		
-				ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
-							es.multiplier.y=(float)Math.random();
-							es.multiplier.x=(float)Math.random();
-							es.multiplier.z=(float)Math.random();
-				e.setShader(es);
-			}
+//			for(Player e:world.playerInstances)
+//			{		
+//				ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
+//							es.multiplier.y=(float)Math.random();
+//							es.multiplier.x=(float)Math.random();
+//							es.multiplier.z=(float)Math.random();
+//				e.setShader(es);
+//			}
 		}
 		else if (value.toLowerCase().contains("efx2")) {
 			
-			for(Enemy e:world.enemyInstances)
+			for(Entity e:Entity.entityInstances)
 			{
-				e.setShader(new FireBallShader());
-			}
-			for(Player e:world.playerInstances)
-			{
+				if(e instanceof Enemy||e instanceof Player)
 				e.setShader(new FireBallShader());
 			}
 		}
