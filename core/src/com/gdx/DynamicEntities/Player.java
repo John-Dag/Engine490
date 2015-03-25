@@ -57,6 +57,14 @@ public class Player extends DynamicEntity {
 	private String netName;
 	private Array<Weapon> weapons;
 	
+	// WEAPONS
+	public static final int NOWEAPON = 0;
+	public static final int ROCKETLAUNCHER = 1;
+	public static final int SWORD = 2;
+	private Weapon noWeapon;
+	private RocketLauncher launcher;
+	private Sword sword;
+	
 	public Player() {
 		super();
 	}
@@ -101,13 +109,17 @@ public class Player extends DynamicEntity {
 	}
 	
 	public void initWeapons() {
-		RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(Vector3.Zero);
-		weapons.add(launcher);
-		Sword sword = (Sword) new Sword().spawn(Vector3.Zero);
-		weapons.add(sword);
-		//this.setWeapon(weapons.get(0));
-		//sword.setPickedup(true);
-		this.setWeapon(launcher);
+		noWeapon = new Weapon();
+		weapons.insert(NOWEAPON, noWeapon);
+		launcher = (RocketLauncher) new RocketLauncher().spawn(Vector3.Zero);
+		weapons.insert(ROCKETLAUNCHER, launcher);
+		sword = (Sword) new Sword().spawn(Vector3.Zero);
+		weapons.insert(SWORD, sword);
+	}
+	
+	public void setWeapon(int type) {
+		weapons.get(type).setIsRenderable(true);
+		this.setWeapon(weapons.get(type));
 	}
 
 	@Override
@@ -530,9 +542,9 @@ public class Player extends DynamicEntity {
 		this.health = health;
 	}
 	
-	public void obtainWeapon(WeaponSpawn.weaponSpawnTypeEnum type) {
-		// TODO: this is where we toggle whether a certain weapon is usable by the player or not
-	}
+//	public void obtainWeapon(WeaponSpawn.weaponSpawnTypeEnum type) {
+//		// TODO: this is where we toggle whether a certain weapon is usable by the player or not
+//	}
 	
 	public boolean isMouseLocked() {
 		return mouseLocked;

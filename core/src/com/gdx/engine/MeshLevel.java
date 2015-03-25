@@ -1199,9 +1199,9 @@ public class MeshLevel {
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				//Note: Here I set is renderable to false.
 				// need to send the newWeapon packet to the player in order to set it to true for client
-				boolean renderable = false;
-				if(GameScreen.mode == GameScreen.mode.Server) {
-					renderable = true;
+				boolean renderable = true;
+				if(GameScreen.mode == GameScreen.mode.Client) {
+					renderable = false;
 				}
 				RocketLauncherSpawn launcherSpawn = new RocketLauncherSpawn(objPosition, 8, true, renderable, Assets.manager.get("GUNFBX.g3db", Model.class), weaponSpawnTypeEnum.rocketLauncher);
 				WeaponSpawner spawner = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), launcherSpawn, world);
@@ -1216,9 +1216,9 @@ public class MeshLevel {
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				//Note: Here I set is renderable to false.
 				// need to send the newWeapon packet to the player in order to set it to true for client
-				boolean renderable = false;
-				if(GameScreen.mode == GameScreen.mode.Server) {
-					renderable = true;
+				boolean renderable = true;
+				if(GameScreen.mode == GameScreen.mode.Client) {
+					renderable = false;
 				}
 				SwordSpawn swordSpawn = new SwordSpawn(objPosition, 8, true, renderable, Assets.manager.get("sword2.g3db", Model.class), weaponSpawnTypeEnum.sword);
 				WeaponSpawner spawner = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), swordSpawn, world);
@@ -1234,9 +1234,9 @@ public class MeshLevel {
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				//Note: Here I set is renderable to false.
 				// need to send the newPowerUp packet to the player in order to set it to true for client
-				boolean renderable = false;
-				if(GameScreen.mode == GameScreen.mode.Server) {
-					renderable = true;
+				boolean renderable = true;
+				if(GameScreen.mode == GameScreen.mode.Client) {
+					renderable = false;
 				}
 				SpeedBoost speedBoost = new SpeedBoost(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.speedBoost);
 				PowerUpSpawner spawner = new PowerUpSpawner(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), speedBoost, world);
@@ -1252,9 +1252,9 @@ public class MeshLevel {
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
 				//Note: Here I set is renderable to false if client, true if server.
 				// need to send the newPowerUp packet to the player in order to set it to true for client
-				boolean renderable = false;
-				if(GameScreen.mode == GameScreen.mode.Server) {
-					renderable = true;
+				boolean renderable = true;
+				if(GameScreen.mode == GameScreen.mode.Client) {
+					renderable = false;
 				}
 				HealthPot healthPot = new HealthPot(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.healthPot);
 				PowerUpSpawner spawner = new PowerUpSpawner(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), healthPot, world);

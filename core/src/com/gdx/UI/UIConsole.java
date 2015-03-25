@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.gdx.DynamicEntities.Weapon;
 import com.gdx.FilterEffects.BlueScreenColorMultiplier;
 import com.gdx.FilterEffects.Cartoon;
 import com.gdx.FilterEffects.GreenScreenColorMultiplier;
@@ -154,6 +155,11 @@ public class UIConsole extends UIBase {
 			else if (weapon.contentEquals("sword")) {
 				Sword sword = (Sword) new Sword().spawn(world.getPlayer().getPosition());
 				world.getPlayer().setWeapon(sword);
+			}
+			
+			else if (weapon.contentEquals("none")) {
+				Weapon none = new Weapon();
+				world.getPlayer().setWeapon(none);
 			}
 		}
 		

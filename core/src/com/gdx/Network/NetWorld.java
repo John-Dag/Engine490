@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
+import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net.NewProjectile;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.Network.NetClientEvent.ProjectileCollision;
@@ -37,6 +38,10 @@ public class NetWorld extends World {
 		entManager = new EntityManager(this);
 		setClientEventManager(new NetClientEventManager(this));
 		setServerEventManager(new NetServerEventManager(this));
+		
+//		RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(getPlayer().getPosition());
+//		Weapon noWeapon = new Weapon();
+//		getPlayer().setWeapon(noWeapon);
 	}
 
 	@Override

@@ -3,7 +3,9 @@ package com.gdx.StaticEntities;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.gdx.DynamicEntities.Player;
 import com.gdx.StaticEntities.WeaponSpawn.weaponSpawnTypeEnum;
+import com.gdx.Weapons.Sword;
 import com.gdx.engine.World;
 
 public class SwordSpawn extends WeaponSpawn{
@@ -21,13 +23,13 @@ private Model model;
 		this.getModel().calculateBoundingBox(temp);
 		this.setBoundingBox(temp);
 		this.getModel().transform.setToTranslation(this.getPosition());
-		this.getModel().transform.scale(0.005f, 0.005f, 0.005f);
-		//this.getModel().transform.rotate(new Vector3(1,0,0), 90);
+		this.getModel().transform.translate(-1f,0f,0f);
+		this.getModel().transform.scale(0.9f, 0.9f, 0.9f);
 	}
 	
 	@Override
 	public void effect() {
-		World.player.obtainWeapon(weaponSpawnTypeEnum.sword);
+		World.player.setWeapon(Player.SWORD);
 	}
 	
 	@Override
@@ -37,6 +39,7 @@ private Model model;
 		swordSpawn.getModel().calculateBoundingBox(temp);
 		swordSpawn.setBoundingBox(temp);
 		swordSpawn.getModel().transform.setToTranslation(swordSpawn.getPosition());
+		swordSpawn.getModel().transform.scale(0.9f, 0.9f, 0.9f);
 		return swordSpawn;
 	}
 }

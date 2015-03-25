@@ -59,6 +59,8 @@ public class PowerUpSpawner extends StaticEntity {
 					if (world != null) {
 						world.getServerEventManager().addNetEvent(event);
 					}
+				} else if(GameScreen.mode == GameScreen.mode.Offline) {
+					powerUpRef.setIsRenderable(true);
 				}
 			}
 		}, this.spawnTime);

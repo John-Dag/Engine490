@@ -52,6 +52,8 @@ public class WeaponSpawner extends StaticEntity {
 					if (world != null) {
 						world.getServerEventManager().addNetEvent(event);
 					}
+				} else if(GameScreen.mode == GameScreen.mode.Offline) {
+					weaponSpawnRef.setIsRenderable(true);
 				}
 			}
 		}, this.spawnTime);

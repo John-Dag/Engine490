@@ -62,7 +62,9 @@ public class WeaponSpawn extends StaticEntity {
 		}
 		
 		else {
-			this.getModel().transform.rotate(rotationVec, 90f * delta);
+			if(!(this instanceof SwordSpawn)) {
+				this.getModel().transform.rotate(rotationVec, 90f * delta);
+			}
 		}
 	}
 	
@@ -74,7 +76,7 @@ public class WeaponSpawn extends StaticEntity {
 		return this.weaponSpawner;
 	}
 	
-	// Override to create your own power-up effect!
+	// Override to create your own weaponspawn effect!
 	public void effect() {
 		/* EXAMPLE:
 

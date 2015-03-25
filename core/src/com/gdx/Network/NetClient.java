@@ -147,13 +147,13 @@ public class NetClient {
         }
         
         else if (object instanceof Net.WeaponPickedUpPacket) {
-        	System.out.println("Client received powerUpConsumed confirmation packet");
+        	System.out.println("Client received weaponPickedUp confirmation packet");
         	Net.WeaponPickedUpPacket packet = (Net.WeaponPickedUpPacket)object;
         	handleWeaponPickedUpPacket(packet);
         }
         
         else if (object instanceof Net.WeaponRespawnPacket) {
-        	System.out.println("Client received powerUpRespawn packet");
+        	System.out.println("Client received weaponRespawn packet");
         	Net.WeaponRespawnPacket packet = (Net.WeaponRespawnPacket)object;
         	handleWeaponRespawnPacket(packet);
         }
@@ -176,6 +176,7 @@ public class NetClient {
 	private void handleWeaponPickedUpPacket(Net.WeaponPickedUpPacket packet) {
 		// this makes the weapon disappear for players who did not consume it but witnessed the event
 		WeaponSpawn weaponSpawn = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		weaponSpawn.setIsRenderable(false);
 		if(packet.playerId == world.getPlayer().getNetId()) {
 			weaponSpawn.effect();
 		} 

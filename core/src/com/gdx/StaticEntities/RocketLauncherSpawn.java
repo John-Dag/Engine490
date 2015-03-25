@@ -3,6 +3,9 @@ package com.gdx.StaticEntities;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.gdx.DynamicEntities.Player;
+import com.gdx.DynamicEntities.Weapon;
+import com.gdx.Weapons.RocketLauncher;
 import com.gdx.engine.World;
 
 public class RocketLauncherSpawn extends WeaponSpawn{
@@ -27,7 +30,7 @@ public class RocketLauncherSpawn extends WeaponSpawn{
 	
 	@Override
 	public void effect() {
-		World.player.obtainWeapon(weaponSpawnTypeEnum.rocketLauncher);
+		World.player.setWeapon(Player.ROCKETLAUNCHER);
 	}
 	
 	@Override
