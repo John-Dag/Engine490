@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.Array;
 
 public class UIGrid extends UIBase {
 	private Table table;
-	private Window window;
 	private Array<Actor> images = new Array<Actor>();
 	private Texture slotTexture;
 	
@@ -23,10 +22,10 @@ public class UIGrid extends UIBase {
 		super(stage);
 		table = new Table();
 		table.setFillParent(true);
-		window = new Window(name, skin);
-		window.addActor(table);
-		window.setVisible(false);
-		window.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		this.setWindow(new Window(name, skin));
+		getWindow().addActor(table);
+		getWindow().setVisible(false);
+		getWindow().setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		this.slotTexture = slotTexture;
 	}
 	
@@ -34,18 +33,18 @@ public class UIGrid extends UIBase {
 		super(stage);
 		table = new Table();
 		table.setFillParent(true);
-		window = new Window(name, skin);
-		window.addActor(table);
-		window.setColor(color);
-		window.setVisible(false);
-		window.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		this.setWindow(new Window(name, skin));
+		getWindow().addActor(table);
+		getWindow().setColor(color);
+		getWindow().setVisible(false);
+		getWindow().setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		this.slotTexture = slotTexture;
 	}
 	
 	/***
-	 * Generates a grid in a scene2d window based on specified number of slots
+	 * Generates a grid in a scene2d getWindow() based on specified number of slots
 	 * and slot size.
-	 * @param align Alignment of the grid within a window
+	 * @param align Alignment of the grid within a getWindow()
 	 * @param slotWidth Width of each slot
 	 * @param slotHeight Height of each slot
 	 * @param numSlotsX Number of slots to fill each row
@@ -54,7 +53,7 @@ public class UIGrid extends UIBase {
 	 */
 	
 	public void generateGrid(int align, float slotWidth, float slotHeight, int numSlotsX, int numSlotsY, int padding) {
-		window.setSize(slotWidth * numSlotsX, slotHeight * numSlotsY);
+		getWindow().setSize(slotWidth * numSlotsX, slotHeight * numSlotsY);
 		table.align(align);
 		
 		//Add click listeners to each slot
@@ -68,7 +67,7 @@ public class UIGrid extends UIBase {
 			});
 		}
 		
-		//Add the slot actors to the window in a grid
+		//Add the slot actors to the getWindow() in a grid
 		for (int i = 0; i < numSlotsX; i++) {
 			for (int j = 0; j < numSlotsY; j++) { 
 				table.add(images.get((i * numSlotsX) + j)).pad(padding).size(slotWidth, slotHeight);
@@ -77,23 +76,19 @@ public class UIGrid extends UIBase {
 			table.row();
 		}
 
-		this.getStage().addActor(window);
+		this.getStage().addActor(getWindow());
 	}
 	
 	@Override
 	public void show() {
-		if (!this.window.isVisible() && uiSelected == false)
-			this.window.setVisible(true);
+		if (!this.getWindow().isVisible() && uiSelected == false)
+			this.getWindow().setVisible(true);
 		else
-			this.window.setVisible(false);
+			this.getWindow().setVisible(false);
 	}
 	
 	public Table getTable() {
 		return table;
-	}
-
-	public Window getWindow() {
-		return window;
 	}
 
 	public Array<Actor> getImages() {
@@ -108,20 +103,11 @@ public class UIGrid extends UIBase {
 		this.table = table;
 	}
 
-	public void setWindow(Window window) {
-		this.window = window;
-	}
-
 	public void setImages(Array<Actor> images) {
 		this.images = images;
 	}
 
 	public void setSlotTexture(Texture slotTexture) {
 		this.slotTexture = slotTexture;
-	}
-
-	public void setWindowSize(int width, int height) {
-		this.window.setWidth(width);
-		this.window.setHeight(height);
 	}
 }

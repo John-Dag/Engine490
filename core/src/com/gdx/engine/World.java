@@ -13,6 +13,24 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.DebugDrawer;
+import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
+import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionWorld;
+import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
+import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btDispatcher;
+import com.badlogic.gdx.physics.bullet.collision.btDispatcherInfo;
+import com.badlogic.gdx.physics.bullet.collision.btManifoldResult;
+import com.badlogic.gdx.physics.bullet.dynamics.btConstraintSolver;
+import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
+import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 //import com.esotericsoftware.kryonet.Client;
@@ -23,12 +41,16 @@ import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
+import com.gdx.Network.Net.CollisionPacket;
+import com.gdx.Network.NetClientEventManager;
 import com.gdx.Network.NetServer;
-import com.gdx.Network.Net.newProjectile;
-import com.gdx.Network.Net.playerNew;
-import com.gdx.Network.Net.playerPacket;
-import com.gdx.Network.Net.projectile;
+import com.gdx.Network.Net.NewProjectile;
+import com.gdx.Network.Net.NewPlayer;
+import com.gdx.Network.Net.PlayerPacket;
+import com.gdx.Network.Net.ProjectilePacket;
 import com.gdx.Network.NetClient;
+import com.gdx.Network.NetServerEventManager;
+import com.gdx.Shaders.ColorMultiplierEntityShader;
 import com.gdx.Weapons.RocketLauncher;
 
 import java.util.ArrayList;
@@ -36,12 +58,21 @@ import java.util.ArrayList;
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
     public static boolean isWireframeEnabled;
+	public boolean bulletDebugDrawEnabled=false;
+	public boolean bulletDebugDrawMeshLevelWiresEnabled=true;
 	public static Player player;
 	public static ParticleManager particleManager;
 	public static Array<Enemy> enemyInstances;
+	public static EntityManager entityManager;
+	public static ClientEventManager eventManager;
+	public static btDynamicsWorld dynamicsWorld;
+	public static short PROJECTILE_FLAG = 1<<8;
+	public static short ENEMY_FLAG = 1<<9;
+	public static short PLAYER_FLAG = 1<<10;
 	public Array<Player> playerInstances;
 	public Array<ModelInstance> wireInstances;
 	public Array<Projectile> projectileInstances;
+	public Vector3 startVector = new Vector3(2f, 1.5f, 2f);
 	private MeshLevel meshLevel;
 	private Ray ray;
 	private Array<BoundingBox> boxes;
@@ -52,7 +83,14 @@ public class World implements Disposable {
     private NetClient client;
     private NetServer server;
     private int NetIdCurrent;
-	public static EntityManager entManager;
+	private NetClientEventManager clientEventManager;
+	public static NetServerEventManager serverEventManager;
+	private btCollisionConfiguration collisionConfig;
+	private btDispatcher dispatcher;
+	private BulletContactListener contactListener;
+	private btBroadphaseInterface broadPhase;
+	private btConstraintSolver constraintSolver;
+	private BulletTickCallback tickCallback;
     
 	public World() {
 		playerInstances = new Array<Player>();
@@ -63,7 +101,18 @@ public class World implements Disposable {
 		setOut(new Vector3());
 		wireInstances = new Array<ModelInstance>();
 		isWireframeEnabled = false;
+		collisionConfig = new btDefaultCollisionConfiguration();
+		dispatcher = new btCollisionDispatcher(collisionConfig);
 		//Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
+		broadPhase = new btDbvtBroadphase();
+		setContactListener(new BulletContactListener());
+		setContraintSolver(new btSequentialImpulseConstraintSolver());
+		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, constraintSolver, collisionConfig);
+		dynamicsWorld.setGravity(new Vector3(0, -0f, 0));
+
+
+		eventManager = new ClientEventManager(this);
+		setTickCallback(new BulletTickCallback(dynamicsWorld));
 	}
 	
 	
@@ -71,16 +120,17 @@ public class World implements Disposable {
 	public void loadOfflineWorld(TiledMap map, boolean skySphere) {
 		try {
 			Assets.loadModels();
-			player = new Player(this, 100, null, 2, true, true, new Vector3(2f, 1.5f, 2f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
+			player = new Player(this, 100, null, 2, true, true, startVector, new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 			particleManager = new ParticleManager(this);
 			player.initAbilities();
-			playerInstances.add(player);
-			Entity.entityInstances.add(player);
+			setPlayer(player);
+			ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(player);
+			eventManager.addEvent(event);
 			setMeshLevel(new MeshLevel(map, skySphere));
 			distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
-			entManager = new EntityManager(this);
 			meshLevel.generatePatrolPath();
+			entityManager = new EntityManager(this);
 		}
 		catch (Exception e) {
 			System.err.println(e);
@@ -170,17 +220,18 @@ public class World implements Disposable {
 	}
 	
 	private void updateEntities(float delta) {
-    	int size = Entity.entityInstances.size;
-		
+		dynamicsWorld.stepSimulation(delta, 5, 1f/120f);
+		eventManager.processEvents();
 		wireInstances.clear();
 		
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < Entity.entityInstances.size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
 			
 			if (entity.isActive()) {
 				entity.update(delta, this);
+				if(entity.shader!=null)
+					entity.shader.time+=delta;
 				
-				//
 				if(isWireframeEnabled) {
 					Material material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 					BoundingBox box;
@@ -241,12 +292,12 @@ public class World implements Disposable {
 						}
 					}
 				}
-			}
+//			}
 			
-			else {
-				//System.out.println("Removed: " + size);
-				entity.removeEntity(i);
-				size -= 1;
+//			else {
+//				//System.out.println("Removed: " + size);
+//				//entity.dispose();
+//				Entity.entityInstances.removeIndex(i);
 			}
 		}
 	}
@@ -269,18 +320,19 @@ public class World implements Disposable {
 		getMeshLevel().meshPartBuilder.line(corners[2], corners[6]);
 		getMeshLevel().meshPartBuilder.line(corners[3], corners[7]);
 		getMeshLevel().model = getMeshLevel().modelBuilder.end();
+		
 		return new ModelInstance(getMeshLevel().model);
 	}
 	
-	public void checkProjectileCollisions(Projectile projectile) {
+	public boolean checkProjectileCollisions(Projectile projectile) {
+		boolean collision = false;
+		
 		for (Enemy enemy : enemyInstances) {
-			if (projectile.getBoundingBox().intersects(enemy.getTransformedBoundingBox())) {
-				//projectile.initializeBloodEffect();
-				if (!projectile.isDealtDamage())
-					enemy.takeDamage(player.getWeapon().getDamage());
-					projectile.initializeCollisionExplosionEffect();
-			}
+			//collision = checkCollision(enemy.getBulletObject(), projectile.getBulletObject());
+			return collision;
 		}
+		
+		return collision;
 	}
 	
 	public void checkAbilityCollision(Ability ability) {
@@ -302,6 +354,28 @@ public class World implements Disposable {
 				enemy.takeDamage(weapon.getDamage());
 			}
 		}
+	}
+	
+	public boolean checkCollision(btCollisionObject obj0, btCollisionObject obj1) {
+		CollisionObjectWrapper co0 = new CollisionObjectWrapper(obj0);
+	    CollisionObjectWrapper co1 = new CollisionObjectWrapper(obj1);
+	     
+	    btCollisionAlgorithm algorithm = dispatcher.findAlgorithm(co0.wrapper, co1.wrapper);
+	 
+	    btDispatcherInfo info = new btDispatcherInfo();
+	    btManifoldResult result = new btManifoldResult(co0.wrapper, co1.wrapper);
+	     
+	    algorithm.processCollision(co0.wrapper, co1.wrapper, info, result);
+	 
+	    boolean r = result.getPersistentManifold().getNumContacts() > 0;
+	 
+	    dispatcher.freeCollisionAlgorithm(algorithm.getCPointer());
+	    result.dispose();
+	    info.dispose();
+	    co1.dispose();
+	    co0.dispose();
+	    
+	    return r;
 	}
 	
 	//Bounding boxes used for frustum culling
@@ -465,8 +539,12 @@ public class World implements Disposable {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
+		dispatcher.dispose();
+		dynamicsWorld.dispose();
+		broadPhase.dispose();
+		dispatcher.dispose();
+		constraintSolver.dispose();
+		collisionConfig.dispose();
 	}
 
 	public void setMeshLevel(MeshLevel meshLevel) {
@@ -493,22 +571,22 @@ public class World implements Disposable {
 		this.out = out;
 	}
 
-	public void updatePlayers(playerPacket packet) {
+	public void updatePlayers(PlayerPacket packet) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void updateProjectiles(projectile packet) {
+	public void updateProjectiles(ProjectilePacket packet) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void addProjectile(newProjectile packet) {
+	public void addProjectile(NewProjectile packet) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void addPlayer(playerNew playerPacket) {
+	public void addPlayer(NewPlayer playerPacket) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -530,5 +608,94 @@ public class World implements Disposable {
 
 	public void setNetIdCurrent(int netIdCurrent) {
 		NetIdCurrent = netIdCurrent;
+	}
+
+
+	public NetClientEventManager getNetEventManager() {
+		return clientEventManager;
+	}
+
+
+	public void setNetEventManager(NetClientEventManager eventManager) {
+		this.clientEventManager = eventManager;
+	}
+
+
+	public NetServerEventManager getServerEventManager() {
+		return serverEventManager;
+	}
+
+
+	public void setServerEventManager(NetServerEventManager serverEventManager) {
+		this.serverEventManager = serverEventManager;
+	}
+
+	public void removeProjectile(CollisionPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void checkClientProjectileCollisions(Projectile projectile) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void createExplosionEffect(CollisionPacket packet) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void checkProjectileCollisionsServer(Projectile projectile) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setEventManager(ClientEventManager eventManager) {
+		this.eventManager = eventManager;
+	}
+	
+	public ClientEventManager getClientEventManager() {
+		return eventManager;
+	}
+
+
+	public BulletContactListener getContactListener() {
+		return contactListener;
+	}
+
+
+	public void setContactListener(BulletContactListener contactListener) {
+		this.contactListener = contactListener;
+	}
+
+
+	public btDynamicsWorld getDynamicsWorld() {
+		return dynamicsWorld;
+	}
+
+
+	public void setDynamicsWorld(btDynamicsWorld dynamicsWorld) {
+		this.dynamicsWorld = dynamicsWorld;
+	}
+
+
+	public btConstraintSolver getContraintSolver() {
+		return constraintSolver;
+	}
+
+
+	public void setContraintSolver(btConstraintSolver contraintSolver) {
+		this.constraintSolver = contraintSolver;
+	}
+
+
+	public BulletTickCallback getTickCallback() {
+		return tickCallback;
+	}
+
+
+	public void setTickCallback(BulletTickCallback tickCallback) {
+		this.tickCallback = tickCallback;
 	}
 }

@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.DynamicEntities.Enemy;
+import com.gdx.Shaders.ColorMultiplierEntityShader;
 import com.gdx.engine.Assets;
+import com.gdx.engine.World;
 
 public class Zombie extends Enemy {
 	public static final int MAX_HEALTH = 100;
@@ -33,6 +35,24 @@ public class Zombie extends Enemy {
 					  	new Vector3(0.8f, 0.8f, 0.8f), new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 					  	new ModelInstance(Assets.manager.get("zombie_fast.g3db", Model.class)));
 		zombie.initializeEnemy();
+		
+		ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
+		es.multiplier.y=(float)Math.random();
+		es.multiplier.x=(float)Math.random();
+		es.multiplier.z=(float)Math.random();
+		zombie.setShader(es);
 		return zombie;
+	}
+	
+	@Override
+	public void takeDamage(int damage) {
+		// TODO Auto-generated method stub
+		super.takeDamage(damage);
+		
+		if(this.shader instanceof ColorMultiplierEntityShader&&this.getHealth()<=10)
+		{
+			ColorMultiplierEntityShader multiplier=(ColorMultiplierEntityShader)shader;
+			multiplier.multiplier.set(1,0,0);
+		}
 	}
 }

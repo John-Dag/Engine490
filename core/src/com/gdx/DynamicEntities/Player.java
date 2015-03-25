@@ -9,9 +9,12 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
@@ -39,16 +42,17 @@ public class Player extends DynamicEntity {
 	public static final int MIN_HEALTH = 0;
 	public static final int MAX_HEALTH = 100;
 	public PerspectiveCamera camera;
-	public Vector3 temp;
+	public Vector3 temp, positionBeforeRecoil;
 	private World world;
 	private int health;
 	private boolean mouseLocked, mouseLeft, clipping, isCrouching, isJumping, isFiring, isCooldownActive, isPlayerTargeting, 
 				    moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false, jump = false, crouch = false, 
-				    ability1 = false, ability2 = false, ESCAPE = false, respawning;
+				    ability1 = false, ability2 = false, ESCAPE = false, respawning, isRotating = false;
 	private Vector3 collisionVector, newPos, oldPos;
 	private float jumpVelocity, currentMovementSpeed, currentHeightOffset, speedScalar, fireDelayTimer;
 	private DistanceTrackerMap distanceMap;
 	private Array<Ability> abilities;
+	private String netName;
 	
 	public Player() {
 		super();
@@ -72,6 +76,7 @@ public class Player extends DynamicEntity {
 		this.getMovementVector().set(new Vector3(0, 0, 0));
 		this.newPos = new Vector3(0,0,0);
 		this.oldPos = new Vector3(0,0,0);
+		this.positionBeforeRecoil = new Vector3(0,0,0);
 		this.isJumping = false;
 		this.clipping = true;
 		this.isCrouching = false;
@@ -83,7 +88,13 @@ public class Player extends DynamicEntity {
 		this.speedScalar = 1f; // 1 = default movespeed
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
-		//this.setModel(model);
+		this.setBulletShape(new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)));
+		this.setBulletObject(new btCollisionObject());
+		this.getBulletObject().setCollisionShape(this.getBulletShape());
+		this.setTarget(new Matrix4());
+		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
+		this.getBulletObject().setContactCallbackFlag(World.PLAYER_FLAG);
+		World.dynamicsWorld.addCollisionObject(this.getBulletObject());
 	}
 	
 	public void initAbilities() {
@@ -183,42 +194,44 @@ public class Player extends DynamicEntity {
 					getMovementVector().z * collisionVector.z);
 		}
 		
-       for(Enemy enemy:World.enemyInstances)
-       {
-       	
-       	if(oldPos.dst(enemy.getPosition()) > 4)
-       			continue;
-
-       	if(oldPos.dst(enemy.getPosition()) < 1)
-       	{
-       		if(enemy.getPosition().dst(newPos) < enemy.getPosition().dst(oldPos))
-       		{
-       			getMovementVector().set(0,0,0);
-       			break;
-       		}
-
-       	}
-       	if(oldPos.dst(enemy.getPosition()) < 2)
-       	{
-           	if(isJumping & jumpVelocity < 0)
-           		jumpVelocity = 0;
-       	
-       	}
-
-       }
+//       for(Enemy enemy:World.enemyInstances)
+//       {
+//       	
+//       	if(oldPos.dst(enemy.getPosition()) > 4)
+//       			continue;
+//
+//       	if(oldPos.dst(enemy.getPosition()) < 1)
+//       	{
+//       		if(enemy.getPosition().dst(newPos) < enemy.getPosition().dst(oldPos))
+//       		{
+//       			getMovementVector().set(0,0,0);
+//       			break;
+//       		}
+//
+//       	}
+//       	if(oldPos.dst(enemy.getPosition()) < 2)
+//       	{
+//           	if(isJumping & jumpVelocity < 0)
+//           		jumpVelocity = 0;
+//       	
+//       	}
+//
+//       }
 
 		this.camera.position.mulAdd(getMovementVector(), movAmt);
 		
 		//world.getMeshLevel().updateHeightOffset(this.camera.position.y - currentHeightOffset);
 		
 		this.camera.update();
-		if (this.getModel() != null)
-			this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+//		if (this.getModel() != null)
+//			this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.getPosition().set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.updatePosition(delta);
-		this.updateInstanceTransform();
+		//this.updateInstanceTransform();
 		
 		if (this.health <= MIN_HEALTH) {
+			if (world.getClient() != null) {
+			}
 			setRespawning(true);
 			respawnPlayer(this);
 		}
@@ -277,12 +290,18 @@ public class Player extends DynamicEntity {
 				fireWeapon();
 			}
 			
+			if (Gdx.input.getDeltaX() != 0)
+				setRotating(true);
+			else
+				setRotating(false);
+			
 			// rotate xz plane
 			camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
 			
 			// calculates up and down rotation vector
 			// weapon recoil added here
-			if (isFiring) {
+			if (isFiring && fireDelayTimer >= 0.01f) {
+				positionBeforeRecoil.set(camera.position.cpy());
 				camera.direction.y += world.getPlayer().getWeapon().getRecoil();
 				temp.set(camera.direction).crs(camera.up).nor();
 				isFiring = false;
@@ -305,6 +324,12 @@ public class Player extends DynamicEntity {
 			// rotates up and down
 			camera.direction.rotate(temp, pr);
 		}
+		
+		else
+			setRotating(false);
+		
+		this.setTarget(this.getTarget().idt());
+		this.getBulletObject().setWorldTransform(this.getTarget());
 	}
 	
 	public void catchCursor() {
@@ -379,7 +404,6 @@ public class Player extends DynamicEntity {
 	
 	public void takeDamage(int damage) {
 		this.health -= damage;
-		
 		world.setFilterEffect(new com.gdx.FilterEffects.RedFade());
 	}
 	
@@ -566,5 +590,21 @@ public class Player extends DynamicEntity {
 
 	public void setRespawning(boolean respawning) {
 		this.respawning = respawning;
+	}
+
+	public String getNetName() {
+		return netName;
+	}
+
+	public void setNetName(String netName) {
+		this.netName = netName;
+	}
+
+	public boolean isRotating() {
+		return isRotating;
+	}
+
+	public void setRotating(boolean isRotating) {
+		this.isRotating = isRotating;
 	}
 }

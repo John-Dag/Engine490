@@ -1,5 +1,6 @@
 package com.gdx.DynamicEntities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
@@ -7,13 +8,30 @@ import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationListener
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.engine.*;
-
+import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.gdx.Network.Net;
+import com.gdx.Network.NetServerEvent;
+import com.gdx.engine.BulletContactListener;
+import com.gdx.engine.BulletMotionState;
+import com.gdx.engine.ClientEvent;
+import com.gdx.engine.Condition;
+import com.gdx.engine.DistanceTrackerMap;
+import com.gdx.engine.Entity;
+import com.gdx.engine.GameScreen;
+import com.gdx.engine.State;
+import com.gdx.engine.StateMachine;
+import com.gdx.engine.World;
 import java.util.*;
 
 public class Enemy extends DynamicEntity {
@@ -52,14 +70,23 @@ public class Enemy extends DynamicEntity {
 		attack = new State();
 		stateMachine = new StateMachine();
 		this.StateMachineUsage(this);
+		this.setBulletShape(new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)));
+		this.setBulletObject(new btCollisionObject());
+		this.getBulletObject().setCollisionShape(this.getBulletShape());
+		this.setTarget(new Matrix4());
+		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
+		this.getBulletObject().setContactCallbackFlag(World.ENEMY_FLAG);
 	}
 
 	@Override
-	public void update(float delta, World world) {
+	public void update(float delta, final World world) {
 		this.updatePosition(delta);
 		this.updateInstanceTransform();
 		this.getAnimation().update(delta);
 		this.stateMachine.UpdateStates(this);
+		this.setTarget(this.getTarget().idt());
+		this.setTarget(this.getTarget().translate(this.getPosition()).translate(0, .5f, 0));
+		this.getBulletObject().setWorldTransform(this.getTarget());
 		
 		GridPoint2 thisPosition = new GridPoint2((int)this.getPosition().x, (int)this.getPosition().z);
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
@@ -269,11 +296,13 @@ public class Enemy extends DynamicEntity {
 		}
 		
 		else if (this.getStateMachine().Current == this.dead) {
-			this.getVelocity().set(0, 0, 0);
-			World.enemyInstances.removeValue(this, true);
+			final Enemy enemyRef = this;
+			enemyRef.getBulletObject().setContactCallbackFilter(0);
+			enemyRef.getVelocity().set(0, 0, 0);
+			World.enemyInstances.removeValue(enemyRef, true);
 			this.getAnimation().setAnimation("Dying", 1, new AnimationListener() {
 					
-					@Override
+				@Override
 				public void onLoop(AnimationDesc animation) {
 						// TODO Auto-generated method stub
 						
@@ -281,7 +310,8 @@ public class Enemy extends DynamicEntity {
 					
 				@Override
 				public void onEnd(AnimationDesc animation) {
-					setIsActive(false);
+					ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(enemyRef);
+					world.getClientEventManager().addEvent(event);
 				}
 			});
 		}
@@ -530,17 +560,11 @@ public class Enemy extends DynamicEntity {
 		World.player.takeDamage(this.getDamage());
 	}
 	
-	public Enemy copyEnemy() {
-		Enemy enemy = new Enemy(this.getId(), this.isActive(), this.isRenderable(), this.getPosition().cpy(), this.getRotation().cpy(),
-			     				this.getScale().cpy(), this.getVelocity().cpy(), this.getAcceleration().cpy(), this.getModel());
-		enemy.initializeEnemy();
-		return enemy;
-	}
-	
 	public void initializeEnemy() {
 		this.setAnimation(new AnimationController(this.getModel()));
 		this.getStateMachine().Current = this.spawn;
 		this.setInCollision(true);
+		this.getBulletObject().setCollisionFlags(World.ENEMY_FLAG);
 		this.setIsActive(true);
 	}
 	
@@ -561,6 +585,60 @@ public class Enemy extends DynamicEntity {
 		boundingBoxMinimum.set(this.getPosition().x - 1f, this.getPosition().y - 0f, this.getPosition().z - 1f);
 		boundingBoxMaximum.set(this.getPosition().x + 1f, this.getPosition().y + 1f, this.getPosition().z + 1f);
 		return this.getBoundingBox().set(boundingBoxMinimum,boundingBoxMaximum);
+	}
+	
+
+	public static void handleCollisionA(int bulletId1, int bulletId2) {
+		Projectile projectile = null;
+		Enemy enemy = null;
+		Player player = null;
+		
+		if (bulletId1 < Entity.entityInstances.size && bulletId2 < Entity.entityInstances.size) {
+			if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId1);
+				projectile.getBulletBody().setContactCallbackFilter(0);
+				projectile.setMoving(false);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId2);
+				projectile.getBulletBody().setContactCallbackFilter(0);
+				projectile.setMoving(false);
+			}
+			
+			if (Entity.entityInstances.get(bulletId1) instanceof Enemy) {
+				enemy = (Enemy)Entity.entityInstances.get(bulletId1);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Enemy) {
+				enemy = (Enemy)Entity.entityInstances.get(bulletId2);
+			}
+			
+			if (Entity.entityInstances.get(bulletId1) instanceof Player) {
+				player = (Player)Entity.entityInstances.get(bulletId1);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Player) {
+				player = (Player)Entity.entityInstances.get(bulletId2);
+			}
+			
+			if (enemy != null && projectile != null) {
+				enemy.takeDamage(projectile.getDamage());
+				projectile.setMoving(false);
+			}
+			
+			else if (player != null && projectile != null) {
+				System.out.println("collided");
+				if (GameScreen.mode == GameScreen.State.Server) {
+					Net.CollisionPacket packet = new Net.CollisionPacket();
+					packet.playerOriginID = projectile.getOriginID();
+					packet.playerID = projectile.getNetId();
+					packet.damage = projectile.getDamage();
+					NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
+					World.serverEventManager.addNetEvent(event);
+				}
+			}
+		}
 	}
 
 	public boolean isAttacking() {

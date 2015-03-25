@@ -16,11 +16,18 @@ import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.DebugDrawer;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.DynamicEntities.Player;
-import com.gdx.Network.Net.playerPacket;
+import com.gdx.Network.Net.PlayerPacket;
+import com.gdx.Shaders.WiznerdShaderProvider;
 
 public class Render implements Disposable {
 	public static int renderCount;
@@ -35,15 +42,19 @@ public class Render implements Disposable {
 	private Model weapon = new Model();
 	private boolean loading;
 	private Mesh fullScreenQuad;
+	public Vector3 upVector = new Vector3(0f, 1f, 0f);
+	public Vector3 zeroVector = new Vector3(0f,0f,0f);
 	
+	private DebugDrawer debugDrawer=new DebugDrawer();
 	public Render(World world) {
 		this.world = world;
 		position = new Vector3();
 	
 		//Changes the max number point lights in the default shader
 		//shaderProvider = new DefaultShaderProvider();
-		shaderProvider = new DefaultShaderProvider(Assets.vertexShader, Assets.fragmentShader);//new DefaultShaderProvider();
+		shaderProvider = new WiznerdShaderProvider(Assets.vertexShader, Assets.fragmentShader);//new DefaultShaderProvider();
 		shaderProvider.config.numPointLights = 100;
+		
 		
 		//Environment settings
 		environment = new Environment();
@@ -61,6 +72,10 @@ public class Render implements Disposable {
 		world.createBoundingBoxes();
 		
 		fullScreenQuad=createFullScreenQuad();
+		debugDrawer.setDebugMode(btIDebugDraw.DebugDrawModes.DBG_FastWireframe);
+		
+
+		world.dynamicsWorld.setDebugDrawer(debugDrawer);
 	}
 
 	//g3db files loaded here
@@ -78,6 +93,10 @@ public class Render implements Disposable {
 		modelBatch.render(World.particleManager.getSystem());
 	}
 	
+	
+	private Vector3 dst=new Vector3();
+	private Vector3 wireColor=new Vector3(1,1,1);
+	private Vector3 levelWireColor=new Vector3(0.3f,.3f,1);
 	public void RenderWorld(float delta) {
 		if (loading && Assets.manager.update()) {
 			doneLoading();
@@ -107,7 +126,7 @@ public class Render implements Disposable {
 		//Viewport culling
 		renderCount = 0;
 		for (int i = 0; i < world.getMeshLevel().getInstances().size; i++) {
-			ModelInstance instance = world.getMeshLevel().getInstances().get(i);
+			ModelInstance instance = (ModelInstance) world.getMeshLevel().getInstances().get(i);
 			//shadowBatch.render(instance);
 			if (isVisible(world.getPlayer().camera, instance, world.getBoundingBoxes().get(i))) {
 				renderModels(instance);
@@ -125,13 +144,16 @@ public class Render implements Disposable {
 			renderModels(wireInstance);
 			renderCount++;
 		}
+
 		
 		//Renders multiplayer (just players so far)
 		for (int i = 0; i < world.getPlayerInstances().size; i++) {
 			if (world.getPlayerInstances().get(i).getModel() != null) {
 				Player player = world.getPlayerInstances().get(i);
 				player.getAnimation().update(delta);
+				Vector2 angleVector = new Vector2(player.camera.direction.z, player.camera.direction.x);
 				player.getModel().transform.setToTranslation(player.camera.position.cpy());
+				player.getModel().transform.rotate(upVector, angleVector.angle());
 				renderModels(player.getModel());
 			}
 		}
@@ -147,10 +169,33 @@ public class Render implements Disposable {
 		if(filterEffect!=null){
 			filterEffect.getFilterEffectBuffer().begin();
 		}
-		
+
 		modelBatch.end();
 		//Render decals
 		decalBatch.flush();
+		
+		if(world.bulletDebugDrawEnabled){
+		debugDrawer.begin(world.getPlayer().camera);
+		Vector3 wireColorToUse=wireColor;
+		for(int i=0;i<world.dynamicsWorld.getCollisionObjectArray().size();i++)
+		{
+			wireColorToUse=wireColor;
+			//if(!world.bulletDebugDrawMeshLevelWiresEnabled)
+			{
+				if(world.dynamicsWorld.getCollisionObjectArray().at(i).userData!=null&&(Integer)world.dynamicsWorld.getCollisionObjectArray().at(i).userData==1)
+					if(!world.bulletDebugDrawMeshLevelWiresEnabled)
+						continue;
+					else
+						wireColorToUse=levelWireColor;
+			}
+			world.dynamicsWorld.getCollisionObjectArray().at(i).getWorldTransform().getTranslation(dst);
+			
+			if(dst.dst(world.player.getPosition())>10)
+					continue;
+			world.dynamicsWorld.debugDrawObject(world.dynamicsWorld.getCollisionObjectArray().at(i).getWorldTransform(), world.dynamicsWorld.getCollisionObjectArray().at(i).getCollisionShape(),wireColorToUse);
+		}
+		debugDrawer.end();
+		}
 		
 		if(filterEffect!=null) {
 			filterEffect.getFilterEffectBuffer().end();

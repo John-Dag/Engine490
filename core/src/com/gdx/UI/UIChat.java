@@ -19,7 +19,6 @@ import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 
 public class UIChat extends UIBase {
-	private Window window;
 	private final int ENTER = 13;
 	private final int T = 84;
 	private TextField textfield;
@@ -31,7 +30,7 @@ public class UIChat extends UIBase {
 	
 	public UIChat(Stage stage, Skin skin, String name) {
 		super(stage);
-		window = new Window(name, skin);
+		this.setWindow(new Window(name, skin));
 		textfield = new TextField("", skin);
 		fieldValue = new String();
 		textAreaTable = new Table();
@@ -50,10 +49,10 @@ public class UIChat extends UIBase {
 	 */
 
 	public void addChatWidget(float width, float height, float posX, float posY, float fontScale) {
-		window.setSize(width, height);
-		window.setPosition(posX, posY);
-		window.setColor(Color.BLUE);
-		textAreaTable.setSize(window.getWidth(), window.getHeight());
+		getWindow().setSize(width, height);
+		getWindow().setPosition(posX, posY);
+		getWindow().setColor(Color.BLUE);
+		textAreaTable.setSize(getWindow().getWidth(), getWindow().getHeight());
 		textfield.setSize(textAreaTable.getWidth(), 30);
 		textfield.setDisabled(true);
 		textAreaTable.addActor(textfield);
@@ -68,9 +67,9 @@ public class UIChat extends UIBase {
 		scrollPane.setOverscroll(false, false);
 		scrollPane.layout();
 		textAreaTable.add(scrollPane).width(width - 10).height(height - 55);
-		window.addActor(textAreaTable);
+		getWindow().addActor(textAreaTable);
 
-		this.getStage().addActor(window);
+		this.getStage().addActor(getWindow());
 	}
 	
 	/***
@@ -127,7 +126,7 @@ public class UIChat extends UIBase {
 	
 	public void sendMessage(String message) {
 		try {
-			Net.chatMessage packet = new Net.chatMessage();
+			Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
 			packet.message = Net.name + ": " + fieldValue;
 			GameScreen.client.sendChatMessage(packet);
 		}
@@ -136,14 +135,15 @@ public class UIChat extends UIBase {
 		}
 	}
 	
-	public void addMessage(Net.chatMessage packet) {
+	public void addMessage(Net.ChatMessagePacket packet) {
 		fieldValue = textfield.getText();
 		chatLog.append(packet.message + "\n");
 		textArea.setText(chatLog.toString());
 		scrollPane.setScrollPercentY(scrollPane.getScrollPercentY());
 	}
 	
-	public void activateChatField() {
+	@Override
+	public void show() {
 		if (textfield.isDisabled()) {
 			textfield.setDisabled(false);
 			this.getStage().unfocusAll();
@@ -152,8 +152,12 @@ public class UIChat extends UIBase {
 		}
 	}
 
-	public Window getWindow() {
-		return window;
+	public Label getTextArea() {
+		return textArea;
+	}
+
+	public void setTextArea(Label textArea) {
+		this.textArea = textArea;
 	}
 
 	public TextField getTextfield() {
@@ -174,10 +178,6 @@ public class UIChat extends UIBase {
 
 	public ScrollPane getScrollPane() {
 		return scrollPane;
-	}
-
-	public void setWindow(Window window) {
-		this.window = window;
 	}
 
 	public void setTextfield(TextField textfield) {

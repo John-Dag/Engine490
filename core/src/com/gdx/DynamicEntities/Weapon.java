@@ -3,6 +3,7 @@ package com.gdx.DynamicEntities;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.engine.World;
 
 public class Weapon extends DynamicEntity {
@@ -11,6 +12,7 @@ public class Weapon extends DynamicEntity {
 	protected float recoil;
 	protected int damage;
 	private boolean isParticleWeapon, isPickedup;
+	private WeaponSpawner spawnerRef;
 
 	public Weapon() {
 		super();
@@ -24,6 +26,7 @@ public class Weapon extends DynamicEntity {
 			  scale, velocity, acceleration);
 		this.isParticleWeapon = isParticleWeapon;
 		this.setModel(new ModelInstance(model));
+		this.spawnerRef = this.getSpawnerRef();
 	}
 	
 	public void fireWeapon(World world) {
@@ -76,5 +79,18 @@ public class Weapon extends DynamicEntity {
 
 	public void setParticleWeapon(boolean isParticleWeapon) {
 		this.isParticleWeapon = isParticleWeapon;
+	}
+
+	public WeaponSpawner getSpawnerRef() {
+		return spawnerRef;
+	}
+
+	public void setSpawnerRef(WeaponSpawner spawnerRef) {
+		this.spawnerRef = spawnerRef;
+	}
+
+	public void pickupWeapon(World world) {
+		// TODO Auto-generated method stub
+		
 	}
 }

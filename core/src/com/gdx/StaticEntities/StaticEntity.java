@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.gdx.Shaders.EntityShader;
 import com.gdx.engine.Entity;
 import com.gdx.engine.Render;
 import com.gdx.engine.World;
@@ -156,5 +157,13 @@ public class StaticEntity extends Entity {
 
 	public void setDecalFacing(boolean isDecalFacing) {
 		this.isDecalFacing = isDecalFacing;
+	}
+	
+	public void setShader(EntityShader shader) {
+		super.setShader(shader);
+		if(this.model!=null)
+		{
+			this.model.userData=shader;
+		}
 	}
 }

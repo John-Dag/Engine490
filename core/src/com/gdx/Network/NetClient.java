@@ -3,27 +3,27 @@ package com.gdx.Network;
 import java.io.IOException;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.net.Socket;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
-import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
-import com.gdx.Network.Net.playerPacket;
+import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
+import com.badlogic.gdx.utils.Sort;
 
 public class NetClient {
 	private Client client;
 	private World world;
 	private GameScreen screen;
 	private int id;
-	private Vector3 previousPlayerPos = new Vector3();
+	private NetStatComparator comparator;
 	
 	public NetClient() {
 		super();
@@ -33,6 +33,7 @@ public class NetClient {
 		try {
 			this.world = world;
 			this.screen = screen;
+			comparator = new NetStatComparator();
 			client = new Client();
 			Log.set(Log.LEVEL_INFO);
 			client.start();
@@ -56,9 +57,11 @@ public class NetClient {
 	}
 	
 	private void createPlayerOnServer() {
-		Net.playerNew packet = new Net.playerNew();
+		Net.NewPlayer packet = new Net.NewPlayer();
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
+		packet.name = Net.name;
+		world.getPlayer().setNetId(client.getID());
 		client.sendTCP(packet);
 	}
 	
@@ -76,7 +79,7 @@ public class NetClient {
 			
 			@Override
 			public void received(Connection connection, Object object) {
-				clientReceived(connection, object);
+				packetReceived(connection, object);
 			}
 		};
 		
@@ -92,55 +95,109 @@ public class NetClient {
 	}
 	
 	//Handles received packets
-	private void clientReceived(Connection connection, Object object) {
-        if (object instanceof Net.playerPacket) {
-     	   Net.playerPacket packet = (Net.playerPacket)object;
+	private void packetReceived(Connection connection, Object object) {
+        if (object instanceof Net.PlayerPacket) {
+     	   Net.PlayerPacket packet = (Net.PlayerPacket)object;
      	   updatePlayers(packet, connection);
         }
         
-        else if (object instanceof Net.playerNew) {
-       	   Net.playerNew packet = (Net.playerNew)object;
-     	   addPlayer(packet);
+        else if (object instanceof Net.NewPlayer) {
+       	   Net.NewPlayer packet = (Net.NewPlayer)object;
+       	   createPlayerStatField(packet);
+       	   world.getNetEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
         }
         
-        else if (object instanceof Net.playerDisconnect) {
-     	   Net.playerDisconnect disconnect = (Net.playerDisconnect)object;
-     	   removePlayer(disconnect);
+        else if (object instanceof Net.PlayerDisconnect) {
+     	   Net.PlayerDisconnect packet = (Net.PlayerDisconnect)object;
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.RemovePlayer(packet));
         }
         
-        else if (object instanceof Net.projectile) {
-     	   Net.projectile packet = (Net.projectile)object;
+        else if (object instanceof Net.ProjectilePacket) {
+     	   Net.ProjectilePacket packet = (Net.ProjectilePacket)object;
      	   updateProjectiles(packet);
         }
         
-        else if (object instanceof Net.newProjectile) {
-        	//System.out.println("test");
-     	   Net.newProjectile packet = (Net.newProjectile)object;
-     	   addServerProjectile(packet);
+        else if (object instanceof Net.NewProjectile) {
+     	   Net.NewProjectile packet = (Net.NewProjectile)object;
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.CreateProjectile(packet));
      	}
         
-        else if (object instanceof Net.chatMessage) {
-        	Net.chatMessage packet = (Net.chatMessage)object;
-        	addChatMessage(packet);
+        else if (object instanceof Net.ChatMessagePacket) {
+        	Net.ChatMessagePacket packet = (Net.ChatMessagePacket)object;
+        	world.getNetEventManager().addNetEvent(new NetClientEvent.ChatMessage(packet));
+        }
+        
+        else if (object instanceof Net.CollisionPacket) {
+        	Net.CollisionPacket packet = (Net.CollisionPacket)object;
+        	world.getNetEventManager().addNetEvent(new NetClientEvent.ProjectileCollision(packet));
+        }
+        
+        else if (object instanceof Net.StatPacket) {
+        	Net.StatPacket packet = (Net.StatPacket)object;
+        	updateNetStats(packet);
         }
 	}
 	
-	public synchronized void updateProjectiles(Net.projectile packet) {
-		world.updateProjectiles(packet);
+	public void createPlayerStatField(Net.NewPlayer packet) {
+		NetStatField field = new NetStatField("", GameScreen.skin);
+		field.setPlayerName(packet.name);
+		field.setStats(field.getPlayerName() + "                 K: " + 0 + "                 D: " + 0);
+		field.setText(field.getStats());
+		field.setPlayerID(packet.id);
+		screen.getStatForm().addNetStatField(field, 0, (screen.getStatForm().getWindow().getHeight() - 40f) - 
+				                                       (screen.getStatForm().getStatFields().size * 20f), 300, 20);
+		screen.getStatForm().getWindow().setHeight(screen.getStatForm().getWindow().getHeight() + 20f);
+	}
+	
+	public void updateNetStats(Net.StatPacket packet) {
+		for (int i = 0; i < screen.getStatForm().getStatFields().size; i++) {
+			NetStatField field = screen.getStatForm().getStatFields().get(i);
+
+			if (field.getPlayerID() == packet.playerID) {
+				field.setPlayerName(packet.name);
+				field.setKills(packet.kills);
+				field.setDeaths(packet.deaths);
+				field.setStats(field.getPlayerName() + "                 K: " + packet.kills + "                 D: " + packet.deaths);
+				field.setText(field.getStats());
+			}
+		}
+	
+		Array<NetStatField> fields = new Array<NetStatField>();
+		fields.addAll(sortPlayerStatFields());
+		
+		for (int i = 0; i < fields.size; i++) {
+			screen.getStatForm().addNetStatField(fields.get(i), 0, (screen.getStatForm().getWindow().getHeight() - 40f) - 
+												(screen.getStatForm().getStatFields().size * 20f), 300, 20);
+		}
+	}
+	
+	public void sendKillUpdate(int playerID) {
+		Net.KillPacket packet = new Net.KillPacket();
+		packet.id = playerID;
+		client.sendTCP(packet);
+	}
+	
+	public void sendDeathUpdate(int playerID) {
+		Net.DeathPacket packet = new Net.DeathPacket();
+		packet.id = playerID;
+		client.sendTCP(packet);
 	}
 	
 	//Remove the player that disconnected from the world
 	//Check both the player instances, and entity instances for the player
-	public void removePlayer(Net.playerDisconnect disconnect) {
+	public void removePlayer(Net.PlayerDisconnect disconnect) {
 		try {
 			for (int i = 0; i < world.playerInstances.size; i++) {
 				Player player = world.playerInstances.get(i);
-				if (player.getNetId() == disconnect.id)
+				
+				if (player.getNetId() == disconnect.id) {
 					world.getPlayerInstances().removeIndex(i);
+				}
 			}
 			
 			for (int i = 0; i < Entity.entityInstances.size; i++) {
 				Entity entity = Entity.entityInstances.get(i);
+				
 				if (entity instanceof Player) {
 					Player player = (Player)Entity.entityInstances.get(i);
 					if (player.getNetId() == disconnect.id)
@@ -153,46 +210,90 @@ public class NetClient {
 		}
 	}
 	
-	public void addChatMessage(Net.chatMessage packet) {
+	public void removePlayerStatField(Net.PlayerDisconnect disconnect) {
+		boolean removed = false;
+		
+		for (int i = 0; i < screen.getStatForm().getStatFields().size; i++) {
+			NetStatField field = screen.getStatForm().getStatFields().get(i);
+			
+			//A players stat field was removed shift all fields down
+			if (removed) {
+				field.setPosition(field.getX(), field.getY() + 20f);
+			}
+			
+			if (disconnect.id == field.getPlayerID()) {
+				field.setVisible(false);
+				screen.getStatForm().getStatFields().removeIndex(i);
+				removed = true;
+				i--;
+			}
+		}
+	}
+	
+	public Array<NetStatField> sortPlayerStatFields() {
+		Array<NetStatField> fields = new Array<NetStatField>(); 
+		Sort.instance().sort(screen.getStatForm().getStatFields(), comparator);
+		fields.addAll(screen.getStatForm().getStatFields());
+		screen.getStatForm().getStatFields().clear();
+		screen.getStatForm().getWindow().clear();
+		
+		return fields;
+	}
+	
+	public void addChatMessage(Net.ChatMessagePacket packet) {
 		screen.getChat().addMessage(packet);
 	}
 	
-	public void sendChatMessage(Net.chatMessage packet) {
+	public void sendChatMessage(Net.ChatMessagePacket packet) {
 		client.sendTCP(packet);
+	}
+	
+	public void sendProjectile(Projectile projectile, int id) {
+		Net.NewProjectile packet = new Net.NewProjectile();
+		packet.id = id;
+		packet.position = projectile.getPosition();
+		Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+		packet.rayDirection = ray.direction;
+		packet.rayOrigin = ray.origin;
+		packet.cameraPos = projectile.getPosition();
+		packet.originID = this.getId();
+		client.sendTCP(packet);
+	}
+	
+	public void sendPlayerUpdate() {
+    	Net.PlayerPacket packet = new Net.PlayerPacket();
+    	packet.position = world.getPlayer().camera.position.cpy();
+    	packet.position.y = packet.position.y - .5f;
+    	packet.id = client.getID();
+    	packet.direction = world.getPlayer().camera.direction.cpy();
+		client.sendUDP(packet);
+		world.getPlayer().setRespawning(false);
 	}
 	
 	//Adds a new player to the client representing a player on the server
-	public void addPlayer(Net.playerNew packet) {
+	public void addPlayer(Net.NewPlayer packet) {
 		world.addPlayer(packet);
 	}
 	
+	public void addServerProjectile(Net.NewProjectile packet) {
+		world.addProjectile(packet);
+	}
+	
 	//Updates the clients players with player positions from the server
-	public void updatePlayers(playerPacket packet, Connection connection) {
+	public void updatePlayers(PlayerPacket packet, Connection connection) {
 		world.updatePlayers(packet);
 	}
 	
-	public synchronized void addProjectile(Projectile projectile, int id) {
-		Net.newProjectile packet = new Net.newProjectile();
-		packet.id = id;
-		packet.position = projectile.getPosition();
-		packet.cameraPos = projectile.getVelocity();
-		client.sendTCP(packet);
-	}
-	
-	public void addServerProjectile(Net.newProjectile packet) {
-		world.addProjectile(packet);
+	public void updateProjectiles(Net.ProjectilePacket packet) {
+		world.updateProjectiles(packet);
 	}
 	
 	//Send updates to the server if the player is moving, jumping, or respawning.
 	public void clientUpdate() {
-		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping() || world.getPlayer().isRespawning()) {
-	    	Net.playerPacket packet = new Net.playerPacket();
-	    	packet.position = world.getPlayer().camera.position.cpy();
-	    	packet.position.y = packet.position.y - .5f;
-	    	packet.id = client.getID();
-	    	packet.direction = world.getPlayer().camera.direction.cpy();
-			client.sendTCP(packet);
-			world.getPlayer().setRespawning(false);
+		world.getNetEventManager().processEvents();
+		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping() || 
+		    world.getPlayer().isRespawning() || world.getPlayer().isRotating()) {
+			sendPlayerUpdate();
 		}
 	}
 
@@ -202,5 +303,13 @@ public class NetClient {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public Client getClient() {
+		return client;
+	}
+
+	public void setClient(Client client) {
+		this.client = client;
 	}
 }

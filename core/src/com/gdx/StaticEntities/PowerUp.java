@@ -7,6 +7,7 @@ import com.gdx.engine.World;
 
 public class PowerUp extends StaticEntity {
 	private Vector3 rotationVec;
+	private PowerUpSpawn spawnRef;
 	
 	public PowerUp () {
 		super();
@@ -16,6 +17,7 @@ public class PowerUp extends StaticEntity {
 		super(position, id, isActive, isRenderable, false);
 		this.setModel(new ModelInstance(model));
 		rotationVec = new Vector3(0f, 0f, 1f);
+		spawnRef = this.getSpawnRef();
 	}
 	
 	@Override
@@ -23,6 +25,8 @@ public class PowerUp extends StaticEntity {
 		if (this.getModel() != null && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
 			this.setIsActive(false);
 			effect();
+			if (spawnRef != null)
+				spawnRef.startSpawnTimer();
 		}
 		
 		else {
@@ -42,5 +46,13 @@ public class PowerUp extends StaticEntity {
 			}, DURATION); 
 		
 		*/
+	}
+
+	public PowerUpSpawn getSpawnRef() {
+		return spawnRef;
+	}
+
+	public void setSpawnRef(PowerUpSpawn spawnRef) {
+		this.spawnRef = spawnRef;
 	}
 }

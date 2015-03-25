@@ -6,9 +6,17 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody.btRigidBodyConstructionInfo;
+import com.gdx.engine.BulletMotionState;
+import com.gdx.Shaders.EntityShader;
 import com.gdx.engine.Entity;
 import com.gdx.engine.Render;
 import com.gdx.engine.World;
@@ -25,12 +33,19 @@ public class DynamicEntity extends Entity {
 	private AnimationController animation;
 	private BoundingBox boundingBox;
 	private BoundingBox detectionBox;
-	private int NetId;
+	private int NetId, originID;
 	private Vector3 newPosition = new Vector3();
 	private Vector3 newVelocity = new Vector3();
 	private Vector3 newRotation = new Vector3();
 	private Vector3 newAngVelocity = new Vector3();
 	private Vector3 movementVector = new Vector3();
+	private btCollisionShape bulletShape = null;
+	private btCollisionObject bulletObject;
+	private btRigidBody bulletBody;
+	private btRigidBodyConstructionInfo constructionInfo = null;
+	private BulletMotionState motionState;
+	private Matrix4 target;
+	private Vector3 inertia;
 	
 	public DynamicEntity() {
 		super(0, false, false);
@@ -186,6 +201,52 @@ public class DynamicEntity extends Entity {
 		this.model.transform.rotate(rotationQuaternion.setEulerAngles(this.rotation.x, this.rotation.y, this.rotation.z));
 		this.model.transform.scale(scale.x,scale.y,scale.z);
 		this.model.calculateTransforms();
+	}
+	
+	@Override
+	public void dispose() {
+		//Removes all bullet references. Important to call this dispose method before removing an entity.
+		//The gc will cause stuttering if they aren't removed. 
+		if (this.getBulletBody() != null) {
+			World.dynamicsWorld.removeRigidBody(this.getBulletBody());
+			bulletBody.dispose();
+		}
+		
+		if (this.getBulletObject() != null) {
+			World.dynamicsWorld.removeCollisionObject(this.getBulletObject());
+			bulletObject.dispose();
+		}
+		
+		if (this.getMotionState() != null) {
+			motionState.dispose();
+		}
+		
+		if (this.constructionInfo != null) {
+			constructionInfo.dispose();
+		}
+		
+		if (this.bulletShape != null) {
+			bulletShape.dispose();
+		}
+		
+		bulletBody = null;
+		bulletObject = null;
+		motionState = null;
+		constructionInfo = null;
+		bulletShape = null;
+	}
+	
+	@Override
+	public void decrementBulletIndex() {
+		if (this.getBulletBody() != null)
+			this.bulletBody.setUserValue(this.bulletBody.getUserValue() - 1);
+		else if (this.getBulletObject() != null)
+			this.bulletObject.setUserValue(this.bulletObject.getUserValue() - 1);
+	}
+	
+	public Matrix4 calculateTarget(Vector3 vector) {
+		this.getTarget().idt();
+		return this.getTarget().translate(vector);
 	}
 	
 	public int getNetId() {
@@ -374,4 +435,77 @@ public class DynamicEntity extends Entity {
 	public void setModel(ModelInstance model) {
 		this.model = model;
 	}
+
+	public int getOriginID() {
+		return originID;
+	}
+
+	public void setOriginID(int originID) {
+		this.originID = originID;
+	}
+
+	public btCollisionShape getBulletShape() {
+		return bulletShape;
+	}
+
+	public void setBulletShape(btCollisionShape entityShape) {
+		this.bulletShape = entityShape;
+	}
+
+	public Matrix4 getTarget() {
+		return target;
+	}
+
+	public void setTarget(Matrix4 target) {
+		this.target = target;
+	}
+
+	public btCollisionObject getBulletObject() {
+		return bulletObject;
+	}
+
+	public void setBulletObject(btCollisionObject bulletObject) {
+		this.bulletObject = bulletObject;
+	}
+
+	public btRigidBody getBulletBody() {
+		return bulletBody;
+	}
+
+	public void setBulletBody(btRigidBody bulletBody) {
+		this.bulletBody = bulletBody;
+	}
+
+	public btRigidBody.btRigidBodyConstructionInfo getConstructionInfo() {
+		return constructionInfo;
+	}
+
+	public void setConstructionInfo(btRigidBody.btRigidBodyConstructionInfo constructionInfo) {
+		this.constructionInfo = constructionInfo;
+	}
+
+	public Vector3 getInertia() {
+		return inertia;
+	}
+
+	public void setInertia(Vector3 intertia) {
+		this.inertia = intertia;
+	}
+
+	public BulletMotionState getMotionState() {
+		return motionState;
+	}
+
+	public void setMotionState(BulletMotionState motionState) {
+		this.motionState = motionState;
+	}
+	
+	public void setShader(EntityShader shader) {
+		super.setShader(shader);
+		if(this.model!=null)
+		{
+			this.model.userData=shader;
+		}
+	}
+	
 }

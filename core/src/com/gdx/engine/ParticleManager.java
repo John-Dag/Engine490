@@ -46,7 +46,7 @@ public class ParticleManager {
 		bloodEffect = Assets.manager.get("bloodeffect.pfx");
 		poisonEffect = Assets.manager.get("poisonCloudEffect.pfx");
 		torchEffect = Assets.manager.get("torcheffect2.pfx");
-		rocketEffect = Assets.manager.get("rocketeffect.pfx");
+		rocketEffect = Assets.manager.get("energyball2.pfx");
 		mistEffect = Assets.manager.get("mistGreenWeapon.pfx");
 		portalEffect = Assets.manager.get("portalEffect.pfx");
 		poisonPool = new PFXPool(poisonEffect);

@@ -3,8 +3,18 @@ package com.gdx.engine;
 import java.lang.Object;
 import java.util.*;
 
+import java.nio.FloatBuffer;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -25,8 +35,17 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
+import com.badlogic.gdx.physics.bullet.collision.btBvhTriangleMeshShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
+import com.badlogic.gdx.physics.bullet.collision.btStaticPlaneShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.EnemySpawner;
@@ -120,6 +139,16 @@ public class MeshLevel {
 
 	ArrayList<DistanceFromPlayer> patrolPath = new ArrayList<DistanceFromPlayer>();
 	
+	//Bullet physics stuff
+	public btCollisionShape unitBoxShape;
+	public btCollisionShape unitFloorTileShape;
+	public btConvexHullShape bulletUnitRampShapeUp;
+	public btConvexHullShape bulletUnitRampShapeDown;
+	public btConvexHullShape bulletUnitRampShapeLeft;
+	public btConvexHullShape bulletUnitRampShapeRight;
+	public Array<btCollisionObject> bulletObjects;
+	//
+	
 	public MeshLevel(boolean isSkySphereActive){
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
@@ -141,7 +170,10 @@ public class MeshLevel {
 		initializeLevelArray();
 		generateBSPDungeonArray();
 		Assets.loadMeshLevelTextures(tiledMap, levelArray, MapMaterials, MaterialIds);
+		initializeBulletPhysics();
 		generateLevelMesh();
+		bindBulletPhysics();
+		
 	}
 	
 	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
@@ -177,7 +209,10 @@ public class MeshLevel {
 		}
 		generateLevelArray();
 		Assets.loadMeshLevelTextures(tiledMap, levelArray, MapMaterials, MaterialIds);
+		initializeBulletPhysics();
 		generateLevelMesh();
+		bindBulletPhysics();
+		
 	}
 	
 	// print levelArray
@@ -207,6 +242,123 @@ public class MeshLevel {
 				levelArray[i][j][1].setRampDirection(-1);
 			}
 		}
+	}
+	
+	private void initializeBulletPhysics()
+	{
+		unitBoxShape=new btBoxShape(new Vector3(.5f, .5f, .5f));
+		//unitFloorTileShape=new btBoxShape(new Vector3(.5f, 0.01f, .5f));
+		unitFloorTileShape=new btConvexHullShape();
+		((btConvexHullShape)unitFloorTileShape).addPoint(new Vector3(-.5f, 0, -.5f));
+		((btConvexHullShape)unitFloorTileShape).addPoint(new Vector3(-.5f, 0, .5f));
+		((btConvexHullShape)unitFloorTileShape).addPoint(new Vector3(.5f, 0,  .5f));
+		((btConvexHullShape)unitFloorTileShape).addPoint(new Vector3(.5f, 0, -.5f));
+		
+		bulletUnitRampShapeUp=new btConvexHullShape();
+		bulletUnitRampShapeUp.addPoint(new Vector3(0,0,1));
+		bulletUnitRampShapeUp.addPoint(new Vector3(1,1,1));
+		bulletUnitRampShapeUp.addPoint(new Vector3(1,1,0));
+		bulletUnitRampShapeUp.addPoint(new Vector3(0,0,0));
+		
+
+			bulletUnitRampShapeDown=new btConvexHullShape();
+			bulletUnitRampShapeDown.addPoint(new Vector3(0,1,1));
+			bulletUnitRampShapeDown.addPoint(new Vector3(1,0,1));
+			bulletUnitRampShapeDown.addPoint(new Vector3(1,0,0));
+			bulletUnitRampShapeDown.addPoint(new Vector3(0,1,0));
+			
+			bulletUnitRampShapeLeft=new btConvexHullShape();
+			bulletUnitRampShapeLeft.addPoint(new Vector3(0,0,1));
+			bulletUnitRampShapeLeft.addPoint(new Vector3(1,0,1));
+			bulletUnitRampShapeLeft.addPoint(new Vector3(1,1,0));
+			bulletUnitRampShapeLeft.addPoint(new Vector3(0,1,0));
+			
+			bulletUnitRampShapeRight=new btConvexHullShape();
+			bulletUnitRampShapeRight.addPoint(new Vector3(0,1,1));
+			bulletUnitRampShapeRight.addPoint(new Vector3(1,1,1));
+			bulletUnitRampShapeRight.addPoint(new Vector3(1,0,0));
+			bulletUnitRampShapeRight.addPoint(new Vector3(0,0,0));
+		
+		bulletObjects=new Array<btCollisionObject>(); 
+	}
+	
+	private void bindBulletPhysics()
+	{
+		for(btCollisionObject bulletObject:bulletObjects)
+		{
+			//World.dynamicsWorld.addRigidBody((btRigidBody)bulletObject);
+			World.dynamicsWorld.addCollisionObject(bulletObject);
+		}
+		System.out.println(bulletObjects.size + "level bullet objects added to dynamic sim");
+		bulletObjects.clear();
+	}
+	
+	private btCollisionObject addBoxObject()
+	{
+		//Vector3 inertia=new Vector3();
+		//bulletShape.calculateLocalInertia(0, inertia);
+		//btCollisionObject btObj=new btRigidBody(0,new BulletMotionState(),bulletShape,inertia);
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(unitBoxShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		//btObj.activate();
+		return btObj;
+	}
+	
+	private btCollisionObject addBoxObject(float dx,float dy, float dz)
+	{
+		//Vector3 inertia=new Vector3();
+		//bulletShape.calculateLocalInertia(0, inertia);
+		//btCollisionObject btObj=new btRigidBody(0,new BulletMotionState(),bulletShape,inertia);
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(new btBoxShape(new Vector3(dx,dy,dz)));
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		//btObj.activate();
+		return btObj;
+	}
+	
+	private btCollisionObject addFloorObject()
+	{
+	
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(unitFloorTileShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		return btObj;
+	}
+	
+	private btCollisionObject addRampBulletShape()
+	{
+	
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(unitFloorTileShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		return btObj;
+	}
+	
+	private btCollisionObject addCustomShapeObject(btCollisionShape shape)
+	{
+	
+		btCollisionObject btObj=new btCollisionObject();
+		btObj.setCollisionShape(shape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		return btObj;
+	}
+	
+	
+	private btCollisionObject addPlane()
+	{
+		btCollisionObject btObj=new btCollisionObject();
+		btCollisionShape btShape=new btStaticPlaneShape(new Vector3(0,1,0),1f);
+		btObj.setCollisionShape(btShape);
+		bulletObjects.add(btObj);
+		btObj.userData=1;
+		//btObj.activate();
+		return btObj;
 	}
 	
 	private void createDungeonRoom(int x1, int x2, int y1, int y2) {
@@ -463,7 +615,7 @@ public class MeshLevel {
 			instance.transform.setToTranslation(tileLayerHeight/2, 0, tileLayerWidth/2);
 			instances.add(instance);
 		}
-		
+		//addPlane();
 		//modelBuilder.begin();
 
 		MapTile tile1 = null;
@@ -512,6 +664,7 @@ public class MeshLevel {
 						model = modelBuilder.end();
 						instance = new ModelInstance(model);
 						instances.add(instance);
+						addFloorObject().setWorldTransform(new Matrix4().idt().translate(node.translation).translate(.5f, 0, .5f));
 					}
 
 					// make the floor tiles
@@ -528,15 +681,19 @@ public class MeshLevel {
 
 							if (currentTile.getRampDirection() == UP)	{ // -x direction
 								meshPartBuilder.rect(0,0,1, 1,1,1, 1,1,0, 0,0,0, -ROOT_PT5,ROOT_PT5,0);
+								addCustomShapeObject(bulletUnitRampShapeUp).setWorldTransform(new Matrix4().idt().translate(node.translation));
 							}	
 							else if (currentTile.getRampDirection() == DOWN) { // +x direction
 								meshPartBuilder.rect(0,1,1, 1,0,1, 1,0,0, 0,1,0, ROOT_PT5,ROOT_PT5,0);
+								addCustomShapeObject(bulletUnitRampShapeDown).setWorldTransform(new Matrix4().idt().translate(node.translation));
 							}	
 							else if (currentTile.getRampDirection() == LEFT) { // +z direction
 								meshPartBuilder.rect(0,0,1, 1,0,1, 1,1,0, 0,1,0, 0,ROOT_PT5,ROOT_PT5);
+								addCustomShapeObject(bulletUnitRampShapeLeft).setWorldTransform(new Matrix4().idt().translate(node.translation));
 							}	
 							else if (currentTile.getRampDirection() == RIGHT)	{ // -z direction
 								meshPartBuilder.rect(0,1,1, 1,1,1, 1,0,0, 0,0,0, 0,ROOT_PT5,-ROOT_PT5);
+								addCustomShapeObject(bulletUnitRampShapeRight).setWorldTransform(new Matrix4().idt().translate(node.translation));
 							}	
 							else {
 								System.err.println("generateLevel(): Direction not recognized");
@@ -544,7 +701,7 @@ public class MeshLevel {
 							model = modelBuilder.end();
 							instance = new ModelInstance(model);
 							instances.add(instance);
-
+							
 
 						}
 						else if (k == 0 && currentTile.getHeight() == 5 && tile2.getHeight() != -1) {
@@ -564,6 +721,8 @@ public class MeshLevel {
 							model = modelBuilder.end();
 							instance = new ModelInstance(model);
 							instances.add(instance);
+							//addBoxObject().setWorldTransform(new Matrix4().idt().translate(node.translation));
+							addFloorObject().setWorldTransform(new Matrix4().idt().translate(node.translation).translate(.5f, 0, .5f));
 						}
 					}
 					//				Node node = modelBuilder.node();
@@ -604,6 +763,162 @@ public class MeshLevel {
 		}
 		
 		return instances;
+	}
+	public static Mesh mergeMeshes(AbstractList<Mesh> meshes, AbstractList<Matrix4> transformations)
+	{
+	    if(meshes.size() == 0) return null;
+
+	    int vertexArrayTotalSize = 0;
+	    int indexArrayTotalSize = 0;
+
+	    VertexAttributes va = meshes.get(0).getVertexAttributes();
+	    int vaA[] = new int [va.size()];
+	    for(int i=0; i<va.size(); i++)
+	    {
+	        vaA[i] = va.get(i).usage;
+	    }
+
+	    for(int i=0; i<meshes.size(); i++)
+	    {
+	        Mesh mesh = meshes.get(i);
+	        if(mesh.getVertexAttributes().size() != va.size()) 
+	        {
+	            meshes.set(i, copyMesh(mesh, true, false, vaA));
+	        }
+
+	        vertexArrayTotalSize += mesh.getNumVertices() * mesh.getVertexSize() / 4;
+	        indexArrayTotalSize += mesh.getNumIndices();
+	    }
+
+	    final float vertices[] = new float[vertexArrayTotalSize];
+	    final short indices[] = new short[indexArrayTotalSize];
+
+	    int indexOffset = 0;
+	    int vertexOffset = 0;
+	    int vertexSizeOffset = 0;
+	    int vertexSize = 0;
+
+	    for(int i=0; i<meshes.size(); i++)
+	    {
+	        Mesh mesh = meshes.get(i);
+
+	        int numIndices = mesh.getNumIndices();
+	        int numVertices = mesh.getNumVertices();
+	        vertexSize = mesh.getVertexSize() / 4;
+	        int baseSize = numVertices * vertexSize;
+	        VertexAttribute posAttr = mesh.getVertexAttribute(Usage.Position);
+	        int offset = posAttr.offset / 4;
+	        int numComponents = posAttr.numComponents;
+
+	        { //uzupelnianie tablicy indeksow
+	            mesh.getIndices(indices, indexOffset);
+	            for(int c = indexOffset; c < (indexOffset + numIndices); c++)
+	            {
+	                indices[c] += vertexOffset;
+	            }
+	            indexOffset += numIndices;
+	        }
+
+	        mesh.getVertices(0, baseSize, vertices, vertexSizeOffset);
+	        Mesh.transform(transformations.get(i), vertices, vertexSize, offset, numComponents, vertexOffset, numVertices);
+	        vertexOffset += numVertices;
+	        vertexSizeOffset += baseSize;
+	    }
+
+	    Mesh result = new Mesh(true, vertexOffset, indices.length, meshes.get(0).getVertexAttributes());
+	    result.setVertices(vertices);
+	    result.setIndices(indices);
+	    return result;
+	} 
+
+	    public static Mesh copyMesh(Mesh meshToCopy, boolean isStatic, boolean removeDuplicates, final int[] usage) {
+	    // TODO move this to a copy constructor?
+	    // TODO duplicate the buffers without double copying the data if possible.
+	    // TODO perhaps move this code to JNI if it turns out being too slow.
+	    final int vertexSize = meshToCopy.getVertexSize() / 4;
+	    int numVertices = meshToCopy.getNumVertices();
+	    float[] vertices = new float[numVertices * vertexSize];
+	    meshToCopy.getVertices(0, vertices.length, vertices);
+	    short[] checks = null;
+	    VertexAttribute[] attrs = null;
+	    int newVertexSize = 0;
+	    if (usage != null) {
+	        int size = 0;
+	        int as = 0;
+	        for (int i = 0; i < usage.length; i++)
+	            if (meshToCopy.getVertexAttribute(usage[i]) != null) {
+	                size += meshToCopy.getVertexAttribute(usage[i]).numComponents;
+	                as++;
+	            }
+	        if (size > 0) {
+	            attrs = new VertexAttribute[as];
+	            checks = new short[size];
+	            int idx = -1;
+	            int ai = -1;
+	            for (int i = 0; i < usage.length; i++) {
+	                VertexAttribute a = meshToCopy.getVertexAttribute(usage[i]);
+	                if (a == null)
+	                    continue;
+	                for (int j = 0; j < a.numComponents; j++)
+	                    checks[++idx] = (short)(a.offset/4 + j);
+	                attrs[++ai] = new VertexAttribute(a.usage, a.numComponents, a.alias);
+	                newVertexSize += a.numComponents;
+	            }
+	        }
+	    }
+	    if (checks == null) {
+	        checks = new short[vertexSize];
+	        for (short i = 0; i < vertexSize; i++)
+	            checks[i] = i;
+	        newVertexSize = vertexSize;
+	    }
+
+	    int numIndices = meshToCopy.getNumIndices();
+	    short[] indices = null; 
+	    if (numIndices > 0) {
+	        indices = new short[numIndices];
+	        meshToCopy.getIndices(indices);
+	        if (removeDuplicates || newVertexSize != vertexSize) {
+	            float[] tmp = new float[vertices.length];
+	            int size = 0;
+	            for (int i = 0; i < numIndices; i++) {
+	                final int idx1 = indices[i] * vertexSize;
+	                short newIndex = -1;
+	                if (removeDuplicates) {
+	                    for (short j = 0; j < size && newIndex < 0; j++) {
+	                        final int idx2 = j*newVertexSize;
+	                        boolean found = true;
+	                        for (int k = 0; k < checks.length && found; k++) {
+	                            if (tmp[idx2+k] != vertices[idx1+checks[k]])
+	                                found = false;
+	                        }
+	                        if (found)
+	                            newIndex = j;
+	                    }
+	                }
+	                if (newIndex > 0)
+	                    indices[i] = newIndex;
+	                else {
+	                    final int idx = size * newVertexSize;
+	                    for (int j = 0; j < checks.length; j++)
+	                        tmp[idx+j] = vertices[idx1+checks[j]];
+	                    indices[i] = (short)size;
+	                    size++;
+	                }
+	            }
+	            vertices = tmp;
+	            numVertices = size;
+	        }
+	    }
+
+	    Mesh result;
+	    if (attrs == null)
+	        result = new Mesh(isStatic, numVertices, indices == null ? 0 : indices.length, meshToCopy.getVertexAttributes());
+	    else
+	        result = new Mesh(isStatic, numVertices, indices == null ? 0 : indices.length, attrs);
+	    result.setVertices(vertices, 0, numVertices * newVertexSize);
+	    result.setIndices(indices);
+	    return result;
 	}
 	
 	private void makeWalls(int i, int j, int k, int direction) {
@@ -969,6 +1284,13 @@ public class MeshLevel {
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 		instances.add(instance);
+		
+		btConvexHullShape chshape=new btConvexHullShape();
+		chshape.addPoint(v1.position);
+		chshape.addPoint(v2.position);
+		chshape.addPoint(v3.position);
+
+		addCustomShapeObject(chshape).setWorldTransform(new Matrix4().idt().translate(node.translation));
 	}
 	
 	// TODO: genWall
@@ -1034,6 +1356,13 @@ public class MeshLevel {
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 		instances.add(instance);
+		btConvexHullShape chshape=new btConvexHullShape();
+		chshape.addPoint(v1.position);
+		chshape.addPoint(v2.position);
+		chshape.addPoint(v3.position);
+		chshape.addPoint(v4.position);
+
+		addCustomShapeObject(chshape).setWorldTransform(new Matrix4().idt().translate(node.translation));
 	}
 	
 	private void genCombinedWall(float cellj, float celli, float bottom, float top, int direction){
@@ -1103,6 +1432,13 @@ public class MeshLevel {
 		model = modelBuilder.end();
 		instance = new ModelInstance(model);
 		instances.add(instance);
+		btConvexHullShape chshape=new btConvexHullShape();
+		chshape.addPoint(v1.position);
+		chshape.addPoint(v2.position);
+		chshape.addPoint(v3.position);
+		chshape.addPoint(v4.position);
+
+		addCustomShapeObject(chshape).setWorldTransform(new Matrix4().idt().translate(node.translation));
 	}
 
 	public ArrayList<int[]> getEnemyWayPoints(){

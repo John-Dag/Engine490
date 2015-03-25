@@ -4,14 +4,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
-import com.gdx.DynamicEntities.DynamicEntity;
-import com.gdx.DynamicEntities.Player;
 
 public class Net {
 	public static final int tcpPort = 54555;
 	public static final int udpPort = 54777;
-	public static final String serverIP = "192.168.1.2";
-	public static final String name = "John";
+	public static String serverIP = "172.31.160.142";
+	public static String name = "Player";
+	public static String serverMessage = "Connected to Engine490 test server at ";
 	public static int writeBuffer = 256000;
 	public static int objectBuffer = 128000;
 	
@@ -20,47 +19,69 @@ public class Net {
 	static public void register(EndPoint endPoint) {
 		Kryo kryo = endPoint.getKryo();
 	    kryo.register(Vector3.class);
-	    kryo.register(playerPacket.class);
+	    kryo.register(PlayerPacket.class);
 	    kryo.register(Array.class);
 	    kryo.register(Object[].class);
-	    kryo.register(playerNew.class);
-	    kryo.register(projectile.class);
-	    kryo.register(newProjectile.class);
-	    kryo.register(projectile.class);
-	    kryo.register(chatMessage.class);
+	    kryo.register(NewPlayer.class);
+	    kryo.register(ProjectilePacket.class);
+	    kryo.register(NewProjectile.class);
+	    kryo.register(ProjectilePacket.class);
+	    kryo.register(ChatMessagePacket.class);
 	    kryo.register(String.class);
-	    kryo.register(playerDisconnect.class);
+	    kryo.register(PlayerDisconnect.class);
+	    kryo.register(KillPacket.class);
+	    kryo.register(DeathPacket.class);
+	    kryo.register(CollisionPacket.class);
+	    kryo.register(StatPacket.class);
 	}
 	
 	//Packets
-	public static class playerPacket {
+	public static class PlayerPacket {
 		public Vector3 position;
 		public Vector3 direction;
 		public int id;
 	}
 	
-	public static class playerNew {
+	public static class NewPlayer {
 		public Vector3 position;
+		public String name;
 		public int id;
 	}
 	
-	public static class playerDisconnect {
+	public static class PlayerDisconnect {
 		public int id;
 	}
 	
-	public static class newProjectile {
-		public Vector3 position;
-		public Vector3 cameraPos;
+	public static class NewProjectile {
+		public Vector3 position, cameraPos, cameraDir, rayOrigin, rayDirection;
+		public int id, originID;
+	}
+	
+	public static class ProjectilePacket {
+		public Vector3 position, cameraPos, cameraDir;
 		public int id;
 	}
 	
-	public static class projectile {
-		public Vector3 position;
-		public Vector3 cameraPos;
-		public int id;
-	}
-	
-	public static class chatMessage {
+	public static class ChatMessagePacket {
 		public String message;
+		public int id;
+	}
+	
+	public static class CollisionPacket {
+		public int projectileID, playerID, playerOriginID, damage;
+		public Vector3 position;
+	}
+	
+	public static class StatPacket {
+		public int playerID, playerDeathID, kills, deaths;
+		public String name;
+	}
+	
+	public static class KillPacket {
+		public int id;
+	}
+	
+	public static class DeathPacket {
+		public int id;
 	}
 }

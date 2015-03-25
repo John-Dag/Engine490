@@ -14,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.gdx.DynamicEntities.Enemy;
+import com.gdx.DynamicEntities.Player;
 import com.gdx.FilterEffects.BlueScreenColorMultiplier;
 import com.gdx.FilterEffects.Cartoon;
 import com.gdx.FilterEffects.GreenScreenColorMultiplier;
@@ -22,9 +24,15 @@ import com.gdx.FilterEffects.Lights;
 import com.gdx.FilterEffects.Rainbow;
 import com.gdx.FilterEffects.RedScreenColorMultiplier;
 import com.gdx.FilterEffects.Sepia;
+import com.gdx.Shaders.BlackHole;
+import com.gdx.Shaders.ColorMultiplierEntityShader;
+import com.gdx.Shaders.EntityRainbow;
+import com.gdx.Shaders.FireBallShader;
+import com.gdx.Shaders.LavaShader;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
+import com.gdx.engine.Entity;
 import com.gdx.engine.FilterEffect;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
@@ -36,7 +44,6 @@ public class UIConsole extends UIBase {
 	private final int GRAVE = 96;
 	private BitmapFont bitmapFont;
 	private Skin skin;
-	private Window consoleWindow;
 	private TextField consoleInputField;
 	private String consoleVal;
 	private World world;
@@ -58,14 +65,13 @@ public class UIConsole extends UIBase {
 	
 	public void initializeConsoleWindow() {
 		consoleVal = "";
-		consoleWindow = new Window("Console", skin);
-		consoleWindow.setName("console");
-		consoleWindow.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() / 3);
-		consoleWindow.setPosition(0, Gdx.graphics.getHeight());
+		this.setWindow(new Window("Console", skin));
+		this.getWindow().setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() / 3);
+		this.getWindow().setPosition(0, Gdx.graphics.getHeight());
 		consoleInputField = new TextField("", skin);
-		consoleWindow.add(consoleInputField).width(consoleWindow.getWidth()).height(consoleWindow.getHeight());
-		this.getStage().addActor(consoleWindow);
-		consoleWindow.setVisible(false);
+		this.getWindow().add(consoleInputField).width(this.getWindow().getWidth()).height(this.getWindow().getHeight());
+		this.getStage().addActor(this.getWindow());
+		this.getWindow().setVisible(false);
 		
 		//Sends console commands to be parsed once the user hits enter
 		consoleInputField.setTextFieldListener(new TextFieldListener() {
@@ -194,7 +200,57 @@ public class UIConsole extends UIBase {
 				world.setFilterEffect(filterEffects.get(currentFilter));
 			}
 		}
-		
+		else if (value.toLowerCase().contains("bulletwires")) {
+			world.bulletDebugDrawEnabled=!world.bulletDebugDrawEnabled;
+		}
+		else if (value.toLowerCase().contains("levelwire")) {
+			world.bulletDebugDrawMeshLevelWiresEnabled=!world.bulletDebugDrawMeshLevelWiresEnabled;
+		}
+		else if (value.toLowerCase().contains("efx1")) {
+			LavaShader shdr=new LavaShader();
+			for(Entity e:Entity.entityInstances)
+			{
+				if(e instanceof Enemy||e instanceof Player)
+				e.setShader(shdr);
+			}
+		}
+		else if (value.toLowerCase().contains("efx3")) {
+			BlackHole shdr=new BlackHole();
+			for(Entity e:Entity.entityInstances)
+			{
+				if(e instanceof Enemy||e instanceof Player)
+				e.setShader(shdr);
+			}
+		}
+		else if (value.toLowerCase().contains("efx4")) {
+			EntityRainbow shdr=new EntityRainbow();
+			for(Entity e:Entity.entityInstances)
+			{
+				if(e instanceof Enemy||e instanceof Player)
+				e.setShader(shdr);
+			}
+		}
+		else if (value.toLowerCase().contains("efx0")) {
+			
+			for(Entity e:Entity.entityInstances)
+			{
+				if(e instanceof Enemy||e instanceof Player){
+				ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
+							es.multiplier.y=(float)Math.random();
+							es.multiplier.x=(float)Math.random();
+							es.multiplier.z=(float)Math.random();
+				e.setShader(es);
+				}
+			}
+		}
+		else if (value.toLowerCase().contains("efx2")) {
+			
+			for(Entity e:Entity.entityInstances)
+			{
+				if(e instanceof Enemy||e instanceof Player)
+				e.setShader(new FireBallShader());
+			}
+		}
 		else
 			System.err.println("Unknown command");
 		consoleVal = "";
@@ -277,22 +333,18 @@ public class UIConsole extends UIBase {
 	
 	@Override
 	public void show() {
-		if (!this.consoleWindow.isVisible()) {
-			this.consoleWindow.setVisible(true);
+		if (!this.getWindow().isVisible()) {
+			this.getWindow().setVisible(true);
 			this.consoleInputField.setDisabled(false);
 			UIBase.uiSelected = true;
 			this.getStage().setKeyboardFocus(consoleInputField);
 			GameScreen.state = State.Paused;
 		}
 		else {
-			this.consoleWindow.setVisible(false);
+			this.getWindow().setVisible(false);
 			UIBase.uiSelected = false;
 			this.consoleInputField.setDisabled(true);
 			GameScreen.state = State.Running;
 		}
-	}
-	
-	public Window getConsoleWindow() {
-		return consoleWindow;
 	}
 }
