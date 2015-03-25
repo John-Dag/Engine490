@@ -24,7 +24,9 @@ import com.gdx.FilterEffects.Lights;
 import com.gdx.FilterEffects.Rainbow;
 import com.gdx.FilterEffects.RedScreenColorMultiplier;
 import com.gdx.FilterEffects.Sepia;
+import com.gdx.Shaders.BlackHole;
 import com.gdx.Shaders.ColorMultiplierEntityShader;
+import com.gdx.Shaders.EntityRainbow;
 import com.gdx.Shaders.FireBallShader;
 import com.gdx.Shaders.LavaShader;
 import com.gdx.Weapons.RocketLauncher;
@@ -211,10 +213,22 @@ public class UIConsole extends UIBase {
 				if(e instanceof Enemy||e instanceof Player)
 				e.setShader(shdr);
 			}
-//			for(Player e:world.playerInstances)
-//			{
-//				e.setShader(shdr);
-//			}
+		}
+		else if (value.toLowerCase().contains("efx3")) {
+			BlackHole shdr=new BlackHole();
+			for(Entity e:Entity.entityInstances)
+			{
+				if(e instanceof Enemy||e instanceof Player)
+				e.setShader(shdr);
+			}
+		}
+		else if (value.toLowerCase().contains("efx4")) {
+			EntityRainbow shdr=new EntityRainbow();
+			for(Entity e:Entity.entityInstances)
+			{
+				if(e instanceof Enemy||e instanceof Player)
+				e.setShader(shdr);
+			}
 		}
 		else if (value.toLowerCase().contains("efx0")) {
 			
@@ -228,14 +242,6 @@ public class UIConsole extends UIBase {
 				e.setShader(es);
 				}
 			}
-//			for(Player e:world.playerInstances)
-//			{		
-//				ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
-//							es.multiplier.y=(float)Math.random();
-//							es.multiplier.x=(float)Math.random();
-//							es.multiplier.z=(float)Math.random();
-//				e.setShader(es);
-//			}
 		}
 		else if (value.toLowerCase().contains("efx2")) {
 			

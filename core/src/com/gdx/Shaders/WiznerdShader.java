@@ -33,6 +33,8 @@ public class WiznerdShader extends DefaultShader {
 		
 		public boolean enableRainbow=false;
 		
+		public boolean enableBlackHole=false;
+		
 		public Config(String vertexShader, String fragmentShader) {
 			super(vertexShader,fragmentShader);
 		}
@@ -168,6 +170,11 @@ public class WiznerdShader extends DefaultShader {
 		if(config.enableRainbow)
 		{
 			prefix += "#define Rainbow\n";
+		}
+		
+		if(config.enableBlackHole)
+		{
+			prefix += "#define BlackHole\n";
 		}
 		
 		return prefix;

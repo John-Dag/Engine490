@@ -41,6 +41,7 @@ public class WiznerdShaderProvider extends DefaultShaderProvider {
 			config.enableRainbow=false;
 			config.enableFract=false;
 			config.enableFireBall=false;
+			config.enableBlackHole=false;
 			
 			if(entityShader instanceof ColorMultiplierEntityShader){
 				config.enableColorMultiplier=true;
@@ -59,6 +60,15 @@ public class WiznerdShaderProvider extends DefaultShaderProvider {
 			{
 				config.enableRainbow=true;
 				config.enableColorMultiplier=false;
+			}
+			else if(entityShader instanceof BlackHole)
+			{
+				config.enableBlackHole=true;
+				config.enableColorMultiplier=false;
+				config.enableRainbow=false;
+				config.enableFract=false;
+				config.enableFireBall=false;
+				
 			}
 			return createShader ( renderable, entityShader);
 		}
