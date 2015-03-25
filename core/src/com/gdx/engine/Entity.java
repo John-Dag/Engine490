@@ -6,11 +6,14 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Shaders.EntityShader;
 
 public class Entity {
 	private int id, index;
 	private boolean isActive, isRenderable, moving, hasCollided;
 	public static Array<Entity> entityInstances = new Array<Entity>();
+	
+	public EntityShader shader;
 	
 	public Entity() {
 		id = 0;
@@ -120,6 +123,14 @@ public class Entity {
 
 	public void setHasCollided(boolean hasCollided) {
 		this.hasCollided = hasCollided;
+	}
+
+	public EntityShader getShader() {
+		return shader;
+	}
+
+	public void setShader(EntityShader shader) {
+		this.shader = shader;
 	}
 }
 

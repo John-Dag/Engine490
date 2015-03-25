@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
+import com.gdx.Shaders.EntityRainbow;
 import com.gdx.engine.Assets;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
@@ -21,6 +22,7 @@ public class PowerUpSpawn extends StaticEntity {
 	private Color color;
 	private float spawnTime;
 	private PointLight pointLight;
+	EntityRainbow es=new EntityRainbow();
 	
 	public PowerUpSpawn() {
 		super();

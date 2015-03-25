@@ -14,6 +14,7 @@
 attribute vec3 a_position;
 uniform mat4 u_projViewTrans;
 varying vec4 pos;
+varying vec4 wpos;
 
 #if defined(colorFlag)
 varying vec4 v_color;
@@ -226,6 +227,7 @@ void main() {
 	#else
 		pos = u_worldTrans * vec4(a_position, 1.0);
 	#endif
+	wpos=vec4(a_position, 1.0);
 		
 	gl_Position = u_projViewTrans * pos;
 		

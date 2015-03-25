@@ -27,6 +27,7 @@ import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net.PlayerPacket;
+import com.gdx.Shaders.WiznerdShaderProvider;
 
 public class Render implements Disposable {
 	public static int renderCount;
@@ -51,8 +52,9 @@ public class Render implements Disposable {
 	
 		//Changes the max number point lights in the default shader
 		//shaderProvider = new DefaultShaderProvider();
-		shaderProvider = new DefaultShaderProvider(Assets.vertexShader, Assets.fragmentShader);//new DefaultShaderProvider();
+		shaderProvider = new WiznerdShaderProvider(Assets.vertexShader, Assets.fragmentShader);//new DefaultShaderProvider();
 		shaderProvider.config.numPointLights = 100;
+		
 		
 		//Environment settings
 		environment = new Environment();

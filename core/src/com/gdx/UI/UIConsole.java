@@ -14,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.gdx.DynamicEntities.Enemy;
+import com.gdx.DynamicEntities.Player;
 import com.gdx.FilterEffects.BlueScreenColorMultiplier;
 import com.gdx.FilterEffects.Cartoon;
 import com.gdx.FilterEffects.GreenScreenColorMultiplier;
@@ -22,6 +24,9 @@ import com.gdx.FilterEffects.Lights;
 import com.gdx.FilterEffects.Rainbow;
 import com.gdx.FilterEffects.RedScreenColorMultiplier;
 import com.gdx.FilterEffects.Sepia;
+import com.gdx.Shaders.ColorMultiplierEntityShader;
+import com.gdx.Shaders.FireBallShader;
+import com.gdx.Shaders.LavaShader;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
@@ -197,6 +202,47 @@ public class UIConsole extends UIBase {
 		}
 		else if (value.toLowerCase().contains("levelwire")) {
 			world.bulletDebugDrawMeshLevelWiresEnabled=!world.bulletDebugDrawMeshLevelWiresEnabled;
+		}
+		else if (value.toLowerCase().contains("efx1")) {
+			LavaShader shdr=new LavaShader();
+			for(Enemy e:world.enemyInstances)
+			{
+				e.setShader(shdr);
+			}
+			for(Player e:world.playerInstances)
+			{
+				e.setShader(shdr);
+			}
+		}
+		else if (value.toLowerCase().contains("efx0")) {
+			
+			for(Enemy e:world.enemyInstances)
+			{		
+				ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
+							es.multiplier.y=(float)Math.random();
+							es.multiplier.x=(float)Math.random();
+							es.multiplier.z=(float)Math.random();
+				e.setShader(es);
+			}
+			for(Player e:world.playerInstances)
+			{		
+				ColorMultiplierEntityShader es=new ColorMultiplierEntityShader();
+							es.multiplier.y=(float)Math.random();
+							es.multiplier.x=(float)Math.random();
+							es.multiplier.z=(float)Math.random();
+				e.setShader(es);
+			}
+		}
+		else if (value.toLowerCase().contains("efx2")) {
+			
+			for(Enemy e:world.enemyInstances)
+			{
+				e.setShader(new FireBallShader());
+			}
+			for(Player e:world.playerInstances)
+			{
+				e.setShader(new FireBallShader());
+			}
 		}
 		else
 			System.err.println("Unknown command");

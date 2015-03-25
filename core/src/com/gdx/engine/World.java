@@ -50,6 +50,7 @@ import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.Network.Net.ProjectilePacket;
 import com.gdx.Network.NetClient;
 import com.gdx.Network.NetServerEventManager;
+import com.gdx.Shaders.ColorMultiplierEntityShader;
 import com.gdx.Weapons.RocketLauncher;
 
 public class World implements Disposable {
@@ -204,6 +205,8 @@ public class World implements Disposable {
 			
 			if (entity.isActive()) {
 				entity.update(delta, this);
+				if(entity.shader!=null)
+					entity.shader.time+=delta;
 				
 				if(isWireframeEnabled) {
 					Material material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
