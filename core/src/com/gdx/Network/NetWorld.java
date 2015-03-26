@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
+import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net.NewProjectile;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.Network.NetClientEvent.ProjectileCollision;
@@ -33,12 +34,17 @@ public class NetWorld extends World {
 		//playerInstances.add(player);
 		particleManager = new ParticleManager(this);
 		player.initAbilities();
-		setMeshLevel(new MeshLevel(Assets.castle3Multi, true));
+		player.initWeapons();
+		setMeshLevel(new MeshLevel(Assets.castle3Multi, true, this));
 		Entity.entityInstances.add(player);
 		//distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
 		entityManager = new EntityManager(this);
 		setNetEventManager(new NetClientEventManager(this));
 		setServerEventManager(new NetServerEventManager(this));
+		
+//		RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(getPlayer().getPosition());
+//		Weapon noWeapon = new Weapon();
+//		getPlayer().setWeapon(noWeapon);
 	}
 
 	@Override

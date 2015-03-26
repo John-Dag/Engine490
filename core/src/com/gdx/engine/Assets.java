@@ -276,7 +276,8 @@ public class Assets {
 		//manager.load("floorHighres.png", Texture.class, param);
 		//manager.load("wallHighres.png", Texture.class, param);
 		
-		manager.load("wall_normal.jpg", Texture.class, param);
+		manager.load("wall_bump.png", Texture.class, param);
+		//manager.load("wall_normal.jpg", Texture.class, param);
 		manager.load("floor_normal_map.jpg", Texture.class, param);
 		manager.finishLoading();
 
@@ -304,7 +305,8 @@ public class Assets {
 				TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		material = new Material(TextureAttribute.createDiffuse(texture));
-		texture = manager.get("wall_normal.jpg", Texture.class);
+		//texture = manager.get("wall_normal.jpg", Texture.class);
+		texture = manager.get("wall_bump.png", Texture.class);
 		texture.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		//material.set(TextureAttribute.createBump(wallNormal));
 		material.set(TextureAttribute.createNormal(texture));

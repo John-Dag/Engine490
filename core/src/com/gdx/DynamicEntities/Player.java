@@ -18,14 +18,19 @@ import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
+import com.gdx.StaticEntities.WeaponSpawn;
+import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.UI.UIBase;
 import com.gdx.UI.UIConsole;
+import com.gdx.Weapons.RocketLauncher;
+import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
 import com.gdx.engine.DistanceTrackerMap;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 import com.gdx.engine.GameScreen.State;
+import com.gdx.engine.GameScreen.Mode;
 
 public class Player extends DynamicEntity {
 	public static float FOG_DISTANCE = 15f;
@@ -53,6 +58,15 @@ public class Player extends DynamicEntity {
 	private DistanceTrackerMap distanceMap;
 	private Array<Ability> abilities;
 	private String netName;
+	private Array<Weapon> weapons;
+	
+	// WEAPONS
+	public static final int NOWEAPON = 0;
+	public static final int ROCKETLAUNCHER = 1;
+	public static final int SWORD = 2;
+	private Weapon noWeapon;
+	private RocketLauncher launcher;
+	private Sword sword;
 	
 	public Player() {
 		super();
@@ -95,11 +109,27 @@ public class Player extends DynamicEntity {
 		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
 		this.getBulletObject().setContactCallbackFlag(World.PLAYER_FLAG);
 		World.dynamicsWorld.addCollisionObject(this.getBulletObject());
+		this.weapons = new Array<Weapon>();
+		//this.setModel(model);
 	}
 	
 	public void initAbilities() {
 		abilities.add(new Blizzard(10, false, true, new Vector3(0, 0, 0)));
 		abilities.add(new PoisonCloud(11, false, true, new Vector3(0, 0, 0), new Decal().newDecal(Assets.aoeTextureRegion, true)));
+	}
+	
+	public void initWeapons() {
+		noWeapon = new Weapon();
+		weapons.insert(NOWEAPON, noWeapon);
+		launcher = (RocketLauncher) new RocketLauncher().spawn(Vector3.Zero);
+		weapons.insert(ROCKETLAUNCHER, launcher);
+		sword = (Sword) new Sword().spawn(Vector3.Zero);
+		weapons.insert(SWORD, sword);
+	}
+	
+	public void setWeapon(int type) {
+		weapons.get(type).setIsRenderable(true);
+		this.setWeapon(weapons.get(type));
 	}
 
 	@Override
@@ -112,7 +142,8 @@ public class Player extends DynamicEntity {
 		int heightPerLayer = 6;
 		int playersTilePos = playerPosition.x + world.getMeshLevel().getMapXDimension() * playerPosition.y;
 		int test = 0;
-		if (newPos != oldPos && clipping && GameScreen.mode == State.Offline) {
+
+		if (newPos != oldPos && clipping && GameScreen.mode == Mode.Offline) {
             distanceMap = world.getDistanceMap();
             distanceMap.resetDistances();
 			distanceMap.addDistances(playersTilePos + ((int)(camera.position.y / heightPerLayer)
@@ -523,6 +554,10 @@ public class Player extends DynamicEntity {
 	public void setHealth(int health) {
 		this.health = health;
 	}
+	
+//	public void obtainWeapon(WeaponSpawn.weaponSpawnTypeEnum type) {
+//		// TODO: this is where we toggle whether a certain weapon is usable by the player or not
+//	}
 	
 	public boolean isMouseLocked() {
 		return mouseLocked;

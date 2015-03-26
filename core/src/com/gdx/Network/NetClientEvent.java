@@ -7,6 +7,7 @@ import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
+import com.badlogic.gdx.math.Vector3;
 
 public class NetClientEvent {
 	public NetClientEvent() {
@@ -73,7 +74,7 @@ public class NetClientEvent {
 		public CreatePlayer(Net.NewPlayer packet) {
 			this.packet = packet;
 		}
-		
+
 		@Override
 		public void handleEvent(World world) {
 			world.addPlayer(packet);
@@ -130,5 +131,47 @@ public class NetClientEvent {
 	
 	public void handleEvent(World world) {
 		
+	}
+	
+	public static class NewPowerUp extends NetClientEvent {
+		public Net.NewPowerUpPacket packet;
+		
+		public NewPowerUp(Net.NewPowerUpPacket packet) {
+			this.packet = packet;
+		}
+	}
+	
+	public static class PowerUpRespawn extends NetClientEvent {
+		public Net.PowerUpRespawnPacket packet;
+		
+		public PowerUpRespawn(Net.PowerUpRespawnPacket packet) {
+			this.packet = packet;
+		}
+	}
+	
+	public static class PowerUpConsumed extends NetClientEvent {
+		public Net.PowerUpConsumedPacket packet;
+		
+		public PowerUpConsumed(Net.PowerUpConsumedPacket packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+			world.getClient().sendPowerUpConsumedUpdate(this.packet);
+		}
+	}
+	
+	public static class WeaponPickedUp extends NetClientEvent {
+		public Net.WeaponPickedUpPacket packet;
+		
+		public WeaponPickedUp(Net.WeaponPickedUpPacket packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+			world.getClient().sendWeaponPickedUpUpdate(this.packet);
+		}
 	}
 }

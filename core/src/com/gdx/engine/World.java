@@ -58,17 +58,19 @@ import java.util.ArrayList;
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
     public static boolean isWireframeEnabled;
-	public boolean bulletDebugDrawEnabled=false;
-	public boolean bulletDebugDrawMeshLevelWiresEnabled=true;
 	public static Player player;
 	public static ParticleManager particleManager;
 	public static Array<Enemy> enemyInstances;
 	public static EntityManager entityManager;
 	public static ClientEventManager eventManager;
 	public static btDynamicsWorld dynamicsWorld;
+	public static NetServerEventManager serverEventManager;
+	public static EntityManager entManager;
 	public static short PROJECTILE_FLAG = 1<<8;
 	public static short ENEMY_FLAG = 1<<9;
 	public static short PLAYER_FLAG = 1<<10;
+	public boolean bulletDebugDrawEnabled=false;
+	public boolean bulletDebugDrawMeshLevelWiresEnabled=true;
 	public Array<Player> playerInstances;
 	public Array<ModelInstance> wireInstances;
 	public Array<Projectile> projectileInstances;
@@ -84,7 +86,6 @@ public class World implements Disposable {
     private NetServer server;
     private int NetIdCurrent;
 	private NetClientEventManager clientEventManager;
-	public static NetServerEventManager serverEventManager;
 	private btCollisionConfiguration collisionConfig;
 	private btDispatcher dispatcher;
 	private BulletContactListener contactListener;
@@ -109,12 +110,9 @@ public class World implements Disposable {
 		setContraintSolver(new btSequentialImpulseConstraintSolver());
 		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, constraintSolver, collisionConfig);
 		dynamicsWorld.setGravity(new Vector3(0, -0f, 0));
-
-
 		eventManager = new ClientEventManager(this);
 		setTickCallback(new BulletTickCallback(dynamicsWorld));
 	}
-	
 	
 	//Order matters here
 	public void loadOfflineWorld(TiledMap map, boolean skySphere) {
@@ -124,10 +122,11 @@ public class World implements Disposable {
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 			particleManager = new ParticleManager(this);
 			player.initAbilities();
+			player.initWeapons();
 			setPlayer(player);
 			ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(player);
 			eventManager.addEvent(event);
-			setMeshLevel(new MeshLevel(map, skySphere));
+			setMeshLevel(new MeshLevel(map, skySphere, this));
 			distanceMap = new DistanceTrackerMap(getMeshLevel(), 2 + 32 * 2);
 			meshLevel.generatePatrolPath();
 			entityManager = new EntityManager(this);
@@ -137,9 +136,6 @@ public class World implements Disposable {
 		}
 		// TODO fix merge
 		/*
-<<<<<<< HEAD
-=======
-		
 		//distanceMap = new DistanceTrackerMap((TiledMapTileLayer)meshLevel.getTiledMap().getLayers().get(0), 2 + 32 * 2);
 		distanceMap = new DistanceTrackerMap(meshLevel, 2 + 32 * 2);
 		meshLevel.generatePatrolPath();
@@ -152,8 +148,7 @@ public class World implements Disposable {
 		isWireframeEnabled = false;
 		
 		Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
->>>>>>> enemy_lv2_bug_fixes
-*/
+		*/
 	}
 	
 	public void enterDungeon() {
@@ -162,7 +157,7 @@ public class World implements Disposable {
 		getMeshLevel().getInstances().clear();
 		particleManager.system.removeAll();
 		Render.environment.pointLights.removeRange(0, Render.environment.pointLights.size - 1);
-		setMeshLevel(new MeshLevel(true));
+		setMeshLevel(new MeshLevel(true, this));
 		GridPoint2 playerPos = new GridPoint2();
 		playerPos.set(getMeshLevel().getStartingPoint());
 		player.camera.position.set(playerPos.x+0.5f, player.camera.position.y, playerPos.y+0.5f);
@@ -184,10 +179,10 @@ public class World implements Disposable {
 		particleManager.system.removeAll();
 		Render.environment.pointLights.removeRange(0, Render.environment.pointLights.size - 1);
 		try {
-			setMeshLevel(new MeshLevel(map, true));
+			setMeshLevel(new MeshLevel(map, true, this));
 		} catch(Exception e) {
 			System.err.println("Error loading specified map. Loading default.");
-			setMeshLevel(new MeshLevel(Assets.castle3, true));
+			setMeshLevel(new MeshLevel(Assets.castle3, true, this));
 		}
 		GridPoint2 playerPos = new GridPoint2();
 		playerPos.set(getMeshLevel().getStartingPoint());
@@ -535,8 +530,6 @@ public class World implements Disposable {
 		*/
 	}
 
-
-
 	@Override
 	public void dispose() {
 		dispatcher.dispose();
@@ -600,16 +593,13 @@ public class World implements Disposable {
 		
 	}
 
-
 	public int getNetIdCurrent() {
 		return NetIdCurrent;
 	}
 
-
 	public void setNetIdCurrent(int netIdCurrent) {
 		NetIdCurrent = netIdCurrent;
 	}
-
 
 	public NetClientEventManager getNetEventManager() {
 		return clientEventManager;
@@ -620,11 +610,9 @@ public class World implements Disposable {
 		this.clientEventManager = eventManager;
 	}
 
-
 	public NetServerEventManager getServerEventManager() {
 		return serverEventManager;
 	}
-
 
 	public void setServerEventManager(NetServerEventManager serverEventManager) {
 		this.serverEventManager = serverEventManager;
@@ -645,7 +633,6 @@ public class World implements Disposable {
 		
 	}
 
-
 	public void checkProjectileCollisionsServer(Projectile projectile) {
 		// TODO Auto-generated method stub
 		
@@ -659,41 +646,33 @@ public class World implements Disposable {
 		return eventManager;
 	}
 
-
 	public BulletContactListener getContactListener() {
 		return contactListener;
 	}
-
 
 	public void setContactListener(BulletContactListener contactListener) {
 		this.contactListener = contactListener;
 	}
 
-
 	public btDynamicsWorld getDynamicsWorld() {
 		return dynamicsWorld;
 	}
-
 
 	public void setDynamicsWorld(btDynamicsWorld dynamicsWorld) {
 		this.dynamicsWorld = dynamicsWorld;
 	}
 
-
 	public btConstraintSolver getContraintSolver() {
 		return constraintSolver;
 	}
-
 
 	public void setContraintSolver(btConstraintSolver contraintSolver) {
 		this.constraintSolver = contraintSolver;
 	}
 
-
 	public BulletTickCallback getTickCallback() {
 		return tickCallback;
 	}
-
 
 	public void setTickCallback(BulletTickCallback tickCallback) {
 		this.tickCallback = tickCallback;

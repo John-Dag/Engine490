@@ -70,16 +70,7 @@ public class Sword extends Weapon {
 		}
 		
 		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
-			if (world.getPlayer().getWeapon() == null || world.getPlayer().getWeapon().getId() != this.getId()) {
-				pickupWeapon(world);
-			}
+			world.getPlayer().setWeapon(this);
 		}
-	}
-	
-	@Override
-	public void pickupWeapon(World world) {
-		world.getPlayer().setWeapon(this);
-		if (this.getSpawnerRef() != null)
-			this.getSpawnerRef().startSpawnTimer();
 	}
 }

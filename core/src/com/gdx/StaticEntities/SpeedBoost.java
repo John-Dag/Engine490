@@ -19,15 +19,22 @@ public class SpeedBoost extends PowerUp {
 		duration = 10;
 	}
 	
-	public SpeedBoost(Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, Model model, float duration) {
-		super(position, id , isActive, isRenderable, isDecalFacing, model, duration);
+	public SpeedBoost(Vector3 position, int id, boolean isActive, boolean isRenderable, Model model, float duration, powerUpTypeEnum type) {
+		super(position, id , isActive, isRenderable, model, duration, type);
 		this.duration = duration;
 		this.model = model;
+		
+		BoundingBox temp = new BoundingBox();
+		this.getModel().calculateBoundingBox(temp);
+		this.setBoundingBox(temp);
+		this.getModel().transform.setToTranslation(this.getPosition());
+		this.getModel().transform.scale(0.05f, 0.05f, 0.05f);
+		this.getModel().transform.rotate(new Vector3(1,0,0), 90);
 	}
 	
 	// Boosts player speed for duration.
 	@Override
-	protected void effect() {
+	public void effect() {
 		World.player.setSpeedScalar(SPEEDBOOST);
 		Timer.schedule(new Task() {
 			public void run() { 
@@ -39,7 +46,7 @@ public class SpeedBoost extends PowerUp {
 	// Need to change model to some sort of power-up.
 	@Override
 	public PowerUp spawn() {
-		SpeedBoost speedBoost = new SpeedBoost(this.getPosition().cpy(), 2, true, true, true, model, duration);
+		SpeedBoost speedBoost = new SpeedBoost(this.getPosition().cpy(), 2, true, true, model, duration, powerUpTypeEnum.speedBoost);
 		BoundingBox temp = new BoundingBox();
 		speedBoost.getModel().calculateBoundingBox(temp);
 		speedBoost.setBoundingBox(temp);

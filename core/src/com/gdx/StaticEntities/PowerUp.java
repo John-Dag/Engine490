@@ -3,30 +3,60 @@ package com.gdx.StaticEntities;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import com.gdx.Network.Net;
+import com.gdx.Network.NetClientEvent;
+import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 
 public class PowerUp extends StaticEntity {
 	private Vector3 rotationVec;
-	private PowerUpSpawn spawnRef;
+	private PowerUpSpawner powerUpSpawner;
+	private static int powerUpCount = 0;
+	private int uniqueId;
+	private powerUpTypeEnum powerUpType;
 	
-	public PowerUp () {
+	public enum powerUpTypeEnum {
+		healthPot, speedBoost
+	}
+	
+	public PowerUp() {
 		super();
 	}
 	
-	public PowerUp (Vector3 position, int id, boolean isActive, boolean isRenderable, boolean isDecalFacing, Model model, float duration) {
+	public PowerUp(Vector3 position, int id, boolean isActive, boolean isRenderable, Model model, float duration, powerUpTypeEnum type) {
 		super(position, id, isActive, isRenderable, false);
+		uniqueId = powerUpCount;
+		powerUpCount++;
+		
 		this.setModel(new ModelInstance(model));
+		this.setPowerUpType(type);
 		rotationVec = new Vector3(0f, 0f, 1f);
-		spawnRef = this.getSpawnRef();
 	}
 	
 	@Override
 	public void update(float delta, World world) {
-		if (this.getModel() != null && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
-			this.setIsActive(false);
-			effect();
-			if (spawnRef != null)
-				spawnRef.startSpawnTimer();
+		if (this.getModel() != null && this.isRenderable() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
+			if (GameScreen.mode == GameScreen.mode.Offline){
+				this.setIsRenderable(false);
+				effect();
+				if(powerUpSpawner != null) {
+
+					this.powerUpSpawner.startTimer();
+
+				}else{
+					System.out.println("Power Up Spawner is null");
+				}
+			} else {
+				this.setIsRenderable(false);
+				System.out.println("Send PowerUpConsumed message to server");
+				if (world.getClient() != null) {
+					Net.PowerUpConsumedPacket packet = new Net.PowerUpConsumedPacket();
+					packet.playerId = world.player.getNetId();
+					packet.powerUpEntityId = this.getUniqueId();
+					NetClientEvent.PowerUpConsumed event = new NetClientEvent.PowerUpConsumed(packet);
+					world.getNetEventManager().addNetEvent(event);
+				}
+			}
 		}
 		
 		else {
@@ -34,8 +64,16 @@ public class PowerUp extends StaticEntity {
 		}
 	}
 	
+	public void setSpawner(PowerUpSpawner powerUpSpawner) {
+		this.powerUpSpawner = powerUpSpawner;
+	}
+	
+	public PowerUpSpawner getSpawner() {
+		return this.powerUpSpawner;
+	}
+	
 	// Override to create your own power-up effect!
-	 protected void effect() {
+	public void effect() {
 		/* EXAMPLE:
 		
 		    World.player.setSpeedBoost(SPEEDBOOST);
@@ -47,12 +85,16 @@ public class PowerUp extends StaticEntity {
 		
 		*/
 	}
-
-	public PowerUpSpawn getSpawnRef() {
-		return spawnRef;
+	
+	public void setPowerUpType(powerUpTypeEnum type) {
+		this.powerUpType = type;
 	}
-
-	public void setSpawnRef(PowerUpSpawn spawnRef) {
-		this.spawnRef = spawnRef;
+	
+	public powerUpTypeEnum getPowerUpType() {
+		return this.powerUpType;
+	}
+	
+	public int getUniqueId() {
+		return uniqueId;
 	}
 }

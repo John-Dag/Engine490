@@ -374,14 +374,14 @@
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
-    <property name="time" value="40"/>
+    <property name="time" value="8"/>
    </properties>
   </object>
   <object name="Rocket" x="175" y="945">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
-    <property name="time" value="40"/>
+    <property name="time" value="8"/>
    </properties>
   </object>
   <object name="SpeedBoost" x="145" y="591">
@@ -389,14 +389,14 @@
     <property name="color" value="2"/>
     <property name="duration" value="5"/>
     <property name="height" value="1"/>
-    <property name="time" value="40"/>
+    <property name="time" value="16"/>
    </properties>
   </object>
   <object name="Sword" x="552" y="540">
    <properties>
     <property name="color" value="2"/>
     <property name="height" value="1"/>
-    <property name="time" value="40"/>
+    <property name="time" value="8"/>
    </properties>
   </object>
   <object name="HealthPot" x="144" y="399">
@@ -404,7 +404,7 @@
     <property name="color" value="3"/>
     <property name="duration" value="0"/>
     <property name="height" value="1"/>
-    <property name="time" value="40"/>
+    <property name="time" value="16"/>
    </properties>
   </object>
  </objectgroup>

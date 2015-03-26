@@ -629,7 +629,7 @@ public class Enemy extends DynamicEntity {
 			
 			else if (player != null && projectile != null) {
 				System.out.println("collided");
-				if (GameScreen.mode == GameScreen.State.Server) {
+				if (GameScreen.mode == GameScreen.mode.Server) {
 					Net.CollisionPacket packet = new Net.CollisionPacket();
 					packet.playerOriginID = projectile.getOriginID();
 					packet.playerID = projectile.getNetId();

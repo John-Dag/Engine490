@@ -381,7 +381,8 @@ public class DynamicEntity extends Entity {
 		}
 		
 		else if (this.getWeapon().getId() != weapon.getId()) {
-			this.weapon.setIsActive(false);
+			//this.weapon.setIsActive(false);
+			this.weapon.setIsRenderable(false);
 			this.weapon = weapon;
 			this.weapon.setPickedup(true);
 			Entity.entityInstances.add(this.weapon);

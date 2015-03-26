@@ -13,7 +13,15 @@ public class Weapon extends DynamicEntity {
 	protected int damage;
 	private boolean isParticleWeapon, isPickedup;
 	private WeaponSpawner spawnerRef;
+	private static int weaponCount = 0;
+	private int uniqueId;
+	private weaponTypeEnum weaponType;
 
+	
+	public enum weaponTypeEnum{
+		rocketLauncher, sword
+	}
+	
 	public Weapon() {
 		super();
 		firingDelay = 0;
@@ -91,6 +99,17 @@ public class Weapon extends DynamicEntity {
 
 	public void pickupWeapon(World world) {
 		// TODO Auto-generated method stub
-		
+	}
+	
+	public void setWeaponType(weaponTypeEnum type) {
+		this.weaponType = type;
+	}
+	
+	public weaponTypeEnum getWeaponType() {
+		return this.weaponType;
+	}
+	
+	public int getUniqueId() {
+		return uniqueId;
 	}
 }

@@ -12,7 +12,10 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
+import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net.PlayerPacket;
+import com.gdx.StaticEntities.PowerUp;
+import com.gdx.StaticEntities.WeaponSpawn;
 import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
@@ -136,6 +139,58 @@ public class NetClient {
         	Net.StatPacket packet = (Net.StatPacket)object;
         	updateNetStats(packet);
         }
+        
+        else if (object instanceof Net.PowerUpConsumedPacket) {
+        	System.out.println("Client received powerUpConsumed confirmation packet");
+        	Net.PowerUpConsumedPacket packet = (Net.PowerUpConsumedPacket)object;
+        	handlePowerUpConsumedPacket(packet);
+        }
+        
+        else if (object instanceof Net.PowerUpRespawnPacket) {
+        	System.out.println("Client received powerUpRespawn packet");
+        	Net.PowerUpRespawnPacket packet = (Net.PowerUpRespawnPacket)object;
+        	handlePowerUpRespawnPacket(packet);
+        }
+        
+        else if (object instanceof Net.WeaponPickedUpPacket) {
+        	System.out.println("Client received weaponPickedUp confirmation packet");
+        	Net.WeaponPickedUpPacket packet = (Net.WeaponPickedUpPacket)object;
+        	handleWeaponPickedUpPacket(packet);
+        }
+        
+        else if (object instanceof Net.WeaponRespawnPacket) {
+        	System.out.println("Client received weaponRespawn packet");
+        	Net.WeaponRespawnPacket packet = (Net.WeaponRespawnPacket)object;
+        	handleWeaponRespawnPacket(packet);
+        }
+	}
+	
+	private void handlePowerUpConsumedPacket(Net.PowerUpConsumedPacket packet) {
+		// this makes the power up disappear for players who did not consume it but witnessed the event
+		PowerUp powerUp = world.getMeshLevel().getPowerUpInstances().get(packet.powerUpEntityId);
+		powerUp.setIsRenderable(false);
+		if(packet.playerId == world.getPlayer().getNetId()) {
+			powerUp.effect();
+		}
+	}
+	
+	private void handlePowerUpRespawnPacket(Net.PowerUpRespawnPacket packet) {
+		PowerUp powerUp = world.getMeshLevel().getPowerUpInstances().get(packet.powerUpEntityId);
+		powerUp.setIsRenderable(true);
+	}
+	
+	private void handleWeaponPickedUpPacket(Net.WeaponPickedUpPacket packet) {
+		// this makes the weapon disappear for players who did not consume it but witnessed the event
+		WeaponSpawn weaponSpawn = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		weaponSpawn.setIsRenderable(false);
+		if(packet.playerId == world.getPlayer().getNetId()) {
+			weaponSpawn.effect();
+		} 
+	}
+	
+	private void handleWeaponRespawnPacket(Net.WeaponRespawnPacket packet) {
+		WeaponSpawn weaponSpawn = world.getMeshLevel().getWeaponInstances().get(packet.weaponEntityId);
+		weaponSpawn.setIsRenderable(true);
 	}
 	
 	public void createPlayerStatField(Net.NewPlayer packet) {
@@ -180,6 +235,14 @@ public class NetClient {
 	public void sendDeathUpdate(int playerID) {
 		Net.DeathPacket packet = new Net.DeathPacket();
 		packet.id = playerID;
+		client.sendTCP(packet);
+	}
+	
+	public void sendPowerUpConsumedUpdate(Net.PowerUpConsumedPacket packet) {
+		client.sendTCP(packet);
+	}
+	
+	public void sendWeaponPickedUpUpdate(Net.WeaponPickedUpPacket packet) {
 		client.sendTCP(packet);
 	}
 	
@@ -291,6 +354,7 @@ public class NetClient {
 	//Send updates to the server if the player is moving, jumping, or respawning.
 	public void clientUpdate() {
 		world.getNetEventManager().processEvents();
+
 		if (!world.getPlayer().getMovementVector().isZero() || world.getPlayer().isJumping() || 
 		    world.getPlayer().isRespawning() || world.getPlayer().isRotating()) {
 			sendPlayerUpdate();

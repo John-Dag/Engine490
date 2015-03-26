@@ -11,6 +11,7 @@ import com.gdx.Network.Net;
 import com.gdx.Network.NetClientEvent;
 import com.gdx.Network.NetClientEvent.CreateProjectile;
 import com.gdx.Network.NetWorld;
+import com.gdx.StaticEntities.PowerUp.powerUpTypeEnum;
 import com.gdx.engine.Assets;
 import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Entity;
@@ -22,7 +23,7 @@ public class RocketLauncher extends Weapon {
 	public static final float FIRING_DELAY = 0.1f;
 	public static final float PROJECTILE_SPEED = 15f;
 	private final float RECOIL = 0.08f;
-	public static final int DAMAGE = 20;
+	public static final int DAMAGE = 100;
 	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0), rotationVec;
 	
 	public RocketLauncher() {
@@ -36,7 +37,6 @@ public class RocketLauncher extends Weapon {
 		this.projectileSpeed = PROJECTILE_SPEED;
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
-		this.setPickedup(false);
 		rotationVec = new Vector3(World.player.camera.up.cpy());
 	}
 	
@@ -83,6 +83,7 @@ public class RocketLauncher extends Weapon {
 		launcher.setBoundingBox(temp);
 		launcher.getModel().transform.setToTranslation(spawnPos);
 		launcher.getModel().transform.scale(0.005f, 0.005f, 0.005f);
+		
 		return launcher;
 	}
 	
@@ -100,21 +101,26 @@ public class RocketLauncher extends Weapon {
 			this.getModel().transform.scale(0.005f, 0.005f, 0.005f);
 		}
 		
-		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
-			if (world.getPlayer().getWeapon() == null || world.getPlayer().getWeapon().getId() != this.getId()) {
-				pickupWeapon(world);
+		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox()) && this.getWeapon().getWeaponType() != this.getWeaponType().rocketLauncher) {
+			if (GameScreen.mode == GameScreen.mode.Offline){
+				world.getPlayer().setWeapon(this);
+			} else {
+//				this.setPickedup(true);
+//				this.setIsRenderable(false);
+				System.out.println("Send rocketObtain message to server");
+				if (world.getClient() != null) {
+					Net.WeaponPickedUpPacket packet = new Net.WeaponPickedUpPacket();
+					packet.playerId = world.player.getNetId();
+					packet.weaponEntityId = this.getUniqueId();
+					NetClientEvent.WeaponPickedUp event = new NetClientEvent.WeaponPickedUp(packet);
+					world.getNetEventManager().addNetEvent(event);
+				}
 			}
 		}
 		
-		else {
-			this.getModel().transform.rotate(rotationVec, 180f * delta);
-		}
-	}
-	
-	@Override
-	public void pickupWeapon(World world) {
-		world.getPlayer().setWeapon(this);
-		if (this.getSpawnerRef() != null)
-			this.getSpawnerRef().startSpawnTimer();
+//		else {
+//			this.getModel().transform.rotate(rotationVec, 180f * delta);
+//		}
 	}
 }
+

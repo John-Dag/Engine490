@@ -116,7 +116,7 @@ public class UIChat extends UIBase {
 					textArea.setText(chatLog.toString());
 					scrollPane.setScrollPercentY(scrollPane.getScrollPercentY());
 					
-					if (GameScreen.mode == GameScreen.state.Client) {
+					if (GameScreen.mode == GameScreen.Mode.Client) {
 						sendMessage(fieldValue);
 					}
 				}

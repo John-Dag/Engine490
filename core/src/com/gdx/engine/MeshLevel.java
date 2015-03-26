@@ -47,19 +47,24 @@ import com.badlogic.gdx.physics.bullet.collision.btStaticPlaneShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.EnemySpawner;
 import com.gdx.StaticEntities.HealthPot;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.Portal;
-import com.gdx.StaticEntities.PowerUpSpawn;
+import com.gdx.StaticEntities.PowerUp;
+import com.gdx.StaticEntities.PowerUpSpawner;
+import com.gdx.StaticEntities.RocketLauncherSpawn;
 import com.gdx.StaticEntities.SpeedBoost;
+import com.gdx.StaticEntities.SwordSpawn;
 import com.gdx.StaticEntities.Torch;
+import com.gdx.StaticEntities.WeaponSpawn;
+import com.gdx.StaticEntities.WeaponSpawn.weaponSpawnTypeEnum;
 import com.gdx.StaticEntities.WeaponSpawner;
-import com.gdx.Weapons.RocketLauncher;
-import com.gdx.Weapons.Sword;
-import org.omg.CORBA.*;
+import com.gdx.StaticEntities.PowerUp.powerUpTypeEnum;
+
 
 // Important note to the team: (this can be confusing)
 // World coordinates have x, y, z, with +x pointing East, and +z pointing South
@@ -67,6 +72,7 @@ import org.omg.CORBA.*;
 // Many methods convert between these two coordinate systems, so its important to know which variables are in which coordinate system.
 
 public class MeshLevel {
+	private World world;
 	public static Color skyColor = Color.BLACK;
 	public static final float ROOT_PT5 = 0.70710678f;
 	public static final int NORTH = 1;
@@ -83,7 +89,7 @@ public class MeshLevel {
 	public MeshPartBuilder meshPartBuilder;
 	public ModelBuilder modelBuilder;
 	public ModelInstance instance;
-	public Model model; 
+	public Model model;
 	
 	// the length and width of one tile
 	private static final float SPOT_WIDTH = 1;
@@ -98,6 +104,8 @@ public class MeshLevel {
 	
 	private TiledMap tiledMap;
 	private Array<ModelInstance> instances;
+	private Array<PowerUp> powerUpInstances;
+	private Array<WeaponSpawn> weaponInstances;
 	private Model skySphere;
 	private int triCount = 0;
 	private boolean isSkySphereActive;
@@ -149,9 +157,12 @@ public class MeshLevel {
 	public Array<btCollisionObject> bulletObjects;
 	//
 	
-	public MeshLevel(boolean isSkySphereActive){
+	public MeshLevel(boolean isSkySphereActive, World world){
+		this.world = world;
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
+		powerUpInstances = new Array<PowerUp>();
+		weaponInstances = new Array<WeaponSpawn>();
 		currentLayerNumber = 0;
 		this.heightOffset = 0f;
 		combinedWalls = true;
@@ -176,9 +187,12 @@ public class MeshLevel {
 		
 	}
 	
-	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive) {
+	public MeshLevel(TiledMap tiledMap, boolean isSkySphereActive, World world) {
+		this.world = world;
 		modelBuilder = new ModelBuilder();
 		instances = new Array<ModelInstance>();
+		powerUpInstances = new Array<PowerUp>();
+		weaponInstances = new Array<WeaponSpawn>();
 		this.tiledMap = tiledMap;
 		this.isSkySphereActive = isSkySphereActive;
 		//tiledMapLayer0 = (TiledMapTileLayer) tiledMap.getLayers().get(0);
@@ -1527,28 +1541,6 @@ public class MeshLevel {
 				Entity.entityInstances.add(light);
 			} 
 
-			else if (rectObj.getName().contains("Sword")) {
-				int height = getObjectHeight(rectObj);
-				//float scale = 0.005f;
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				Sword sword = (Sword) new Sword().spawn(new Vector3(objPosition.x - 0.4f, objPosition.y, objPosition.z));
-				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-												        sword);
-				Entity.entityInstances.add(spawn);
-			}
-			
-			else if (rectObj.getName().contains("Rocket")) {
-				int height = getObjectHeight(rectObj);
-				//float scale = 0.005f;
-				objPosition = new Vector3();
-				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(objPosition);
-				WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-														launcher);
-				Entity.entityInstances.add(spawn);
-			}
-
 			else if (rectObj.getName().contains("Mist")) {
 				int height = getObjectHeight(rectObj);
 				objPosition = new Vector3();
@@ -1581,14 +1573,56 @@ public class MeshLevel {
 				Entity.entityInstances.add(portal);
 			}
 			
+			else if (rectObj.getName().contains("Rocket")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				//Note: Here I set is renderable to false.
+				// need to send the newWeapon packet to the player in order to set it to true for client
+				boolean renderable = true;
+				if(GameScreen.mode == GameScreen.mode.Client) {
+					renderable = false;
+				}
+				RocketLauncherSpawn launcherSpawn = new RocketLauncherSpawn(objPosition, 8, true, renderable, Assets.manager.get("GUNFBX.g3db", Model.class), weaponSpawnTypeEnum.rocketLauncher);
+				WeaponSpawner spawner = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), launcherSpawn, world);
+				launcherSpawn.setSpawner(spawner);
+				weaponInstances.add(launcherSpawn);
+				Entity.entityInstances.add(spawner);
+			}
+			
+			else if (rectObj.getName().contains("Sword")) {
+				int height = getObjectHeight(rectObj);
+				objPosition = new Vector3();
+				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
+				//Note: Here I set is renderable to false.
+				// need to send the newWeapon packet to the player in order to set it to true for client
+				boolean renderable = true;
+				if(GameScreen.mode == GameScreen.mode.Client) {
+					renderable = false;
+				}
+				SwordSpawn swordSpawn = new SwordSpawn(objPosition, 8, true, renderable, Assets.manager.get("sword2.g3db", Model.class), weaponSpawnTypeEnum.sword);
+				WeaponSpawner spawner = new WeaponSpawner(objPosition, 8, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), swordSpawn, world);
+				swordSpawn.setSpawner(spawner);
+				weaponInstances.add(swordSpawn);
+				Entity.entityInstances.add(spawner);
+			}
+			
 			else if (rectObj.getName().contains("SpeedBoost")) {
 				objPosition = new Vector3();
 				int height = getObjectHeight(rectObj);
 				float duration = getPowerUpDuration(rectObj);
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-						new SpeedBoost(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
-				Entity.entityInstances.add(spawn);
+				//Note: Here I set is renderable to false.
+				// need to send the newPowerUp packet to the player in order to set it to true for client
+				boolean renderable = true;
+				if(GameScreen.mode == GameScreen.mode.Client) {
+					renderable = false;
+				}
+				SpeedBoost speedBoost = new SpeedBoost(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.speedBoost);
+				PowerUpSpawner spawner = new PowerUpSpawner(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), speedBoost, world);
+				speedBoost.setSpawner(spawner);
+				powerUpInstances.add(speedBoost);
+				Entity.entityInstances.add(spawner);
 			}
 			
 			else if (rectObj.getName().contains("HealthPot")) {
@@ -1596,9 +1630,17 @@ public class MeshLevel {
 				int height = getObjectHeight(rectObj);
 				float duration = getPowerUpDuration(rectObj);
 				objPosition.set(rectObj.getRectangle().getY() / 32, height + .5f, rectObj.getRectangle().getX() / 32);
-				PowerUpSpawn spawn = new PowerUpSpawn(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), 
-									 new HealthPot(objPosition, 9, true, true, true, Assets.manager.get("FireFlower.g3db", Model.class), duration));
-				Entity.entityInstances.add(spawn);
+				//Note: Here I set is renderable to false if client, true if server.
+				// need to send the newPowerUp packet to the player in order to set it to true for client
+				boolean renderable = true;
+				if(GameScreen.mode == GameScreen.mode.Client) {
+					renderable = false;
+				}
+				HealthPot healthPot = new HealthPot(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.healthPot);
+				PowerUpSpawner spawner = new PowerUpSpawner(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), healthPot, world);
+				healthPot.setSpawner(spawner);
+				powerUpInstances.add(healthPot);
+				Entity.entityInstances.add(spawner);
 			}
 
 			else {
@@ -1611,10 +1653,15 @@ public class MeshLevel {
 		if(!outOfBounds(xPos, yPos)){
 			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight();
 			Vector3 objPosition = new Vector3(yPos+0.5f, height+0.5f, xPos+0.5f);
-			RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(objPosition);
-			WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, spawnTime, Color.MAROON, 
-													launcher);
-			Entity.entityInstances.add(spawn);
+			boolean renderable = false;
+			if(GameScreen.mode == GameScreen.mode.Server) {
+				renderable = true;
+			}
+			RocketLauncherSpawn launcherSpawn = new RocketLauncherSpawn(objPosition, 8, true, renderable, Assets.manager.get("GUNFBX.g3db", Model.class), weaponSpawnTypeEnum.rocketLauncher);
+			WeaponSpawner spawner = new WeaponSpawner(objPosition, 8, true, true, false, spawnTime, Color.CYAN, launcherSpawn, world);
+			launcherSpawn.setSpawner(spawner);
+			weaponInstances.add(launcherSpawn);
+			Entity.entityInstances.add(spawner);
 		}
 	}
 	
@@ -1622,10 +1669,15 @@ public class MeshLevel {
 		if(!outOfBounds(xPos, yPos)){
 			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight();
 			Vector3 objPosition = new Vector3(yPos+0.5f, height+0.5f, xPos+0.5f);
-			Sword sword = (Sword) new Sword().spawn(new Vector3(objPosition.x - 0.4f, objPosition.y, objPosition.z));
-			WeaponSpawner spawn = new WeaponSpawner(objPosition, 8, true, true, false, spawnTime, Color.MAROON, 
-											        sword);
-			Entity.entityInstances.add(spawn);
+			boolean renderable = false;
+			if(GameScreen.mode == GameScreen.mode.Server) {
+				renderable = true;
+			}
+			SwordSpawn swordSpawn = new SwordSpawn(objPosition, 8, true, renderable, Assets.manager.get("sword2.g3db", Model.class), weaponSpawnTypeEnum.sword);
+			WeaponSpawner spawner = new WeaponSpawner(objPosition, 8, true, true, false, spawnTime, Color.CYAN, swordSpawn, world);
+			swordSpawn.setSpawner(spawner);
+			weaponInstances.add(swordSpawn);
+			Entity.entityInstances.add(spawner);
 		}
 	}
 	
@@ -2136,5 +2188,13 @@ public class MeshLevel {
 		}catch (Exception e) {
 			return levelArray[x][y][0];
 		}
+	}
+
+	public Array<PowerUp> getPowerUpInstances() {
+		return powerUpInstances;
+	}
+	
+	public Array<WeaponSpawn> getWeaponInstances() {
+		return weaponInstances;
 	}
 }
