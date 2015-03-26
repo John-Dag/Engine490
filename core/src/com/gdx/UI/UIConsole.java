@@ -22,6 +22,8 @@ import com.gdx.FilterEffects.Lights;
 import com.gdx.FilterEffects.Rainbow;
 import com.gdx.FilterEffects.RedScreenColorMultiplier;
 import com.gdx.FilterEffects.Sepia;
+import com.gdx.Inventory.HealthPotion;
+import com.gdx.Inventory.Inventory;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
@@ -193,6 +195,11 @@ public class UIConsole extends UIBase {
 				filterEffects.get(currentFilter).initializeFrameBuffer();
 				world.setFilterEffect(filterEffects.get(currentFilter));
 			}
+		}
+		
+		else if (value.toLowerCase().contains("givehealthpotion")) {
+			Inventory inv = world.getPlayer().getInventory();
+			inv.store(new HealthPotion(), 1);
 		}
 		
 		else

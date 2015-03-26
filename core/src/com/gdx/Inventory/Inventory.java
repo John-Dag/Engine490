@@ -1,22 +1,15 @@
 package com.gdx.Inventory;
 
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
-import com.gdx.engine.Assets;
 
 public class Inventory {
 	private Array<Slot> slots;
-	private Array<Image> images;
 	private int size = 25;
-	private ItemList list;
 
     public Inventory() {
         slots = new Array<Slot>(size);
-        images = new Array<Image>(size);
         for (int i = 0; i < size; i++) {
             slots.add(new Slot(null, 0));
-            images.add(new Image(Assets.gridslot));
-           
         }
         
     }
@@ -30,7 +23,6 @@ public class Inventory {
             Slot emptySlot = firstSlotWithItem(null);
             if (emptySlot != null) {
                 emptySlot.add(item, amount);
-                updateImage(emptySlot);
                 return true;
             }
         }
@@ -46,21 +38,6 @@ public class Inventory {
         }
 
         return null;
-    }
-    
-    public Array<Image> getImages() {
-        return images;
-    }
-    
-   public void updateImage(Slot slot) {
-        for (int i = 0; i < size; i++) {
-        	if (slots.get(i).equals(slot)) {
-        		if (slots.get(i) != null) 
-        			images.set(i, slot.getItem().getImage());
-        		else
-        			images.set(i, new Image(Assets.gridslot));
-        	}
-        }
     }
     
     public Array<Slot> getSlots() {

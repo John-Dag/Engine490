@@ -1,26 +1,29 @@
 package com.gdx.Inventory;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.gdx.engine.Assets;
 
+// Extend this class to make your own items
 public class Item {
-	private Image image;
-	private String name;
+	protected Texture texture;
+	protected String name;
 	
-	public Item(Image image, String name) {
-		this.image = image;
-		this.name = name;
+	public Item() {
+		this.texture =  Assets.gridslot;
+		this.name = "base item";
 	}
 	
 	//Override this to give items effects.
 	public void effect(){
 	}
 
-	public Image getImage() {
-		return image;
+	public Texture getTexture() {
+		return texture;
 	}
 
-	public void setImage(Image image) {
-		this.image = image;
+	public void setTexture(Texture texture) {
+		this.texture = texture;
 	}
 	
 	public String getName() {

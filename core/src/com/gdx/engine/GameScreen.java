@@ -22,11 +22,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
-import com.gdx.Inventory.TestInventory;
 import com.gdx.UI.UIChat;
 import com.gdx.UI.UIConsole;
 import com.gdx.UI.UIBase;
-import com.gdx.UI.UIGrid;
+import com.gdx.UI.UIInventory;
 import com.gdx.UI.UIMap;
 import com.gdx.UI.UIMenu;
 import com.gdx.UI.UIOverlay;
@@ -49,10 +48,9 @@ public class GameScreen implements Screen {
 	private InputMultiplexer multiplexer = new InputMultiplexer();
 	private UIMap map;
 	private UIChat chat;
-	private UIGrid grid;
+	private UIInventory inventory;
 	private WorldInputProcessor screenInputProcessor;
 	private UIVirtualJoystick virtualJoystick;
-	//private TestInventory testInv = new TestInventory();
 	
 	public enum State {
 		Running, Paused
@@ -79,12 +77,7 @@ public class GameScreen implements Screen {
 				}
 				
 				else if (keyCode == Keys.I && !UIBase.uiSelected) {
-					grid.show();
-					if (grid.getWindow().isVisible())
-						Gdx.input.setCursorCatched(false);
-					else{
-						Gdx.input.setCursorCatched(true);
-					}
+					inventory.show();
 				}
 		
 				return false;
@@ -127,10 +120,7 @@ public class GameScreen implements Screen {
 		buttons.add(button2);
 		menu = new UIMenu(stage, skin, buttons, "Engine 490", 0, 0);
 		menu.generateVerticalMenu(10);
-		grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
-		//grid.setImages(testInv.getImages());
-		grid.generateGrid(Align.bottom, 30, 30, 5, 5, 3);
-		grid.setWindowSize(200, 200);
+		inventory = new UIInventory(stage, world.getPlayer().getInventory(), skin);
 		overlay = new UIOverlay(stage, spriteBatch, bitmapFont);
 		overlay.addCrosshair(Assets.crosshair, center);
 		map = new UIMap(world, stage, spriteBatch, skin, Color.BLACK, 5, 5, 3, 0);
@@ -145,6 +135,8 @@ public class GameScreen implements Screen {
 		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
+		
+		
 		
 		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);

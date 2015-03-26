@@ -1,6 +1,7 @@
 package com.gdx.engine;
 
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.gdx.UI.UIBase;
 
@@ -89,7 +90,10 @@ public class WorldInputProcessor implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
+		if(button == Input.Buttons.RIGHT) {
+			world.getPlayer().catchCursor();
+			return true;
+		}
 		return false;
 	}
 

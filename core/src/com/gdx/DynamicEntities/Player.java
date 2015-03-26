@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
+import com.gdx.Inventory.Inventory;
 import com.gdx.UI.UIBase;
 import com.gdx.UI.UIConsole;
 import com.gdx.engine.Assets;
@@ -53,6 +54,7 @@ public class Player extends DynamicEntity {
 	private Array<Ability> abilities;
 	private boolean moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false,
 								  jump = false, crouch = false, ability1 = false, ability2 = false, ESCAPE = false;
+	private Inventory inventory;
 	
 	public Player() {
 		super();
@@ -87,6 +89,7 @@ public class Player extends DynamicEntity {
 		this.speedScalar = 1f; // 1 = default movespeed
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
+		this.inventory = new Inventory();
 	}
 	
 	public void initAbilities() {
@@ -237,7 +240,8 @@ public class Player extends DynamicEntity {
 	public void input(float delta) {
 		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT) && !this.isPlayerTargeting) {
-			Gdx.input.setCursorCatched(true);
+			//Gdx.input.setCursorCatched(true); // I moved this input to the WorldInputProcessor for use with the multiplexer.
+												// Left it commented in case I screwed something up. - Matt
 		}
 		
 		else if (ESCAPE || Gdx.input.isButtonPressed(Buttons.RIGHT) 
@@ -502,6 +506,9 @@ public class Player extends DynamicEntity {
 		this.health = health;
 	}
 	
+	public Inventory getInventory() {
+		return inventory;
+	}
 	public boolean isMouseLocked() {
 		return mouseLocked;
 	}
