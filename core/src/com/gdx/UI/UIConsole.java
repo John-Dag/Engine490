@@ -197,9 +197,14 @@ public class UIConsole extends UIBase {
 			}
 		}
 		
-		else if (value.toLowerCase().contains("givehealthpotion")) {
+		else if (value.toLowerCase().startsWith("givehealthpotion")) {
+			int itemNum = parseConsoleValueInt(value);
 			Inventory inv = world.getPlayer().getInventory();
-			inv.store(new HealthPotion(), 1);
+			if (itemNum > 1)
+				for (int i = 0; i < itemNum; i++)
+					inv.store(new HealthPotion(), 1);
+			else
+				inv.store(new HealthPotion(), 1);
 		}
 		
 		else
@@ -241,6 +246,20 @@ public class UIConsole extends UIBase {
 		}
 		
 		return floatValue;
+	}
+	
+	public int parseConsoleValueInt(String value) {
+		int intValue = 0;
+		String[] tokens = value.split(" ");
+		if (tokens.length > 1 && tokens.length < 3) {
+			try {
+				intValue = Integer.parseInt(tokens[1]);
+			} catch (Exception e) {
+				System.err.println("Invalid argument");
+			}
+		}
+		
+		return intValue;
 	}
 	
 	//Parse string value from console string

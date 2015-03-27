@@ -136,10 +136,8 @@ public class GameScreen implements Screen {
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
 		
-		
-		
-		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);
+		multiplexer.addProcessor(screenInputProcessor);
 		Gdx.input.setInputProcessor(multiplexer);
 	}
 	

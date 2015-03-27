@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.gdx.engine.Assets;
 
 public class SlotActor extends Image implements SlotListener{
 	
@@ -19,11 +20,19 @@ public class SlotActor extends Image implements SlotListener{
 	
 	@Override
 	public void hasChanged(Slot slot) {
+		// Show new item
 		if(slot.getItem() != null) {
 			TextureRegion region = new TextureRegion(slot.getItem().getTexture());
 			TextureRegionDrawable drawable = new TextureRegionDrawable(region);
 			setDrawable(drawable);
 		}
+		// Show an empty slot
+		else {
+			TextureRegion region = new TextureRegion(Assets.gridslot);
+			TextureRegionDrawable drawable = new TextureRegionDrawable(region);
+			setDrawable(drawable);
+		}
+		
 	}
 	
 	public Slot getSlot() {
