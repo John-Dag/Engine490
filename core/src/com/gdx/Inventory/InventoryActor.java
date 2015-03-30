@@ -15,7 +15,7 @@ public class InventoryActor extends Window{
 		setVisible(false);
 		
 		//Layout
-		setPosition(Gdx.graphics.getWidth() - 230, 30);
+		setPosition(Gdx.graphics.getWidth() - 500, 0);
         defaults().space(3);
         row().fill().expandX();
 		
