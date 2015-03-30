@@ -296,6 +296,7 @@ public class DistanceTrackerMap {
                     && getYPos(currentAdjTile) == getYPos(tileLocation) + YDistFromTile
                     && meshLevel.getMapTile(getXPos(currentAdjTile), getYPos(currentAdjTile), tileLayer).getRampDirection() == -1
                     && notAdjToRamp(XAdjTile, YAdjTile, tileLayer)
+                    && adjTilesSameHeight(mapObject, XAdjTile, YAdjTile)
                     ) {
                 if (tileLayer == 1)
                     if ((YAdjTile > width * width && XAdjTile > width * width) || (YAdjTile < width * width && XAdjTile < width * width))
@@ -547,6 +548,22 @@ public class DistanceTrackerMap {
             if (adjNum == adjTileNum)
                 return true;
         return false;
+    }
+
+    private boolean adjTilesSameHeight(DistanceFromPlayer currentTile, int XAdjTileNum, int YAdjTileNum){
+        int XAdjTileLayer = XAdjTileNum/ (width * height);
+        int YAdjTileLayer = YAdjTileNum / (width * height);
+        int currentLayer = currentTile.getTileNumber() / (width * height);
+        XAdjTileNum = XAdjTileNum - (width * height * XAdjTileLayer);
+        YAdjTileNum = YAdjTileNum - (width * height * YAdjTileLayer);
+        int tileXAdjHeight = meshLevel.getMapTile(getXPos(XAdjTileNum), getYPos(XAdjTileNum), XAdjTileLayer).getHeight();
+        int tileYAdjHeight = meshLevel.getMapTile(getXPos(YAdjTileNum), getYPos(YAdjTileNum), YAdjTileLayer).getHeight();
+        int currentTileHeight = meshLevel.getMapTile(getXPos(currentTile.getTileNumber()), getYPos(currentTile.getTileNumber()), currentLayer).getHeight();
+        if (currentTileHeight == tileXAdjHeight && currentTileHeight == tileYAdjHeight
+                && currentLayer == XAdjTileLayer && currentLayer == YAdjTileLayer)
+            return true;
+        else
+            return false;
     }
 
 }
