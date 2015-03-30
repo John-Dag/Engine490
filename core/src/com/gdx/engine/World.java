@@ -149,6 +149,8 @@ public class World implements Disposable {
 		
 		Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
 		*/
+		//Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
+
 	}
 	
 	public void enterDungeon() {

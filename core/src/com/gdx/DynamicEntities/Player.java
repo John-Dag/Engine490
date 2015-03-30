@@ -20,6 +20,7 @@ import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
 import com.gdx.StaticEntities.WeaponSpawn;
 import com.gdx.StaticEntities.WeaponSpawner;
+import com.gdx.Inventory.Inventory;
 import com.gdx.UI.UIBase;
 import com.gdx.UI.UIConsole;
 import com.gdx.Weapons.RocketLauncher;
@@ -67,6 +68,7 @@ public class Player extends DynamicEntity {
 	private Weapon noWeapon;
 	private RocketLauncher launcher;
 	private Sword sword;
+	private Inventory inventory;
 	
 	public Player() {
 		super();
@@ -111,6 +113,7 @@ public class Player extends DynamicEntity {
 		World.dynamicsWorld.addCollisionObject(this.getBulletObject());
 		this.weapons = new Array<Weapon>();
 		//this.setModel(model);
+		this.inventory = new Inventory();
 	}
 	
 	public void initAbilities() {
@@ -271,7 +274,8 @@ public class Player extends DynamicEntity {
 	public void handleInput(float delta) {
 		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT) && !this.isPlayerTargeting) {
-			Gdx.input.setCursorCatched(true);
+			//Gdx.input.setCursorCatched(true); // I moved this input to the WorldInputProcessor for use with the multiplexer.
+												// Left it commented in case I screwed something up. - Matt
 		}
 		
 		else if (ESCAPE || Gdx.input.isButtonPressed(Buttons.RIGHT) 
@@ -555,10 +559,15 @@ public class Player extends DynamicEntity {
 		this.health = health;
 	}
 	
+
 //	public void obtainWeapon(WeaponSpawn.weaponSpawnTypeEnum type) {
 //		// TODO: this is where we toggle whether a certain weapon is usable by the player or not
 //	}
 	
+	public Inventory getInventory() {
+		return inventory;
+	}
+
 	public boolean isMouseLocked() {
 		return mouseLocked;
 	}

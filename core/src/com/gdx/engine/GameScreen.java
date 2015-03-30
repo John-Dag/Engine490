@@ -35,7 +35,7 @@ import com.gdx.Network.NetWorld;
 import com.gdx.UI.UIChat;
 import com.gdx.UI.UIConsole;
 import com.gdx.UI.UIBase;
-import com.gdx.UI.UIGrid;
+import com.gdx.UI.UIInventory;
 import com.gdx.UI.UIMap;
 import com.gdx.UI.UIMenu;
 import com.gdx.UI.UIOverlay;
@@ -62,7 +62,7 @@ public class GameScreen implements Screen {
 	private InputMultiplexer multiplexer = new InputMultiplexer();
 	private UIMap map;
 	private UIChat chat;
-	private UIGrid grid;
+	private UIInventory inventory;
 	private WorldInputProcessor screenInputProcessor;
 	private UIVirtualJoystick virtualJoystick;
 	private UIForm form, statForm;
@@ -99,7 +99,7 @@ public class GameScreen implements Screen {
 				}
 				
 				else if (keyCode == Keys.I && !UIBase.uiSelected) {
-					grid.show();
+					inventory.show();
 				}
 				
 				else if (keyCode == Keys.ALT_RIGHT) {
@@ -155,10 +155,7 @@ public class GameScreen implements Screen {
 		buttons.add(button2);
 		menu = new UIMenu(stage, skin, buttons, "Engine 490", 0, 0);
 		menu.generateVerticalMenu(10);
-		grid = new UIGrid(stage, skin, Color.GREEN, "Inventory", Assets.gridslot);
-		grid.generateGrid(Align.bottom, 30, 30, 5, 5, 3);
-		grid.setWindowSize(300, 300);
-		grid.setOpacity(0.5f);
+		inventory = new UIInventory(stage, world.getPlayer().getInventory(), skin);
 		overlay = new UIOverlay(stage, spriteBatch, bitmapFont);
 		overlay.addCrosshair(Assets.crosshair, center);
 		overlay.setCursorImage("cursor.png", 6, 3);
@@ -177,8 +174,8 @@ public class GameScreen implements Screen {
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		//virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
 		
-		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);
+		multiplexer.addProcessor(screenInputProcessor);
 		Gdx.input.setInputProcessor(multiplexer);
 		uiGenerated = true;
 	}

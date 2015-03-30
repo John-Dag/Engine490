@@ -30,6 +30,8 @@ import com.gdx.Shaders.ColorMultiplierEntityShader;
 import com.gdx.Shaders.EntityRainbow;
 import com.gdx.Shaders.FireBallShader;
 import com.gdx.Shaders.LavaShader;
+import com.gdx.Inventory.HealthPotion;
+import com.gdx.Inventory.Inventory;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
@@ -206,6 +208,7 @@ public class UIConsole extends UIBase {
 				world.setFilterEffect(filterEffects.get(currentFilter));
 			}
 		}
+		
 		else if (value.toLowerCase().contains("bulletwires")) {
 			world.bulletDebugDrawEnabled=!world.bulletDebugDrawEnabled;
 		}
@@ -257,6 +260,17 @@ public class UIConsole extends UIBase {
 				e.setShader(new FireBallShader());
 			}
 		}
+		
+		else if (value.toLowerCase().startsWith("givehealthpotion")) {
+			int itemNum = parseConsoleValueInt(value);
+			Inventory inv = world.getPlayer().getInventory();
+			if (itemNum > 1)
+				for (int i = 0; i < itemNum; i++)
+					inv.store(new HealthPotion(), 1);
+			else
+				inv.store(new HealthPotion(), 1);
+		}
+	
 		else
 			System.err.println("Unknown command");
 		consoleVal = "";
@@ -296,6 +310,20 @@ public class UIConsole extends UIBase {
 		}
 		
 		return floatValue;
+	}
+	
+	public int parseConsoleValueInt(String value) {
+		int intValue = 0;
+		String[] tokens = value.split(" ");
+		if (tokens.length > 1 && tokens.length < 3) {
+			try {
+				intValue = Integer.parseInt(tokens[1]);
+			} catch (Exception e) {
+				System.err.println("Invalid argument");
+			}
+		}
+		
+		return intValue;
 	}
 	
 	//Parse string value from console string

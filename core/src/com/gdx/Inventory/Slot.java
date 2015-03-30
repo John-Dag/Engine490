@@ -12,40 +12,48 @@ public class Slot {
 		this.amount = amount;
 	}
 	
-	public boolean add(Item item, int amount) {
+	public void add(Item item, int amount) {
 		if (this.item == item || this.item == null) {
             this.item = item;
             this.amount += amount;
             notifyListeners();
-            return true;
 		}
-		
-		return false;
 	}
 	
-	public boolean remove(int amount) {
+	public void remove(int amount) {
 		if (this.amount >= amount) {
             this.amount -= amount;
             if (this.amount == 0) {
                 item = null;
             }
             notifyListeners();
-            return true;
-        }
-		return false;
+		}
+	}
+	
+	public Item getItem() {
+		return item;
+	}
+	
+	public int getAmount() {
+		return amount;
 	}
 	
 	public void addListener(SlotListener slotListener) {
         slotListeners.add(slotListener);
     }
-	
-	public void notifyListeners() {
-		for (SlotListener slotListener : slotListeners) {
+
+    public void removeListener(SlotListener slotListener) {
+        slotListeners.removeValue(slotListener, true);
+    }
+
+    private void notifyListeners() {
+        for (SlotListener slotListener : slotListeners) {
             slotListener.hasChanged(this);
         }
-	}
+    }
 	
-	public Item getItem() {
-        return item;
+	@Override
+    public String toString() {
+        return "Slot[" + item + ":" + amount + "]";
     }
 }

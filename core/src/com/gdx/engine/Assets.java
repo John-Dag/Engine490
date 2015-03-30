@@ -50,6 +50,8 @@ public class Assets {
 	public static Texture joystickKnob;
 	public static Texture cursor;
 	public static TextureRegion cursorRegion;
+	public static Texture healthPotion;
+	public static Texture manaPotion;
 	private static ParticleEffectLoader loader;
 	private static ParticleEffectLoadParameter loadParam;
 	public static String vertexShader;
@@ -88,6 +90,8 @@ public class Assets {
 		joystickBackground = new Texture("joystickBackground.png");
 		joystickKnob = new Texture("joystickKnob.png");
 		cursor = new Texture("cursor.png");
+		healthPotion = new Texture("Items/Item_HealthPotion.png");
+		manaPotion = new Texture("Items/mana.png");
 		//wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		loadShaders();
 	}
