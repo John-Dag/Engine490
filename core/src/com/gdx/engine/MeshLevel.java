@@ -50,14 +50,14 @@ import com.badlogic.gdx.utils.Array;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.EnemySpawner;
-import com.gdx.StaticEntities.HealthPot;
+import com.gdx.StaticEntities.HealthPowerUp;
 import com.gdx.StaticEntities.Light;
 import com.gdx.StaticEntities.Mist;
 import com.gdx.StaticEntities.Portal;
 import com.gdx.StaticEntities.PowerUp;
 import com.gdx.StaticEntities.PowerUpSpawner;
 import com.gdx.StaticEntities.RocketLauncherSpawn;
-import com.gdx.StaticEntities.SpeedBoost;
+import com.gdx.StaticEntities.SpeedPowerUp;
 import com.gdx.StaticEntities.SwordSpawn;
 import com.gdx.StaticEntities.Torch;
 import com.gdx.StaticEntities.WeaponSpawn;
@@ -1618,7 +1618,7 @@ public class MeshLevel {
 				if(GameScreen.mode == GameScreen.mode.Client) {
 					renderable = false;
 				}
-				SpeedBoost speedBoost = new SpeedBoost(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.speedBoost);
+				SpeedPowerUp speedBoost = new SpeedPowerUp(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.speedBoost);
 				PowerUpSpawner spawner = new PowerUpSpawner(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), speedBoost, world);
 				speedBoost.setSpawner(spawner);
 				powerUpInstances.add(speedBoost);
@@ -1636,7 +1636,7 @@ public class MeshLevel {
 				if(GameScreen.mode == GameScreen.mode.Client) {
 					renderable = false;
 				}
-				HealthPot healthPot = new HealthPot(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.healthPot);
+				HealthPowerUp healthPot = new HealthPowerUp(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.healthPot);
 				PowerUpSpawner spawner = new PowerUpSpawner(objPosition, 9, true, true, false, getSpawnTime(rectObj), getLightColor(rectObj), healthPot, world);
 				healthPot.setSpawner(spawner);
 				powerUpInstances.add(healthPot);

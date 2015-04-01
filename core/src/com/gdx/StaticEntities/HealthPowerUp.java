@@ -5,17 +5,17 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.engine.World;
 
-public class HealthPot extends PowerUp{
+public class HealthPowerUp extends PowerUp{
 	
 	private Model model;
 	private float duration;
 	private Vector3 xVec = new Vector3(1,0,0);
 	
-	public HealthPot () {
+	public HealthPowerUp () {
 		
 	}
 	
-	public HealthPot(Vector3 position, int id, boolean isActive, boolean isRenderable, Model model, float duration, powerUpTypeEnum type) {
+	public HealthPowerUp(Vector3 position, int id, boolean isActive, boolean isRenderable, Model model, float duration, powerUpTypeEnum type) {
 		super(position, id, isActive, isRenderable, model, duration, type);
 		this.model = model;
 		this.duration = duration;
@@ -35,7 +35,7 @@ public class HealthPot extends PowerUp{
 	
 	@Override
 	public PowerUp spawn() {
-		HealthPot healthPot = new HealthPot(this.getPosition().cpy(), 2, true, true, model, duration, powerUpTypeEnum.healthPot);
+		HealthPowerUp healthPot = new HealthPowerUp(this.getPosition().cpy(), 2, true, true, model, duration, powerUpTypeEnum.healthPot);
 		BoundingBox temp = new BoundingBox();
 		healthPot.getModel().calculateBoundingBox(temp);
 		healthPot.setBoundingBox(temp);
