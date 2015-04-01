@@ -2,7 +2,7 @@ package com.gdx.UI;
 
 import com.gdx.engine.World;
 
-public class UIConsoleCommand {
+public class UIConsoleCommand implements UIConsoleCommandI {
 	private String command;
 	private World world;
 	
@@ -10,10 +10,6 @@ public class UIConsoleCommand {
 		this.command = new String();
 		this.command = command;
 		this.setWorld(world);
-	}
-	
-	public void triggerCommand() {
-		
 	}
 
 	public String getCommand() {
@@ -30,5 +26,11 @@ public class UIConsoleCommand {
 
 	public void setWorld(World world) {
 		this.world = world;
+	}
+
+	@Override
+	public void triggerCommand() {
+		// TODO Auto-generated method stub
+		
 	}
 }

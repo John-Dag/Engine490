@@ -33,7 +33,7 @@ public class DistanceTrackerMap {
         defaultTileNumber = width * height * (totalLayers + 1);
     	tilesAlreadyChecked = new ArrayList<Integer>(width * height);
         //set default values in distance map
-        for (int fill = 0; fill < width * height - 1; fill++)
+        for (int fill = 0; fill < width * height; fill++)
             for (int fillTileLayers = 0; fillTileLayers < totalLayers; fillTileLayers++)
                 distanceMap[fill][fillTileLayers] = new DistanceFromPlayer(defaultTileNumber, defaultTileNumber, defaultTileNumber);
 
