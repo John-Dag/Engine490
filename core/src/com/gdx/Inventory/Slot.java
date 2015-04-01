@@ -1,18 +1,19 @@
 package com.gdx.Inventory;
 
+import Items.ItemBase;
 import com.badlogic.gdx.utils.Array;
 
 public class Slot {
-	private Item item;
+	private ItemBase item;
 	private int amount;
 	private Array<SlotListener> slotListeners = new Array<SlotListener>();
 	
-	public Slot (Item item, int amount) {
+	public Slot (ItemBase item, int amount) {
 		this.item = item;
 		this.amount = amount;
 	}
 	
-	public void add(Item item, int amount) {
+	public void add(ItemBase item, int amount) {
 		if (this.item == item || this.item == null) {
             this.item = item;
             this.amount += amount;
@@ -30,7 +31,7 @@ public class Slot {
 		}
 	}
 	
-	public Item getItem() {
+	public ItemBase getItem() {
 		return item;
 	}
 	

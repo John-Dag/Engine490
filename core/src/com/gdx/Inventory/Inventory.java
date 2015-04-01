@@ -1,5 +1,7 @@
 package com.gdx.Inventory;
 
+import Items.ItemBase;
+
 import com.badlogic.gdx.utils.Array;
 
 public class Inventory {
@@ -14,7 +16,7 @@ public class Inventory {
         
     }
     
-    public boolean store(Item item, int amount) {
+    public boolean store(ItemBase item, int amount) {
         Slot itemSlot = firstSlotWithItem(item);
         if (itemSlot != null) {
             itemSlot.add(item, amount);      
@@ -30,7 +32,7 @@ public class Inventory {
         return false;
     }
     
-    private Slot firstSlotWithItem(Item item) {
+    private Slot firstSlotWithItem(ItemBase item) {
         for (Slot slot : slots) {
             if (slot.getItem() == item) {
                 return slot;
