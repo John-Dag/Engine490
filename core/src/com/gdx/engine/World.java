@@ -44,6 +44,7 @@ import com.gdx.Network.Net;
 import com.gdx.Network.Net.CollisionPacket;
 import com.gdx.Network.NetClientEventManager;
 import com.gdx.Network.NetServer;
+import com.gdx.Network.NetServerEvent;
 import com.gdx.Network.Net.NewProjectile;
 import com.gdx.Network.Net.NewPlayer;
 import com.gdx.Network.Net.PlayerPacket;
@@ -383,6 +384,75 @@ public class World implements Disposable {
 			BoundingBox box = new BoundingBox();
 			getMeshLevel().getInstances().get(i).calculateBoundingBox(box);
 			getBoxes().add(box);
+		}
+	}
+
+	public void handleCollisionProjectileEnemy(int bulletId1, int bulletId2) {
+		Projectile projectile = null;
+		Enemy enemy = null;
+		
+		if (bulletId1 < Entity.entityInstances.size && bulletId2 < Entity.entityInstances.size) {
+			if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId1);
+				projectile.getBulletBody().setContactCallbackFilter(0);
+				projectile.setMoving(false);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId2);
+				projectile.getBulletBody().setContactCallbackFilter(0);
+				projectile.setMoving(false);
+			}
+			
+			if (Entity.entityInstances.get(bulletId1) instanceof Enemy) {
+				enemy = (Enemy)Entity.entityInstances.get(bulletId1);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Enemy) {
+				enemy = (Enemy)Entity.entityInstances.get(bulletId2);
+			}
+			
+			if (enemy != null && projectile != null) {
+				enemy.takeDamage(projectile.getDamage());
+				projectile.setMoving(false);
+			}
+		}
+	}
+	
+	public void handleCollisionProjectilePlayer(int bulletId1, int bulletId2) {
+		Projectile projectile = null;
+		Player player = null;
+		
+		if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
+			projectile = (Projectile)Entity.entityInstances.get(bulletId1);
+			projectile.getBulletBody().setContactCallbackFilter(0);
+			projectile.setMoving(false);
+		}
+		
+		else if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
+			projectile = (Projectile)Entity.entityInstances.get(bulletId2);
+			projectile.getBulletBody().setContactCallbackFilter(0);
+			projectile.setMoving(false);
+		}
+		
+		if (Entity.entityInstances.get(bulletId1) instanceof Player) {
+			player = (Player)Entity.entityInstances.get(bulletId1);
+		}
+		
+		else if (Entity.entityInstances.get(bulletId2) instanceof Player) {
+			player = (Player)Entity.entityInstances.get(bulletId2);
+		}
+		
+		if (player != null && projectile != null) {
+			System.out.println("Collision between player projectile");
+			if (GameScreen.mode == GameScreen.mode.Server) {
+				Net.CollisionPacket packet = new Net.CollisionPacket();
+				packet.playerOriginID = projectile.getOriginID();
+				packet.playerID = projectile.getNetId();
+				packet.damage = projectile.getDamage();
+				NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
+				World.serverEventManager.addNetEvent(event);
+			}
 		}
 	}
 	

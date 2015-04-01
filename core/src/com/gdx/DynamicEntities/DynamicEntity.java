@@ -27,7 +27,7 @@ public class DynamicEntity extends Entity {
 	private Vector3 position, rotation, scale, velocity, acceleration, angVelocity, angAccel;
 	private ModelInstance model;
 	private Decal decal;
-	private ParticleEffect particleEffect, collisionEffect;
+	private ParticleEffect particleEffect;
 	private boolean inCollision, isRendered, isAnimating;
 	private Quaternion rotationQuaternion;
 	private AnimationController animation;
@@ -370,6 +370,8 @@ public class DynamicEntity extends Entity {
 	}
 
 	public Weapon getWeapon() {
+		if (weapon == null)
+			return null;
 		return weapon;
 	}
 
@@ -508,5 +510,4 @@ public class DynamicEntity extends Entity {
 			this.model.userData=shader;
 		}
 	}
-	
 }

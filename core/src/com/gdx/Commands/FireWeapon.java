@@ -10,6 +10,7 @@ public class FireWeapon extends UIConsoleCommand {
 	
 	@Override
 	public void triggerCommand() {
-		this.getWorld().getPlayer().getWeapon().fireWeapon(this.getWorld());
+		if (this.getWorld().getPlayer().getWeapon() != null)
+			this.getWorld().getPlayer().getWeapon().fireWeapon(this.getWorld());
 	}
 }

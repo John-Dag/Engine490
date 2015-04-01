@@ -8,7 +8,7 @@ import com.esotericsoftware.kryonet.EndPoint;
 public class Net {
 	public static final int tcpPort = 54555;
 	public static final int udpPort = 54777;
-	public static String serverIP = "172.31.160.142";
+	public static String serverIP = "192.168.1.2";
 	public static String name = "Player";
 	public static String serverMessage = "Connected to Engine490 test server at ";
 	public static int writeBuffer = 256000;

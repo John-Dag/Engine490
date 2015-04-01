@@ -43,9 +43,9 @@ import com.gdx.engine.World;
 import com.gdx.engine.GameScreen.State;
 
 public class UIConsole extends UIBase {
+	public static final int ENTER = 13;
+	public static final int GRAVE = 96;
 	public static boolean isConsoleActive;
-	private final int ENTER = 13;
-	private final int GRAVE = 96;
 	private BitmapFont bitmapFont;
 	private Skin skin;
 	private TextField consoleInputField;

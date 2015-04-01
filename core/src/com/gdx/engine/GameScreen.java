@@ -123,7 +123,7 @@ public class GameScreen implements Screen {
 		screenInputProcessor = new WorldInputProcessor(world);
 		
 		console = new UIConsole(stage, world);
-		console.initializeConsoleWindow(null, 13, 96);
+		console.initializeConsoleWindow(null, UIConsole.ENTER, UIConsole.GRAVE);
 		console.initializeFilterEffects();
 		console.setWindowOpacity(0.5f);
 		
@@ -178,6 +178,8 @@ public class GameScreen implements Screen {
 		multiplexer.addProcessor(stage);
 		multiplexer.addProcessor(screenInputProcessor);
 		Gdx.input.setInputProcessor(multiplexer);
+		FireWeapon command = new FireWeapon("fireweapon", world);
+		console.getCommands().add(command);
 		uiGenerated = true;
 	}
 	
@@ -213,17 +215,15 @@ public class GameScreen implements Screen {
 		state = State.Running;
 		networkMenu.getTable().setVisible(false);
 		generateUI(world);
-		FireWeapon command = new FireWeapon("fireweapon", world);
-		console.getCommands().add(command);
 	}
 	
-	// TODO: HERE WE SET THE IP
+	// Set the IP in Net class
 	public void createNetworkMenu() {
 		form = new UIForm(stage, skin, "Name/IP");
 		form.generateWindow(center.x - 70, center.y + 60, 150, 150, false);
 		form.addTextField("Name", 0, 100, 150, 25);
 		//form.addTextField("192.168.0.6", 0, 50, 150, 25);
-		form.addTextField("172.31.160.41", 0, 50, 150, 25);
+		form.addTextField(Net.serverIP, 0, 50, 150, 25);
 		UIBase.uiSelected = true;
 
 		form.getFields().get(0).addListener(new ClickListener() {

@@ -586,60 +586,6 @@ public class Enemy extends DynamicEntity {
 		boundingBoxMaximum.set(this.getPosition().x + 1f, this.getPosition().y + 1f, this.getPosition().z + 1f);
 		return this.getBoundingBox().set(boundingBoxMinimum,boundingBoxMaximum);
 	}
-	
-
-	public static void handleCollisionA(int bulletId1, int bulletId2) {
-		Projectile projectile = null;
-		Enemy enemy = null;
-		Player player = null;
-		
-		if (bulletId1 < Entity.entityInstances.size && bulletId2 < Entity.entityInstances.size) {
-			if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
-				projectile = (Projectile)Entity.entityInstances.get(bulletId1);
-				projectile.getBulletBody().setContactCallbackFilter(0);
-				projectile.setMoving(false);
-			}
-			
-			else if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
-				projectile = (Projectile)Entity.entityInstances.get(bulletId2);
-				projectile.getBulletBody().setContactCallbackFilter(0);
-				projectile.setMoving(false);
-			}
-			
-			if (Entity.entityInstances.get(bulletId1) instanceof Enemy) {
-				enemy = (Enemy)Entity.entityInstances.get(bulletId1);
-			}
-			
-			else if (Entity.entityInstances.get(bulletId2) instanceof Enemy) {
-				enemy = (Enemy)Entity.entityInstances.get(bulletId2);
-			}
-			
-			if (Entity.entityInstances.get(bulletId1) instanceof Player) {
-				player = (Player)Entity.entityInstances.get(bulletId1);
-			}
-			
-			else if (Entity.entityInstances.get(bulletId2) instanceof Player) {
-				player = (Player)Entity.entityInstances.get(bulletId2);
-			}
-			
-			if (enemy != null && projectile != null) {
-				enemy.takeDamage(projectile.getDamage());
-				projectile.setMoving(false);
-			}
-			
-			else if (player != null && projectile != null) {
-				System.out.println("collided");
-				if (GameScreen.mode == GameScreen.mode.Server) {
-					Net.CollisionPacket packet = new Net.CollisionPacket();
-					packet.playerOriginID = projectile.getOriginID();
-					packet.playerID = projectile.getNetId();
-					packet.damage = projectile.getDamage();
-					NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
-					World.serverEventManager.addNetEvent(event);
-				}
-			}
-		}
-	}
 
 	public boolean isAttacking() {
 		return isAttacking;

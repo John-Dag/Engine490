@@ -33,8 +33,10 @@ public class NetClientEvent {
 			projectile.setNetId(packet.id);
 			//projectile.getMotionState().transform = projectile.calculateTarget(packet.cameraPos);
 			projectile.getBulletBody().setWorldTransform(projectile.calculateTarget(packet.cameraPos));
+			projectile.getBulletBody().activate();
 			Ray ray = new Ray(packet.rayOrigin, packet.rayDirection);
-			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(200f));
+			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(300f));
+			System.out.println("Origin: " + ray.origin + " Direction: " + ray.direction);
 			Entity.entityInstances.add(projectile);
 			World.dynamicsWorld.addRigidBody(projectile.getBulletBody());
 		}
@@ -59,12 +61,13 @@ public class NetClientEvent {
 			projectile.setPosition(position);
 			projectile.getBulletBody().activate();
 			Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+			projectile.setNetId(world.getClient().getId() + world.getNetIdCurrent());
+			world.getClient().sendProjectile(projectile, world.getClient().getId() + world.getNetIdCurrent(), ray);
+			world.setNetIdCurrent(world.getNetIdCurrent() + 1);
 			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(300f));
 			Entity.entityInstances.add(projectile);
 			World.dynamicsWorld.addRigidBody(projectile.getBulletBody());
-			projectile.setNetId(world.getClient().getId() + world.getNetIdCurrent());
-			world.getClient().sendProjectile(projectile, world.getClient().getId() + world.getNetIdCurrent());
-			world.setNetIdCurrent(world.getNetIdCurrent() + 1);
+			System.out.println("Client Origin: " + ray.origin + " Direction: " + ray.direction);
 		}
 	}
 	

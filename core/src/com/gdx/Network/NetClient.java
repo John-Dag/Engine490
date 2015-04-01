@@ -311,11 +311,10 @@ public class NetClient {
 		client.sendTCP(packet);
 	}
 	
-	public void sendProjectile(Projectile projectile, int id) {
+	public void sendProjectile(Projectile projectile, int id, Ray ray) {
 		Net.NewProjectile packet = new Net.NewProjectile();
 		packet.id = id;
 		packet.position = projectile.getPosition();
-		Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 		packet.rayDirection = ray.direction;
 		packet.rayOrigin = ray.origin;
 		packet.cameraPos = projectile.getPosition();

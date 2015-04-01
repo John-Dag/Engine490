@@ -49,7 +49,12 @@ public class ClientEvent {
 		
 		@Override
 		public void handleEvent(World world) {
-			Enemy.handleCollisionA(bulletId1, bulletId2);
+			if (GameScreen.mode == GameScreen.Mode.Client ||
+				GameScreen.mode == GameScreen.Mode.Offline)
+				world.handleCollisionProjectileEnemy(bulletId1, bulletId2);
+			else
+				world.handleCollisionProjectilePlayer(bulletId1, bulletId2);
+			
 			this.eventHandled = true;
 		}
 	}
