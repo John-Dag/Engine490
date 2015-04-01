@@ -1,8 +1,7 @@
 package com.gdx.Inventory;
 
-import Items.ItemBase;
-
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Items.ItemBase;
 
 public class Inventory {
 	private Array<Slot> slots;

@@ -3,8 +3,6 @@ package com.gdx.UI;
 import java.util.LinkedList;
 import java.util.List;
 
-import Items.HealthPotion;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -34,6 +32,7 @@ import com.gdx.Shaders.EntityRainbow;
 import com.gdx.Shaders.FireBallShader;
 import com.gdx.Shaders.LavaShader;
 import com.gdx.Inventory.Inventory;
+import com.gdx.Items.HealthPotion;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;

@@ -1,4 +1,4 @@
-package Items;
+package com.gdx.Items;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;

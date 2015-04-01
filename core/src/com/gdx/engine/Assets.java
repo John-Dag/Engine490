@@ -93,7 +93,7 @@ public class Assets {
 		cursor = new Texture("cursor.png");
 		healthPotion = new Texture("Items/healthpotion.png");
 		manaPotion = new Texture("Items/manapotion.png");
-		speedPotion = new Texture("Item/speedpotion.png");
+		speedPotion = new Texture("Items/speedpotion.png");
 		//wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		loadShaders();
 	}

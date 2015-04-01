@@ -1,4 +1,4 @@
-package Items;
+package com.gdx.Items;
 
 public interface Item {
 	

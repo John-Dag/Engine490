@@ -1,4 +1,4 @@
-package Items;
+package com.gdx.Items;
 
 import com.gdx.engine.Assets;
 import com.gdx.engine.World;

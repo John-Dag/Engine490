@@ -1,4 +1,4 @@
-package Items;
+package com.gdx.Items;
 
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
