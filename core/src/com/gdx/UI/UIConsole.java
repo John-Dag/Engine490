@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.badlogic.gdx.utils.Array;
 import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Weapon;
@@ -52,6 +53,7 @@ public class UIConsole extends UIBase {
 	private World world;
 	private List<FilterEffect> filterEffects = new LinkedList<FilterEffect>();
 	private int currentFilter = 0;
+	private Array<UIConsoleCommand> commands;
 	
 	public UIConsole(Stage stage, World world) {
 		super(stage);
@@ -60,13 +62,17 @@ public class UIConsole extends UIBase {
 		stage = new Stage();
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
 		this.world = world;
+		this.commands = new Array<UIConsoleCommand>();
 	}
 	
 	/***
-	 * Initializes the drop down console window. 
+	 * Initializes the console window
+	 * @param filter TextFieldFilter
+	 * @param processInputKey Key to trigger processing of console input
+	 * @param showConsoleKey Key to show/hide the console that is specified in the stages input listener.
 	 */
 	
-	public void initializeConsoleWindow() {
+	public void initializeConsoleWindow(TextFieldFilter filter, final int processInputKey, final int showConsoleKey) {
 		consoleVal = "";
 		this.setWindow(new Window("Console", skin));
 		this.getWindow().setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight() / 3);
@@ -79,7 +85,7 @@ public class UIConsole extends UIBase {
 		//Sends console commands to be parsed once the user hits enter
 		consoleInputField.setTextFieldListener(new TextFieldListener() {
 			public void keyTyped (TextField textField, char key) {
-				if (key == ENTER) { //Enter key ASCII value is 13
+				if (key == processInputKey) { //Enter key ASCII value is 13
 					consoleVal = consoleInputField.getText();
 					processConsoleInput(consoleVal);
 				}
@@ -87,17 +93,24 @@ public class UIConsole extends UIBase {
 		});
 		
 		//Filters keys that shouldn't be entered into the console textfield
-		consoleInputField.setTextFieldFilter(new TextFieldFilter() {
-			@Override
-			public boolean acceptChar(TextField textField, char c) {
-				if (c == GRAVE)
-					return false;
-				return true;
-			}
-		});
+		if (filter != null)
+			consoleInputField.setTextFieldFilter(filter);
+		else {
+			//Create a default filter
+			consoleInputField.setTextFieldFilter(new TextFieldFilter() {
+				@Override
+				public boolean acceptChar(TextField textField, char c) {
+					if (c == showConsoleKey)
+						return false;
+					return true;
+				}
+			});
+		}
 	}
 	
-	public void processConsoleInput(String value) {
+	private void processConsoleInput(String value) {
+		boolean customCommand = false;
+		
 		if (value.contentEquals("kill")) {
 			world.getPlayer().respawnPlayer(world.getPlayer());
 			System.out.println("Player killed");
@@ -270,9 +283,20 @@ public class UIConsole extends UIBase {
 			else
 				inv.store(new HealthPotion(), 1);
 		}
-	
-		else
-			System.err.println("Unknown command");
+		
+		else if (commands.size > 0) {
+			//Check all custom commands
+			for (int i = 0; i < commands.size; i++) {
+				if (commands.get(i) != null && value.toLowerCase().startsWith(commands.get(i).getCommand())) {
+					customCommand = true;
+					commands.get(i).triggerCommand();
+				}
+			}
+			
+			if (customCommand != true)
+				System.err.println("Unknown command");
+		}
+		
 		consoleVal = "";
 		consoleInputField.setText("");
 	}
@@ -380,5 +404,13 @@ public class UIConsole extends UIBase {
 			this.consoleInputField.setDisabled(true);
 			GameScreen.state = State.Running;
 		}
+	}
+
+	public Array<UIConsoleCommand> getCommands() {
+		return commands;
+	}
+
+	public void setCommands(Array<UIConsoleCommand> commands) {
+		this.commands = commands;
 	}
 }

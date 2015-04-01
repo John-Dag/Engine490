@@ -26,42 +26,22 @@ public class UIBase implements Screen {
 	    stage.draw();
 	}
 	
-	/***
-	 * Adds a keyDown input listener to show/hide an actor
-	 * @param key Specified key value
-	 * @param actorNumber Index of the actor that is attached to the stage
-	 */  
-	
-	public void addVisibleInputListener(final int key, final int actorIndex) {
-		final Stage stage = this.getStage();
-		
-		if (actorIndex > stage.getActors().size) {
-			System.err.println("addInputListener(): Actor index value out of range.");
-			return;
-		}
-		
-		this.getStage().addListener(new InputListener() {
-			public boolean keyDown(InputEvent event, int keyCode) {
-				if (keyCode == key && stage.getActors().get(actorIndex).isVisible() && 
-				    !stage.getActors().get(0).isVisible())
-					stage.getActors().get(actorIndex).setVisible(false);
-				else if (keyCode == key && !stage.getActors().get(actorIndex).isVisible() && 
-						 !stage.getActors().get(0).isVisible()) {
-					stage.getActors().get(actorIndex).setVisible(true);
-				}
-				
-				return true;
-			}
-		});
-	}
-	
-	public void setOpacity(float alpha) {
+	public void setWindowOpacity(float alpha) {
 		if (this.getWindow() == null)
 			return;
 		this.getWindow().setColor(this.getWindow().getColor().r,
 								  this.getWindow().getColor().g,
 								  this.getWindow().getColor().b,
 								  alpha);
+	}
+	
+	public void setActorOpacity(Actor actor, float alpha) {
+		if (actor == null)
+			return;
+		actor.setColor(actor.getColor().r,
+					   actor.getColor().g,
+					   actor.getColor().b,
+					   alpha);
 	}
 
 	@Override

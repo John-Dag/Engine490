@@ -27,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.gdx.Commands.FireWeapon;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetClient;
 import com.gdx.Network.NetServer;
@@ -122,9 +123,9 @@ public class GameScreen implements Screen {
 		screenInputProcessor = new WorldInputProcessor(world);
 		
 		console = new UIConsole(stage, world);
-		console.initializeConsoleWindow();
+		console.initializeConsoleWindow(null, 13, 96);
 		console.initializeFilterEffects();
-		console.setOpacity(0.5f);
+		console.setWindowOpacity(0.5f);
 		
 		base.setWorld(world);
 		Array<TextButton> buttons = new Array<TextButton>();
@@ -161,7 +162,7 @@ public class GameScreen implements Screen {
 		overlay.setCursorImage("cursor.png", 6, 3);
 		map = new UIMap(world, stage, spriteBatch, skin, Color.BLACK, 5, 5, 3, 0);
 		map.generateMap(world.getMeshLevel().getLevelArray(), world.getMeshLevel().getMapMaterials());
-		map.setOpacity(0.5f);
+		map.setWindowOpacity(0.5f);
 		TextureRegionDrawable barTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("barRed2.png"))));
 		ProgressBarStyle barStyle = new ProgressBarStyle(skin.newDrawable("white", Color.RED), barTexture);
 		ProgressBar bar = new ProgressBar(world.getPlayer().MIN_HEALTH, world.getPlayer().getHealth(), 1f, false, barStyle);
@@ -169,7 +170,7 @@ public class GameScreen implements Screen {
 		chat = new UIChat(stage, skin, "Chat");
 		chat.addChatWidget(300, 200, Gdx.graphics.getWidth() - chat.getWindow().getWidth(), 0, 0.9f);
 		chat.addChatWidgetListeners();
-		chat.setOpacity(0.8f);
+		chat.setWindowOpacity(0.8f);
 		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		//virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
@@ -212,6 +213,8 @@ public class GameScreen implements Screen {
 		state = State.Running;
 		networkMenu.getTable().setVisible(false);
 		generateUI(world);
+		FireWeapon command = new FireWeapon("fireweapon", world);
+		console.getCommands().add(command);
 	}
 	
 	// TODO: HERE WE SET THE IP
@@ -309,7 +312,7 @@ public class GameScreen implements Screen {
 			field.setColor(Color.TEAL);
 			statForm.addNetStatField(field, 0, 0, 300, 20);
 			statForm.getWindow().setVisible(false);
-			statForm.setOpacity(.5f);
+			statForm.setWindowOpacity(.5f);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

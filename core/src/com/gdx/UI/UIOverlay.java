@@ -30,7 +30,7 @@ public class UIOverlay extends UIBase {
 	/***
 	 * Adds a screen centered crosshair
 	 * @param crosshairTexture Texture to be displayed
-	 * @param center Center of the screen coords
+	 * @param center Coords for rendering the texture
 	 */
 	
 	public void addCrosshair(Texture crosshairTexture, Vector2 center) {
@@ -74,14 +74,14 @@ public class UIOverlay extends UIBase {
 		try {
 			if (knobBefore)
 				bar.getStyle().knobBefore = bar.getStyle().knob;
+			
+			bar.setValue(value);
+			this.getStage().addActor(bar);
+			bars.add(bar);
 		}
 		catch(Exception e) {
 			System.err.println(e);
 		}
-		
-		bar.setValue(value);
-		this.getStage().addActor(bar);
-		bars.add(bar);
 	}
 	
 	public void updateWidgets(float delta, int value1) {

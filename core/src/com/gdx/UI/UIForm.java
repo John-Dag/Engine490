@@ -49,12 +49,26 @@ public class UIForm extends UIBase {
 		}
 	}
 	
+	/***
+	 * Adds a NetStat field to the form window
+	 * @param field
+	 * @param posX
+	 * @param posY
+	 * @param width
+	 * @param height
+	 */
+	
 	public void addNetStatField(NetStatField field, float posX, float posY, int width, int height) {
-		field.setPosition(posX, posY);
-		field.setWidth(width);
-		field.setHeight(height);
-		statFields.add(field);
-		getWindow().addActor(field);
+		try {
+			field.setPosition(posX, posY);
+			field.setWidth(width);
+			field.setHeight(height);
+			statFields.add(field);
+			getWindow().addActor(field);
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 	
 	public Array<TextField> getFields() {
