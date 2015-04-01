@@ -1,15 +1,16 @@
-package com.gdx.Inventory;
+package com.gdx.Items;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.gdx.engine.Assets;
 
-// Extend this class to make your own items
-public class Item {
+// Extend this class to make your own items.
+public class ItemBase implements Item {
 	protected Texture texture;
 	protected String name;
 	
-	public Item() {
+	// Can be used to show an empty or null slot.
+	public ItemBase() {
 		this.texture =  Assets.gridslot;
 		this.name = "no item";
 	}

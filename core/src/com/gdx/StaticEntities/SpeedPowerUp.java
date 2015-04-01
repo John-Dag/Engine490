@@ -8,18 +8,18 @@ import com.badlogic.gdx.utils.Timer.Task;
 import com.gdx.engine.Assets;
 import com.gdx.engine.World;
 
-public class SpeedBoost extends PowerUp {
+public class SpeedPowerUp extends PowerUp {
 	private float duration; // Length of time power-up lasts (in seconds).
 	private final float SPEEDBOOST = 1.5f;
 	private final float DEFAULTSPEED = 1f;
 	private Model model;
 	
-	public SpeedBoost() {
+	public SpeedPowerUp() {
 		super();
 		duration = 10;
 	}
 	
-	public SpeedBoost(Vector3 position, int id, boolean isActive, boolean isRenderable, Model model, float duration, powerUpTypeEnum type) {
+	public SpeedPowerUp(Vector3 position, int id, boolean isActive, boolean isRenderable, Model model, float duration, powerUpTypeEnum type) {
 		super(position, id , isActive, isRenderable, model, duration, type);
 		this.duration = duration;
 		this.model = model;
@@ -46,7 +46,7 @@ public class SpeedBoost extends PowerUp {
 	// Need to change model to some sort of power-up.
 	@Override
 	public PowerUp spawn() {
-		SpeedBoost speedBoost = new SpeedBoost(this.getPosition().cpy(), 2, true, true, model, duration, powerUpTypeEnum.speedBoost);
+		SpeedPowerUp speedBoost = new SpeedPowerUp(this.getPosition().cpy(), 2, true, true, model, duration, powerUpTypeEnum.speedBoost);
 		BoundingBox temp = new BoundingBox();
 		speedBoost.getModel().calculateBoundingBox(temp);
 		speedBoost.setBoundingBox(temp);
