@@ -27,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Commands.FireWeapon;
+import com.gdx.Commands.ReconnectCommand;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetClient;
 import com.gdx.Network.NetServer;
@@ -178,6 +179,8 @@ public class GameScreen implements Screen {
 		Gdx.input.setInputProcessor(multiplexer);
 		FireWeapon command = new FireWeapon("fireweapon", world);
 		console.getCommands().add(command);
+		ReconnectCommand commandB = new ReconnectCommand("reconnect", world);
+		console.getCommands().add(commandB);
 		uiGenerated = true;
 	}
 	

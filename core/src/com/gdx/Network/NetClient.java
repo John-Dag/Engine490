@@ -39,7 +39,6 @@ public class NetClient {
 			client.start();
 		    Net.register(client);
 		    connectClientToServer();
-		    createPlayerOnServer();
 		    setId(client.getID());
 		}
 		catch (Exception e) {
@@ -70,11 +69,16 @@ public class NetClient {
 			@Override
 			public void connected(Connection connection) {
 				serverConnect(connection);
+			    createPlayerOnServer();
 			}
 			
 			@Override
 			public void disconnected(Connection connection) {
+				Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
+				packet.message = "Connection to server lost";
+				world.getClient().addChatMessage(packet);
 				serverDisconnect(connection);
+				removeAllStatFields();
 			}
 			
 			@Override
@@ -290,6 +294,24 @@ public class NetClient {
 		}
 	}
 	
+	public void removeAllStatFields() {
+		for (int i = 0; i < screen.getStatForm().getStatFields().size; i++) {
+			NetStatField field = screen.getStatForm().getStatFields().get(i);
+			
+			if (field.getPlayerID() == world.getPlayer().getNetId()) {
+				field.setPlayerName(world.getPlayer().getNetName());
+				field.setKills(0);
+				field.setDeaths(0);
+				field.setStats(field.getPlayerName() + "                 K: " + 0 + "                 D: " + 0);
+				field.setText(field.getStats());
+			}
+			else {
+				field.setVisible(false);
+				screen.getStatForm().getStatFields().removeIndex(i);
+			}
+		}
+	}
+	
 	public Array<NetStatField> sortPlayerStatFields() {
 		Array<NetStatField> fields = new Array<NetStatField>(); 
 		Sort.instance().sort(screen.getStatForm().getStatFields(), comparator);
@@ -315,7 +337,7 @@ public class NetClient {
 		packet.rayDirection = ray.direction;
 		packet.rayOrigin = ray.origin;
 		packet.cameraPos = projectile.getPosition();
-		packet.originID = this.getId();
+		packet.originID = this.getClient().getID();
 		client.sendTCP(packet);
 	}
 	
