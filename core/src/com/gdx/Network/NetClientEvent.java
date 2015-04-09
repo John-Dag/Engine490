@@ -7,7 +7,6 @@ import com.gdx.DynamicEntities.Projectile;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.engine.Entity;
 import com.gdx.engine.World;
-import com.badlogic.gdx.math.Vector3;
 
 public class NetClientEvent {
 	public NetClientEvent() {
@@ -25,18 +24,15 @@ public class NetClientEvent {
 		public void handleEvent(World world) {
 			Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 			projectile.reset();
-			projectile.setProjectileSpeed(20f);
 			projectile.setDamage(RocketLauncher.DAMAGE);
 			projectile.setPosition(packet.position);
-			projectile.setVelocity(packet.cameraPos);
-			projectile.setAcceleration(packet.cameraPos);
 			projectile.setNetId(packet.id);
-			//projectile.getMotionState().transform = projectile.calculateTarget(packet.cameraPos);
 			projectile.getBulletBody().setWorldTransform(projectile.calculateTarget(packet.cameraPos));
+			projectile.getBulletBody().setContactCallbackFilter(World.PLAYER_FLAG);
 			projectile.getBulletBody().activate();
 			Ray ray = new Ray(packet.rayOrigin, packet.rayDirection);
-			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(300f));
-			System.out.println("Origin: " + ray.origin + " Direction: " + ray.direction);
+			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(RocketLauncher.PROJECTILE_SCALAR));
+			//System.out.println("Origin: " + ray.origin + " Direction: " + ray.direction);
 			Entity.entityInstances.add(projectile);
 			World.dynamicsWorld.addRigidBody(projectile.getBulletBody());
 		}
@@ -53,21 +49,18 @@ public class NetClientEvent {
 		public void handleEvent(World world) {
 			Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 			projectile.reset();
-			projectile.setProjectileSpeed(world.getPlayer().getWeapon().getProjectileSpeed());
 			projectile.setDamage(RocketLauncher.DAMAGE);
 			projectile.setPlayerProjectile(true);
-			projectile.setDealtDamage(false);
-			projectile.setIsActive(true);
-			projectile.setPosition(position);
+			projectile.getBulletBody().setContactCallbackFilter(World.PLAYER_FLAG);
 			projectile.getBulletBody().activate();
 			Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 			projectile.setNetId(world.getClient().getId() + world.getNetIdCurrent());
 			world.getClient().sendProjectile(projectile, world.getClient().getId() + world.getNetIdCurrent(), ray);
 			world.setNetIdCurrent(world.getNetIdCurrent() + 1);
-			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(300f));
+			projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(RocketLauncher.PROJECTILE_SCALAR));
 			Entity.entityInstances.add(projectile);
 			World.dynamicsWorld.addRigidBody(projectile.getBulletBody());
-			System.out.println("Client Origin: " + ray.origin + " Direction: " + ray.direction);
+			//System.out.println("Client Origin: " + ray.origin + " Direction: " + ray.direction);
 		}
 	}
 	

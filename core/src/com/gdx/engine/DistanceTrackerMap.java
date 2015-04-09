@@ -1,11 +1,8 @@
 package com.gdx.engine;
 
-import com.badlogic.gdx.maps.tiled.TiledMapTile;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.gdx.DynamicEntities.Enemy;
 
-import javax.management.BadAttributeValueExpException;
 import java.util.*;
 
 /**

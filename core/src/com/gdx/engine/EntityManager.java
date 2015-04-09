@@ -1,11 +1,7 @@
 package com.gdx.engine;
 
-import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.badlogic.gdx.utils.Pools;
-import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Explosion;
 import com.gdx.DynamicEntities.Projectile;
 
@@ -50,7 +46,7 @@ public class EntityManager {
 	}
 	
 	public static class ExplosionPool extends Pool<Explosion> {
-		private Explosion explosion;
+		public Explosion explosion;
 		
 		public ExplosionPool(Explosion explosion) {
 			this.explosion = explosion;

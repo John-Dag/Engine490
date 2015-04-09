@@ -1,9 +1,5 @@
 package com.gdx.engine;
 
-import java.lang.Object;
-import java.util.*;
-
-import java.nio.FloatBuffer;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +23,6 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -39,15 +34,11 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
-import com.badlogic.gdx.physics.bullet.collision.btBvhTriangleMeshShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
 import com.badlogic.gdx.physics.bullet.collision.btStaticPlaneShape;
-import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
-import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
-import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Enemies.Zombie;
 import com.gdx.StaticEntities.EnemySpawner;
 import com.gdx.StaticEntities.HealthPot;
@@ -274,24 +265,23 @@ public class MeshLevel {
 		bulletUnitRampShapeUp.addPoint(new Vector3(1,1,0));
 		bulletUnitRampShapeUp.addPoint(new Vector3(0,0,0));
 		
-
-			bulletUnitRampShapeDown=new btConvexHullShape();
-			bulletUnitRampShapeDown.addPoint(new Vector3(0,1,1));
-			bulletUnitRampShapeDown.addPoint(new Vector3(1,0,1));
-			bulletUnitRampShapeDown.addPoint(new Vector3(1,0,0));
-			bulletUnitRampShapeDown.addPoint(new Vector3(0,1,0));
-			
-			bulletUnitRampShapeLeft=new btConvexHullShape();
-			bulletUnitRampShapeLeft.addPoint(new Vector3(0,0,1));
-			bulletUnitRampShapeLeft.addPoint(new Vector3(1,0,1));
-			bulletUnitRampShapeLeft.addPoint(new Vector3(1,1,0));
-			bulletUnitRampShapeLeft.addPoint(new Vector3(0,1,0));
-			
-			bulletUnitRampShapeRight=new btConvexHullShape();
-			bulletUnitRampShapeRight.addPoint(new Vector3(0,1,1));
-			bulletUnitRampShapeRight.addPoint(new Vector3(1,1,1));
-			bulletUnitRampShapeRight.addPoint(new Vector3(1,0,0));
-			bulletUnitRampShapeRight.addPoint(new Vector3(0,0,0));
+		bulletUnitRampShapeDown=new btConvexHullShape();
+		bulletUnitRampShapeDown.addPoint(new Vector3(0,1,1));
+		bulletUnitRampShapeDown.addPoint(new Vector3(1,0,1));
+		bulletUnitRampShapeDown.addPoint(new Vector3(1,0,0));
+		bulletUnitRampShapeDown.addPoint(new Vector3(0,1,0));
+		
+		bulletUnitRampShapeLeft=new btConvexHullShape();
+		bulletUnitRampShapeLeft.addPoint(new Vector3(0,0,1));
+		bulletUnitRampShapeLeft.addPoint(new Vector3(1,0,1));
+		bulletUnitRampShapeLeft.addPoint(new Vector3(1,1,0));
+		bulletUnitRampShapeLeft.addPoint(new Vector3(0,1,0));
+		
+		bulletUnitRampShapeRight=new btConvexHullShape();
+		bulletUnitRampShapeRight.addPoint(new Vector3(0,1,1));
+		bulletUnitRampShapeRight.addPoint(new Vector3(1,1,1));
+		bulletUnitRampShapeRight.addPoint(new Vector3(1,0,0));
+		bulletUnitRampShapeRight.addPoint(new Vector3(0,0,0));
 		
 		bulletObjects=new Array<btCollisionObject>(); 
 	}
@@ -303,7 +293,7 @@ public class MeshLevel {
 			//World.dynamicsWorld.addRigidBody((btRigidBody)bulletObject);
 			World.dynamicsWorld.addCollisionObject(bulletObject);
 		}
-		System.out.println(bulletObjects.size + "level bullet objects added to dynamic sim");
+		System.out.println(bulletObjects.size + " Mesh level bullet objects added to dynamic sim");
 		bulletObjects.clear();
 	}
 	
@@ -1580,7 +1570,7 @@ public class MeshLevel {
 				//Note: Here I set is renderable to false.
 				// need to send the newWeapon packet to the player in order to set it to true for client
 				boolean renderable = true;
-				if(GameScreen.mode == GameScreen.mode.Client) {
+				if(GameScreen.mode == GameScreen.Mode.Client) {
 					renderable = false;
 				}
 				RocketLauncherSpawn launcherSpawn = new RocketLauncherSpawn(objPosition, 8, true, renderable, Assets.manager.get("GUNFBX.g3db", Model.class), weaponSpawnTypeEnum.rocketLauncher);
@@ -1597,7 +1587,7 @@ public class MeshLevel {
 				//Note: Here I set is renderable to false.
 				// need to send the newWeapon packet to the player in order to set it to true for client
 				boolean renderable = true;
-				if(GameScreen.mode == GameScreen.mode.Client) {
+				if(GameScreen.mode == GameScreen.Mode.Client) {
 					renderable = false;
 				}
 				SwordSpawn swordSpawn = new SwordSpawn(objPosition, 8, true, renderable, Assets.manager.get("sword2.g3db", Model.class), weaponSpawnTypeEnum.sword);
@@ -1615,7 +1605,7 @@ public class MeshLevel {
 				//Note: Here I set is renderable to false.
 				// need to send the newPowerUp packet to the player in order to set it to true for client
 				boolean renderable = true;
-				if(GameScreen.mode == GameScreen.mode.Client) {
+				if(GameScreen.mode == GameScreen.Mode.Client) {
 					renderable = false;
 				}
 				SpeedBoost speedBoost = new SpeedBoost(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.speedBoost);
@@ -1633,7 +1623,7 @@ public class MeshLevel {
 				//Note: Here I set is renderable to false if client, true if server.
 				// need to send the newPowerUp packet to the player in order to set it to true for client
 				boolean renderable = true;
-				if(GameScreen.mode == GameScreen.mode.Client) {
+				if(GameScreen.mode == GameScreen.Mode.Client) {
 					renderable = false;
 				}
 				HealthPot healthPot = new HealthPot(objPosition, 9, true, renderable, Assets.manager.get("FireFlower.g3db", Model.class), duration, powerUpTypeEnum.healthPot);
@@ -1654,7 +1644,7 @@ public class MeshLevel {
 			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight();
 			Vector3 objPosition = new Vector3(yPos+0.5f, height+0.5f, xPos+0.5f);
 			boolean renderable = false;
-			if(GameScreen.mode == GameScreen.mode.Server) {
+			if(GameScreen.mode == GameScreen.Mode.Server) {
 				renderable = true;
 			}
 			RocketLauncherSpawn launcherSpawn = new RocketLauncherSpawn(objPosition, 8, true, renderable, Assets.manager.get("GUNFBX.g3db", Model.class), weaponSpawnTypeEnum.rocketLauncher);
@@ -1670,7 +1660,7 @@ public class MeshLevel {
 			int height = levelArray[xPos][yPos][currentLayerNumber].getHeight();
 			Vector3 objPosition = new Vector3(yPos+0.5f, height+0.5f, xPos+0.5f);
 			boolean renderable = false;
-			if(GameScreen.mode == GameScreen.mode.Server) {
+			if(GameScreen.mode == GameScreen.Mode.Server) {
 				renderable = true;
 			}
 			SwordSpawn swordSpawn = new SwordSpawn(objPosition, 8, true, renderable, Assets.manager.get("sword2.g3db", Model.class), weaponSpawnTypeEnum.sword);

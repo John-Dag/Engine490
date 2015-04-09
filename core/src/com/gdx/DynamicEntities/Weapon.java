@@ -13,10 +13,8 @@ public class Weapon extends DynamicEntity {
 	protected int damage;
 	private boolean isParticleWeapon, isPickedup;
 	private WeaponSpawner spawnerRef;
-	private static int weaponCount = 0;
 	private int uniqueId;
 	private weaponTypeEnum weaponType;
-
 	
 	public enum weaponTypeEnum{
 		rocketLauncher, sword

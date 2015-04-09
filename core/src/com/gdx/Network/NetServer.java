@@ -1,18 +1,14 @@
 package com.gdx.Network;
 
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net.PlayerPacket;
-import com.gdx.Network.Net.StatPacket;
 import com.gdx.StaticEntities.PowerUp;
 import com.gdx.StaticEntities.WeaponSpawn;
-import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
 public class NetServer {

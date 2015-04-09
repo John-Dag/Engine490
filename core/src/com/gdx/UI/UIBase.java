@@ -2,12 +2,8 @@ package com.gdx.UI;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.gdx.Network.NetClient;
-import com.gdx.Network.NetWorld;
 import com.gdx.engine.World;
 
 public class UIBase implements Screen {

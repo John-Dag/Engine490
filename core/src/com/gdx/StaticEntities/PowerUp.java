@@ -36,7 +36,7 @@ public class PowerUp extends StaticEntity {
 	@Override
 	public void update(float delta, World world) {
 		if (this.getModel() != null && this.isRenderable() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox())) {
-			if (GameScreen.mode == GameScreen.mode.Offline){
+			if (GameScreen.mode == GameScreen.Mode.Offline){
 				this.setIsRenderable(false);
 				effect();
 				if(powerUpSpawner != null) {
@@ -51,7 +51,7 @@ public class PowerUp extends StaticEntity {
 				System.out.println("Send PowerUpConsumed message to server");
 				if (world.getClient() != null) {
 					Net.PowerUpConsumedPacket packet = new Net.PowerUpConsumedPacket();
-					packet.playerId = world.player.getNetId();
+					packet.playerId = world.getPlayer().getNetId();
 					packet.powerUpEntityId = this.getUniqueId();
 					NetClientEvent.PowerUpConsumed event = new NetClientEvent.PowerUpConsumed(packet);
 					world.getNetEventManager().addNetEvent(event);

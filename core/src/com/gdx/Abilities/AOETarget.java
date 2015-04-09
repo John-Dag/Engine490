@@ -11,7 +11,6 @@ import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.gdx.DynamicEntities.Ability;
-import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
 public class AOETarget extends Ability {

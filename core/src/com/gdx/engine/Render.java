@@ -16,17 +16,13 @@ import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.DebugDrawer;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.utils.Disposable;
 import com.gdx.DynamicEntities.Player;
-import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.Shaders.WiznerdShaderProvider;
 
 public class Render implements Disposable {
@@ -177,27 +173,28 @@ public class Render implements Disposable {
 		if(world.bulletDebugDrawEnabled){
 		debugDrawer.begin(world.getPlayer().camera);
 		Vector3 wireColorToUse=wireColor;
-		for(int i=0;i<world.dynamicsWorld.getCollisionObjectArray().size();i++)
+		for (int i = 0; i < world.dynamicsWorld.getCollisionObjectArray().size(); i++)
 		{
 			wireColorToUse=wireColor;
 			//if(!world.bulletDebugDrawMeshLevelWiresEnabled)
 			{
-				if(world.dynamicsWorld.getCollisionObjectArray().at(i).userData!=null&&(Integer)world.dynamicsWorld.getCollisionObjectArray().at(i).userData==1)
-					if(!world.bulletDebugDrawMeshLevelWiresEnabled)
+				if (world.dynamicsWorld.getCollisionObjectArray().at(i).userData != null && 
+				   (Integer)world.dynamicsWorld.getCollisionObjectArray().at(i).userData == 1)
+					if (!world.bulletDebugDrawMeshLevelWiresEnabled)
 						continue;
 					else
 						wireColorToUse=levelWireColor;
 			}
 			world.dynamicsWorld.getCollisionObjectArray().at(i).getWorldTransform().getTranslation(dst);
 			
-			if(dst.dst(world.player.getPosition())>10)
+			if(dst.dst(world.player.getPosition()) > 10)
 					continue;
 			world.dynamicsWorld.debugDrawObject(world.dynamicsWorld.getCollisionObjectArray().at(i).getWorldTransform(), world.dynamicsWorld.getCollisionObjectArray().at(i).getCollisionShape(),wireColorToUse);
 		}
 		debugDrawer.end();
 		}
 		
-		if(filterEffect!=null) {
+		if (filterEffect!=null) {
 			filterEffect.getFilterEffectBuffer().end();
 			filterEffect.getFilterEffectBuffer().getColorBufferTexture().bind(0);
 			filterEffect.begin();

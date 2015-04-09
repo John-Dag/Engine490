@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetClientEvent;
-import com.gdx.StaticEntities.PowerUp.powerUpTypeEnum;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 

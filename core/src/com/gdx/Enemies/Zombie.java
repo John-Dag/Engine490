@@ -27,6 +27,7 @@ public class Zombie extends Enemy {
 		box.set(new Vector3(this.getPosition().x - 1, this.getPosition().y - 1, this.getPosition().z - 1),
 			    new Vector3(this.getPosition().x + 1, this.getPosition().y + 1, this.getPosition().z + 1));
 		this.getBoundingBox().set(box);
+		this.initializeBulletObject(new Vector3(0.5f, 0.5f, 0.5f), World.ENEMY_FLAG);
 	}
 	
 	@Override

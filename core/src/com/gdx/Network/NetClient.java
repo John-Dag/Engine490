@@ -2,8 +2,6 @@ package com.gdx.Network;
 
 import java.io.IOException;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Client;
@@ -12,7 +10,6 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
-import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.StaticEntities.PowerUp;
 import com.gdx.StaticEntities.WeaponSpawn;
