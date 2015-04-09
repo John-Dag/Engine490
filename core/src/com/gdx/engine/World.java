@@ -422,12 +422,14 @@ public class World implements Disposable {
 				projectile = (Projectile)Entity.entityInstances.get(bulletId2);
 			}
 			
-			if (playerInstances.get(bulletId1) instanceof Player) {
-				player = playerInstances.get(bulletId1);
-			}
-			
-			else if (playerInstances.get(bulletId2) instanceof Player) {
-				player = playerInstances.get(bulletId2);
+			if (bulletId1 < playerInstances.size || bulletId2 < playerInstances.size) {
+				if (playerInstances.get(bulletId1) instanceof Player) {
+					player = playerInstances.get(bulletId1);
+				}
+				
+				else if (playerInstances.get(bulletId2) instanceof Player) {
+					player = playerInstances.get(bulletId2);
+				}
 			}
 			
 			if (player != null && projectile != null && projectile.getOriginID() != player.getNetId()) {
