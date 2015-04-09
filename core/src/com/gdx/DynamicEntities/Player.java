@@ -262,7 +262,7 @@ public class Player extends DynamicEntity {
 	public void handleInput(float delta) {
 		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT) && !this.isPlayerTargeting) {
-			//Gdx.input.setCursorCatched(true); // I moved this input to the WorldInputProcessor for use with the multiplexer.
+			Gdx.input.setCursorCatched(true); // I moved this input to the WorldInputProcessor for use with the multiplexer.
 												// Left it commented in case I screwed something up. - Matt
 		}
 		

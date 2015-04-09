@@ -90,10 +90,10 @@ public class WorldInputProcessor implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		if(button == Input.Buttons.RIGHT) {
-			world.getPlayer().catchCursor();
-			return true;
-		}
+//		if(button == Input.Buttons.RIGHT) {
+//			world.getPlayer().catchCursor();
+//			return true;
+//		}
 		return false;
 	}
 
