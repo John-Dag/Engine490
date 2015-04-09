@@ -444,9 +444,11 @@ public class World implements Disposable {
 					packet.projectileID = projectile.getNetId();
 					packet.damage = projectile.getDamage();
 					packet.position = new Vector3();
-					packet.position.set(projectile.getBulletBody().getWorldTransform().getTranslation(new Vector3()));
-					NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
-					World.serverEventManager.addNetEvent(event);
+					if (projectile.getBulletBody() != null) {
+						packet.position.set(projectile.getBulletBody().getWorldTransform().getTranslation(new Vector3()));
+						NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
+						World.serverEventManager.addNetEvent(event);
+					}
 				}
 			}
 		}
