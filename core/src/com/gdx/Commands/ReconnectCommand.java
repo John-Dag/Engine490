@@ -21,6 +21,7 @@ public class ReconnectCommand extends UIConsoleCommand {
 			if (!this.getWorld().getClient().getClient().isConnected()) {
 				this.getWorld().playerInstances.clear();
 				this.getWorld().getClient().getClient().reconnect();
+				this.getWorld().getClient().createPlayerOnServer();
 			}
 			else {
 				System.err.println("Already connected to a host");

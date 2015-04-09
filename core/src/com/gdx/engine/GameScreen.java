@@ -306,12 +306,6 @@ public class GameScreen implements Screen {
 			world.setClient(client);
 			statForm = new UIForm(stage, skin, "Stats");
 			statForm.generateWindow(center.x  / 2, center.y + 300, 300, 40, true);
-			NetStatField field = new NetStatField("", skin);
-			field.setText(Net.name + "                  " + 
-			                     0 + "                  " + 0);
-			field.setPlayerID(client.getId());
-			field.setColor(Color.TEAL);
-			statForm.addNetStatField(field, 0, 0, 300, 20);
 			statForm.getWindow().setVisible(false);
 			statForm.setWindowOpacity(.5f);
 		} catch (IOException e) {

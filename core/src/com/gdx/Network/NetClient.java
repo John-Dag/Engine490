@@ -2,6 +2,7 @@ package com.gdx.Network;
 
 import java.io.IOException;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
 import com.esotericsoftware.kryonet.Client;
@@ -40,6 +41,7 @@ public class NetClient {
 		    Net.register(client);
 		    connectClientToServer();
 		    setId(client.getID());
+		    createPlayerOnServer();
 		}
 		catch (Exception e) {
 			System.err.println(e);
@@ -55,7 +57,7 @@ public class NetClient {
 		}
 	}
 	
-	private void createPlayerOnServer() {
+	public void createPlayerOnServer() {
 		Net.NewPlayer packet = new Net.NewPlayer();
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
@@ -69,7 +71,6 @@ public class NetClient {
 			@Override
 			public void connected(Connection connection) {
 				serverConnect(connection);
-			    createPlayerOnServer();
 			}
 			
 			@Override
@@ -108,7 +109,8 @@ public class NetClient {
         else if (object instanceof Net.NewPlayer) {
        	   Net.NewPlayer packet = (Net.NewPlayer)object;
        	   createPlayerStatField(packet);
-       	   world.getNetEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
+       	   if (packet.id != this.getClient().getID())
+       		   world.getNetEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
         }
         
         else if (object instanceof Net.PlayerDisconnect) {
@@ -138,7 +140,7 @@ public class NetClient {
         
         else if (object instanceof Net.StatPacket) {
         	Net.StatPacket packet = (Net.StatPacket)object;
-        	updateNetStats(packet);
+        	world.getNetEventManager().addNetEvent(new NetClientEvent.UpdateNetStats(packet));
         }
         
         else if (object instanceof Net.PowerUpConsumedPacket) {
@@ -196,6 +198,8 @@ public class NetClient {
 	
 	public void createPlayerStatField(Net.NewPlayer packet) {
 		NetStatField field = new NetStatField("", GameScreen.skin);
+		if (packet.id == this.getClient().getID())
+			field.setColor(Color.TEAL);
 		field.setPlayerName(packet.name);
 		field.setStats(field.getPlayerName() + "                 K: " + 0 + "                 D: " + 0);
 		field.setText(field.getStats());
@@ -295,21 +299,9 @@ public class NetClient {
 	}
 	
 	public void removeAllStatFields() {
-		for (int i = 0; i < screen.getStatForm().getStatFields().size; i++) {
-			NetStatField field = screen.getStatForm().getStatFields().get(i);
-			
-			if (field.getPlayerID() == world.getPlayer().getNetId()) {
-				field.setPlayerName(world.getPlayer().getNetName());
-				field.setKills(0);
-				field.setDeaths(0);
-				field.setStats(field.getPlayerName() + "                 K: " + 0 + "                 D: " + 0);
-				field.setText(field.getStats());
-			}
-			else {
-				field.setVisible(false);
-				screen.getStatForm().getStatFields().removeIndex(i);
-			}
-		}
+		screen.getStatForm().getWindow().clear();
+		screen.getStatForm().getFields().clear();
+		screen.getStatForm().getStatFields().clear();
 	}
 	
 	public Array<NetStatField> sortPlayerStatFields() {

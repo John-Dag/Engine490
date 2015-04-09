@@ -170,4 +170,17 @@ public class NetClientEvent {
 			world.getClient().sendWeaponPickedUpUpdate(this.packet);
 		}
 	}
+	
+	public static class UpdateNetStats extends NetClientEvent {
+		public Net.StatPacket packet;
+		
+		public UpdateNetStats(Net.StatPacket packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+			world.getClient().updateNetStats(this.packet);
+		}
+	}
 }

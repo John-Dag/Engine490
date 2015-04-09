@@ -90,7 +90,7 @@ public class NetServer {
     		NetServerEvent.NewPlayer event = new NetServerEvent.NewPlayer(packet);
     		world.getServerEventManager().addNetEvent(event);
     		NetStat stat = new NetStat(packet.id, packet.name);
-    		//netStatManager.getStats().add(stat);
+    		netStatManager.getStats().add(stat);
     	}
     	
     	else if (object instanceof Net.NewProjectile) {
@@ -259,7 +259,7 @@ public class NetServer {
 		String message = Net.serverMessage + " " + Net.serverIP + "\nActive connections: " + server.getConnections().length;
 		
 		world.addPlayer(packet);
-		server.sendToAllExceptTCP(packet.id, packet);
+		server.sendToAllTCP(packet);
 		sendAllPlayers(packet.id);
 		sendServerMessage(message, packet.id);
 		String joinedMessage = packet.name + " joined.";
