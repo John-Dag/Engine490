@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.gdx.DynamicEntities.Player;
@@ -25,7 +26,7 @@ public class NetWorld extends World {
 		player = new Player(this, 100, null, 2, true, true, startVector, new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 							new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 		setPlayer(player);
-		playerInstances.add(player);
+		//playerInstances.add(player);
 		particleManager = new ParticleManager(this);
 		player.initAbilities();
 		player.initWeapons();
@@ -165,6 +166,8 @@ public class NetWorld extends World {
 			if (entity instanceof Projectile) {
 				Projectile projectile = (Projectile)entity;
 				if (projectile.getNetId() == packet.projectileID) {
+					Matrix4 temp = new Matrix4();
+					projectile.setTarget(temp.translate(packet.position));
 					projectile.setMoving(false);
 				}
 			}
