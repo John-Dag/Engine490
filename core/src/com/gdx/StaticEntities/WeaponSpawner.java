@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
-import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetServerEvent;
 import com.gdx.engine.Entity;

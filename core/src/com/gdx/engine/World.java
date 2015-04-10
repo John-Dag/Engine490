@@ -4,23 +4,19 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.physics.bullet.DebugDrawer;
 import com.badlogic.gdx.physics.bullet.collision.CollisionObjectWrapper;
 import com.badlogic.gdx.physics.bullet.collision.btBroadphaseInterface;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionAlgorithm;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionWorld;
 import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btDispatcher;
@@ -30,10 +26,8 @@ import com.badlogic.gdx.physics.bullet.dynamics.btConstraintSolver;
 import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
-import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-//import com.esotericsoftware.kryonet.Client;
 import com.gdx.DynamicEntities.Ability;
 import com.gdx.DynamicEntities.DynamicEntity;
 import com.gdx.DynamicEntities.Player;
@@ -51,10 +45,6 @@ import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.Network.Net.ProjectilePacket;
 import com.gdx.Network.NetClient;
 import com.gdx.Network.NetServerEventManager;
-import com.gdx.Shaders.ColorMultiplierEntityShader;
-import com.gdx.Weapons.RocketLauncher;
-
-import java.util.ArrayList;
 
 public class World implements Disposable {
 	public static final float PLAYER_SIZE = 0.2f;
@@ -423,35 +413,43 @@ public class World implements Disposable {
 		Projectile projectile = null;
 		Player player = null;
 		
-		if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
-			projectile = (Projectile)Entity.entityInstances.get(bulletId1);
-			projectile.getBulletBody().setContactCallbackFilter(0);
-			projectile.setMoving(false);
-		}
-		
-		else if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
-			projectile = (Projectile)Entity.entityInstances.get(bulletId2);
-			projectile.getBulletBody().setContactCallbackFilter(0);
-			projectile.setMoving(false);
-		}
-		
-		if (Entity.entityInstances.get(bulletId1) instanceof Player) {
-			player = (Player)Entity.entityInstances.get(bulletId1);
-		}
-		
-		else if (Entity.entityInstances.get(bulletId2) instanceof Player) {
-			player = (Player)Entity.entityInstances.get(bulletId2);
-		}
-		
-		if (player != null && projectile != null) {
-			System.out.println("Collision between player projectile");
-			if (GameScreen.mode == GameScreen.mode.Server) {
-				Net.CollisionPacket packet = new Net.CollisionPacket();
-				packet.playerOriginID = projectile.getOriginID();
-				packet.playerID = projectile.getNetId();
-				packet.damage = projectile.getDamage();
-				NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
-				World.serverEventManager.addNetEvent(event);
+		if ((bulletId1 < Entity.entityInstances.size && bulletId2 < Entity.entityInstances.size)) {
+			if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId1);
+			}
+			
+			else if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId2);
+			}
+			
+			if (bulletId1 < playerInstances.size || bulletId2 < playerInstances.size) {
+				if (playerInstances.get(bulletId1) instanceof Player) {
+					player = playerInstances.get(bulletId1);
+				}
+				
+				else if (playerInstances.get(bulletId2) instanceof Player) {
+					player = playerInstances.get(bulletId2);
+				}
+			}
+			
+			if (player != null && projectile != null && projectile.getOriginID() != player.getNetId()) {
+				projectile.setMoving(false);
+				System.out.println("Player ID: " + player.getNetId() + " Projectile ID: " + projectile.getOriginID());
+				System.out.println("Collision between player projectile");
+				if (GameScreen.mode == GameScreen.Mode.Server) {
+					System.out.println("Projectile damage: " + projectile.getDamage());
+					Net.CollisionPacket packet = new Net.CollisionPacket();
+					packet.playerOriginID = projectile.getOriginID();
+					packet.playerID = player.getNetId();
+					packet.projectileID = projectile.getNetId();
+					packet.damage = projectile.getDamage();
+					packet.position = new Vector3();
+					if (projectile.getBulletBody() != null) {
+						packet.position.set(projectile.getBulletBody().getWorldTransform().getTranslation(new Vector3()));
+						NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
+						World.serverEventManager.addNetEvent(event);
+					}
+				}
 			}
 		}
 	}

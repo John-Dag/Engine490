@@ -2,23 +2,18 @@ package com.gdx.Network;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleEffect;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
-import com.gdx.DynamicEntities.Enemy;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
-import com.gdx.DynamicEntities.Weapon;
-import com.gdx.Network.Net.NewProjectile;
 import com.gdx.Network.Net.PlayerPacket;
-import com.gdx.Network.NetClientEvent.ProjectileCollision;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Shaders.ColorMultiplierEntityShader;
 import com.gdx.engine.Assets;
+import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Entity;
 import com.gdx.engine.EntityManager;
 import com.gdx.engine.MeshLevel;
@@ -57,7 +52,7 @@ public class NetWorld extends World {
 				//Check this out later. 
 				playerInstances.get(i).setPosition(playerInstances.get(i).camera.position);
 				playerInstances.get(i).setTarget(playerInstances.get(i).getTarget().idt());
-				playerInstances.get(i).setTarget(playerInstances.get(i).getTarget().translate(playerInstances.get(i).getPosition()));
+				playerInstances.get(i).setTarget(playerInstances.get(i).getTarget().translate(playerInstances.get(i).getPosition()).translate(0, .5f, 0));
 				playerInstances.get(i).getBulletObject().setWorldTransform(playerInstances.get(i).getTarget());
 			}
 		}
@@ -79,21 +74,18 @@ public class NetWorld extends World {
 
 	@Override
 	public void addProjectile(Net.NewProjectile packet) {
-		System.out.println("added projectile");
 		Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 		projectile.reset();
-		projectile.setProjectileSpeed(20f);
 		projectile.setDamage(RocketLauncher.DAMAGE);
 		projectile.setPosition(packet.position);
-		projectile.setVelocity(packet.cameraPos);
-		projectile.setAcceleration(packet.cameraPos);
 		projectile.setNetId(packet.id);
-		//projectile.getMotionState().transform = projectile.calculateTarget(packet.cameraPos);
+		projectile.setOriginID(packet.originID);
 		projectile.getBulletBody().setWorldTransform(projectile.calculateTarget(packet.cameraPos));
+		projectile.getBulletBody().setContactCallbackFilter(World.PLAYER_FLAG);
 		Ray ray = new Ray(packet.rayOrigin, packet.rayDirection);
-		projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(300f));
-		Entity.entityInstances.add(projectile);
-		World.dynamicsWorld.addRigidBody(projectile.getBulletBody());
+		projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(RocketLauncher.PROJECTILE_SCALAR));
+		ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(projectile);
+		getClientEventManager().addEvent(event);
 	}
 	
 	@Override
@@ -122,6 +114,7 @@ public class NetWorld extends World {
 			es.multiplier.x=(float)Math.random();
 			es.multiplier.z=(float)Math.random();
 			player1.setShader(es);
+			player1.getBulletObject().setUserValue(playerInstances.size);
 			playerInstances.add(player1);
 		}
 		catch (Exception e) {
@@ -172,7 +165,9 @@ public class NetWorld extends World {
 			if (entity instanceof Projectile) {
 				Projectile projectile = (Projectile)entity;
 				if (projectile.getNetId() == packet.projectileID) {
-//					projectile.initializeCollisionExplosionEffect();
+					Matrix4 temp = new Matrix4();
+					projectile.setTarget(temp.translate(packet.position));
+					projectile.setMoving(false);
 				}
 			}
 		}

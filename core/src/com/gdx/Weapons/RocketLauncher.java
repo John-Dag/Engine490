@@ -9,22 +9,19 @@ import com.gdx.DynamicEntities.Projectile;
 import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetClientEvent;
-import com.gdx.Network.NetClientEvent.CreateProjectile;
 import com.gdx.Network.NetWorld;
-import com.gdx.StaticEntities.PowerUp.powerUpTypeEnum;
 import com.gdx.engine.Assets;
 import com.gdx.engine.ClientEvent;
-import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
-import com.gdx.engine.GameScreen.State;
 import com.gdx.engine.World;
 
 public class RocketLauncher extends Weapon {
 	public static final float FIRING_DELAY = 0.1f;
 	public static final float PROJECTILE_SPEED = 15f;
+	public static final float PROJECTILE_SCALAR = 500f;
 	private final float RECOIL = 0.08f;
-	public static final int DAMAGE = 100;
-	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0), rotationVec;
+	public static final int DAMAGE = 25;
+	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0);
 	
 	public RocketLauncher() {
 		super();
@@ -37,7 +34,6 @@ public class RocketLauncher extends Weapon {
 		this.projectileSpeed = PROJECTILE_SPEED;
 		this.recoil = RECOIL;
 		this.damage = DAMAGE;
-		rotationVec = new Vector3(World.player.camera.up.cpy());
 	}
 	
 	@Override
@@ -52,18 +48,12 @@ public class RocketLauncher extends Weapon {
 			else {
 				Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 				projectile.reset();
-				projectile.setProjectileSpeed(world.getPlayer().getWeapon().getProjectileSpeed());
 				projectile.setDamage(DAMAGE);
 				projectile.setPlayerProjectile(true);
-				projectile.setDealtDamage(false);
-				projectile.setIsActive(true);
-				projectile.setMoving(true);
-				projectile.setInCollision(false);
-				projectile.setCollEffectInit(false);
 				projectile.getBulletBody().setContactCallbackFilter(World.ENEMY_FLAG);
 				projectile.getBulletBody().activate();
 				Ray ray = world.getPlayer().camera.getPickRay(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
-				projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(200f));
+				projectile.getBulletBody().applyCentralImpulse(ray.direction.scl(PROJECTILE_SCALAR));
 				ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(projectile);
 				world.getClientEventManager().addEvent(event);
 			}
@@ -102,7 +92,7 @@ public class RocketLauncher extends Weapon {
 		}
 		
 		else if (!this.isPickedup() && this.getTransformedBoundingBox().intersects(World.player.getTransformedBoundingBox()) && this.getWeapon().getWeaponType() != this.getWeaponType().rocketLauncher) {
-			if (GameScreen.mode == GameScreen.mode.Offline){
+			if (GameScreen.mode == GameScreen.Mode.Offline){
 				world.getPlayer().setWeapon(this);
 			} else {
 //				this.setPickedup(true);

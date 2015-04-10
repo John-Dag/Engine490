@@ -107,6 +107,58 @@ public class DynamicEntity extends Entity {
 		this.angVelocity = new Vector3(0, 0, 0);
 	}
 	
+	public void initializeBulletObject(Vector3 boxVector, short callBackFlag) {
+		try {
+			this.setBulletShape(new btBoxShape(boxVector));
+			this.setBulletObject(new btCollisionObject());
+			this.getBulletObject().setCollisionShape(this.getBulletShape());
+			this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
+			this.getBulletObject().setContactCallbackFlag(callBackFlag);
+			this.getBulletObject().setCollisionFlags(this.getBulletObject().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_NO_CONTACT_RESPONSE);
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
+	}
+	
+	public void initializeBulletBody(Vector3 boxVector, float mass, short callBackFlag) {
+		Vector3 localInertia = new Vector3();
+		
+		try {
+			this.setBulletShape(new btBoxShape(boxVector));
+			this.setBulletObject(new btCollisionObject());
+			this.getBulletObject().setCollisionShape(this.getBulletShape());
+			this.setTarget(new Matrix4());
+			this.getBulletShape().calculateLocalInertia(mass, localInertia);
+			
+			this.setMotionState(new BulletMotionState());
+			this.getMotionState().transform = this.calculateTarget(this.getPosition());
+			this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(mass, null, this.getBulletShape(), localInertia));
+			this.setBulletBody(new btRigidBody(this.getConstructionInfo()));
+			this.getBulletBody().setMotionState(this.getMotionState());
+			this.getBulletBody().setCollisionFlags(this.getBulletBody().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
+			this.getBulletBody().activate();
+			this.getConstructionInfo().dispose();
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
+	}
+	
+	public void addBulletObject() {
+		if (this.getBulletObject() == null)
+			System.err.println("addBulletObject(): Bullet collision object hasn't been initialized");
+		else
+			World.dynamicsWorld.addCollisionObject(this.getBulletObject());
+	}
+	
+	public void addBulletBody() {
+		if (this.getBulletBody() == null)
+			System.err.println("addBulletBody(): Bullet body hasn't been initialized");
+		else
+			World.dynamicsWorld.addRigidBody(this.getBulletBody());
+	}
+	
 	@Override
 	public void update(float delta, World world) {
 		
@@ -505,9 +557,9 @@ public class DynamicEntity extends Entity {
 	
 	public void setShader(EntityShader shader) {
 		super.setShader(shader);
-		if(this.model!=null)
+		if (this.model != null)
 		{
-			this.model.userData=shader;
+			this.model.userData = shader;
 		}
 	}
 }

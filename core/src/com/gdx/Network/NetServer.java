@@ -1,18 +1,14 @@
 package com.gdx.Network;
 
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net.PlayerPacket;
-import com.gdx.Network.Net.StatPacket;
 import com.gdx.StaticEntities.PowerUp;
 import com.gdx.StaticEntities.WeaponSpawn;
-import com.gdx.engine.Entity;
 import com.gdx.engine.World;
 
 public class NetServer {
@@ -42,6 +38,7 @@ public class NetServer {
 			@Override
 			public void connected(Connection connection) {
 				clientConnect(connection);
+				sendNetStatUpdate();
 			}
 			
 			@Override
@@ -262,7 +259,7 @@ public class NetServer {
 		String message = Net.serverMessage + " " + Net.serverIP + "\nActive connections: " + server.getConnections().length;
 		
 		world.addPlayer(packet);
-		server.sendToAllExceptTCP(packet.id, packet);
+		server.sendToAllTCP(packet);
 		sendAllPlayers(packet.id);
 		sendServerMessage(message, packet.id);
 		String joinedMessage = packet.name + " joined.";

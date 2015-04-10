@@ -13,24 +13,16 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Abilities.Blizzard;
 import com.gdx.Abilities.PoisonCloud;
-import com.gdx.StaticEntities.WeaponSpawn;
-import com.gdx.StaticEntities.WeaponSpawner;
 import com.gdx.Inventory.Inventory;
-import com.gdx.UI.UIBase;
-import com.gdx.UI.UIConsole;
 import com.gdx.Weapons.RocketLauncher;
 import com.gdx.Weapons.Sword;
 import com.gdx.engine.Assets;
 import com.gdx.engine.DistanceTrackerMap;
-import com.gdx.engine.Entity;
 import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
-import com.gdx.engine.GameScreen.State;
 import com.gdx.engine.GameScreen.Mode;
 
 public class Player extends DynamicEntity {
@@ -104,13 +96,9 @@ public class Player extends DynamicEntity {
 		this.speedScalar = 1f; // 1 = default movespeed
 		this.isPlayerTargeting = false;
 		this.abilities = new Array<Ability>();
-		this.setBulletShape(new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)));
-		this.setBulletObject(new btCollisionObject());
-		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
-		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
-		this.getBulletObject().setContactCallbackFlag(World.PLAYER_FLAG);
-		World.dynamicsWorld.addCollisionObject(this.getBulletObject());
+		this.initializeBulletObject(new Vector3(0.5f, 0.5f, 0.5f), World.PLAYER_FLAG);
+		this.addBulletObject();
 		this.weapons = new Array<Weapon>();
 		//this.setModel(model);
 		this.inventory = new Inventory();
@@ -274,7 +262,7 @@ public class Player extends DynamicEntity {
 	public void handleInput(float delta) {
 		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT) && !this.isPlayerTargeting) {
-			//Gdx.input.setCursorCatched(true); // I moved this input to the WorldInputProcessor for use with the multiplexer.
+			Gdx.input.setCursorCatched(true); // I moved this input to the WorldInputProcessor for use with the multiplexer.
 												// Left it commented in case I screwed something up. - Matt
 		}
 		

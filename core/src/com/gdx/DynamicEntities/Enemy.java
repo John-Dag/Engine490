@@ -1,6 +1,5 @@
 package com.gdx.DynamicEntities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController;
 import com.badlogic.gdx.graphics.g3d.utils.AnimationController.AnimationDesc;
@@ -15,20 +14,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.gdx.engine.*;
-import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
-import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
-import com.gdx.Network.Net;
-import com.gdx.Network.NetServerEvent;
-import com.gdx.engine.BulletContactListener;
-import com.gdx.engine.BulletMotionState;
 import com.gdx.engine.ClientEvent;
 import com.gdx.engine.Condition;
 import com.gdx.engine.DistanceTrackerMap;
-import com.gdx.engine.Entity;
-import com.gdx.engine.GameScreen;
 import com.gdx.engine.State;
 import com.gdx.engine.StateMachine;
 import com.gdx.engine.World;
@@ -47,7 +35,6 @@ public class Enemy extends DynamicEntity {
 	public boolean isSpawned, isAttacking;
 	public Vector3 spawnPos;
 	private double changeLayerHeight = 5.9;
-	private float addToChangeLH = 0.2f;
 	private boolean aggroed = false;
 
 	public Enemy() {
@@ -70,12 +57,7 @@ public class Enemy extends DynamicEntity {
 		attack = new State();
 		stateMachine = new StateMachine();
 		this.StateMachineUsage(this);
-		this.setBulletShape(new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)));
-		this.setBulletObject(new btCollisionObject());
-		this.getBulletObject().setCollisionShape(this.getBulletShape());
 		this.setTarget(new Matrix4());
-		this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
-		this.getBulletObject().setContactCallbackFlag(World.ENEMY_FLAG);
 	}
 
 	@Override

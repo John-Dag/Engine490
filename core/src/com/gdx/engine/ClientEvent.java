@@ -1,9 +1,6 @@
 package com.gdx.engine;
 
 import com.gdx.DynamicEntities.DynamicEntity;
-import com.gdx.DynamicEntities.Enemy;
-import com.gdx.DynamicEntities.Projectile;
-import com.gdx.Enemies.Zombie;
 
 public class ClientEvent {
 	public boolean eventHandled;

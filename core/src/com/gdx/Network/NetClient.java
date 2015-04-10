@@ -2,7 +2,6 @@ package com.gdx.Network;
 
 import java.io.IOException;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.utils.Array;
@@ -12,7 +11,6 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
-import com.gdx.DynamicEntities.Weapon;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.StaticEntities.PowerUp;
 import com.gdx.StaticEntities.WeaponSpawn;
@@ -42,8 +40,8 @@ public class NetClient {
 			client.start();
 		    Net.register(client);
 		    connectClientToServer();
-		    createPlayerOnServer();
 		    setId(client.getID());
+		    createPlayerOnServer();
 		}
 		catch (Exception e) {
 			System.err.println(e);
@@ -59,7 +57,7 @@ public class NetClient {
 		}
 	}
 	
-	private void createPlayerOnServer() {
+	public void createPlayerOnServer() {
 		Net.NewPlayer packet = new Net.NewPlayer();
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
@@ -77,7 +75,11 @@ public class NetClient {
 			
 			@Override
 			public void disconnected(Connection connection) {
+				Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
+				packet.message = "Connection to server lost";
+				world.getClient().addChatMessage(packet);
 				serverDisconnect(connection);
+				removeAllStatFields();
 			}
 			
 			@Override
@@ -107,7 +109,8 @@ public class NetClient {
         else if (object instanceof Net.NewPlayer) {
        	   Net.NewPlayer packet = (Net.NewPlayer)object;
        	   createPlayerStatField(packet);
-       	   world.getNetEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
+       	   if (packet.id != this.getClient().getID())
+       		   world.getNetEventManager().addNetEvent(new NetClientEvent.CreatePlayer(packet));
         }
         
         else if (object instanceof Net.PlayerDisconnect) {
@@ -137,7 +140,7 @@ public class NetClient {
         
         else if (object instanceof Net.StatPacket) {
         	Net.StatPacket packet = (Net.StatPacket)object;
-        	updateNetStats(packet);
+        	world.getNetEventManager().addNetEvent(new NetClientEvent.UpdateNetStats(packet));
         }
         
         else if (object instanceof Net.PowerUpConsumedPacket) {
@@ -195,6 +198,8 @@ public class NetClient {
 	
 	public void createPlayerStatField(Net.NewPlayer packet) {
 		NetStatField field = new NetStatField("", GameScreen.skin);
+		if (packet.id == this.getClient().getID())
+			field.setColor(Color.TEAL);
 		field.setPlayerName(packet.name);
 		field.setStats(field.getPlayerName() + "                 K: " + 0 + "                 D: " + 0);
 		field.setText(field.getStats());
@@ -293,6 +298,12 @@ public class NetClient {
 		}
 	}
 	
+	public void removeAllStatFields() {
+		screen.getStatForm().getWindow().clear();
+		screen.getStatForm().getFields().clear();
+		screen.getStatForm().getStatFields().clear();
+	}
+	
 	public Array<NetStatField> sortPlayerStatFields() {
 		Array<NetStatField> fields = new Array<NetStatField>(); 
 		Sort.instance().sort(screen.getStatForm().getStatFields(), comparator);
@@ -318,7 +329,7 @@ public class NetClient {
 		packet.rayDirection = ray.direction;
 		packet.rayOrigin = ray.origin;
 		packet.cameraPos = projectile.getPosition();
-		packet.originID = this.getId();
+		packet.originID = this.getClient().getID();
 		client.sendTCP(packet);
 	}
 	

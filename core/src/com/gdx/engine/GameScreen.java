@@ -23,11 +23,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.gdx.Commands.FireWeapon;
+import com.gdx.Commands.ReconnectCommand;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetClient;
 import com.gdx.Network.NetServer;
@@ -174,12 +174,13 @@ public class GameScreen implements Screen {
 		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		//virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);
-		
-		multiplexer.addProcessor(stage);
 		multiplexer.addProcessor(screenInputProcessor);
+		multiplexer.addProcessor(stage);
 		Gdx.input.setInputProcessor(multiplexer);
 		FireWeapon command = new FireWeapon("fireweapon", world);
 		console.getCommands().add(command);
+		ReconnectCommand commandB = new ReconnectCommand("reconnect", world);
+		console.getCommands().add(commandB);
 		uiGenerated = true;
 	}
 	
@@ -305,12 +306,6 @@ public class GameScreen implements Screen {
 			world.setClient(client);
 			statForm = new UIForm(stage, skin, "Stats");
 			statForm.generateWindow(center.x  / 2, center.y + 300, 300, 40, true);
-			NetStatField field = new NetStatField("", skin);
-			field.setText(Net.name + "                  " + 
-			                     0 + "                  " + 0);
-			field.setPlayerID(client.getId());
-			field.setColor(Color.TEAL);
-			statForm.addNetStatField(field, 0, 0, 300, 20);
 			statForm.getWindow().setVisible(false);
 			statForm.setWindowOpacity(.5f);
 		} catch (IOException e) {
