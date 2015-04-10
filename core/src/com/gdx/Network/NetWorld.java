@@ -74,7 +74,6 @@ public class NetWorld extends World {
 
 	@Override
 	public void addProjectile(Net.NewProjectile packet) {
-		System.out.println("Added projectile");
 		Projectile projectile = NetWorld.entityManager.projectilePool.obtain();
 		projectile.reset();
 		projectile.setDamage(RocketLauncher.DAMAGE);
