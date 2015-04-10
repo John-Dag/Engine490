@@ -11,6 +11,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.DynamicEntities.Projectile;
+import com.gdx.Network.Net.NewMatch;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.StaticEntities.PowerUp;
 import com.gdx.StaticEntities.WeaponSpawn;
@@ -166,8 +167,18 @@ public class NetClient {
         	Net.WeaponRespawnPacket packet = (Net.WeaponRespawnPacket)object;
         	handleWeaponRespawnPacket(packet);
         }
+        
+        else if (object instanceof Net.NewMatch) {
+        	Net.NewMatch packet = (Net.NewMatch)object;
+        	handleNewMatch(packet);
+        }
 	}
 	
+	private void handleNewMatch(NewMatch packet) {
+		world.getPlayer().respawnPlayer(world.getPlayer());
+		sendPlayerUpdate();
+	}
+
 	private void handlePowerUpConsumedPacket(Net.PowerUpConsumedPacket packet) {
 		// this makes the power up disappear for players who did not consume it but witnessed the event
 		PowerUp powerUp = world.getMeshLevel().getPowerUpInstances().get(packet.powerUpEntityId);

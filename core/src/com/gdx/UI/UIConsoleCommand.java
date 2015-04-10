@@ -28,5 +28,5 @@ public abstract class UIConsoleCommand {
 		this.world = world;
 	}
 
-	public abstract void triggerCommand();
+	public abstract void triggerCommand(String value);
 }

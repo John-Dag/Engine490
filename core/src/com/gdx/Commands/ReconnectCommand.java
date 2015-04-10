@@ -11,9 +11,9 @@ public class ReconnectCommand extends UIConsoleCommand {
 	}
 
 	@Override
-	public void triggerCommand() {
+	public void triggerCommand(String value) {
 		if (this.getWorld().getClient() == null) {
-			System.err.println("Offline mode");
+			System.out.println("Offline mode");
 			return;
 		}
 	
@@ -24,7 +24,7 @@ public class ReconnectCommand extends UIConsoleCommand {
 				this.getWorld().getClient().createPlayerOnServer();
 			}
 			else {
-				System.err.println("Already connected to a host");
+				System.out.println("Already connected to a host");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

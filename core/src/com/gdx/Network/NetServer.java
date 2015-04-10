@@ -1,11 +1,14 @@
 package com.gdx.Network;
 
 import java.io.IOException;
+
+import com.badlogic.gdx.math.Vector3;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 import com.gdx.DynamicEntities.Player;
+import com.gdx.Matches.DeathMatch;
 import com.gdx.Network.Net.PlayerPacket;
 import com.gdx.StaticEntities.PowerUp;
 import com.gdx.StaticEntities.WeaponSpawn;
@@ -15,6 +18,7 @@ public class NetServer {
 	private Server server;
 	private NetStatManager netStatManager;
 	private World world;
+	private NetMatch activeMatch;
 	
 	public NetServer(World world) throws IOException {
 		try {
@@ -131,6 +135,10 @@ public class NetServer {
         	NetServerEvent.WeaponPickedUp event = new NetServerEvent.WeaponPickedUp(packet);
         	world.getServerEventManager().addNetEvent(event);
         }
+	}
+	
+	public void startMatch(NetMatch match) {
+		match.broadcastStartMessage();
 	}
 	
 	public void sendNetStatUpdate() {
@@ -255,6 +263,10 @@ public class NetServer {
 		server.sendToAllTCP(packet);
 	}
 	
+	public void broadcastNewMatch(Net.NewMatch packet) {
+		server.sendToAllTCP(packet);
+	}
+	
 	public void addNewPlayer(Net.NewPlayer packet) {
 		String message = Net.serverMessage + " " + Net.serverIP + "\nActive connections: " + server.getConnections().length;
 		
@@ -291,6 +303,10 @@ public class NetServer {
 		world.updatePlayers(packet);
 	}
 	
+	public void updatePlayer(PlayerPacket packet, int id) {
+		server.sendToTCP(id, packet);
+	}
+	
 	public void updateProjectiles(Net.ProjectilePacket packet) {
 		server.sendToAllUDP(packet);
 	}
@@ -319,5 +335,23 @@ public class NetServer {
 	
 	public void serverUpdate() {
 		world.getServerEventManager().processEvents();
+		if (this.getActiveMatch() != null)
+			this.getActiveMatch().update();
+	}
+
+	public NetMatch getActiveMatch() {
+		return activeMatch;
+	}
+
+	public void setActiveMatch(NetMatch match) {
+		this.activeMatch = match;
+	}
+
+	public NetStatManager getNetStatManager() {
+		return netStatManager;
+	}
+
+	public void setNetStatManager(NetStatManager netStatManager) {
+		this.netStatManager = netStatManager;
 	}
 }

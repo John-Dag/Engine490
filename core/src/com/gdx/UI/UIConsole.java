@@ -289,7 +289,7 @@ public class UIConsole extends UIBase {
 			for (int i = 0; i < commands.size; i++) {
 				if (commands.get(i) != null && value.toLowerCase().startsWith(commands.get(i).getCommand())) {
 					customCommand = true;
-					commands.get(i).triggerCommand();
+					commands.get(i).triggerCommand(value);
 				}
 			}
 			
@@ -322,7 +322,7 @@ public class UIConsole extends UIBase {
 	}
 	
 	//Parse float value from console string
-	public float parseConsoleValueFloat(String value) {
+	public static float parseConsoleValueFloat(String value) {
 		float floatValue = 0;
 		String[] tokens = value.split(" ");
 		if (tokens.length > 1 && tokens.length < 3) {
@@ -336,7 +336,7 @@ public class UIConsole extends UIBase {
 		return floatValue;
 	}
 	
-	public int parseConsoleValueInt(String value) {
+	public static int parseConsoleValueInt(String value) {
 		int intValue = 0;
 		String[] tokens = value.split(" ");
 		if (tokens.length > 1 && tokens.length < 3) {
@@ -351,7 +351,7 @@ public class UIConsole extends UIBase {
 	}
 	
 	//Parse string value from console string
-	public String parseConsoleValueString(String value) {
+	public static String parseConsoleValueString(String value) {
 		String temp = "";
 		String[] tokens = value.split(" ");
 		if (tokens.length > 1 && tokens.length < 3) {
@@ -396,13 +396,17 @@ public class UIConsole extends UIBase {
 			this.consoleInputField.setDisabled(false);
 			UIBase.uiSelected = true;
 			this.getStage().setKeyboardFocus(consoleInputField);
-			GameScreen.state = State.Paused;
+			if (GameScreen.mode != GameScreen.Mode.Server)
+				GameScreen.state = State.Paused;
+			else
+				this.getStage().setKeyboardFocus(consoleInputField);
 		}
 		else {
 			this.getWindow().setVisible(false);
 			UIBase.uiSelected = false;
 			this.consoleInputField.setDisabled(true);
-			GameScreen.state = State.Running;
+			if (GameScreen.mode != GameScreen.Mode.Server)
+				GameScreen.state = State.Running;
 		}
 	}
 

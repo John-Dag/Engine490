@@ -8,6 +8,13 @@ public class NetStatManager {
 	public NetStatManager() {
 		setStats(new Array<NetStat>());
 	}
+	
+	public void resetStats() {
+		for (NetStat stat : stats) {
+			stat.setKills(0);
+			stat.setDeaths(0);
+		}
+	}
 
 	public Array<NetStat> getStats() {
 		return stats;

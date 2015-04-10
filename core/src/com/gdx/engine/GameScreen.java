@@ -26,7 +26,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
-import com.gdx.Commands.FireWeapon;
+import com.gdx.Commands.FireCommand;
+import com.gdx.Commands.MatchCommand;
 import com.gdx.Commands.ReconnectCommand;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetClient;
@@ -177,10 +178,12 @@ public class GameScreen implements Screen {
 		multiplexer.addProcessor(screenInputProcessor);
 		multiplexer.addProcessor(stage);
 		Gdx.input.setInputProcessor(multiplexer);
-		FireWeapon command = new FireWeapon("fireweapon", world);
+		FireCommand command = new FireCommand("fireweapon", world);
 		console.getCommands().add(command);
 		ReconnectCommand commandB = new ReconnectCommand("reconnect", world);
 		console.getCommands().add(commandB);
+		MatchCommand commandC = new MatchCommand("startmatch", world);
+		console.getCommands().add(commandC);
 		uiGenerated = true;
 	}
 	

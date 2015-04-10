@@ -39,6 +39,7 @@ public class Net {
 	    kryo.register(WeaponPickedUpPacket.class);
 	    kryo.register(WeaponRespawnPacket.class);
 	    kryo.register(NewWeaponPacket.class);
+	    kryo.register(NewMatch.class);
 	}
 	
 	//Packets
@@ -118,5 +119,9 @@ public class Net {
 	
 	public static class DeathPacket {
 		public int id;
+	}
+	
+	public static class NewMatch {
+		public Vector3 startPos;
 	}
 }
