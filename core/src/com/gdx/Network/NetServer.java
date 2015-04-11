@@ -141,6 +141,20 @@ public class NetServer {
 		match.broadcastStartMessage();
 	}
 	
+	public void resetSpawns() {
+		for(int i = 0; i < world.getMeshLevel().getPowerUpInstances().size; i++) {
+			Net.PowerUpRespawnPacket powerUpPacket = new Net.PowerUpRespawnPacket();
+			powerUpPacket.powerUpEntityId = i;
+			respawnPowerUp(powerUpPacket);
+		}
+		
+		for(int i = 0; i < world.getMeshLevel().getWeaponInstances().size; i++) {
+			Net.WeaponRespawnPacket weaponPacket = new Net.WeaponRespawnPacket();
+			weaponPacket.weaponEntityId = i;
+			respawnWeapon(weaponPacket);
+		}
+	}
+	
 	public void sendNetStatUpdate() {
 		for (int i = 0; i < netStatManager.getStats().size; i++) {
 			Net.StatPacket packet = new Net.StatPacket();

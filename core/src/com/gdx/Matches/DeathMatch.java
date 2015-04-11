@@ -45,6 +45,7 @@ public class DeathMatch extends NetMatch {
 		this.getWorld().getServer().sendNetStatUpdate();
 		this.getWorld().getServer().broadcastNewMatch(matchPacket);
 		this.getWorld().getServer().setActiveMatch(this);
+		this.getWorld().getServer().resetSpawns();
 		matchActive = true;
 	}
 
