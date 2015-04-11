@@ -8,6 +8,61 @@ public class NetServerEvent {
 		super();
 	}
 	
+	public static class PlayerUpdate extends NetServerEvent {
+		public Net.PlayerPacket packet;
+		
+		public PlayerUpdate(Net.PlayerPacket packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+    		world.getServer().updatePlayers(packet);
+		}
+	}
+
+	public static class DeathEvent extends NetServerEvent {
+		public Net.DeathPacket packet;
+		
+		public DeathEvent(Net.DeathPacket packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+        	world.getServer().updateDeathNetStat(packet.id);
+        	world.getServer().sendNetStatUpdate();
+		}
+	}
+
+	public static class KillEvent extends NetServerEvent {
+		public Net.KillPacket packet;
+		
+		public KillEvent(Net.KillPacket packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+        	world.getServer().updateKillNetStat(packet.id);
+        	world.getServer().sendNetStatUpdate();
+		}
+	}
+
+	public static class NewNetStat extends NetServerEvent {
+		public Net.NewPlayer packet;
+		
+		public NewNetStat(Net.NewPlayer packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+    		NetStat stat = new NetStat(packet.id, packet.name);
+    		world.getServer().getNetStatManager().getStats().add(stat);
+		}
+	}
+	
 	public static class ProjectileCollision extends NetServerEvent {
 		public Net.CollisionPacket packet;
 		

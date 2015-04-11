@@ -72,9 +72,9 @@ public class NetServer {
 	//Handles received packets
 	private void packetReceived(Connection connection, Object object) {
 	   	if (object instanceof Net.PlayerPacket) {
-    		Net.PlayerPacket playerPacket = (Net.PlayerPacket)object;
-    		updatePlayers(playerPacket, connection);
-    		server.sendToAllExceptUDP(connection.getID(), playerPacket);
+    		Net.PlayerPacket packet = (Net.PlayerPacket)object;
+    		NetServerEvent.PlayerUpdate event = new NetServerEvent.PlayerUpdate(packet);
+    		world.getServerEventManager().addNetEvent(event);
     	}
     	
     	else if (object instanceof Net.ProjectilePacket) {
@@ -93,8 +93,8 @@ public class NetServer {
     		packet.name = playerNew.name;
     		NetServerEvent.NewPlayer event = new NetServerEvent.NewPlayer(packet);
     		world.getServerEventManager().addNetEvent(event);
-    		NetStat stat = new NetStat(packet.id, packet.name);
-    		netStatManager.getStats().add(stat);
+    		NetServerEvent.NewNetStat eventB = new NetServerEvent.NewNetStat(packet);
+    		world.getServerEventManager().addNetEvent(eventB);
     	}
     	
     	else if (object instanceof Net.NewProjectile) {
@@ -112,14 +112,14 @@ public class NetServer {
 	   	
         else if (object instanceof Net.KillPacket) {
         	Net.KillPacket packet = (Net.KillPacket)object;
-        	updateKillNetStat(packet.id);
-        	sendNetStatUpdate();
+        	NetServerEvent.KillEvent event = new NetServerEvent.KillEvent(packet);
+        	world.getServerEventManager().addNetEvent(event);
         }
 	   	
         else if (object instanceof Net.DeathPacket) {
         	Net.DeathPacket packet = (Net.DeathPacket)object;
-        	updateDeathNetStat(packet.id);
-        	sendNetStatUpdate();
+        	NetServerEvent.DeathEvent event = new NetServerEvent.DeathEvent(packet);
+        	world.getServerEventManager().addNetEvent(event);
         }
 	   	
         else if (object instanceof Net.PowerUpConsumedPacket) {
@@ -313,8 +313,9 @@ public class NetServer {
 		}
 	}
 	
-	public void updatePlayers(PlayerPacket packet, Connection connection) {
+	public void updatePlayers(PlayerPacket packet) {
 		world.updatePlayers(packet);
+		server.sendToAllExceptUDP(packet.id, packet);
 	}
 	
 	public void updatePlayer(PlayerPacket packet, int id) {

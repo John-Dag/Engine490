@@ -104,7 +104,7 @@ public class NetClient {
 	private void packetReceived(Connection connection, Object object) {
         if (object instanceof Net.PlayerPacket) {
      	   Net.PlayerPacket packet = (Net.PlayerPacket)object;
-     	   updatePlayers(packet, connection);
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.PlayerUpdate(packet));
         }
         
         else if (object instanceof Net.NewPlayer) {
@@ -121,7 +121,7 @@ public class NetClient {
         
         else if (object instanceof Net.ProjectilePacket) {
      	   Net.ProjectilePacket packet = (Net.ProjectilePacket)object;
-     	   updateProjectiles(packet);
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.ProjectileUpdate(packet));
         }
         
         else if (object instanceof Net.NewProjectile) {
@@ -364,7 +364,7 @@ public class NetClient {
 	}
 	
 	//Updates the clients players with player positions from the server
-	public void updatePlayers(PlayerPacket packet, Connection connection) {
+	public void updatePlayers(PlayerPacket packet) {
 		world.updatePlayers(packet);
 	}
 	

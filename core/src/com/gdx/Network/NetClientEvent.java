@@ -13,6 +13,32 @@ public class NetClientEvent {
 		super();
 	}
 	
+	public static class PlayerUpdate extends NetClientEvent {
+		public Net.PlayerPacket packet;
+		
+		public PlayerUpdate(Net.PlayerPacket packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+			world.getClient().updatePlayers(packet);
+		}
+	}
+
+	public static class ProjectileUpdate extends NetClientEvent {
+		public Net.ProjectilePacket packet;
+		
+		public ProjectileUpdate(Net.ProjectilePacket packet) {
+			this.packet = packet;
+		}
+		
+		@Override
+		public void handleEvent(World world) {
+			world.getClient().updateProjectiles(packet);
+		}
+	}
+	
 	public static class CreateProjectile extends NetClientEvent {
 		public Net.NewProjectile packet;
 		
