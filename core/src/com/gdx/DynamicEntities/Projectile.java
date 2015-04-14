@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.gdx.Network.NetWorld;
 import com.gdx.engine.ClientEvent;
+import com.gdx.engine.GameScreen;
 import com.gdx.engine.World;
 
 public class Projectile extends DynamicEntity implements Poolable {
@@ -49,27 +50,21 @@ public class Projectile extends DynamicEntity implements Poolable {
 		if (!this.isRendered() && this.getParticleEffect() != null) 
 			this.initializeProjectileEffect();
 		
-		if (!this.isMoving() && !this.isInCollision()) {
-			Explosion explosion = World.entityManager.explosionPool.obtain();
-			explosion.setTarget(this.getTarget());
-			explosion.initialize();
+		if ((!this.isMoving() && !this.isInCollision()) || this.timer >= 3.0f) {
+			if (GameScreen.mode != GameScreen.Mode.Server) {
+				Explosion explosion = World.entityManager.explosionPool.obtain();
+				explosion.setTarget(this.getTarget());
+				explosion.initialize();
+				ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(explosion);
+				World.eventManager.addEvent(event);
+			}
+			
 			this.removeProjectile();
-			ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(explosion);
-			World.eventManager.addEvent(event);
 			this.setInCollision(true);
 		}	
 		
-		else if (this.timer >= 3.0f) {
-			Explosion explosion = World.entityManager.explosionPool.obtain();
-			explosion.setTarget(this.getTarget());
-			explosion.initialize();
-			this.removeProjectile();
-			ClientEvent.CreateEntity event = new ClientEvent.CreateEntity(explosion);
-			World.eventManager.addEvent(event);
-			this.setInCollision(true);
-		}
-		
-		this.getParticleEffect().setTransform(this.getBulletBody().getWorldTransform());
+		if (this.getBulletBody() != null && GameScreen.mode != GameScreen.Mode.Server)
+			this.getParticleEffect().setTransform(this.getBulletBody().getWorldTransform());
 
 		//If the client is hosting a server, send position update packets
 		if (world.getServer() != null) {
@@ -127,6 +122,8 @@ public class Projectile extends DynamicEntity implements Poolable {
 	}
 	
 	public void initializeProjectileEffect() {
+		if (GameScreen.mode == GameScreen.Mode.Server)
+			return;
 		this.setRendered(true);
 		this.getParticleEffect().init();
 		this.getParticleEffect().start();
@@ -161,9 +158,10 @@ public class Projectile extends DynamicEntity implements Poolable {
 	}
 	
 	public void removeProjectile() {
-		//System.out.println(World.particleManager.getProjectilePool().peak);
-		World.particleManager.system.remove(this.getParticleEffect());
-		World.particleManager.projectilePool.free(this.getParticleEffect());
+		if (GameScreen.mode != GameScreen.Mode.Server) {
+			World.particleManager.system.remove(this.getParticleEffect());
+			World.particleManager.projectilePool.free(this.getParticleEffect());
+		}
 		NetWorld.entityManager.projectilePool.free(this);
 		ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(this);
 		world.getClientEventManager().addEvent(event);

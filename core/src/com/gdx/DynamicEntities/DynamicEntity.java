@@ -259,6 +259,10 @@ public class DynamicEntity extends Entity {
 	public void dispose() {
 		//Removes all bullet references. Important to call this dispose method before removing an entity.
 		//The gc will cause stuttering if they aren't removed. 
+		if (this.getMotionState() != null) {
+			motionState.dispose();
+		}
+		
 		if (this.getBulletBody() != null) {
 			World.dynamicsWorld.removeRigidBody(this.getBulletBody());
 			bulletBody.dispose();
@@ -267,10 +271,6 @@ public class DynamicEntity extends Entity {
 		if (this.getBulletObject() != null) {
 			World.dynamicsWorld.removeCollisionObject(this.getBulletObject());
 			bulletObject.dispose();
-		}
-		
-		if (this.getMotionState() != null) {
-			motionState.dispose();
 		}
 		
 		if (this.constructionInfo != null) {

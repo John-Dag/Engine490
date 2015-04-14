@@ -70,12 +70,12 @@ public class ClientEvent {
 
 			for (int i = 0; i < Entity.entityInstances.size; i++) {
 				if (!Entity.entityInstances.get(i).isActive()) {
-						//System.out.println("REMOVING : " + entity + " INDEX: " + entity.getIndex());
-						Entity.entityInstances.get(i).dispose();
-						Entity.entityInstances.removeIndex(i);
-						removalIndex = i;
-						this.eventHandled = true;
-					}
+					//System.out.println("REMOVING : " + entity + " INDEX: " + entity.getIndex());
+					Entity.entityInstances.get(i).dispose();
+					Entity.entityInstances.removeIndex(i);
+					removalIndex = i;
+					this.eventHandled = true;
+				}
 			}
 			
 			if (removalIndex != -1) {

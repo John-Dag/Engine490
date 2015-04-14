@@ -434,10 +434,7 @@ public class World implements Disposable {
 			
 			if (player != null && projectile != null && projectile.getOriginID() != player.getNetId()) {
 				projectile.setMoving(false);
-				System.out.println("Player ID: " + player.getNetId() + " Projectile ID: " + projectile.getOriginID());
-				System.out.println("Collision between player projectile");
 				if (GameScreen.mode == GameScreen.Mode.Server) {
-					System.out.println("Projectile damage: " + projectile.getDamage());
 					Net.CollisionPacket packet = new Net.CollisionPacket();
 					packet.playerOriginID = projectile.getOriginID();
 					packet.playerID = player.getNetId();
