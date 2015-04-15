@@ -588,13 +588,7 @@ public class World implements Disposable {
 			this.filterEffect.dispose();
 		}
 
-		/* TODO fix merge conflict
-<<<<<<< HEAD
-		
-=======
->>>>>>> enemy_lv2_bug_fixes
 		this.filterEffect = filterEffect;
-		*/
 	}
 
 	@Override
