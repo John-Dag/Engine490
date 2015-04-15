@@ -3,11 +3,8 @@ package com.gdx.engine;
 import com.gdx.DynamicEntities.DynamicEntity;
 
 public class ClientEvent {
-	public boolean eventHandled;
-	
 	public ClientEvent() {
 		super();
-		eventHandled = false;
 	}
 	
 	public static class CreateEntity extends ClientEvent {
@@ -31,7 +28,6 @@ public class ClientEvent {
 
 			temp.setIndex(Entity.entityInstances.size);
 			Entity.entityInstances.add(temp);
-			this.eventHandled = true;
 		}
 	}
 	
@@ -51,8 +47,6 @@ public class ClientEvent {
 				world.handleCollisionProjectileEnemy(bulletId1, bulletId2);
 			else
 				world.handleCollisionProjectilePlayer(bulletId1, bulletId2);
-			
-			this.eventHandled = true;
 		}
 	}
 	
@@ -74,7 +68,6 @@ public class ClientEvent {
 					Entity.entityInstances.get(i).dispose();
 					Entity.entityInstances.removeIndex(i);
 					removalIndex = i;
-					this.eventHandled = true;
 				}
 			}
 			

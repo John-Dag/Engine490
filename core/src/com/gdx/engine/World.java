@@ -413,39 +413,43 @@ public class World implements Disposable {
 		Projectile projectile = null;
 		Player player = null;
 		
-		if ((bulletId1 < Entity.entityInstances.size && bulletId2 < Entity.entityInstances.size)) {
+		if (bulletId1 < Entity.entityInstances.size) {
 			if (Entity.entityInstances.get(bulletId1) instanceof Projectile) {
 				projectile = (Projectile)Entity.entityInstances.get(bulletId1);
 			}
 			
-			else if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
-				projectile = (Projectile)Entity.entityInstances.get(bulletId2);
-			}
-			
-			if (bulletId1 < playerInstances.size || bulletId2 < playerInstances.size) {
+			else if (bulletId1 < playerInstances.size) {
 				if (playerInstances.get(bulletId1) instanceof Player) {
 					player = playerInstances.get(bulletId1);
 				}
-				
-				else if (playerInstances.get(bulletId2) instanceof Player) {
+			}
+		}
+		
+		if (bulletId2 < Entity.entityInstances.size) {
+			if (Entity.entityInstances.get(bulletId2) instanceof Projectile) {
+				projectile = (Projectile)Entity.entityInstances.get(bulletId2);
+			}
+			
+			else if (bulletId2 < playerInstances.size) {
+				if (playerInstances.get(bulletId2) instanceof Player) {
 					player = playerInstances.get(bulletId2);
 				}
 			}
+		}
 			
-			if (player != null && projectile != null && projectile.getOriginID() != player.getNetId()) {
-				projectile.setMoving(false);
-				if (GameScreen.mode == GameScreen.Mode.Server) {
-					Net.CollisionPacket packet = new Net.CollisionPacket();
-					packet.playerOriginID = projectile.getOriginID();
-					packet.playerID = player.getNetId();
-					packet.projectileID = projectile.getNetId();
-					packet.damage = projectile.getDamage();
-					packet.position = new Vector3();
-					if (projectile.getBulletBody() != null) {
-						packet.position.set(projectile.getBulletBody().getWorldTransform().getTranslation(new Vector3()));
-						NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
-						World.serverEventManager.addNetEvent(event);
-					}
+		if (player != null && projectile != null && projectile.getOriginID() != player.getNetId()) {
+			projectile.setMoving(false);
+			if (GameScreen.mode == GameScreen.Mode.Server) {
+				Net.CollisionPacket packet = new Net.CollisionPacket();
+				packet.playerOriginID = projectile.getOriginID();
+				packet.playerID = player.getNetId();
+				packet.projectileID = projectile.getNetId();
+				packet.damage = projectile.getDamage();
+				packet.position = new Vector3();
+				if (projectile.getBulletBody() != null) {
+					packet.position.set(projectile.getBulletBody().getWorldTransform().getTranslation(new Vector3()));
+					NetServerEvent.ProjectileCollision event = new NetServerEvent.ProjectileCollision(packet);
+					World.serverEventManager.addNetEvent(event);
 				}
 			}
 		}

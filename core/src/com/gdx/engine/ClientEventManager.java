@@ -14,20 +14,10 @@ public class ClientEventManager {
 	
 	public void processEvents() {
 		for (ClientEvent event : events) {	
-			//System.out.println(event);
 			event.handleEvent(world);
 		}
 		
-		boolean allEventsHandled = true;
-		for (ClientEvent event : events) {
-			if (!event.eventHandled) {
-				System.out.println("Event not handled: " + event);
-				allEventsHandled = false;
-			}
-		}
-		
-		if (allEventsHandled)
-			events.clear();
+		events.clear();
 	}
 	
 	public void addEvent(ClientEvent event) {
