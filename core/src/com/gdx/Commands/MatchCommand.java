@@ -19,7 +19,7 @@ public class MatchCommand extends UIConsoleCommand {
 			killsToWin = 5;
 		
 		if (GameScreen.mode == GameScreen.Mode.Server && this.getWorld().playerInstances.size > 1) {
-			DeathMatch match = new DeathMatch(this.getWorld(), this.getWorld().getPlayerInstances(), this.getWorld().getServer().getNetStatManager().getStats(), 5f, killsToWin);
+			DeathMatch match = new DeathMatch(this.getWorld(), this.getWorld().getPlayerInstances(), this.getWorld().getServer().getNetStatManager().getStats(), 5000, killsToWin);
 			this.getWorld().getServer().startMatch(match);
 		}
 		

@@ -1,10 +1,11 @@
 package com.gdx.StaticEntities;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Timer;
-import com.badlogic.gdx.utils.Timer.Task;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetServerEvent;
 import com.gdx.engine.Entity;
@@ -17,6 +18,7 @@ public class PowerUpSpawner extends StaticEntity {
 	private float spawnTime;
 	private PowerUpSpawner thisSpawn;
 	private World world;
+	private Timer timer;
 	
 	public PowerUpSpawner() {
 		super();
@@ -36,11 +38,12 @@ public class PowerUpSpawner extends StaticEntity {
 		powerUpRef.setSpawner(this);
 		Entity.entityInstances.add(powerUpRef);
 		thisSpawn = this;
+		this.timer = new Timer();
 	}
 	
 	public void startTimer() {
 		System.out.println("Start Timer");
-		Timer.schedule(new Task() {
+		timer.schedule(new TimerTask() {
 			@Override
 			public void run() { 
 				System.out.println("TimerTriggered");
@@ -55,7 +58,7 @@ public class PowerUpSpawner extends StaticEntity {
 					powerUpRef.setIsRenderable(true);
 				}
 			}
-		}, this.spawnTime);
+		}, (long) this.spawnTime * 1000);
 	}
 	
 	public float getSpawnTime() {

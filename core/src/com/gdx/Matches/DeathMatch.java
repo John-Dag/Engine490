@@ -1,9 +1,10 @@
 package com.gdx.Matches;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Timer;
-import com.badlogic.gdx.utils.Timer.Task;
 import com.gdx.DynamicEntities.Player;
 import com.gdx.Network.Net;
 import com.gdx.Network.NetMatch;
@@ -13,20 +14,22 @@ import com.gdx.engine.World;
 public class DeathMatch extends NetMatch {
 	private boolean matchActive;
 	private int killsToWin;
+	private Timer timer;
 	
-	public DeathMatch(World world, Array<Player> players, Array<NetStat> stats, float startDelay, int killsToWin) {
+	public DeathMatch(World world, Array<Player> players, Array<NetStat> stats, long startDelay, int killsToWin) {
 		super(world, players, stats, startDelay);
 		matchActive = false;
 		this.killsToWin = killsToWin;
+		this.timer = new Timer();
 	}
 	
 	@Override
 	public void broadcastStartMessage() {
 		Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
-		packet.message = "Death Match starting in " + this.getStartDelay() + " seconds...";
+		packet.message = "Death Match starting in " + this.getStartDelay() / 1000 + " seconds...";
 		this.getWorld().getServer().sendChatMessage(packet);
 		
-		Timer.schedule(new Task(){
+		timer.schedule(new TimerTask() {
 		    @Override
 		    public void run() {
 		    	startMatch();

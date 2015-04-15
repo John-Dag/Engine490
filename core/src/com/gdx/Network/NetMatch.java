@@ -8,9 +8,9 @@ public abstract class NetMatch {
 	private Array<Player> players;
 	private Array<NetStat> stats;
 	private World world;
-	private float startDelay;
+	private long startDelay;
 	
-	public NetMatch(World world, Array<Player> players, Array<NetStat> stats, float startDelay) {
+	public NetMatch(World world, Array<Player> players, Array<NetStat> stats, long startDelay) {
 		this.setPlayers(players);
 		this.setStats(stats);
 		this.setWorld(world);
@@ -45,11 +45,11 @@ public abstract class NetMatch {
 		this.world = world;
 	}
 
-	public float getStartDelay() {
+	public long getStartDelay() {
 		return startDelay;
 	}
 
-	public void setStartDelay(float startDelay) {
+	public void setStartDelay(long startDelay) {
 		this.startDelay = startDelay;
 	}
 }
