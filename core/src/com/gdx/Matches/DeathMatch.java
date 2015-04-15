@@ -52,7 +52,7 @@ public class DeathMatch extends NetMatch {
 	@Override
 	public void update() {
 		for (NetStat stat : this.getStats()) {
-			if (matchActive && stat.getKills() == this.killsToWin) {
+			if (matchActive && stat.getKills() >= this.killsToWin) {
 				Net.ChatMessagePacket packet = new Net.ChatMessagePacket();
 				packet.message = "" + stat.getName() + " wins the match with " + stat.getKills() + " kills" + " and " + stat.getDeaths() + " deaths!";
 				this.getWorld().getServer().sendChatMessage(packet);

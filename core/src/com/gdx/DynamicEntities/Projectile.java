@@ -20,7 +20,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 	private Emitter emitter;
 	private RegularEmitter emitterReg;
 	public static Vector3 localInertia = new Vector3();
-	public float timer = 0;
+	public float explosionTimer = 0;
 	 
 	public Projectile() {
 		super();
@@ -40,17 +40,17 @@ public class Projectile extends DynamicEntity implements Poolable {
 		collisionVector = new Vector3(0, 0, 0);
 		newPos = new Vector3(0, 0, 0);
 		oldPos = new Vector3(0, 0, 0);
-		this.timer = 0;
+		this.explosionTimer = 0;
 	}
 
 	@Override
 	public void update(float time, World world) {
-		timer += time;
+		explosionTimer += time;
 		
 		if (!this.isRendered() && this.getParticleEffect() != null) 
 			this.initializeProjectileEffect();
 		
-		if ((!this.isMoving() && !this.isInCollision()) || this.timer >= 3.0f) {
+		if ((!this.isMoving() && !this.isInCollision()) || this.explosionTimer >= 3.0f) {
 			if (GameScreen.mode != GameScreen.Mode.Server) {
 				Explosion explosion = World.entityManager.explosionPool.obtain();
 				explosion.setTarget(this.getTarget());
@@ -264,7 +264,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 		this.emitterReg = null;
 		this.setDealtDamage(false);
 		this.initializeBulletBody(new Vector3(0.05f, 0.05f, 0.05f), 10f, World.PROJECTILE_FLAG);
-		this.timer = 0;
+		this.explosionTimer = 0;
 	}
 
 	public boolean hasDealtDamage() {
