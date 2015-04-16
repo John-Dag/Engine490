@@ -75,7 +75,8 @@ public class NetServer {
 	   	if (object instanceof Net.PlayerPacket) {
     		Net.PlayerPacket packet = (Net.PlayerPacket)object;
     		NetServerEvent.PlayerUpdate event = new NetServerEvent.PlayerUpdate(packet);
-    		world.getServerEventManager().addNetEvent(event);
+    		event.handleEvent(world);
+    		//world.getServerEventManager().addNetEvent(event);
     	}
     	
     	else if (object instanceof Net.ProjectilePacket) {
@@ -101,7 +102,8 @@ public class NetServer {
     	else if (object instanceof Net.NewProjectile) {
     		Net.NewProjectile packet = (Net.NewProjectile)object;
     		NetServerEvent.NewProjectile event = new NetServerEvent.NewProjectile(packet);
-    		world.getServerEventManager().addNetEvent(event);
+    		event.handleEvent(world);
+    		//world.getServerEventManager().addNetEvent(event);
     	}
         
         else if (object instanceof Net.ChatMessagePacket) {

@@ -105,7 +105,9 @@ public class NetClient {
 	private void packetReceived(Connection connection, Object object) {
         if (object instanceof Net.PlayerPacket) {
      	   Net.PlayerPacket packet = (Net.PlayerPacket)object;
-     	   world.getNetEventManager().addNetEvent(new NetClientEvent.PlayerUpdate(packet));
+     	   //world.getNetEventManager().addNetEvent(new NetClientEvent.PlayerUpdate(packet));
+     	   NetClientEvent.PlayerUpdate event = new NetClientEvent.PlayerUpdate(packet);
+     	   event.handleEvent(world);
         }
         
         else if (object instanceof Net.NewPlayer) {
@@ -122,12 +124,15 @@ public class NetClient {
         
         else if (object instanceof Net.ProjectilePacket) {
      	   Net.ProjectilePacket packet = (Net.ProjectilePacket)object;
-     	   world.getNetEventManager().addNetEvent(new NetClientEvent.ProjectileUpdate(packet));
+     	   //world.getNetEventManager().addNetEvent(new NetClientEvent.ProjectileUpdate(packet));
+     	   NetClientEvent.ProjectileUpdate event = new NetClientEvent.ProjectileUpdate(packet);
+     	   event.handleEvent(world);
         }
         
         else if (object instanceof Net.NewProjectile) {
      	   Net.NewProjectile packet = (Net.NewProjectile)object;
-     	   world.getNetEventManager().addNetEvent(new NetClientEvent.CreateProjectile(packet));
+     	   NetClientEvent.CreateProjectile event = new NetClientEvent.CreateProjectile(packet);
+     	   event.handleEvent(world);
      	}
         
         else if (object instanceof Net.ChatMessagePacket) {
