@@ -373,7 +373,7 @@
   <object id="22" name="Spawn" x="921" y="509">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="20"/>
    </properties>
   </object>
   <object id="23" name="Rocket" x="447" y="540">
@@ -393,43 +393,43 @@
   <object id="25" name="Spawn" x="804" y="951">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="20"/>
    </properties>
   </object>
   <object id="26" name="Spawn" x="907" y="400">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="20"/>
    </properties>
   </object>
   <object id="27" name="Spawn" x="651" y="673">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="20"/>
    </properties>
   </object>
   <object id="28" name="Spawn" x="381" y="644">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="20"/>
    </properties>
   </object>
   <object id="29" name="Spawn" x="356" y="374">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="20"/>
    </properties>
   </object>
   <object id="30" name="Spawn" x="497" y="165">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="20"/>
    </properties>
   </object>
   <object id="31" name="Spawn" x="700" y="347">
    <properties>
     <property name="height" value="1"/>
-    <property name="time" value="1"/>
+    <property name="time" value="20"/>
    </properties>
   </object>
   <object id="32" name="Portal" x="79" y="817">
@@ -462,29 +462,29 @@
    </properties>
   </object>
  </objectgroup>
- <layer name="Tile Layer 2" width="32" height="32" opacity="0.6">
+ <layer name="Tile Layer 2" width="32" height="32" visible="0" opacity="0.6">
   <data encoding="base64" compression="zlib">
    eJztVsEKwCAIbSuIHXfccf//k1tQIGKlFotYh0cj8j1tpnpjjF9YQLAvXFy/5gg2O4BTaGs5bDx/EfuSuJOuB98cDgfs8L4lVmqP4uDeAfYd2nOBOW9B/NS/o7iPjG3OTppD8B4DtoiaXToHdbVvyHbQb3m/uVzk+CDJuVr8Wvte8eNaINGfOf7R+tr8C0g1Z+b7l8Z/Evo94ufWH3iutf5o6i+l32P+KPU2rN/af3Lzh6T/Yj8l/bc0O4yYPzR51Moxcv7E+T9i/l74Dx5fwxiU
   </data>
  </layer>
- <layer name="Texture Layer 1" width="32" height="32" opacity="0.62">
+ <layer name="Texture Layer 1" width="32" height="32" visible="0" opacity="0.62">
   <data encoding="base64" compression="zlib">
    eJzdlwEKhDAMBPs1D4X7/4sOQaEsyXbbmgZvIajFZJK2SlNKvj5gqznn/XYZvvO01RyPHyXGz5z/YjzvlY3Ki2HVWI/NcpGN8VT+TB4RfGWc5aLyrZhePdY4q13lW3koc6Ks3b/xmU8E/wtXJc9ZPsspmo/C+j1WBL9nv61a/3ofoF8En9W+6vsb+e89ze95J4J/XBbBV+ZW4Vt5zJw/Wnzm08tvxb35rTzfxkd/T4zPYlhn35Hzd4uPUvufSL7S/2T0X9n9T5Z+0i9xJQ==
   </data>
  </layer>
- <layer name="Texture Layer 2" width="32" height="32">
+ <layer name="Texture Layer 2" width="32" height="32" visible="0">
   <data encoding="base64" compression="zlib">
    eJzt1bENAAAEBVHD2X8mI5CI+OFeo1KchhkA5Lw4L+k0XbgH/Tu7Kujf2VXxvV/Jx/8LYE4Ar8EF2Q==
   </data>
  </layer>
- <layer name="Wall Texture Layer 1" width="32" height="32" opacity="0.61">
+ <layer name="Wall Texture Layer 1" width="32" height="32" visible="0" opacity="0.61">
   <data encoding="base64" compression="zlib">
    eJztl1EKwCAMQ73axN7/SvvZQMLaOam2gzwoFikN6E9SSjy1q3adq3Tu/RXudzOiLw462o6m9LuIfv+MePx3Bg1CCCGE/Ifs/uMwdgjMfCHa/8/4b1H6UXrNmfwhUNbcEx7+/03bAvVX50/MnlkyzwkghA4x
   </data>
  </layer>
  <layer name="Patrol Path Tile Layer 1" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJzt1UsOABAMBNC6/6VFbCnVHzGTWIk+UYEIaSnCoa0xWivZ68zWrD/1JbaVv9MPL18b+PAz/NX7472HVf0InzOiesDN/dCDbP/2O8DNaf8+zjg5G2vfqhZ8+PDf86MG0lMBRdwAiQ==
+   eJztlUEKACAIBPX/n+4agWSIbtYOSKDBqASJ9EXpp/9jPwrk3Le51YgMt+X35KLuk9qai+xod0+nM3P/Hj8Cz8xVbzQbdM8d/Jk90o/1E0J8vPDfVTAAGA4APQ==
   </data>
  </layer>
 </map>

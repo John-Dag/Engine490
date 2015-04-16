@@ -2,9 +2,10 @@ package com.gdx.engine.desktop;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
+import lightning3d.Engine.Engine;
+
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.gdx.engine.Engine;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
@@ -12,8 +13,8 @@ public class DesktopLauncher {
 		config.title = "Engine 490";
 		//config.width = 800;
 		//config.height = 600;
-		config.width = 1920/2;
-		config.height = 1080/2;
+		config.width = 1920 / 2;
+		config.height = 1080 / 2;
 		//config.vSyncEnabled = false;
 		//config.foregroundFPS = 0; 
 		//config.backgroundFPS = 0;
