@@ -124,14 +124,14 @@ public class NetServer {
         }
 	   	
         else if (object instanceof Net.PowerUpConsumedPacket) {
-        	System.out.println("Server received powerUpConsumedPacket");
+        	//System.out.println("Server received powerUpConsumedPacket");
         	Net.PowerUpConsumedPacket packet = (Net.PowerUpConsumedPacket)object;
         	NetServerEvent.PowerUpConsumed event = new NetServerEvent.PowerUpConsumed(packet);
         	world.getServerEventManager().addNetEvent(event);
         }
 	   	
         else if (object instanceof Net.WeaponPickedUpPacket) {
-        	System.out.println("Server received weaponPickedUpPacket");
+        	//System.out.println("Server received weaponPickedUpPacket");
         	Net.WeaponPickedUpPacket packet = (Net.WeaponPickedUpPacket)object;
         	NetServerEvent.WeaponPickedUp event = new NetServerEvent.WeaponPickedUp(packet);
         	world.getServerEventManager().addNetEvent(event);

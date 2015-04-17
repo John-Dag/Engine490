@@ -284,7 +284,7 @@ public class GameScreen implements Screen {
 		});
 		
 		buttons2.add(button5);
-		networkMenu = new UIMenu(stage, skin, buttons2, "Network Testing", 0, 0);
+		networkMenu = new UIMenu(stage, skin, buttons2, "FPS Demo", 0, 0);
 		networkMenu.generateVerticalMenu(10);
 		networkMenu.getTable().setVisible(true);
 		state = State.Paused;

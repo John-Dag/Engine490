@@ -66,7 +66,6 @@ public class NetClient {
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
 		packet.name = Net.name;
-		System.out.println("Connection ID: " + client.getID());
 		world.getPlayer().setNetId(client.getID());
 		client.sendTCP(packet);
 	}
