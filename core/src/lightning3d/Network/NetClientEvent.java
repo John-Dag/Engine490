@@ -54,6 +54,7 @@ public class NetClientEvent {
 			projectile.setDamage(RocketLauncher.DAMAGE);
 			projectile.setPosition(packet.position);
 			projectile.setNetId(packet.id);
+			projectile.setOriginID(packet.originID);
 			projectile.getBulletBody().setWorldTransform(projectile.calculateTarget(packet.cameraPos));
 			projectile.getBulletBody().setContactCallbackFilter(World.PLAYER_FLAG);
 			projectile.getBulletBody().activate();

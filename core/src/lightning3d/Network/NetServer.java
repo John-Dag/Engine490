@@ -3,6 +3,7 @@ package lightning3d.Network;
 import java.io.IOException;
 
 import lightning3d.DynamicEntities.Player;
+import lightning3d.Engine.ClientEvent;
 import lightning3d.Engine.World;
 import lightning3d.Matches.DeathMatch;
 import lightning3d.Network.Net.PlayerPacket;
@@ -75,8 +76,7 @@ public class NetServer {
 	   	if (object instanceof Net.PlayerPacket) {
     		Net.PlayerPacket packet = (Net.PlayerPacket)object;
     		NetServerEvent.PlayerUpdate event = new NetServerEvent.PlayerUpdate(packet);
-    		event.handleEvent(world);
-    		//world.getServerEventManager().addNetEvent(event);
+    		world.getServerEventManager().addNetEvent(event);
     	}
     	
     	else if (object instanceof Net.ProjectilePacket) {
@@ -85,13 +85,11 @@ public class NetServer {
     		//server.sendToAllExceptTCP(connection.getID(), packet);
     	}
     	
-    	//Handles a packet from a new player. Sends the packet to all players 
-    	//except the new one.
     	else if (object instanceof Net.NewPlayer) {
     		Net.NewPlayer playerNew = (Net.NewPlayer)object;
     		Net.NewPlayer packet = new Net.NewPlayer();
     		packet.position = playerNew.position;
-    		packet.id = server.getConnections().length;
+    		packet.id = connection.getID();
     		packet.name = playerNew.name;
     		NetServerEvent.NewPlayer event = new NetServerEvent.NewPlayer(packet);
     		world.getServerEventManager().addNetEvent(event);
@@ -101,9 +99,9 @@ public class NetServer {
     	
     	else if (object instanceof Net.NewProjectile) {
     		Net.NewProjectile packet = (Net.NewProjectile)object;
+    		packet.originID = connection.getID();
     		NetServerEvent.NewProjectile event = new NetServerEvent.NewProjectile(packet);
-    		event.handleEvent(world);
-    		//world.getServerEventManager().addNetEvent(event);
+    		world.getServerEventManager().addNetEvent(event);
     	}
         
         else if (object instanceof Net.ChatMessagePacket) {
@@ -245,20 +243,25 @@ public class NetServer {
 	//Updates all clients with the player that disconnected
 	public void removePlayer(Connection connection) {
 		String name = "";
-		boolean removed = false;
+		int removalIndex = 0;
 		
 		for (int i = 0; i < world.playerInstances.size; i++) {
 			Player player = world.playerInstances.get(i);
 			
-			if (removed) {
-				world.playerInstances.get(i).setNetId(world.playerInstances.get(i).getNetId() - 1);
-			}
-			
 			if (player.getNetId() == connection.getID()) {
 				name = player.getNetName();
 				world.playerInstances.removeIndex(i);
-				removed = true;
+				player.dispose();
+				ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(player);
+				event.handleEvent(world);
+				removalIndex = i;
 			}
+		}
+		
+		for (int i = removalIndex; i < world.playerInstances.size; i++) {
+			Player player = world.playerInstances.get(i);
+			
+			player.decrementBulletIndex();
 		}
 		
 		Net.PlayerDisconnect disconnect = new Net.PlayerDisconnect();

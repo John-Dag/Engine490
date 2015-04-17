@@ -2,6 +2,9 @@ package lightning3d.Commands;
 
 import java.io.IOException;
 
+import lightning3d.DynamicEntities.Player;
+import lightning3d.Engine.ClientEvent;
+import lightning3d.Engine.Entity;
 import lightning3d.Engine.World;
 import lightning3d.UI.UIConsoleCommand;
 
@@ -19,6 +22,10 @@ public class ReconnectCommand extends UIConsoleCommand {
 	
 		try {
 			if (!this.getWorld().getClient().getClient().isConnected()) {
+				for (int i = 0; i < this.getWorld().playerInstances.size; i++) {
+					this.getWorld().playerInstances.get(i).dispose();
+				}
+				
 				this.getWorld().playerInstances.clear();
 				this.getWorld().getClient().getClient().reconnect();
 				this.getWorld().getClient().createPlayerOnServer();

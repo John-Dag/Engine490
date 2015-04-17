@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import lightning3d.DynamicEntities.Player;
 import lightning3d.DynamicEntities.Projectile;
+import lightning3d.Engine.ClientEvent;
 import lightning3d.Engine.Entity;
 import lightning3d.Engine.GameScreen;
 import lightning3d.Engine.World;
@@ -43,7 +44,8 @@ public class NetClient {
 		    Net.register(client);
 		    connectClientToServer();
 		    setId(client.getID());
-		    createPlayerOnServer();
+		    if (client.isConnected())
+		    	createPlayerOnServer();
 		}
 		catch (Exception e) {
 			System.err.println(e);
@@ -64,6 +66,7 @@ public class NetClient {
 		packet.position = world.getPlayer().getPosition();
 		packet.id = client.getID();
 		packet.name = Net.name;
+		System.out.println("Connection ID: " + client.getID());
 		world.getPlayer().setNetId(client.getID());
 		client.sendTCP(packet);
 	}
@@ -105,9 +108,7 @@ public class NetClient {
 	private void packetReceived(Connection connection, Object object) {
         if (object instanceof Net.PlayerPacket) {
      	   Net.PlayerPacket packet = (Net.PlayerPacket)object;
-     	   //world.getNetEventManager().addNetEvent(new NetClientEvent.PlayerUpdate(packet));
-     	   NetClientEvent.PlayerUpdate event = new NetClientEvent.PlayerUpdate(packet);
-     	   event.handleEvent(world);
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.PlayerUpdate(packet));
         }
         
         else if (object instanceof Net.NewPlayer) {
@@ -124,15 +125,12 @@ public class NetClient {
         
         else if (object instanceof Net.ProjectilePacket) {
      	   Net.ProjectilePacket packet = (Net.ProjectilePacket)object;
-     	   //world.getNetEventManager().addNetEvent(new NetClientEvent.ProjectileUpdate(packet));
-     	   NetClientEvent.ProjectileUpdate event = new NetClientEvent.ProjectileUpdate(packet);
-     	   event.handleEvent(world);
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.ProjectileUpdate(packet));
         }
         
         else if (object instanceof Net.NewProjectile) {
      	   Net.NewProjectile packet = (Net.NewProjectile)object;
-     	   NetClientEvent.CreateProjectile event = new NetClientEvent.CreateProjectile(packet);
-     	   event.handleEvent(world);
+     	   world.getNetEventManager().addNetEvent(new NetClientEvent.CreateProjectile(packet));
      	}
         
         else if (object instanceof Net.ChatMessagePacket) {
@@ -271,13 +269,23 @@ public class NetClient {
 	//Remove the player that disconnected from the world
 	//Check both the player instances, and entity instances for the player
 	public void removePlayer(Net.PlayerDisconnect disconnect) {
+		int removalIndex = 0;
+		
 		try {
 			for (int i = 0; i < world.playerInstances.size; i++) {
 				Player player = world.playerInstances.get(i);
 				
 				if (player.getNetId() == disconnect.id) {
 					world.getPlayerInstances().removeIndex(i);
+					player.dispose();
+					removalIndex = i;
 				}
+			}
+			
+			for (int i = removalIndex; i < world.playerInstances.size; i++) {
+				Player player = world.playerInstances.get(i);
+				
+				player.decrementBulletIndex();
 			}
 			
 			for (int i = 0; i < Entity.entityInstances.size; i++) {
@@ -285,8 +293,10 @@ public class NetClient {
 				
 				if (entity instanceof Player) {
 					Player player = (Player)Entity.entityInstances.get(i);
-					if (player.getNetId() == disconnect.id)
-						Entity.entityInstances.removeIndex(i);
+					if (player.getNetId() == disconnect.id) {
+						ClientEvent.RemoveEntity event = new ClientEvent.RemoveEntity(player);
+						event.handleEvent(world);
+					}
 				}
 			}
 		}
