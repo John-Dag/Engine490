@@ -90,7 +90,7 @@ public class NetServer {
     		Net.NewPlayer playerNew = (Net.NewPlayer)object;
     		Net.NewPlayer packet = new Net.NewPlayer();
     		packet.position = playerNew.position;
-    		packet.id = connection.getID();
+    		packet.id = server.getConnections().length;
     		packet.name = playerNew.name;
     		NetServerEvent.NewPlayer event = new NetServerEvent.NewPlayer(packet);
     		world.getServerEventManager().addNetEvent(event);
@@ -243,13 +243,19 @@ public class NetServer {
 	//Updates all clients with the player that disconnected
 	public void removePlayer(Connection connection) {
 		String name = "";
+		boolean removed = false;
 		
 		for (int i = 0; i < world.playerInstances.size; i++) {
 			Player player = world.playerInstances.get(i);
 			
+			if (removed) {
+				world.playerInstances.get(i).setNetId(world.playerInstances.get(i).getNetId() - 1);
+			}
+			
 			if (player.getNetId() == connection.getID()) {
 				name = player.getNetName();
 				world.playerInstances.removeIndex(i);
+				removed = true;
 			}
 		}
 		

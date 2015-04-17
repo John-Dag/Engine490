@@ -16,7 +16,8 @@ public class NetServerEventManager {
 	public void processEvents() {
 		synchronized (events) {
 			for (NetServerEvent event : events) {
-				event.handleEvent(world);
+				if (event != null)
+					event.handleEvent(world);
 			}
 		}
 		

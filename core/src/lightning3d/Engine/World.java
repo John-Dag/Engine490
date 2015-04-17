@@ -98,7 +98,7 @@ public class World implements Disposable {
 		dispatcher = new btCollisionDispatcher(collisionConfig);
 		//Octree octree = new Octree(null, new BoundingBox(new Vector3(0,0,0), new Vector3(4,4,4)), this);
 		broadPhase = new btDbvtBroadphase();
-		setContactListener(new BulletContactListener());
+		setContactListener(new BulletContactListener(this));
 		setContraintSolver(new btSequentialImpulseConstraintSolver());
 		dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadPhase, constraintSolver, collisionConfig);
 		dynamicsWorld.setGravity(new Vector3(0, -0f, 0));
@@ -209,7 +209,7 @@ public class World implements Disposable {
 	}
 	
 	private void updateEntities(float delta) {
-		dynamicsWorld.stepSimulation(delta, 5, 1f/120f);
+		dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 		eventManager.processEvents();
 		wireInstances.clear();
 		
@@ -441,6 +441,7 @@ public class World implements Disposable {
 		if (player != null && projectile != null && projectile.getOriginID() != player.getNetId()) {
 			projectile.setMoving(false);
 			if (GameScreen.mode == GameScreen.Mode.Server) {
+				System.out.println("Player: " + player.getNetId() + " Projectile: " + projectile.getOriginID());
 				Net.CollisionPacket packet = new Net.CollisionPacket();
 				packet.playerOriginID = projectile.getOriginID();
 				packet.playerID = player.getNetId();
