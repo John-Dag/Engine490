@@ -38,7 +38,7 @@ public class NetClient {
 			this.world = world;
 			this.screen = screen;
 			comparator = new NetStatComparator();
-			client = new Client();
+			client = new Client(Net.writeBuffer, Net.objectBuffer);
 			Log.set(Log.LEVEL_INFO);
 			client.start();
 		    Net.register(client);
