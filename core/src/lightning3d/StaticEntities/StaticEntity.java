@@ -2,6 +2,7 @@ package lightning3d.StaticEntities;
 
 import lightning3d.Engine.Entity;
 import lightning3d.Engine.Render;
+import lightning3d.Engine.SoundEffect;
 import lightning3d.Engine.World;
 import lightning3d.Shaders.EntityShader;
 
@@ -26,6 +27,7 @@ public class StaticEntity extends Entity {
 	private ParticleEffect effect;
 	private ModelInstance model;
 	private BoundingBox boundingBox = new BoundingBox();
+	private SoundEffect sound;
 
 	public StaticEntity() {
 		super();
@@ -166,5 +168,13 @@ public class StaticEntity extends Entity {
 		{
 			this.model.userData=shader;
 		}
+	}
+
+	public SoundEffect getSound() {
+		return sound;
+	}
+
+	public void setSound(SoundEffect sound) {
+		this.sound = sound;
 	}
 }

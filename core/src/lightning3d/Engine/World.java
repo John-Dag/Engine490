@@ -52,6 +52,7 @@ public class World implements Disposable {
     public static boolean isWireframeEnabled;
 	public static Player player;
 	public static ParticleManager particleManager;
+	public static SoundManager soundManager;
 	public static Array<Enemy> enemyInstances;
 	public static EntityManager entityManager;
 	public static ClientEventManager eventManager;
@@ -113,6 +114,7 @@ public class World implements Disposable {
 			player = new Player(this, 100, null, 2, true, true, startVector, new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 			particleManager = new ParticleManager(this);
+			soundManager = new SoundManager(5f);
 			player.initAbilities();
 			player.initWeapons();
 			setPlayer(player);
@@ -212,6 +214,8 @@ public class World implements Disposable {
 		dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 		eventManager.processEvents();
 		wireInstances.clear();
+		
+		soundManager.updateEnvironmentSounds(this.getPlayer().getPosition());
 		
 		for (int i = 0; i < Entity.entityInstances.size; i++) {
 			Entity entity = Entity.entityInstances.get(i);

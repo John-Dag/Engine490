@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
@@ -58,6 +59,7 @@ public class Assets {
 	public static String vertexShader;
 	public static String fragmentShader;
 	public static ShaderProgram shaderProgram;
+	public static Sound torchSound;
 	
 	public static void loadAssets() {
 		manager = new AssetManager();
@@ -94,6 +96,7 @@ public class Assets {
 		healthPotion = new Texture("Items/healthpotion.png");
 		manaPotion = new Texture("Items/manapotion.png");
 		speedPotion = new Texture("Items/speedpotion.png");
+		torchSound = Gdx.audio.newSound(Gdx.files.internal("sound/torch.mp3"));
 		//wall.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		loadShaders();
 	}
