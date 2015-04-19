@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody.btRigidBodyConstructionInfo;
 
@@ -109,8 +110,14 @@ public class DynamicEntity extends Entity {
 	}
 	
 	public void initializeBulletObject(Vector3 boxVector, short callBackFlag) {
+		initializeBulletObject(new btBoxShape(boxVector),callBackFlag);
+	}
+	
+	
+	public void initializeBulletObject(btCollisionShape shape, short callBackFlag) {
+		cleanUpBulletObjects();
 		try {
-			this.setBulletShape(new btBoxShape(boxVector));
+			this.setBulletShape(shape);
 			this.setBulletObject(new btCollisionObject());
 			this.getBulletObject().setCollisionShape(this.getBulletShape());
 			this.getBulletObject().setWorldTransform(this.getTarget().translate(this.getPosition()));
@@ -124,6 +131,38 @@ public class DynamicEntity extends Entity {
 	
 	public void initializeBulletBody(Vector3 boxVector, float mass, short callBackFlag) {
 		
+		initializeBulletBody(new btBoxShape(boxVector),mass, callBackFlag);
+	}
+	
+	public void initializeBulletBody(btCollisionShape shape, float mass, short callBackFlag)
+	{
+		cleanUpBulletObjects();
+		
+		Vector3 localInertia = new Vector3();
+		
+		try {
+			this.setBulletShape(shape);
+			this.setBulletObject(new btCollisionObject());
+			this.getBulletObject().setCollisionShape(this.getBulletShape());
+			this.setTarget(new Matrix4());
+			this.getBulletShape().calculateLocalInertia(mass, localInertia);
+			
+			this.setMotionState(new BulletMotionState());
+			this.getMotionState().transform = this.calculateTarget(this.getPosition());
+			this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(mass, null, this.getBulletShape(), localInertia));
+			this.setBulletBody(new btRigidBody(this.getConstructionInfo()));
+			this.getBulletBody().setMotionState(this.getMotionState());
+			this.getBulletBody().setCollisionFlags(this.getBulletBody().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
+			this.getBulletBody().activate();
+			this.getConstructionInfo().dispose();
+		}
+		catch (Exception e) {
+			System.err.println(e);
+		}
+	}
+	
+	private void cleanUpBulletObjects()
+	{
 		if (this.getMotionState() != null) {
 			motionState.dispose();
 		}
@@ -153,28 +192,6 @@ public class DynamicEntity extends Entity {
 		bulletShape = null;
 		
 		
-		
-		Vector3 localInertia = new Vector3();
-		
-		try {
-			this.setBulletShape(new btBoxShape(boxVector));
-			this.setBulletObject(new btCollisionObject());
-			this.getBulletObject().setCollisionShape(this.getBulletShape());
-			this.setTarget(new Matrix4());
-			this.getBulletShape().calculateLocalInertia(mass, localInertia);
-			
-			this.setMotionState(new BulletMotionState());
-			this.getMotionState().transform = this.calculateTarget(this.getPosition());
-			this.setConstructionInfo(new btRigidBody.btRigidBodyConstructionInfo(mass, null, this.getBulletShape(), localInertia));
-			this.setBulletBody(new btRigidBody(this.getConstructionInfo()));
-			this.getBulletBody().setMotionState(this.getMotionState());
-			this.getBulletBody().setCollisionFlags(this.getBulletBody().getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-			this.getBulletBody().activate();
-			this.getConstructionInfo().dispose();
-		}
-		catch (Exception e) {
-			System.err.println(e);
-		}
 	}
 	
 	public void addBulletObject() {
@@ -291,33 +308,7 @@ public class DynamicEntity extends Entity {
 	public void dispose() {
 		//Removes all bullet references. Important to call this dispose method before removing an entity.
 		//The gc will cause stuttering if they aren't removed. 
-		if (this.getMotionState() != null) {
-			motionState.dispose();
-		}
-		
-		if (this.getBulletBody() != null) {
-			World.dynamicsWorld.removeRigidBody(this.getBulletBody());
-			bulletBody.dispose();
-		}
-		
-		if (this.getBulletObject() != null) {
-			World.dynamicsWorld.removeCollisionObject(this.getBulletObject());
-			bulletObject.dispose();
-		}
-		
-		if (this.constructionInfo != null) {
-			constructionInfo.dispose();
-		}
-		
-		if (this.bulletShape != null) {
-			bulletShape.dispose();
-		}
-		
-		bulletBody = null;
-		bulletObject = null;
-		motionState = null;
-		constructionInfo = null;
-		bulletShape = null;
+		cleanUpBulletObjects();
 	}
 	
 	@Override
