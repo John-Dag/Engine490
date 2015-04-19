@@ -123,6 +123,37 @@ public class DynamicEntity extends Entity {
 	}
 	
 	public void initializeBulletBody(Vector3 boxVector, float mass, short callBackFlag) {
+		
+		if (this.getMotionState() != null) {
+			motionState.dispose();
+		}
+		
+		if (this.getBulletBody() != null) {
+			World.dynamicsWorld.removeRigidBody(this.getBulletBody());
+			bulletBody.dispose();
+		}
+		
+		if (this.getBulletObject() != null) {
+			World.dynamicsWorld.removeCollisionObject(this.getBulletObject());
+			bulletObject.dispose();
+		}
+		
+		if (this.constructionInfo != null) {
+			constructionInfo.dispose();
+		}
+		
+		if (this.bulletShape != null) {
+			bulletShape.dispose();
+		}
+		
+		bulletBody = null;
+		bulletObject = null;
+		motionState = null;
+		constructionInfo = null;
+		bulletShape = null;
+		
+		
+		
 		Vector3 localInertia = new Vector3();
 		
 		try {

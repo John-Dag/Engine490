@@ -33,7 +33,7 @@ public class EntityManager {
 
 	    @Override
 	    public void free(Projectile ent) {
-	        ent.reset();
+	        //ent.reset(); <- super.free will call this
 	        super.free(ent);
 	    }
 

@@ -212,6 +212,7 @@ public class World implements Disposable {
 	}
 	
 	private void updateEntities(float delta) {
+		//dynamicsWorld.stepSimulation(delta, 5, 1f/360f);
 		dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
 		eventManager.processEvents();
 		wireInstances.clear();
