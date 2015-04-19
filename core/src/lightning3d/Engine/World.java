@@ -613,6 +613,8 @@ public class World implements Disposable {
 	}
 
 	public void setMeshLevel(MeshLevel meshLevel) {
+		if(this.meshLevel!=null)
+			this.meshLevel.dispose();
 		this.meshLevel = meshLevel;
 	}
 

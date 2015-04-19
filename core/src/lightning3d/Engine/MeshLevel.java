@@ -221,6 +221,16 @@ public class MeshLevel {
 		
 	}
 	
+	public void dispose()
+	{
+		for(btCollisionObject bulletObject:bulletObjects)
+		{
+			
+			World.dynamicsWorld.removeCollisionObject(bulletObject);
+		}
+		bulletObjects.clear();
+	}
+	
 	// print levelArray
 	public void printLevelArray(){
 		for(int i = 0; i < levelArray.length; i++){
@@ -295,7 +305,7 @@ public class MeshLevel {
 			World.dynamicsWorld.addCollisionObject(bulletObject);
 		}
 		System.out.println(bulletObjects.size + " Mesh level bullet objects added to dynamic sim");
-		bulletObjects.clear();
+		
 	}
 	
 	private btCollisionObject addBoxObject()
