@@ -8,6 +8,7 @@ import lightning3d.Engine.Entity;
 import lightning3d.Engine.EntityManager;
 import lightning3d.Engine.MeshLevel;
 import lightning3d.Engine.ParticleManager;
+import lightning3d.Engine.SoundManager;
 import lightning3d.Engine.World;
 import lightning3d.Network.Net.PlayerPacket;
 import lightning3d.Shaders.ColorMultiplierEntityShader;
@@ -37,7 +38,6 @@ public class NetWorld extends World {
 		entityManager = new EntityManager(this);
 		setNetEventManager(new NetClientEventManager(this));
 		setServerEventManager(new NetServerEventManager(this));
-		
 //		RocketLauncher launcher = (RocketLauncher) new RocketLauncher().spawn(getPlayer().getPosition());
 //		Weapon noWeapon = new Weapon();
 //		getPlayer().setWeapon(noWeapon);

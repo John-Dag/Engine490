@@ -1,5 +1,6 @@
 package lightning3d.Engine;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
@@ -7,7 +8,7 @@ public class SoundManager {
 	private Array<SoundEffect> environmentSounds;
 	private Array<Long> activeSoundIds;
 	
-	public SoundManager(float distanceTrigger) {
+	public SoundManager() {
 		setSounds(new Array<SoundEffect>());
 		activeSoundIds = new Array<Long>();
 	}
@@ -20,7 +21,7 @@ public class SoundManager {
 		this.environmentSounds = sounds;
 	}
 	
-	public void updateEnvironmentSounds(Vector3 playerPos) {
+	public void updateEnvironmentSounds(Vector3 playerPos, Vector3 playerDirection) {
 		SoundEffect sound = findClosestEnvironSound(playerPos);
 		float distance = sound.getPosition().dst(playerPos);
 		
@@ -42,6 +43,16 @@ public class SoundManager {
 			else {
 				sound.setVolume(1 - (sound.getPosition().dst(playerPos) / sound.getDistanceTrigger()));
 				sound.getSound().setVolume(sound.getId(), sound.getVolume());
+				Vector2 v = new Vector2(sound.getPosition().x - playerPos.x, sound.getPosition().z - playerPos.z);
+				Vector2 u = new Vector2(playerDirection.x, playerDirection.z);
+				v.nor();
+				u.nor();
+				Vector3 up = new Vector3(0f, 1f, 0f);
+				Vector3 u3 = new Vector3(u.x, 0, u.y);
+				Vector3 leftvec = u3.crs(up);
+				leftvec.nor();
+				float pan = Vector2.dot(leftvec.x, leftvec.z, v.x, v.y);
+				sound.getSound().setPan(sound.getId(), pan, sound.getVolume());
 			}
 			
 			if (sound.isPaused()) {

@@ -105,6 +105,7 @@ public class World implements Disposable {
 		dynamicsWorld.setGravity(new Vector3(0, -0f, 0));
 		eventManager = new ClientEventManager(this);
 		setTickCallback(new BulletTickCallback(dynamicsWorld));
+		soundManager = new SoundManager();
 	}
 	
 	//Order matters here
@@ -114,7 +115,7 @@ public class World implements Disposable {
 			player = new Player(this, 100, null, 2, true, true, startVector, new Vector3(0, 0, 0), new Vector3(0, 0, 0), 
 					new Vector3(0, 0, 0), new Vector3(0, 0, 0), null);
 			particleManager = new ParticleManager(this);
-			soundManager = new SoundManager(5f);
+			soundManager = new SoundManager();
 			player.initAbilities();
 			player.initWeapons();
 			setPlayer(player);
@@ -215,7 +216,7 @@ public class World implements Disposable {
 		eventManager.processEvents();
 		wireInstances.clear();
 		
-		soundManager.updateEnvironmentSounds(this.getPlayer().getPosition());
+		soundManager.updateEnvironmentSounds(this.getPlayer().getPosition(), this.getPlayer().camera.direction);
 		
 		for (int i = 0; i < Entity.entityInstances.size; i++) {
 			Entity entity = Entity.entityInstances.get(i);
