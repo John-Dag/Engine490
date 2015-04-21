@@ -266,8 +266,7 @@ public class Projectile extends DynamicEntity implements Poolable {
 		this.emitter = null;
 		this.emitterReg = null;
 		this.setDealtDamage(false);
-		if(this.getBulletBody()==null)
-			this.initializeBulletBody(new Vector3(0.05f, 0.05f, 0.05f), 10f, World.PROJECTILE_FLAG);
+		this.initializeBulletBody(new Vector3(0.05f, 0.05f, 0.05f), 10f, World.PROJECTILE_FLAG);
 		this.explosionTimer = 0;
 	}
 

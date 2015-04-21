@@ -116,6 +116,7 @@ public class DynamicEntity extends Entity {
 	
 	public void initializeBulletObject(btCollisionShape shape, short callBackFlag) {
 		cleanUpBulletObjects();
+		
 		try {
 			this.setBulletShape(shape);
 			this.setBulletObject(new btCollisionObject());
@@ -130,12 +131,10 @@ public class DynamicEntity extends Entity {
 	}
 	
 	public void initializeBulletBody(Vector3 boxVector, float mass, short callBackFlag) {
-		
 		initializeBulletBody(new btBoxShape(boxVector),mass, callBackFlag);
 	}
 	
-	public void initializeBulletBody(btCollisionShape shape, float mass, short callBackFlag)
-	{
+	public void initializeBulletBody(btCollisionShape shape, float mass, short callBackFlag) {
 		cleanUpBulletObjects();
 		
 		Vector3 localInertia = new Vector3();
@@ -161,8 +160,7 @@ public class DynamicEntity extends Entity {
 		}
 	}
 	
-	private void cleanUpBulletObjects()
-	{
+	private void cleanUpBulletObjects() {
 		if (this.getMotionState() != null) {
 			motionState.dispose();
 		}
@@ -190,8 +188,6 @@ public class DynamicEntity extends Entity {
 		motionState = null;
 		constructionInfo = null;
 		bulletShape = null;
-		
-		
 	}
 	
 	public void addBulletObject() {
