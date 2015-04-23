@@ -1,6 +1,8 @@
 package lightning3d.Engine;
 
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Vector3;
+//import com.gdx.DynamicEntities.Enemy;
 
 import java.util.*;
 
@@ -73,6 +75,7 @@ public class DistanceTrackerMap {
             playerPos = playerPos + 1 - 1;
         pos = unreachableSpotResolution(pos, startLayerHeight);
 
+
         start = distanceMap[pos][startLayerHeight];
         for (int checkLayer = startLayerHeight; checkLayer > -1; checkLayer--){
             start = distanceMap[pos][checkLayer];
@@ -96,13 +99,16 @@ public class DistanceTrackerMap {
             lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
             toBeLookedAt = new ArrayList<DistanceFromPlayer>(1);
             for (DistanceFromPlayer distance : lookingAt) {
-                if (distance.getTileNumber() == 1832)//debug purposes
-                    distance.setTileNumber(1832);
+                if (distance.getTileNumber() == 1386)//debug purposes
+                    distance.setTileNumber(1386);
                 for (int num : distance.getSpotToMoveIndex()) {
+                    if (num == 1386)//debug purposes
+                        num = num + 1 - 1;
                     layerHeight = num / (width * height);
                     if (layerHeight > 0)
                         num = num - (layerHeight * width * height);
                     toCheck = distanceMap[num][layerHeight];
+                    //tile hasnt been looked at yet
                     if (toCheck.getDistFromPlayer() == defaultTileNumber && distanceMap[num][layerHeight].getSpotToMoveIndex().contains(distance.getTileNumber())) {
                         distanceMap[num][layerHeight].setDistFromPlayer(distFromPlayer);
                         toBeLookedAt.add(toCheck);
@@ -151,10 +157,13 @@ public class DistanceTrackerMap {
                     leastDistance = toCheck;
                     break;
                 }
+                //if (leastDistance.getTileNumber() != -1)
+                    if (leastDistance.getDistFromPlayer() > toCheck.getDistFromPlayer() && toCheck.getDistFromPlayer() != defaultTileNumber){
+                        leastDistance = toCheck;
+                    }
+                //else
+                //    leastDistance = toCheck;
 
-                if (leastDistance.getDistFromPlayer() > toCheck.getDistFromPlayer() && toCheck.getDistFromPlayer() != defaultTileNumber){
-                    leastDistance = toCheck;
-                }
                 if (intPath.size() == 5)//2)//temp fix to memory leak
                     return intPath;
             }
@@ -177,8 +186,8 @@ public class DistanceTrackerMap {
             lookingAt = new ArrayList<DistanceFromPlayer>(toBeLookedAt);
             toBeLookedAt = new ArrayList<DistanceFromPlayer>();
             for (DistanceFromPlayer mapObject : lookingAt) {
-                if (mapObject.getTileNumber() == 363)//debug purposes
-                    mapObject.setTileNumber(363);
+                if (mapObject.getTileNumber() == 1385)//debug purposes
+                    mapObject.setTileNumber(1385);
                 layerHeight = mapObject.getTileNumber() / (width * height);
                 tilePos = mapObject.getTileNumber();
                 if (layerHeight > 0)
@@ -272,10 +281,10 @@ public class DistanceTrackerMap {
                     currentAdjTile = currentAdjTile + width * height;
                 else {
                     if (adjTileLayer == 1) {
-                        checkTile = meshLevel.getMapTile(getXPos(currentAdjTile) - (width * tileLayer), getYPos(currentAdjTile), 1);
+                        checkTile = meshLevel.getMapTile(getXPos(currentAdjTile) - (width * tileLayer), getYPos(currentAdjTile), 1);///( , , 1);
                         currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            return null;
+                        //if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
+                        //    return null;
                     }
                 }
                 return new DistanceFromPlayer(currentAdjTile, tileLayer, width);
@@ -305,8 +314,8 @@ public class DistanceTrackerMap {
                     if (adjTileLayer == 1) {
                         checkTile = meshLevel.getMapTile(getXPos(currentAdjTile) - (width * tileLayer), getYPos(currentAdjTile), 1);
                         currentLocHeight = meshLevel.getMapTile(getXPos(mapObject.getTileNumber()), getYPos(mapObject.getTileNumber()), mapObject.getLayer()).getHeight();
-                        if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
-                            return null;
+                        //if(checkTile.getHeight() != -1 || (checkTile.getHeight() > currentLocHeight))
+                        //    return null;
                     }
                 }
                 return new DistanceFromPlayer(currentAdjTile, tileLayer, width);
@@ -319,12 +328,6 @@ public class DistanceTrackerMap {
         MapTile tile;
         int tileLocation = mapObject.getTileNumber();
         int currentHeight;
-
-        if (mapObject.getTileNumber() == 1224)//debug purposes
-            mapObject.setTileNumber(1224);
-
-        if (mapObject.getTileNumber() == 232)//debug purposes
-            mapObject.setTileNumber(232);
 
         if (mapObject.getLayer() == 1){
             mapObject.setTileNumber(mapObject.getTileNumber() - width * height);//temp change to layer 2 tile pos
@@ -562,6 +565,82 @@ public class DistanceTrackerMap {
             return true;
         else
             return false;
+    }
+
+    public boolean posIsRampToHigherLayer(int tile, int layer, int layerHeight, float enemyRot) {
+        if (tile > 32 * 32) {
+            tile = tile - (1 * width * width);
+            layer = 1;
+        }
+        int rampDir = meshLevel.getMapTile(getXPos(tile), getYPos(tile), layer).getRampDirection();
+        if (rampDir != -1
+            && meshLevel.getMapTile(getXPos(tile), getYPos(tile), layer).getHeight() == layerHeight
+            && enemyRot == dirToDegree(rampDir))
+            return true;
+        else
+            return false;
+    }
+
+    public boolean posIsRampToLowerLayer(int tile, int layer, int layerHeight, float enemyRot) {
+        float oppositeDir = enemyRot;
+        if (oppositeDir + 180 > 360)
+            oppositeDir = oppositeDir - 360 + 180;
+        else
+            oppositeDir = oppositeDir + 180;
+
+        if (tile > 32 * 32) {
+            tile = tile - (1 * width * width);
+            layer = 1;
+        }
+
+        int rampDir = meshLevel.getMapTile(getXPos(tile), getYPos(tile), layer).getRampDirection();
+        if (rampDir != -1
+                && meshLevel.getMapTile(getXPos(tile), getYPos(tile), layer).getHeight() == layerHeight
+                && oppositeDir == dirToDegree(rampDir))
+            return true;
+        else
+            return false;
+    }
+
+    public int rampDirDegree(int tile, int layer) {
+        if (tile > 32 * 32) {
+            tile = tile - (1 * width * width);
+            layer = 1;
+        }
+         int rampDir = meshLevel.getMapTile(getXPos(tile), getYPos(tile), layer).getRampDirection();
+
+        //TODO consider diagonals
+        return dirToDegree(rampDir);
+    }
+
+    public Vector3 getNextTile(int degree) {
+        if (degree == 0)
+            return new Vector3(0, 0, 1);
+        else if (degree == 90)
+            return new Vector3(1, 0, 0);
+        else if (degree == 180)
+            return new Vector3(0, 0, -1);
+        else if (degree == 270)
+            return new Vector3(-1, 0, 0);
+        else
+            return new Vector3(0, 0, 0);
+    }
+
+    public int dirToDegree(int rampDir){
+        if (rampDir == meshLevel.RIGHT)
+            return 0;
+        else if (rampDir == meshLevel.UP)
+            return 90;
+        else if (rampDir == meshLevel.LEFT)
+            return 180;
+        else if (rampDir == meshLevel.DOWN)
+            return 270;
+        else
+            return -1;
+    }
+
+    public int getWidth(){
+        return width;
     }
 
 }
