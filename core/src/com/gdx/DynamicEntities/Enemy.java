@@ -36,6 +36,12 @@ public class Enemy extends DynamicEntity {
 	public Vector3 spawnPos;
 	private double changeLayerHeight = 5.9;
 	private boolean aggroed = false;
+    private Vector3 nextLayerTilePos = new Vector3(-1, -1, -1);
+    private boolean goingToHigherLayer = false;
+    private boolean goingToLowerLayer = false;
+    private int currentLayer = 0;// TODO change based on where enemy starts
+    private int nextTile = 32 * 32 +2;
+    int yKeep = -1;
 
 	public Enemy() {
 		super();
@@ -74,7 +80,7 @@ public class Enemy extends DynamicEntity {
 		GridPoint2 playerPosition = new GridPoint2((int)world.getPlayer().camera.position.x, (int)world.getPlayer().camera.position.z);
         int meshLevelHeight = 0;
 		int[] directionVals = new int[3];
-        int x; int y; int yKeep;
+        int x; int y;
 		int width = world.getMeshLevel().getMapXDimension();
 		String adjPos = "";
 		ArrayList<Integer> path;
@@ -87,29 +93,52 @@ public class Enemy extends DynamicEntity {
 				+ world.getMeshLevel().mapHeight(
 				this.getPosition().x, this.getPosition().z, 1);
 
-		if (heightValueLvl2 == 5)//enemy still on layer 1
-			heightValueLvl2 = 6;
-
 		if (this.getStateMachine().Current == this.idle) {
 			this.getAnimation().setAnimation("Idle", -1);
             this.getVelocity().set(0,0,0);
 		}
 
 		else if (this.getStateMachine().Current == this.moving) {
-			//debug
-			float test = 0, test2 = 0;
-			if (playerPosition.x == 8 && playerPosition.y == 7)//testing purposes
-				this.setPosition(new Vector3(this.getPosition().x, this.getPosition().y, this.getPosition().z));
-
             int playerTile = playerPosition.x + width
                     * playerPosition.y;
 			int enemyTile = thisPosition.x + width * thisPosition.y;
-			if (this.getPosition().y > changeLayerHeight)//5.8
+
+            if (world.getDistanceMap().posIsRampToHigherLayer(enemyTile, 0, 5, this.getRotation().x)) {//going up ramp
+                nextLayerTilePos = world.getDistanceMap().getNextTile(world.getDistanceMap().rampDirDegree(enemyTile, 0)).add(this.getPosition());
+                goingToHigherLayer = true;
+            }
+            else if (world.getDistanceMap().posIsRampToLowerLayer(enemyTile, 0, 5, this.getRotation().x)){//going down ramps
+                nextLayerTilePos = world.getDistanceMap().getNextTile(world.getDistanceMap().rampDirDegree(enemyTile, 0)).add(this.getPosition());
+                goingToLowerLayer = true;
+                currentLayer = 0;
+            }
+            else if (currentLayer == 1 && nextTile < width * width){//falling to lower layer
+                nextLayerTilePos = new Vector3(getYPos(nextTile), 0, getXPos(nextTile));
+                goingToLowerLayer = true;
+            }
+
+            //deals with getting enemy to next layer
+            if ((int)this.getPosition().x == (int)nextLayerTilePos.x && (int)this.getPosition().z == (int)nextLayerTilePos.z && goingToHigherLayer == true) {
+                goingToHigherLayer = false;
+                currentLayer = 1;
+            }
+            else if ((int)(this.getPosition().x) == (int)nextLayerTilePos.x && (int)(this.getPosition().z) == (int)nextLayerTilePos.z && goingToLowerLayer == true) {
+                currentLayer = 0;
+                goingToLowerLayer = false;
+            }
+            //else if ((int)this.getPosition().x == (int)nextLayerTilePos.x && (int)this.getPosition().z == (int)nextLayerTilePos.z && goingToLowerLayer == true){
+            //    goingToLowerLayer = false;
+            //    currentLayer = 0;
+            //}
+
+            if (playerTile == 1386 || playerTile == 362)
+                playerTile = playerTile + 1 - 1;
+
+            if (currentLayer == 1)
 				enemyTile = enemyTile + width * width;
 			if (world.getPlayer().camera.position.y >= 6)// should be 6?
 				playerTile = playerTile + width * width;
              try {
-				 //path = this.shortestPath(enemyTile, playerTile, world.getDistanceMap());
 				 if ((Math.abs(playerPosition.x - thisPosition.x) > 3 || Math.abs(playerPosition.y - thisPosition.y) > 3) && !aggroed)
 					 path = patrolTiles(enemyTile, world);
 				 else {
@@ -121,16 +150,24 @@ public class Enemy extends DynamicEntity {
             }
             if (path.size() == 0) 
                 return;
-			int test1 = 0;
-			if (path.contains("633") || path.contains("6"))
-				test1 = test1 + 1;
 
-			//debug
-			if ((int)this.getPosition().x == 8 && (int)this.getPosition().z == 6)
-				this.setPosition(new Vector3(this.getPosition().x, this.getPosition().y, this.getPosition().z));
-
+            int test = 0;
+            if (path.get(0) == -1){
+                path.set(0, enemyTile);
+                path.set(1, enemyTile);
+            }
 			//calc vel
             directionVals = calcVel(path, delta, width, thisPosition, world);
+            nextTile = directionVals[2];
+            /*if ((int)this.getPosition().x == (int)nextLayerTilePos.x && (int)this.getPosition().z == (int)nextLayerTilePos.z && goingToLowerLayer == true){
+                goingToLowerLayer = false;
+                currentLayer = 0;
+            }
+
+            if (directionVals[2] < width * width && currentLayer == 1) {//falling to lower layer
+                nextLayerTilePos = new Vector3(getXPos(directionVals[2], width), 0, getYPos(directionVals[2], width));
+                goingToLowerLayer = true;
+            }*/
             
             //Check collision with other enemies
 
@@ -152,7 +189,6 @@ public class Enemy extends DynamicEntity {
                     directionVals = calcVel(newPath, delta, width, thisPosition, world);
             }
 
-                //this.getVelocity().set(0, 0, 0);
             //set tile
             //reget vel and dir
 
@@ -165,25 +201,16 @@ public class Enemy extends DynamicEntity {
             y = directionVals[1];
             yKeep = directionVals[2];
 
-			//debug
-			if (playerPosition.x == 8 && playerPosition.y == 7)
-				x = x + 1 - 1;
-
-            if (this.getPosition().y > 5.8) {///////////////////////////////////puts enemy on 2nd layer
+            //if (this.getPosition().y > 5.8) {///////////////////////////////////puts enemy on 2nd layer
+            if (currentLayer == 1) {
                 checkPos.y = heightValueLvl2;
             }
-            else if (this.getPosition().y < 6) {
+            //else if (this.getPosition().y < 6) {
+            else if (currentLayer == 0) {
                 checkPos.y = heightValueLvl1;
             }
 
-            //this.setPosition(checkPos);
-
-			//world.getMeshLevel().getEnemyWayPoints();
-			//world.getMeshLevel().generatePatrolPath();
-
-			//adjusts enemy position to center of tile
-			if (this.getPosition().y >= 6)
-				meshLevelHeight = (int)this.getPosition().y / 6;
+            meshLevelHeight = currentLayer;
             if (x >= 0 && y >= 0 && world.getMeshLevel().getMapTile(x, y, meshLevelHeight) != null
             	&& this.getPosition().x + 2 < width && this.getPosition().x - 2 > 0
             	&& this.getPosition().z + 2 < width && this.getPosition().z - 2 > 0)
@@ -198,10 +225,17 @@ public class Enemy extends DynamicEntity {
                         this.getPosition().x = x + .5f;
                 }
 
-            if (this.getPosition().y >= 6)
-                targetHeight = 6 + world.getMeshLevel().getMapTile((int)this.getPosition().x, (int)this.getPosition().z, 1).getHeight();
-                        //+ world.getMeshLevel().mapHeight(
-                        //this.getPosition().x, this.getPosition().z, 2);//get maptile
+            /*if (goingToLowerLayer == true) {
+                targetHeight = world.getMeshLevel().getHeight(nextLayerTilePos) +  world.getMeshLevel().getHeightOffset();
+                goingToLowerLayer = false;
+                currentLayer = 0;
+            }*/
+
+            if (currentLayer == 1)
+                targetHeight = heightValueLvl2;
+            else if (currentLayer == 0)
+                targetHeight = heightValueLvl1;
+
             if (this.getPosition().y > targetHeight + 30 * delta) {
                 this.getPosition().y -= 30 * delta;
 
@@ -209,38 +243,10 @@ public class Enemy extends DynamicEntity {
                 //this.getPosition().y = targetHeight;
 				this.getPosition().y += 30 * delta;
             } else {
-				/*if (this.getPosition().y >=6)
-					this.getPosition().y = 6 + world.getMeshLevel()
-							.getHeightOffset()
-							+ world.getMeshLevel().mapHeight(
-							this.getPosition().x,
-							this.getPosition().z, 2);
-				else if (this.getPosition().y >= changeLayerHeight) {
-					float test1 = 0.2f;
-					//if (this.getPosition().y >= changeLayerHeight && this.getPosition().y < 6.0)
-					//	test1 = addToChangeLH;
-
-					if (this.getRotation().x == 180)
-						this.getPosition().y = 5 + test1 + world.getMeshLevel()
-								.getHeightOffset()
-								+ world.getMeshLevel().mapHeight(
-								this.getPosition().x,
-								this.getPosition().z - 1, 1);
-					else if (this.getRotation().x == 0)
-						this.getPosition().y = 5 + test1 + world.getMeshLevel()
-								.getHeightOffset()
-								+ world.getMeshLevel().mapHeight(
-								this.getPosition().x,
-								this.getPosition().z + 1, 1);
-
-				}
-				else
-					this.getPosition().y = world.getMeshLevel()
-							.getHeightOffset()
-							+ world.getMeshLevel().mapHeight(
-							this.getPosition().x,
-							this.getPosition().z, 1);
-							*/
+                /*
+                if (areOppositeDir(world.getDistanceMap().rampDirDegree(enemyTile, 1), (int)this.getRotation().x))
+                    this.getPosition().y -= 30 * delta;
+                    */
 			}
 
 		}
@@ -302,7 +308,8 @@ public class Enemy extends DynamicEntity {
     private int[] calcVel(ArrayList<Integer> path, float delta, int width, GridPoint2 thisPosition, World world){
         int[] result = new int[3];
         Vector3 vel = new Vector3();
-        int yKeep = path.get(0) / width;
+        int nextTile = path.get(0);
+
         int y;
         if (path.get(0) > width * width)
             y = (path.get(0) - width * width) / width;
@@ -314,7 +321,7 @@ public class Enemy extends DynamicEntity {
         vel.z = y - thisPosition.y;
 
         if (vel.x == 0 && vel.z == 0 && path.size() > 1) {
-            yKeep = path.get(1) / width;
+            nextTile = path.get(1);
             if (path.get(1) > width * width)
                 y = (path.get(1) - width * width) / width;
             else
@@ -333,7 +340,10 @@ public class Enemy extends DynamicEntity {
         // originally 90
         // degrees off
         // when loaded
+
         this.getVelocity().set(vel);
+        /*
+        Doesnt allow enemies to go down ramp to lower layer
         Vector3 collisionVector = world.getMeshLevel()
                 .checkCollision(this.getPosition(),
                         this.getNewPosition(delta), 1.6f, 1.6f,
@@ -342,9 +352,11 @@ public class Enemy extends DynamicEntity {
                 * collisionVector.x, this.getVelocity().y
                 * collisionVector.y, this.getVelocity().z
                 * collisionVector.z);
+        */
         result[0] = x;
         result[1] = y;
-        result[2] = yKeep;
+        result[2] = nextTile;
+
         return result;
      }
 
@@ -621,6 +633,14 @@ public class Enemy extends DynamicEntity {
         return tileNumber / width;
     }
 
+    private int getXPos(int tileNumber){
+        return tileNumber / World.getDistanceMap().getWidth();
+    }
+
+    private int getYPos(int tileNumber) {
+        return tileNumber % World.getDistanceMap().getWidth();
+    }
+
     private int getYPos (int tileNumber, TiledMapTileLayer layer) {
         return tileNumber % layer.getHeight();
     }
@@ -752,4 +772,15 @@ public class Enemy extends DynamicEntity {
 			patrolPathNums = nextRotationBasedTile(patrolPathNums, currentTile, patrolPathTiles, currentRotation);
 		return patrolPathNums;
 	}
+
+    private boolean areOppositeDir(int degree1, int degree2) {
+        if (degree1 + 180 > 360)
+            degree1 = degree1 -180;
+        else
+            degree1 = degree1 + 180;
+        if (degree1 == degree2)
+            return true;
+        else
+            return false;
+    }
 }
