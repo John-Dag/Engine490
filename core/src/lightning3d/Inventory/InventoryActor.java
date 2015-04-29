@@ -31,7 +31,7 @@ public class InventoryActor extends Window{
 				slotActor = new SlotActor(Assets.gridslot, slot); // No item to show.
 				
 				// Removes item and triggers its effect when clicked on.
-				slotActor.addListener(new ClickListener(Input.Buttons.RIGHT) {
+				slotActor.addListener(new ClickListener(Input.Buttons.LEFT) {
 					@Override
 					public void clicked(InputEvent event, float x, float y) {
 						Slot slot = slotActor.getSlot();
