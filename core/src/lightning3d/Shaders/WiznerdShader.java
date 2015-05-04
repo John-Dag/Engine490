@@ -36,6 +36,8 @@ public class WiznerdShader extends DefaultShader {
 		
 		public boolean enableBlackHole=false;
 		
+		public boolean enableLaser=false;
+		
 		public Config(String vertexShader, String fragmentShader) {
 			super(vertexShader,fragmentShader);
 		}
@@ -177,6 +179,13 @@ public class WiznerdShader extends DefaultShader {
 		{
 			prefix += "#define BlackHole\n";
 		}
+		
+		if(config.enableLaser)
+		{
+			prefix += "#define Laser\n";
+		}
+		
+		
 		
 		return prefix;
 	}

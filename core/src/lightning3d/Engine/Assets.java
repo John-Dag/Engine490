@@ -107,6 +107,7 @@ public class Assets {
 	    manager.load("sword2.g3db", Model.class);
 	    manager.load("FireFlower.g3db", Model.class);
 	    manager.load("GUNFBX.g3db", Model.class);
+	    manager.load("AngelStatue.g3db", Model.class);
 	    manager.finishLoading();
 	}
 	

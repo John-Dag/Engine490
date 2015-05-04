@@ -9,6 +9,11 @@ import java.util.Random;
 import lightning3d.Enemies.Zombie;
 import lightning3d.Powerups.HealthPowerUp;
 import lightning3d.Powerups.SpeedPowerUp;
+import lightning3d.Shaders.BlackHole;
+import lightning3d.Shaders.EntityRainbow;
+import lightning3d.Shaders.FireBallShader;
+import lightning3d.Shaders.LaserShader;
+import lightning3d.Shaders.LavaShader;
 import lightning3d.Spawners.EnemySpawner;
 import lightning3d.Spawners.PowerUpSpawner;
 import lightning3d.Spawners.RocketLauncherSpawn;
@@ -20,6 +25,7 @@ import lightning3d.StaticEntities.Light;
 import lightning3d.StaticEntities.Mist;
 import lightning3d.StaticEntities.Portal;
 import lightning3d.StaticEntities.PowerUp;
+import lightning3d.StaticEntities.Statue;
 import lightning3d.StaticEntities.Torch;
 import lightning3d.StaticEntities.PowerUp.powerUpTypeEnum;
 
@@ -1642,6 +1648,54 @@ public class MeshLevel {
 				healthPot.setSpawner(spawner);
 				powerUpInstances.add(healthPot);
 				Entity.entityInstances.add(spawner);
+			}
+			
+			else if (rectObj.getName().contains("Statue")) {
+				objPosition = new Vector3();
+				int height = getObjectHeight(rectObj);
+				
+				objPosition.set(rectObj.getRectangle().getY() / 32, height , rectObj.getRectangle().getX() / 32);
+				//Note: Here I set is renderable to false if client, true if server.
+				// need to send the newPowerUp packet to the player in order to set it to true for client
+				boolean renderable = true;
+//				if(GameScreen.mode == GameScreen.Mode.Client) {
+//					renderable = false;
+//				}
+				Statue statue=new Statue(objPosition,9,true,renderable,false);
+				Vector3 up=new Vector3(0,1,0);
+				if(rectObj.getProperties().containsKey("angle"))
+				{
+					statue.getModel().transform.rotate(up,Float.parseFloat( rectObj.getProperties().get("angle").toString()));
+				}
+				if(rectObj.getProperties().containsKey("shader"))
+				{
+					String shader=rectObj.getProperties().get("shader").toString();
+					if(shader.equals("BlackHole"))
+					{
+						statue.setShader(new BlackHole());
+					}
+					else if(shader.equals("Rainbow"))
+					{
+						statue.setShader(new EntityRainbow());
+					}
+					else if(shader.equals("Lava"))
+					{
+						statue.setShader(new LavaShader());
+					}
+					else if(shader.equals("Laser"))
+					{
+						statue.setShader(new LaserShader());
+					}
+					else if(shader.equals("FireBall"))
+					{
+						statue.setShader(new FireBallShader());
+					}
+					else
+					{
+						statue.setShader(null);
+					}
+				}
+				Entity.entityInstances.add(statue);
 			}
 
 			else {
