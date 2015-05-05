@@ -45,11 +45,9 @@ public class PowerUpSpawner extends StaticEntity {
 	}
 	
 	public void startTimer() {
-		System.out.println("Start Timer");
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() { 
-				System.out.println("TimerTriggered");
 				if(GameScreen.mode == GameScreen.mode.Server) {
 					Net.PowerUpRespawnPacket packet = new Net.PowerUpRespawnPacket();
 					packet.powerUpEntityId = powerUpRef.getUniqueId();

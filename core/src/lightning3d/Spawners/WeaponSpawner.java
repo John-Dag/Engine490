@@ -44,11 +44,9 @@ public class WeaponSpawner extends StaticEntity {
 	}
 	
 	public void startTimer() {
-		System.out.println("Start Timer");
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				System.out.println("TimerTriggered");
 				if(GameScreen.mode == GameScreen.mode.Server) {
 					Net.WeaponRespawnPacket packet = new Net.WeaponRespawnPacket();
 					packet.weaponEntityId = weaponSpawnRef.getUniqueId();

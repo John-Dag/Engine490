@@ -172,7 +172,9 @@ public class GameScreen implements Screen {
 		chat = new UIChat(stage, skin, "Chat");
 		chat.addChatWidget(300, 200, Gdx.graphics.getWidth() - chat.getWindow().getWidth(), 0, 0.9f);
 		chat.addChatWidgetListeners();
-		chat.setWindowOpacity(0.8f);
+		chat.getWindow().setColor(Color.GRAY);
+		chat.setWindowOpacity(0.7f);
+		chat.getWindow().setBackground(new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("logo.png")))));
 		virtualJoystick = new UIVirtualJoystick(stage, Assets.joystickBackground, 
 												Assets.joystickKnob, 1920/2 - 100, 0, 100, 100);
 		//virtualJoystick.addVirtualJoystick(world.getPlayer(), world.getPlayer().camera, 8.0f);

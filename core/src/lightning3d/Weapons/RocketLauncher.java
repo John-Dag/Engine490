@@ -20,7 +20,7 @@ public class RocketLauncher extends Weapon {
 	public static final float FIRING_DELAY = 0.1f;
 	public static final float PROJECTILE_SPEED = 15f;
 	public static final float PROJECTILE_SCALAR = 500f;
-	private final float RECOIL = 0.08f;
+	private final float RECOIL = 0.05f;
 	public static final int DAMAGE = 25;
 	private Vector3 startY = new Vector3(), camDirXZ = new Vector3(), startXZ = new Vector3(-1, 0, 0);
 	
