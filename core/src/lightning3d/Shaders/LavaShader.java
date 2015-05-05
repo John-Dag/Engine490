@@ -6,7 +6,7 @@ public class LavaShader extends EntityShader {
 	
 	@Override
 	public void begin(WiznerdShader wiznerdShader) {
-		wiznerdShader.set(wiznerdShader.u_time, time);
+		wiznerdShader.set(wiznerdShader.u_time, time/100);
 		wiznerdShader.set(wiznerdShader.u_resolution, resolution);
 	}
 

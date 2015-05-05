@@ -6,7 +6,7 @@ public class EntityRainbow extends EntityShader {
 	
 	@Override
 	public void begin(WiznerdShader wiznerdShader) {
-		wiznerdShader.set(wiznerdShader.u_time, time);
+		wiznerdShader.set(wiznerdShader.u_time, time/4);
 	}
 
 	@Override

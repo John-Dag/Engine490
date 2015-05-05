@@ -43,10 +43,11 @@ public class WiznerdShaderProvider extends DefaultShaderProvider {
 			config.enableFract=false;
 			config.enableFireBall=false;
 			config.enableBlackHole=false;
+			config.enableLaser=false;
 			
 			if(entityShader instanceof ColorMultiplierEntityShader){
 				config.enableColorMultiplier=true;
-				config.enableRainbow=false;
+				
 			}
 			else if(entityShader instanceof FireBallShader)
 			{
@@ -60,15 +61,19 @@ public class WiznerdShaderProvider extends DefaultShaderProvider {
 			else if(entityShader instanceof EntityRainbow)
 			{
 				config.enableRainbow=true;
-				config.enableColorMultiplier=false;
+				
 			}
 			else if(entityShader instanceof BlackHole)
 			{
 				config.enableBlackHole=true;
-				config.enableColorMultiplier=false;
-				config.enableRainbow=false;
-				config.enableFract=false;
-				config.enableFireBall=false;
+
+				
+			}
+			else if(entityShader instanceof LaserShader)
+			{
+
+				config.enableLaser=true;
+
 				
 			}
 			return createShader ( renderable, entityShader);
@@ -97,6 +102,7 @@ public class WiznerdShaderProvider extends DefaultShaderProvider {
 		if(entityShader!=null)
 		for (Shader shader : shaders) {
 			if (shader.canRender(renderable))
+				if(shader instanceof WiznerdShader)
 				if(((WiznerdShader)shader).getWiznerdEntityShader()==entityShader)
 				{
 					renderable.shader=shader;
@@ -104,15 +110,20 @@ public class WiznerdShaderProvider extends DefaultShaderProvider {
 				}
 		}
 		else
+		{
 			for (Shader shader : shaders) {
+				if(shader instanceof WiznerdShader)
+					continue;
+				
 				if (shader.canRender(renderable))
 					//if(((WiznerdShader)shader).getWiznerdEntityShader()==entityShader)
+					
 					{
 						renderable.shader=shader;
 						return shader;
 					}
 			}
-
+		}
 		
 		
 		final Shader shader = createShader(renderable);
