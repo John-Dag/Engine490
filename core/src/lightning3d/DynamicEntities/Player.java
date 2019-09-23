@@ -54,7 +54,7 @@ public class Player extends DynamicEntity {
 	private String netName;
 	private Array<Weapon> weapons;
 	
-	// WEAPONS
+	//Weapons
 	public static final int NOWEAPON = 0;
 	public static final int ROCKETLAUNCHER = 1;
 	public static final int SWORD = 2;
@@ -142,12 +142,13 @@ public class Player extends DynamicEntity {
 					* world.getMeshLevel().getMapXDimension() * world.getMeshLevel().getMapXDimension()));
         }
 		
-		float heightValueLvl1 = currentHeightOffset // has to do with crouching, name change may be in order
+		float heightValueLvl1 = currentHeightOffset //Has to do with crouching, name change may be in order
 				+ world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z, 1);
 		float heightValueLvl2 = 6
-				+ currentHeightOffset // has to do with crouching, name change may be in order
+				+ currentHeightOffset //Has to do with crouching, name change may be in order
 				+ world.getMeshLevel().mapHeight(this.camera.position.x, this.camera.position.z, 2);
 		
+		//Handle player jumping
 		if(clipping){
 			if(isJumping) {
 				float jumpAmt = jumpVelocity * delta;
@@ -190,8 +191,7 @@ public class Player extends DynamicEntity {
 		oldPos.set(this.camera.position);
 		newPos.set(oldPos.x + getMovementVector().x * movAmt, oldPos.y + getMovementVector().y * movAmt, oldPos.z + getMovementVector().z * movAmt);
 		
-		// This makes it so that the player falls with gravity when running off ledges
-		
+		//This makes it so that the player falls with gravity when running off ledges
 		int oldPosLevel, newPosLevel;
 		if(oldPos.y >= 6 + currentHeightOffset){
 			oldPosLevel = 2;
@@ -209,52 +209,21 @@ public class Player extends DynamicEntity {
 			isJumping = true;
 		}
 
-		// calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the getMovementVector().
+		//Calculate collision vector (x, y, z) where 0 is collision, and 1 is no collision. This vector is then multiplied by the getMovementVector().
 		if (clipping){
 			collisionVector = world.getMeshLevel().checkCollision(oldPos, newPos, PLAYER_SIZE, PLAYER_HEIGHT, PLAYER_SIZE);
 			getMovementVector().set(getMovementVector().x * collisionVector.x,
 					getMovementVector().y * collisionVector.y,
 					getMovementVector().z * collisionVector.z);
 		}
-		
-//       for(Enemy enemy:World.enemyInstances)
-//       {
-//       	
-//       	if(oldPos.dst(enemy.getPosition()) > 4)
-//       			continue;
-//
-//       	if(oldPos.dst(enemy.getPosition()) < 1)
-//       	{
-//       		if(enemy.getPosition().dst(newPos) < enemy.getPosition().dst(oldPos))
-//       		{
-//       			getMovementVector().set(0,0,0);
-//       			break;
-//       		}
-//
-//       	}
-//       	if(oldPos.dst(enemy.getPosition()) < 2)
-//       	{
-//           	if(isJumping & jumpVelocity < 0)
-//           		jumpVelocity = 0;
-//       	
-//       	}
-//
-//       }
 
 		this.camera.position.mulAdd(getMovementVector(), movAmt);
-		
-		//world.getMeshLevel().updateHeightOffset(this.camera.position.y - currentHeightOffset);
-		
 		this.camera.update();
-//		if (this.getModel() != null)
-//			this.getModel().transform.translate(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.getPosition().set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 		this.updatePosition(delta);
-		//this.updateInstanceTransform();
 		
+		//Respawn the player when below the base amount
 		if (this.health <= MIN_HEALTH) {
-			if (world.getClient() != null) {
-			}
 			setRespawning(true);
 			respawnPlayer(this);
 		}
@@ -263,8 +232,8 @@ public class Player extends DynamicEntity {
 	public void handleInput(float delta) {
 		//Lock the cursor with right mouse button
 		if (Gdx.input.isButtonPressed(Buttons.RIGHT) && !this.isPlayerTargeting) {
-			Gdx.input.setCursorCatched(true); // I moved this input to the WorldInputProcessor for use with the multiplexer.
-												// Left it commented in case I screwed something up. - Matt
+			Gdx.input.setCursorCatched(true); //I moved this input to the WorldInputProcessor for use with the multiplexer.
+											  //Left it commented in case I screwed something up. - Matt
 		}
 		
 		else if (ESCAPE || Gdx.input.isButtonPressed(Buttons.RIGHT) 
@@ -299,7 +268,7 @@ public class Player extends DynamicEntity {
 		if (ability2)
 			activateAbility2();
 		
-		// camera rotation based on mouse looking
+		//Camera rotation based on mouse looking
 		if (Gdx.input.isCursorCatched()) {
 			//ESC cancels cursor lock
 			if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
@@ -319,11 +288,11 @@ public class Player extends DynamicEntity {
 			else
 				setRotating(false);
 			
-			// rotate xz plane
+			//Rotate xz plane
 			camera.direction.rotate(camera.up, -Gdx.input.getDeltaX() * ROTATION_SPEED);
 			
-			// calculates up and down rotation vector
-			// weapon recoil added here
+			//Calculates up and down rotation vector
+			//Weapon recoil added here
 			if (isFiring && fireDelayTimer >= 0.01f) {
 				positionBeforeRecoil.set(camera.position.cpy());
 				camera.direction.y += world.getPlayer().getWeapon().getRecoil();
@@ -345,7 +314,7 @@ public class Player extends DynamicEntity {
 				pr = pitch - 15;
 			}
 
-			// rotates up and down
+			//Rotate camera up and down
 			camera.direction.rotate(temp, pr);
 		}
 		
@@ -437,13 +406,13 @@ public class Player extends DynamicEntity {
 		player.setHealth(MAX_HEALTH);
 	}
 	
-	// input world coordinates to get tile coords
+	//Input world coordinates to get tile coords
 	public GridPoint2 getPlayerTileCoords(){
 		return getTileCoords(camera.position.x, camera.position.z);
 	}
 	
-	// This take in x and z from world coordinates and returns the tile position (tile index)
-	// Note: The coords are flipped because of Tiled Map Editor and LibGDX being slightly inconsistent there.
+	//This take in x and z from world coordinates and returns the tile position (tile index)
+	//Note: The coords are flipped because of Tiled Map Editor and LibGDX being slightly inconsistent there.
 	private GridPoint2 getTileCoords(float x, float z){
 		int tileX = (int)z;
 		int tileY = (int)x;

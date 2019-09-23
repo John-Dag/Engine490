@@ -1,0 +1,794 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="96" height="32" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="TileMapLarge" tilewidth="32" tileheight="32">
+  <image source="TileMapLarge.png" width="256" height="256"/>
+  <tile id="0">
+   <properties>
+    <property name="height" value="0"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="height" value="1"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="height" value="3"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="height" value="4"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="solid" value=""/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="height" value="3"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="height" value="4"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="17">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="18">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="19">
+   <properties>
+    <property name="height" value="3"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="20">
+   <properties>
+    <property name="height" value="4"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="21">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="24">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="25">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="26">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="27">
+   <properties>
+    <property name="height" value="3"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="28">
+   <properties>
+    <property name="height" value="4"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="29">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="32">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="33">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="34">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="35">
+   <properties>
+    <property name="height" value="3"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="36">
+   <properties>
+    <property name="height" value="4"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="37">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="65" name="GroundTileSet" tilewidth="32" tileheight="32">
+  <image source="GroundTileSetResized.png" width="160" height="96"/>
+  <tile id="0">
+   <properties>
+    <property name="filename" value="ground1.png"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="filename" value="ground2.png"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="filename" value="ground3.png"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="filename" value="ground4.png"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="filename" value="ground5.png"/>
+   </properties>
+  </tile>
+  <tile id="6">
+   <properties>
+    <property name="filename" value="ground6.png"/>
+   </properties>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="filename" value="ground7.png"/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="filename" value="ground8.png"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="filename" value="ground9.png"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="filename" value="ground10.png"/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="filename" value="ground11.png"/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="filename" value="ground12.png"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="filename" value="ground13.png"/>
+   </properties>
+  </tile>
+  <tile id="14">
+   <properties>
+    <property name="filename" value="ground14.png"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="80" name="StoneTileSet" tilewidth="32" tileheight="32">
+  <image source="StoneTileSetResized.png" width="160" height="128"/>
+  <tile id="0">
+   <properties>
+    <property name="filename" value="stone1.png"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="filename" value="stone2.png"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="filename" value="stone3.png"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="filename" value="stone4.png"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="filename" value="stone5.png"/>
+   </properties>
+  </tile>
+  <tile id="6">
+   <properties>
+    <property name="filename" value="stone6.png"/>
+   </properties>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="filename" value="stone7.png"/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="filename" value="stone8.png"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="filename" value="stone9.png"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="filename" value="stone10.png"/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="filename" value="stone11.png"/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="filename" value="stone12.png"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="filename" value="stone13.png"/>
+   </properties>
+  </tile>
+  <tile id="14">
+   <properties>
+    <property name="filename" value="stone14.png"/>
+   </properties>
+  </tile>
+  <tile id="15">
+   <properties>
+    <property name="filename" value="stone15.png"/>
+   </properties>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="filename" value="stone16.png"/>
+   </properties>
+  </tile>
+  <tile id="17">
+   <properties>
+    <property name="filename" value="stone17.png"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="100" name="WoodTileSet" tilewidth="32" tileheight="32">
+  <image source="WoodTileSetResized.png" width="192" height="32"/>
+  <tile id="0">
+   <properties>
+    <property name="filename" value="wood1.png"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="filename" value="wood2.png"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="filename" value="wood3.png"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="filename" value="wood4.png"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="filename" value="wood5.png"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="filename" value="wood6.png"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="96" height="32" opacity="0.4">
+  <data encoding="base64" compression="zlib">
+   eJzt2bEKgzAQgOGUgNAOhXZwaTvZvv8rNkMCIhEjzfUO7x/+5RQSPgUVhxDCQKpFUqnFf0q9U5+G6/hKPVMPof1q7UVqXfzxt+CAP/6tjStJeFvdS691t/xrx5j9NtvjT7Lhj7/n8Lfhf8nVjjPrO4sz7+J/zmnfD14q3sX/RCrhj7/n8Lfhf8tpP5e8VLyL/z23PM/Se9tRZnHmzfeXbvjj7zn8bftbem4dZbbHv9Z1JY37R2svvdZt8Z8C/9+l1sUffwsO+ONP/2/rWpJ8X1IFOiU=
+  </data>
+ </layer>
+ <objectgroup name="objects" width="96" height="32">
+  <object name="Rocket" x="1041" y="895">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="2"/>
+    <property name="time" value="8"/>
+   </properties>
+  </object>
+  <object name="Rocket" x="1040" y="129">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="2"/>
+    <property name="time" value="8"/>
+   </properties>
+  </object>
+  <object name="Rocket" x="2080" y="897">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="2"/>
+    <property name="time" value="8"/>
+   </properties>
+  </object>
+  <object name="Rocket" x="2076" y="128">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="2"/>
+    <property name="time" value="8"/>
+   </properties>
+  </object>
+  <object name="Rocket" x="1598" y="513">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="2"/>
+    <property name="time" value="8"/>
+   </properties>
+  </object>
+  <object name="Statue" x="198" y="782">
+   <properties>
+    <property name="angle" value="-180"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Statue" x="200" y="621">
+   <properties>
+    <property name="angle" value="-180"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Statue" x="271" y="784">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="6"/>
+    <property name="shader" value="lava"/>
+   </properties>
+  </object>
+  <object name="Statue" x="688" y="784">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="6"/>
+    <property name="shader" value="lava"/>
+   </properties>
+  </object>
+  <object name="Statue" x="1394" y="786">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="6"/>
+    <property name="shader" value="blackhole"/>
+   </properties>
+  </object>
+  <object name="Statue" x="1810" y="782">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="6"/>
+    <property name="shader" value="blackhole"/>
+   </properties>
+  </object>
+  <object name="Tree" x="95" y="731">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="198" y="807">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="170" y="782">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="197" y="755">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="199" y="647">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="172" y="621">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="199" y="594">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Tree" x="120" y="300">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Tree" x="110" y="135">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Tree" x="800" y="888">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Tree" x="907" y="957">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Tree" x="1199" y="906">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="325" y="322">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="326" y="349">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="353" y="323">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="326" y="293">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="296" y="324">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="297" y="296">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="352" y="295">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="392" y="325">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="406" y="290">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="442" y="326">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="480" y="294">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="494" y="326">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Grass" x="1039" y="47">
+   <properties>
+    <property name="angle" value="90"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Grass" x="477" y="975">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Grass" x="1213" y="974">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Grass" x="857" y="975">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Grass" x="829" y="559">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="0"/>
+   </properties>
+  </object>
+  <object name="Grass" x="1632" y="976">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Grass" x="2116" y="972">
+   <properties>
+    <property name="angle" value="-90"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="651" y="337">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="939" y="339">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="862" y="336">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="1028" y="313">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="1133" y="298">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Bush" x="1260" y="310">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="240" y="805">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Torch" x="399" y="644">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="559" y="378">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="400" y="378">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="1520" y="645">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="1681" y="645">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="1519" y="379">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="1679" y="378">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="2448" y="645">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="2447" y="378">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="2672" y="378">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="7"/>
+   </properties>
+  </object>
+  <object name="Torch" x="241" y="644">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="SpeedBoost" x="480" y="510">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="duration" value="5"/>
+    <property name="height" value="7"/>
+    <property name="time" value="10"/>
+   </properties>
+  </object>
+  <object name="HealthPot" x="2559" y="511">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="duration" value="0"/>
+    <property name="height" value="7"/>
+    <property name="time" value="10"/>
+   </properties>
+  </object>
+  <object name="Light" x="222" y="512">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Light" x="1055" y="512">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Light" x="2112" y="512">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Light" x="2848" y="512">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <layer name="Tile Layer 2" width="96" height="32" visible="0" opacity="0.32">
+  <data encoding="base64" compression="zlib">
+   eJztmcsOgyAQRUEXpsv+/8+2CxeGMDDMg0G9ixOaCDI9uTZTPFJKBwAAAAAASNuffIG7Lk/Au5a9wGLfUf8zPGr9SK9z7l/7PCMzVP61dezEqPWjmcOp1cL/JvDP+T5W2VjNvwcW+S+fy0j/nr8/1ljkH+iQ5p8avye1a60ceIytWnojJ7vUuuu+vbke/ankufIgqpZIB/AP/9G1wD/8R7uH/3ie6L/Xt31OIvrNVi2jfWZvXut+HAfS/nPW/5K3IM0/0LPC+cPomYzHGU55pl874/dihfyP+p+1v7f/FfL/Zv9Z4N/q/SP1Lo/jilpnVctoXZrsevSoAAAAAAB35AdnADp1
+  </data>
+ </layer>
+ <layer name="Texture Layer 1" width="96" height="32" visible="0" opacity="0.65">
+  <data encoding="base64" compression="zlib">
+   eJztWu1uFDEMzKu1RYXewbUVAgrlo7z/S7CR1mJubpw42c210P0xqq67SeyJ7Tj2PqaUHgF39DsCHtMzx2vGG8DFhMsZV/RsDeD8jBHrvSQwt8x/fn4z4e2MdwNkuJ7wacJnwpdB6yn9eZ9H2ASvpbhl/q/h+e2ED5X5e2TLa3xLpz74/Qz8m364jvGytk3YWruZJ8WtxWobs5/wfkaJe5u/RzbF/88Jv8V8a8dC0w91M398SOvahK11mOdQ3KL9K38p6b4P7JHy96zvrwk/iHvlb2gza/uGyZZtX/njUv5xfm8O5B99c61zAH3Q9tLmzXvwVOC+1R+jfFyl05ijbL+Xf7SZGn8e/zzHUv4Zt8Cr4nZEDsb6eTFnKf9oMzXbQf4xNvbwr2JNnvMg+Ffz4fhI3PFymSj/XsypnUmenfTkTSr/V3sYifMWV1hezx44f0J+cN92SeuiYltJZ7Yvi38eSnERZYjkTZ6tcP5j77b6fOs5afuF7xrnKl9Tcyrf8vyK9UGbOKTjeGhz1rg3vSO5tMp7PfvvyStbz0mVByKnXr7W46e1PI31Rdk4vvA+Rvn39FX8R/LKkTj3+qX1auegF8dq50aJ/w3He1PyL3W2tcQB41/liBvGY+N/4/81Y+P/ZfBfOiO83DWKkTW0fx2l/pflul7u2pNDPGdeOxIX89/WepV3/zq3rY7uedbWaq0lMUo+7tWIVP8xg+1d3QGVvL165Xfs/m933yWclu6rXl2da0mR/iTXGZWPe701qw/V+u+XNN7GsY+wXjsYW/MlvP+31j6wx6F0xNocyuPJyf9XHLT0JY0nq1F8TMf1CS/+sC4PNI59xNZBO8bfpbi/B30jPWePT67DfE2ndUnjTtUsvef2G3sF0b7AnmS7r/Bvdtzaj+P9KNWwSv7Lvstj2E5xv2v1fKv13gfei3yvE80lTDaz/bsC/6ovlPsQT+lvXannbPLiX8R3GVgr9saizIgsf63ur2C96p56marRWX1O8Y92VOqNm43Wcgack+NfaT5V22rRm3ucHrCHEBmjeqWRvg+vY9+f4PcPN7RXtR5Q5LxE/jn+Kc7PeUfw8oaWPDTCgZd3Gf/8nPeptLfRHpGKf1H5R4G/ierJgaMcKE6NfyXHWvfVUvx7Dptn7ljXEfJ49wPjf2SNwOtR/K+1iBYszcM2LMcfrfFtmQ==
+  </data>
+ </layer>
+ <layer name="Texture Layer 2" width="96" height="32" opacity="0.14">
+  <data encoding="base64" compression="zlib">
+   eJztWFFqwzAM9e32mzRsSxnrOmi23v8Es2kNRrMtyVKmDvRAEGLZ70mW3VQhOBwOh8PhcDgS3go7MuatYC5c5yXaa7SnaM+IP5y3KmiZG+vWeKHvKC9nbkZNAyU/5bzD/Xki+vc4KDqkczE/GAd1zYmZ+8DQ3fOZGLHD2Eb2g1LH3PHW2NLRP1fmcqFRUyNxQTsIOJIdmf7leK3e4XxqHFyM5gzLV82fs0/Sfdfw51jeQy4wXbWx8t0p2jnaOxhrrVm7f7C9zPfb2uFo8eX3+R5p6c3Pc/itcwEae7xcYDW7hPp9m+P4DLdvnA8Ql2ZNTkUOpkIXlWNB9C6N9fK+Zz7sd/nEyDsVX9EuO6w7gi3c9Pw1LHOQeDcjbohrsNGy3bktkLgfpf5THVrk4RJszl1CivfbiBvCqg4t7wCrO7cGqzq8GvFm7ke5/63qcM87uPc9Bfth3J6aRq+hpQfzwXRS1mrpaXFI+m9U6+nW6jVo/Heg5BeLE+OqcXAx2svC8qvVa+jVIMWPcwY1+hNcSGLjxkDpNUh1SM4gpZ+xV/419l6yb9z6xNbWPIO9npE0/5JeFifH1BhGa1Cz3wc1c3pcXEA+Klr9Q40YRrVomIR3j/6bw+FwOBwOx3/FD8N/lOA=
+  </data>
+ </layer>
+ <layer name="Wall Texture Layer 1" width="96" height="32" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJzt1LEJACAQA8Bs5xA/gfsv4ASChSDqFQcpQ4pUkgIAAAAAeFxbdLrn7/okY/+b+R8AAAAAAHYZlrNC5Q==
+  </data>
+ </layer>
+</map>

@@ -13,13 +13,13 @@ public class DesktopLauncher {
 		config.title = "Lightning3D Demo";
 		//config.width = 800;
 		//config.height = 600;
-		config.width = 1920 / 2;
-		config.height = 1080 / 2;
-		//config.vSyncEnabled = false;
-		//config.foregroundFPS = 0; 
-		//config.backgroundFPS = 0;
+		config.width = 960;
+		config.height = 540;
+		config.vSyncEnabled = true;
+		config.foregroundFPS = 0; 
+		config.backgroundFPS = 0;
 		config.resizable = false;
-		//config.fullscreen = true;
+		config.fullscreen = false;
 		
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			@Override
