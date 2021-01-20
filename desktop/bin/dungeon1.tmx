@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="128" height="128" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="TileMapLarge" tilewidth="32" tileheight="32">
+  <image source="TileMapLarge.png" width="256" height="256"/>
+  <tile id="0">
+   <properties>
+    <property name="height" value="0"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="height" value="1"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="height" value="2"/>
+   </properties>
+  </tile>
+  <tile id="3">
+   <properties>
+    <property name="height" value="3"/>
+   </properties>
+  </tile>
+  <tile id="4">
+   <properties>
+    <property name="height" value="4"/>
+   </properties>
+  </tile>
+  <tile id="5">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="solid" value=""/>
+   </properties>
+  </tile>
+  <tile id="8">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="9">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="10">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="11">
+   <properties>
+    <property name="height" value="3"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="12">
+   <properties>
+    <property name="height" value="4"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="13">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="ramp" value="up"/>
+   </properties>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="17">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="18">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="19">
+   <properties>
+    <property name="height" value="3"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="20">
+   <properties>
+    <property name="height" value="4"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="21">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="ramp" value="down"/>
+   </properties>
+  </tile>
+  <tile id="24">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="25">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="26">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="27">
+   <properties>
+    <property name="height" value="3"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="28">
+   <properties>
+    <property name="height" value="4"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="29">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="ramp" value="left"/>
+   </properties>
+  </tile>
+  <tile id="32">
+   <properties>
+    <property name="height" value="0"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="33">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="34">
+   <properties>
+    <property name="height" value="2"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="35">
+   <properties>
+    <property name="height" value="3"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="36">
+   <properties>
+    <property name="height" value="4"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+  <tile id="37">
+   <properties>
+    <property name="height" value="5"/>
+    <property name="ramp" value="right"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="128" height="128">
+  <data encoding="base64" compression="zlib">
+   eJzt3c1u2zAQRlE1cRvkb5EmXbRpF0nb93/F2ggMG6wkk0OOZoa8iw8IbFka6pgWaSnyzTRNN4SQofOlMtb1k3r/K2Hwjx/8xw7+Ywf/sYP/tvvaMlb+Httt5X9tFGt/6TZqgz/+1u49++cG//78IwR/+r/USmOs3Zt/7r6M6N96m/jjjz/+3vwvHbdrv1vB369/zj6oHUNb+0uDf3x/b+85/P1YbD1nfcffxH/rmun/+C+tE3/88ccff/zxxx9//PH36V8T/GP7awR//PHH37N/ehy7nXlMctzDP47/J2Hwxx//sf2Xgn///m+Gzvjb+9P/8V9aJ/7/94m7mcc0Y+nfMleFy1u7r/UJb/Vp+I+w33ppB/744z9uO/DHH/9x23Go50kY/OO3o2aujv+pxpp5rHXt+Pe9DyPXjv/YteOvX/tXYfDvw1/7HBP++OOPv7S+rY41+G/rnztvfi5YtiT42/vvMtN6WfxPtT8LE92/ZSL75+7X1n1Iyz8nr/v8qHBrFfxt/On/sfxL69KuPW0H/r78l3L+PP5x/DU+/1vuw0vHhi3modLaX4TBP6+NHvr5Wn2fhWkxbsI/rv/Pxib4x/JvOX/aLTyWPj63XOl6tzzu9u5fu21pX59bpvR4gv9HXd+Ewb8P/5rgjz/++Lf2XxsTpuNDSfD36y/t1177v+frl/DX30fXla/H397f+3188Pfnn14vhf/yts9dcjO3fIl/6Wd4adLzZfjn9/8SS8lrDucuXoUmuUm/L8Pfj79W//+9z599/s6s49dU/r7DX8+/pE78Y/jnjhPwL2v/o0It9P84/g8b+0uyhX/t52XpeMOL//3G/q3fG/jXOR3vXezZn/6v569xDiuy/9rfS++Vuecurad3/5LsBK9Zi7b/YxL862rQGINo+j8kwb+uBo0xSO62JffHvU/i9R67UfytapD63yXBP2YNUv/bJPjHrEHq3yL429eAP/742/tbXUeLvw//Fvccw7+s3ceU/i68Rl4Kl8c/Trvf9nmfTufPpf+T3Op/k/HHH//Y/i2Dfyz/43VWtff4/G5ojz/9H3+O//jjj7+tv2Xwt/UfNfiPHfzHDv5jB/+xg//YOZ+DPE1t5jIjzJt6y2FfWl//QfAn+BP8Cf4Ef4I/wZ/kGdbk/DcsrdtCZP49/F45wZ/gT/An+BP8Cf7ksj/XVYybf9VNbRw=
+  </data>
+ </layer>
+ <objectgroup name="objects" width="128" height="128" visible="0">
+  <object name="Torch" x="3306" y="3878">
+   <properties>
+    <property name="N" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3713" y="3518">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3587" y="3421">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3130" y="3642">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3353" y="3879">
+   <properties>
+    <property name="S" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Light" x="3330" y="3528">
+   <properties>
+    <property name="color" value="4"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3420" y="3829">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Light" x="3400" y="3693">
+   <properties>
+    <property name="color" value="4"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3714" y="3472">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="4011" y="3765">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Weapon" x="2812" y="3824">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3015" y="3683">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3895" y="3657">
+   <properties>
+    <property name="S" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3853" y="3882">
+   <properties>
+    <property name="N" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Light" x="2855" y="3693">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3267" y="3551">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3446" y="3630">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3130" y="3588">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3489" y="3475">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3790" y="3603">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3308" y="3657">
+   <properties>
+    <property name="N" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3489" y="3518">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3895" y="3880">
+   <properties>
+    <property name="S" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3241" y="3640">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3129" y="3698">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Mist" x="3602" y="3811">
+   <properties>
+    <property name="color" value="3"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3852" y="3656">
+   <properties>
+    <property name="N" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3014" y="3641">
+   <properties>
+    <property name="E" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Light" x="3601" y="3768">
+   <properties>
+    <property name="color" value="3"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="2997" y="3522">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3353" y="3657">
+   <properties>
+    <property name="S" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Light" x="3874" y="3465">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="3"/>
+   </properties>
+  </object>
+  <object name="Spawn" x="3997" y="3656">
+   <properties>
+    <property name="height" value="1"/>
+    <property name="time" value="1"/>
+   </properties>
+  </object>
+  <object name="Torch" x="3241" y="3683">
+   <properties>
+    <property name="W" value=""/>
+    <property name="color" value="1"/>
+    <property name="height" value="2"/>
+   </properties>
+  </object>
+  <object name="Weapon" x="3602" y="3814">
+   <properties>
+    <property name="color" value="2"/>
+    <property name="height" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <layer name="Tile Layer 2" width="128" height="128" opacity="0.74">
+  <data encoding="base64" compression="zlib">
+   eJzt2UFywjAQRFFW4f43zgVSFYxkT4/mLf4uoJ7+CEfi/Xq93gBG87NIdX6s+694LTLgfzb8z4b/2fD/bNeVVPlPnLvKf9raT/lPm3taFv7rSexh1X/6dzD/9/nvQNJ8p/k/ef+n/a+d6v9OB9X+k7rmn3/++b8j03/PsdXneuLc/H/+mtXc1XM/fW/If87cVV2fcA46wX/F/k9ksv+nMyd+pvh/1v8JPfDPP//8888///zzz/8k/7vvDrr1MNn/aVn4r6dbD/yfk+XTtf96jk177p2Y5Yr/3Wt0mPv0LPzX06EHv3udmeUJ/4kkzXO6f/s/N4vnfz2rZ6s77iSf8r97jt1zV30u0/Ld4X9Cb6fMwT///M+dg3/++Z87B//887+eceUcW52d/7M77Jyd/9nZ+Z+dnf/Z2fmfnZ3/2dn5Pzf7Xb//Xnnf7h12zl45O//12av9J3yX8D+b6g6m+rf/+U94L/77zZ3UYefsJ/lfOb/y32vub9ap9nyX/5Q7GP6ze0iD//Vc9j//HRzwzz///PPPP//8888///xf+dvVM27qGZn/c3Lyzz//n6+d8h3MP/h/vlf7f7b/03J++/4rZ5jk2fjfm2F3li69dsnJP//8888///zz38H/1TP41dfsONPzX5+lMkPC3PzzX50hoQf+Z3WfkCFhbv75r86Q0AP/s7pPyJAwN//8V2dI6IH/Z9e+6+7t2/u6O+730h1MXDsp+1QH/Nf3MHXtHdl3P3umOejs/xT4/z67/d937aTsUx3wX9/D1LWTsifce3TvUPZ+dO6wc/YUOnfYOXsKnTvsnD2Fzh12zp5C5w47Z0+h+tzT9dwEAAAAAAAAAAAAAAAA7OYXQ4G7TA==
+  </data>
+ </layer>
+</map>
