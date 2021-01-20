@@ -5,23 +5,23 @@
 
 A java game engine built on the libGDX framework. Features a mesh level generator, mesh loading/rendering, animation, custom GLSL shaders/lighting/bump mapping, particle systems, projectiles, collision detection, GUI generation, networking, rendering optimizations, command console, and a level editor using XML.
 
-Map editor:
+<b>Map editor</b>:
 https://www.mapeditor.org/
 
-Demo: Download "client_vsync.jar" in the root directory of the project. The client is set to windowed mode at 960x540 resolution. 
+<b>Demo</b>: Download "client_vsync.jar" in the root directory of the project. The client is set to windowed mode at 960x540 resolution. 
 
-Multiplayer features:
-Use the "host" feature to switch the client to server mode. Run an additional client, and enter the correct local/remote IP address to connect to the server.
+<b>Multiplayer features</b>:
+The <a href="https://github.com/EsotericSoftware/kryonet">Kryonet</a> networking library is used for TCP/UDP communication. Use the "host" feature to switch the client to server mode. Run an additional client, and enter the correct local/remote IP address to connect to the server.
 
-AI features:
+<b>AI features</b>:
 Load the "mymap2" level to play against AI. The AI use the A* pathfinding algorithm to chase the player. The enemies are set to chase only if the player is within range.
 
-Mouse controls:  
+<b>Mouse controls</b>:  
 Lock/unlock the mouse cursor by right clicking/escape key.  
 LMB: Fire weapon  
 RMB: Enter player movement mode  
   
-Keyboard controls:  
+<b>Keyboard controls</b>:  
 W: Forward  
 S: Backward  
 A: Strafe left  
@@ -32,7 +32,7 @@ Right Alt: Toggle enter chat text
 K: Show player stats  
 I: Show inventory  
   
-Console commands (No quotes when entering values):  
+<b>Console commands</b> (No quotes when entering values):  
 "noclip": Toggle player world collision  
 "god": God mode  
 "fog x": Render fog (value between 15 and 100)  
