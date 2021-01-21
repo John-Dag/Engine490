@@ -2,6 +2,9 @@
 <img src="http://www.badlogicgames.com/wordpress/wp-content/uploads/2011/05/libGDX-RedGlossyNoReflection.png" align="left" height="128" width="256">
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Bullet_Physics_Logo.svg/1024px-Bullet_Physics_Logo.svg.png" height="96.25" width="256">
 <br>
+<p>
+<img src="https://img.shields.io/github/license/john-dag/engine490">
+</p>
 
 A java game engine built on the libGDX framework. Features a mesh level generator, mesh loading/rendering, animation, custom GLSL shaders/lighting/bump mapping, particle systems, projectiles, collision detection, GUI generation, networking, rendering optimizations, command console, and a level editor using XML.
 
