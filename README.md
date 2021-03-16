@@ -1,5 +1,5 @@
 # Engine_490
-<img src="http://www.badlogicgames.com/wordpress/wp-content/uploads/2011/05/libGDX-RedGlossyNoReflection.png" align="left" height="128" width="256">
+<img src="https://images.pcgamingwiki.com/6/61/LibGDX_logo.png" align="left" height="110" width="300">
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Bullet_Physics_Logo.svg/1024px-Bullet_Physics_Logo.svg.png" height="96.25" width="256">
 <br>
 <p>
